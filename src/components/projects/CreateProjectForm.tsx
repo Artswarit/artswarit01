@@ -101,8 +101,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
   }, [title, description, budget, deadline, milestones]);
 
   const totalMilestoneAmount = milestones.reduce((sum, m) => sum + (m.amount || 0), 0);
-  // Single milestone auto-matches budget; multi-milestone must sum to budget
-  const budgetMatches = milestones.length <= 1 || totalMilestoneAmount === budget;
+  const budgetMatches = totalMilestoneAmount === budget;
 
   const addMilestone = () => {
     setMilestones([
@@ -176,14 +175,9 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
       return;
     }
 
-    // For single milestone, auto-set amount to budget
-    const finalMilestones = milestones.length === 1 
-      ? [{ ...milestones[0], amount: budget }] 
-      : milestones;
-
-    const emptyMilestones = finalMilestones.filter(m => !m.title.trim());
+    const emptyMilestones = milestones.filter(m => !m.title.trim() || m.amount <= 0);
     if (emptyMilestones.length > 0) {
-      toast.error('All milestones must have a title');
+      toast.error('All milestones must have a title and amount');
       return;
     }
 
@@ -267,7 +261,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
       }
 
       // 5. Create milestones
-      const milestonesData: ProjectMilestoneInsert[] = finalMilestones.map((m, index) => {
+      const milestonesData: ProjectMilestoneInsert[] = milestones.map((m, index) => {
         const amountUSD = userCurrency === 'USD' ? m.amount : parseFloat((m.amount / currentRate).toFixed(2));
         return {
           project_id: project.id,

@@ -178,11 +178,6 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
 
     if (!error && data) {
       setMilestones(data as unknown as Milestone[]);
-      // Sync progress to projects table
-      const total = data.length;
-      const completed = data.filter((m: any) => m.status === 'COMPLETED').length;
-      const newProgress = total > 0 ? Math.round((completed / total) * 100) : 0;
-      await supabase.from('projects').update({ progress: newProgress }).eq('id', projectId);
     }
   };
 
@@ -300,7 +295,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     );
   }
 
-  const budgetMatch = milestones.length <= 1 || getTotalBudget() === (project.budget || 0);
+  const budgetMatch = getTotalBudget() === (project.budget || 0);
   const hasApprovedMilestones = milestones.some(m => m.status === 'approved');
 
   return (
