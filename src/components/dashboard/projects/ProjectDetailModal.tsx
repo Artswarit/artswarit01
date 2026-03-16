@@ -479,7 +479,7 @@ const ProjectDetailModal = ({
             <DialogTitle>{project.title}</DialogTitle>
             <DialogDescription>Project details and collaboration workspace</DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-1 h-full">
+          <ScrollArea className="flex-1 overflow-y-auto">
             <div className="flex flex-col min-h-full">
             {/* Ultra Modern Header Section */}
             <div className="relative overflow-hidden pt-12 pb-10 px-6 sm:px-12 border-b bg-gradient-to-br from-primary/[0.07] via-background to-primary/[0.03]">
