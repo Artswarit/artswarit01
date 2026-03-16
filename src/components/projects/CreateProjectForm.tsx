@@ -176,9 +176,14 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
       return;
     }
 
-    const emptyMilestones = milestones.filter(m => !m.title.trim() || m.amount <= 0);
+    // For single milestone, auto-set amount to budget
+    const finalMilestones = milestones.length === 1 
+      ? [{ ...milestones[0], amount: budget }] 
+      : milestones;
+
+    const emptyMilestones = finalMilestones.filter(m => !m.title.trim());
     if (emptyMilestones.length > 0) {
-      toast.error('All milestones must have a title and amount');
+      toast.error('All milestones must have a title');
       return;
     }
 
