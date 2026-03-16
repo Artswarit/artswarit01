@@ -31,19 +31,25 @@ export interface PaymentGatewayInfo {
  * - Razorpay MUST NEVER receive USD amounts
  */
 export function usePaymentGateway(): PaymentGatewayInfo {
-  const { userCountry, userCurrency, userCurrencySymbol, convertPrice, formatPrice } = useCurrency();
+  const { userCountry, userCurrency, userCurrencySymbol, exchangeRates, formatPrice } = useCurrency();
+
+  // Get current INR rate
+  const currentInrRate = exchangeRates['INR'] || 83.5;
 
   // Convert USD to INR for Razorpay
   const convertToINR = useCallback((amountUSD: number): number => {
-    return Math.round(amountUSD * USD_TO_INR_RATE * 100) / 100;
-  }, []);
+    return Math.round(amountUSD * currentInrRate * 100) / 100;
+  }, [currentInrRate]);
 
   return useMemo(() => {
-    // Check if Stripe is available
-    const stripeAvailable = false; // Will be true when Stripe keys are configured
-
     // Determine if user is in India
     const isIndian = userCountry === 'IN' || userCountry === 'India';
+    
+    // Check if Stripe is available (true for international)
+    const stripeAvailable = !isIndian; 
+
+    // Determine if user is in India
+    // const isIndian = userCountry === 'IN' || userCountry === 'India'; // Already defined above
 
     // Gateway selection logic
     let provider: PaymentProvider;
@@ -61,22 +67,14 @@ export function usePaymentGateway(): PaymentGatewayInfo {
       currencySymbol = '₹';
       displayMethods = 'UPI / NetBanking / Card';
       legalCopy = 'Payments in India are processed via Razorpay to support UPI and NetBanking.';
-    } else if (stripeAvailable) {
-      // Foreign users with Stripe available
+    } else {
+      // International users use Stripe
       provider = 'stripe';
-      gatewayCurrency = 'USD'; // Stripe receives USD
+      gatewayCurrency = 'USD'; // Stripe receives USD (as base)
       displayCurrency = userCurrency;
       currencySymbol = userCurrencySymbol;
       displayMethods = 'Card (Visa, Mastercard, Amex)';
       legalCopy = 'International payments are processed via Stripe using cards.';
-    } else {
-      // Foreign users but Stripe not available - fallback to Razorpay with INR
-      provider = 'razorpay';
-      gatewayCurrency = 'INR'; // Razorpay ALWAYS receives INR
-      displayCurrency = userCurrency;
-      currencySymbol = userCurrencySymbol;
-      displayMethods = 'Card (International)';
-      legalCopy = 'Payments are processed via Razorpay.';
     }
 
     // Convert USD amount to gateway currency
@@ -89,7 +87,7 @@ export function usePaymentGateway(): PaymentGatewayInfo {
 
     // Format amount for display with gateway currency
     const formatGatewayAmount = (amountUSD: number): string => {
-      if (isIndian || gatewayCurrency === 'INR') {
+      if (isIndian && gatewayCurrency === 'INR') {
         const amountINR = convertToINR(amountUSD);
         return `₹${amountINR.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       }
@@ -109,7 +107,7 @@ export function usePaymentGateway(): PaymentGatewayInfo {
       convertForGateway,
       formatGatewayAmount,
     };
-  }, [userCountry, userCurrency, userCurrencySymbol, convertToINR, formatPrice]);
+  }, [userCountry, userCurrency, userCurrencySymbol, currentInrRate, convertToINR, formatPrice]);
 }
 
 /**
@@ -120,8 +118,7 @@ export function getPaymentProviderForCountry(countryCode: string): PaymentProvid
   if (indianCodes.includes(countryCode)) {
     return 'razorpay';
   }
-  // For now, all payments go through Razorpay until Stripe is configured
-  return 'razorpay';
+  return 'stripe';
 }
 
 /**

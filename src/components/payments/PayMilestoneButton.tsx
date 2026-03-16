@@ -7,6 +7,8 @@ import { useArtistPlan, calculateEarnings } from '@/hooks/useArtistPlan';
 import { usePaymentGateway } from '@/hooks/usePaymentGateway';
 import { PaymentMethodBadge } from '@/components/payments/PaymentMethodBadge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -38,7 +40,7 @@ export function PayMilestoneButton({
   const { initiatePayment, loading } = useRazorpay();
   const { format: formatCurrency } = useCurrencyFormat();
   const { isProArtist } = useArtistPlan(artistId);
-  const { formatGatewayAmount, gatewayCurrency, isIndian } = usePaymentGateway();
+  const { formatGatewayAmount, gatewayCurrency, isIndian, provider } = usePaymentGateway();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Calculate earnings based on artist plan (in USD base)
@@ -49,10 +51,34 @@ export function PayMilestoneButton({
   const artistPayoutDisplay = formatGatewayAmount(earnings.artistPayout);
   const platformFeeDisplay = formatGatewayAmount(earnings.platformFee);
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     // Close confirm dialog FIRST so its backdrop doesn't block Razorpay overlay
     setConfirmOpen(false);
-    // Longer delay ensures Radix dialog overlay fully unmounts (close animation is 150ms)
+    
+    if (provider === 'stripe') {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const response = await fetch(`${(supabase as any).supabaseUrl}/functions/v1/create-checkout-session`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ milestoneId }),
+        });
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.error || 'Failed to create checkout session');
+        }
+      } catch (err: any) {
+        toast.error(err.message || 'Failed to initiate Stripe payment');
+      }
+      return;
+    }
+
+    // Default to Razorpay
     setTimeout(() => {
       initiatePayment({
         milestoneId,

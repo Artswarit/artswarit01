@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { format as formatDate } from "date-fns";
 import { Link } from "react-router-dom";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { MilestoneWorkflow } from "@/components/projects";
 interface ProjectDetailModalProps {
   projectId: string | null;
@@ -255,10 +256,16 @@ const ProjectDetailModal = ({
       supabase.removeChannel(projectChannel);
     };
   }, [open, projectId, fetchProjectData, project]);
+  const { userCurrency, userCurrencySymbol, exchangeRates } = useCurrency();
+
   const handleAddMilestone = async () => {
     if (!projectId || !user?.id || !newMilestone.title.trim()) return;
     setAddingMilestone(true);
     try {
+      const amountLocal = newMilestone.amount ? parseFloat(newMilestone.amount) : 0;
+      const rate = exchangeRates[userCurrency] || 1;
+      const amountUSD = userCurrency === 'USD' ? amountLocal : parseFloat((amountLocal / rate).toFixed(2));
+
       const {
         error
       } = await supabase.from('project_milestones').insert({
@@ -266,7 +273,10 @@ const ProjectDetailModal = ({
         title: newMilestone.title,
         description: newMilestone.description || null,
         due_date: newMilestone.due_date || null,
-        amount: newMilestone.amount ? parseFloat(newMilestone.amount) : 0,
+        amount: amountUSD, // Store USD as truth
+        amount_usd: amountUSD,
+        exchange_rate: rate,
+        currency: userCurrency,
         created_by: user.id,
         sort_order: milestones.length
       });
@@ -775,7 +785,7 @@ const ProjectDetailModal = ({
                           />
                           <Input 
                             type="number" 
-                            placeholder="Amount (₹)" 
+                            placeholder={`Amount (${userCurrencySymbol})`} 
                             value={newMilestone.amount} 
                             onChange={e => setNewMilestone(prev => ({ ...prev, amount: e.target.value }))} 
                             className="h-12 rounded-xl bg-background border-border/40"

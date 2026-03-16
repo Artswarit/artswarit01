@@ -9,10 +9,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { ExternalLink, Crown, Calendar, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export function ArtistBilling() {
   const { user } = useAuth();
   const { isActive: isProSubscriber, renewAt, loading: subLoading } = usePremiumSubscription(user?.id);
+  const { formatPrice } = useCurrency();
   const [loadingPortal, setLoadingPortal] = useState(false);
 
   const handleSubscribe = async () => {
@@ -142,7 +144,7 @@ export function ArtistBilling() {
                   ) : (
                     <Crown className="h-4 w-4 mr-2" />
                   )}
-                  Upgrade to Pro - ₹499/month
+                  Upgrade to Pro - {formatPrice(6)}/month
                 </Button>
               </div>
             )}

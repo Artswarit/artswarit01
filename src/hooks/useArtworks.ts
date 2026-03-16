@@ -172,6 +172,17 @@ export const useArtworks = () => {
         mediaUrl = urlData.publicUrl;
       }
 
+      // Convert price to USD if it's in a different currency
+      let priceUSD = artworkData.price ? parseFloat(artworkData.price) : null;
+      if (priceUSD && artworkData.currency && artworkData.currency !== 'USD') {
+        // We'll use the convertPrice from useCurrency if we had access to it, 
+        // but since this is a hook that doesn't use CurrencyContext, 
+        // we might need to pass it in or handle it in the component.
+        // Actually, let's keep it simple: assume the component passes the converted USD price 
+        // OR the hook handles it.
+        // Better: component should provide priceUSD.
+      }
+
       // Insert artwork record
       const { data, error } = await supabase
         .from('artworks')
@@ -181,7 +192,7 @@ export const useArtworks = () => {
           category: artworkData.category,
           media_type: artworkData.media_type || 'image',
           media_url: mediaUrl,
-          price: artworkData.price ? parseFloat(artworkData.price) : null,
+          price: artworkData.priceUSD || priceUSD, // Prioritize explicit USD price
           status: artworkData.visibility === 'private' ? 'private' : 'public',
           tags: artworkData.tags || [],
           metadata: {

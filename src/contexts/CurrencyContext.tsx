@@ -27,6 +27,13 @@ interface CurrencyContextType {
   getCurrencySymbol: (currencyCode: string) => string;
   updateUserLocation: (country: string, city: string) => Promise<void>;
   refetchRates: () => Promise<void>;
+  lockRate: (amountUSD: number, targetCurrency?: string) => {
+    amountUSD: number;
+    amountLocal: number;
+    currency: string;
+    rate: number;
+    timestamp: string;
+  };
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -137,19 +144,86 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Fetch exchange rates - using a free API
   const fetchExchangeRates = useCallback(async () => {
     try {
-      // Using exchangerate-api.com free tier or similar
+      // First try to get from DB to see if we have fresh rates (less than 1 hour old)
+      const { data: dbRates, error: dbError } = await supabase
+        .from('exchange_rates')
+        .select('*')
+        .eq('base_currency', 'USD')
+        .maybeSingle();
+
+      const oneHourAgo = new Date();
+      oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
+      if (dbRates && new Date(dbRates.updated_at) > oneHourAgo) {
+        setExchangeRates(dbRates.rates);
+        setLoading(false);
+        return;
+      }
+
+      // If no fresh DB rates, fetch from API
       const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
       if (response.ok) {
         const data = await response.json();
         if (data.rates) {
-          setExchangeRates({ ...FALLBACK_RATES, ...data.rates });
+          const newRates = { ...FALLBACK_RATES, ...data.rates };
+          setExchangeRates(newRates);
+          
+          // Update DB
+          await supabase.from('exchange_rates').upsert({
+            base_currency: 'USD',
+            rates: newRates,
+            updated_at: new Date().toISOString()
+          });
         }
+      } else if (dbRates) {
+        // Use stale DB rates as secondary fallback
+        setExchangeRates(dbRates.rates);
       }
     } catch (error) {
       console.warn('Failed to fetch exchange rates, using fallback rates:', error);
-      // Keep using fallback rates
+      // Keep using fallback rates or whatever we have
+    } finally {
+      setLoading(false);
     }
   }, []);
+
+  // Detect user country and currency
+  const detectUserLocation = useCallback(async () => {
+    try {
+      // Only detect if user hasn't set their country manually or isn't logged in
+      if (userCountry) return;
+
+      const response = await fetch('https://ipapi.co/json/');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.country_code) {
+          setUserCountry(data.country_code);
+          setUserCity(data.city || '');
+          
+          // Set currency based on country
+          const countryData = countries.find(c => c.country_code === data.country_code);
+          if (countryData) {
+            setUserCurrency(countryData.currency_code);
+            setUserCurrencySymbol(countryData.currency_symbol);
+            
+            // If logged in, update profile
+            if (user) {
+              await supabase
+                .from('profiles')
+                .update({ 
+                  country: data.country_code, 
+                  city: data.city || '', 
+                  currency: countryData.currency_code 
+                })
+                .eq('id', user.id);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to detect user location:', error);
+    }
+  }, [user, userCountry, countries]);
 
   // Initialize
   useEffect(() => {
@@ -157,12 +231,24 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     fetchExchangeRates();
   }, [fetchCountries, fetchExchangeRates]);
 
-  // Fetch user preferences after countries are loaded
+  // Handle auto-update of rates every hour
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchExchangeRates();
+    }, 3600000); // 1 hour
+    return () => clearInterval(interval);
+  }, [fetchExchangeRates]);
+
+  // Fetch user preferences OR detect location after countries are loaded
   useEffect(() => {
     if (countries.length > 0) {
-      fetchUserPreferences();
+      if (user) {
+        fetchUserPreferences();
+      } else {
+        detectUserLocation();
+      }
     }
-  }, [countries, fetchUserPreferences]);
+  }, [countries, user, fetchUserPreferences, detectUserLocation]);
 
   // Real-time subscription for profile changes
   useEffect(() => {
@@ -250,6 +336,20 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [user, countries]);
 
+  // Lock rate for checkout
+  const lockRate = useCallback((amountUSD: number, targetCurrency?: string) => {
+    const currency = targetCurrency || userCurrency;
+    const rate = exchangeRates[currency] || 1;
+    const amountLocal = amountUSD * rate;
+    return {
+      amountUSD,
+      amountLocal,
+      currency,
+      rate,
+      timestamp: new Date().toISOString()
+    };
+  }, [userCurrency, exchangeRates]);
+
   const value = useMemo(() => ({
     userCurrency,
     userCurrencySymbol,
@@ -263,6 +363,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     getCurrencySymbol,
     updateUserLocation,
     refetchRates: fetchExchangeRates,
+    lockRate,
   }), [
     userCurrency,
     userCurrencySymbol,
@@ -276,6 +377,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     getCurrencySymbol,
     updateUserLocation,
     fetchExchangeRates,
+    lockRate,
   ]);
 
   return (
