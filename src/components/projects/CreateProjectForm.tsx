@@ -267,7 +267,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
       }
 
       // 5. Create milestones
-      const milestonesData: ProjectMilestoneInsert[] = milestones.map((m, index) => {
+      const milestonesData: ProjectMilestoneInsert[] = finalMilestones.map((m, index) => {
         const amountUSD = userCurrency === 'USD' ? m.amount : parseFloat((m.amount / currentRate).toFixed(2));
         return {
           project_id: project.id,
