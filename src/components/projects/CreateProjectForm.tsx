@@ -101,7 +101,8 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
   }, [title, description, budget, deadline, milestones]);
 
   const totalMilestoneAmount = milestones.reduce((sum, m) => sum + (m.amount || 0), 0);
-  const budgetMatches = totalMilestoneAmount === budget;
+  // Single milestone auto-matches budget; multi-milestone must sum to budget
+  const budgetMatches = milestones.length <= 1 || totalMilestoneAmount === budget;
 
   const addMilestone = () => {
     setMilestones([

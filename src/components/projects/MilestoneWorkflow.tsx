@@ -300,7 +300,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     );
   }
 
-  const budgetMatch = getTotalBudget() === (project.budget || 0);
+  const budgetMatch = milestones.length <= 1 || getTotalBudget() === (project.budget || 0);
   const hasApprovedMilestones = milestones.some(m => m.status === 'approved');
 
   return (
