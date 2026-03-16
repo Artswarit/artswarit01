@@ -466,7 +466,15 @@ const ProjectDetailModal = ({
           </div>
         </DialogContent>
       ) : (
-        <DialogContent className="max-w-6xl w-[95vw] h-[95vh] sm:h-[92vh] overflow-hidden flex flex-col p-0 gap-0 border-none shadow-[0_0_50px_-12px_rgba(0,0,0,0.25)] bg-background/95 backdrop-blur-2xl ring-1 ring-white/10 dark:ring-white/5">
+        <DialogContent className="max-w-6xl w-[100vw] h-[100dvh] sm:w-[95vw] sm:h-[95vh] sm:max-h-[95vh] overflow-hidden flex flex-col p-0 gap-0 border-none shadow-[0_0_50px_-12px_rgba(0,0,0,0.25)] bg-background/95 backdrop-blur-2xl ring-1 ring-white/10 dark:ring-white/5 rounded-none sm:rounded-2xl [&>button]:hidden">
+          {/* Custom circular close button */}
+          <button
+            onClick={() => onOpenChange(false)}
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 h-10 w-10 rounded-full bg-background/80 backdrop-blur-md border border-border/50 flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-all shadow-lg"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
           <DialogHeader className="sr-only">
             <DialogTitle>{project.title}</DialogTitle>
             <DialogDescription>Project details and collaboration workspace</DialogDescription>
