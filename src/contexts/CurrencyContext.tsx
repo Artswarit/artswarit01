@@ -40,56 +40,15 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 
 // Fallback exchange rates (approximate) - will be updated from API
 const FALLBACK_RATES: ExchangeRates = {
-  USD: 1,
-  EUR: 0.92,
-  GBP: 0.79,
-  INR: 83.12,
-  JPY: 149.50,
-  CNY: 7.24,
-  AUD: 1.53,
-  CAD: 1.36,
-  BRL: 4.97,
-  MXN: 17.15,
-  KRW: 1320,
-  SGD: 1.34,
-  HKD: 7.82,
-  CHF: 0.88,
-  SEK: 10.42,
-  NOK: 10.68,
-  DKK: 6.87,
-  NZD: 1.64,
-  ZAR: 18.75,
-  AED: 3.67,
-  SAR: 3.75,
-  RUB: 92.50,
-  PLN: 4.02,
-  THB: 35.50,
-  IDR: 15650,
-  MYR: 4.72,
-  PHP: 56.20,
-  VND: 24500,
-  TRY: 32.50,
-  EGP: 30.90,
-  NGN: 1550,
-  KES: 153,
-  PKR: 278,
-  BDT: 110,
-  ARS: 870,
-  CLP: 950,
-  COP: 4000,
-  PEN: 3.72,
-  ILS: 3.65,
-  CZK: 22.80,
-  HUF: 355,
-  RON: 4.58,
-  UAH: 37.50,
-  NPR: 133,
-  LKR: 320,
-  MMK: 2100,
-  KHR: 4100,
-  GHS: 12.50,
-  TZS: 2520,
-  UGX: 3800,
+  USD: 1, EUR: 0.92, GBP: 0.79, INR: 83.12, JPY: 149.50, CNY: 7.24,
+  AUD: 1.53, CAD: 1.36, BRL: 4.97, MXN: 17.15, KRW: 1320, SGD: 1.34,
+  HKD: 7.82, CHF: 0.88, SEK: 10.42, NOK: 10.68, DKK: 6.87, NZD: 1.64,
+  ZAR: 18.75, AED: 3.67, SAR: 3.75, RUB: 92.50, PLN: 4.02, THB: 35.50,
+  IDR: 15650, MYR: 4.72, PHP: 56.20, VND: 24500, TRY: 32.50, EGP: 30.90,
+  NGN: 1550, KES: 153, PKR: 278, BDT: 110, ARS: 870, CLP: 950,
+  COP: 4000, PEN: 3.72, ILS: 3.65, CZK: 22.80, HUF: 355, RON: 4.58,
+  UAH: 37.50, NPR: 133, LKR: 320, MMK: 2100, KHR: 4100, GHS: 12.50,
+  TZS: 2520, UGX: 3800,
 };
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -108,7 +67,6 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       .from('country_currencies')
       .select('*')
       .order('country_name');
-
     if (!error && data) {
       setCountries(data);
     }
@@ -120,19 +78,15 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setLoading(false);
       return;
     }
-
     const { data, error } = await supabase
       .from('profiles')
       .select('country, city, currency')
       .eq('id', user.id)
       .single();
-
     if (!error && data) {
       setUserCountry(data.country || '');
       setUserCity(data.city || '');
       setUserCurrency(data.currency || 'USD');
-      
-      // Find currency symbol
       const country = countries.find(c => c.country_code === data.country);
       if (country) {
         setUserCurrencySymbol(country.currency_symbol);
@@ -141,47 +95,18 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLoading(false);
   }, [user, countries]);
 
-  // Fetch exchange rates - using a free API
+  // Fetch exchange rates - using a free API (no DB caching to avoid TS errors)
   const fetchExchangeRates = useCallback(async () => {
     try {
-      // First try to get from DB to see if we have fresh rates (less than 1 hour old)
-      const { data: dbRates, error: dbError } = await supabase
-        .from('exchange_rates')
-        .select('*')
-        .eq('base_currency', 'USD')
-        .maybeSingle();
-
-      const oneHourAgo = new Date();
-      oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-
-      if (dbRates && new Date(dbRates.updated_at) > oneHourAgo) {
-        setExchangeRates(dbRates.rates);
-        setLoading(false);
-        return;
-      }
-
-      // If no fresh DB rates, fetch from API
       const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
       if (response.ok) {
         const data = await response.json();
         if (data.rates) {
-          const newRates = { ...FALLBACK_RATES, ...data.rates };
-          setExchangeRates(newRates);
-          
-          // Update DB
-          await supabase.from('exchange_rates').upsert({
-            base_currency: 'USD',
-            rates: newRates,
-            updated_at: new Date().toISOString()
-          });
+          setExchangeRates({ ...FALLBACK_RATES, ...data.rates });
         }
-      } else if (dbRates) {
-        // Use stale DB rates as secondary fallback
-        setExchangeRates(dbRates.rates);
       }
     } catch (error) {
       console.warn('Failed to fetch exchange rates, using fallback rates:', error);
-      // Keep using fallback rates or whatever we have
     } finally {
       setLoading(false);
     }
@@ -190,31 +115,21 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Detect user country and currency
   const detectUserLocation = useCallback(async () => {
     try {
-      // Only detect if user hasn't set their country manually or isn't logged in
       if (userCountry) return;
-
       const response = await fetch('https://ipapi.co/json/');
       if (response.ok) {
         const data = await response.json();
         if (data.country_code) {
           setUserCountry(data.country_code);
           setUserCity(data.city || '');
-          
-          // Set currency based on country
           const countryData = countries.find(c => c.country_code === data.country_code);
           if (countryData) {
             setUserCurrency(countryData.currency_code);
             setUserCurrencySymbol(countryData.currency_symbol);
-            
-            // If logged in, update profile
             if (user) {
               await supabase
                 .from('profiles')
-                .update({ 
-                  country: data.country_code, 
-                  city: data.city || '', 
-                  currency: countryData.currency_code 
-                })
+                .update({ country: data.country_code, city: data.city || '', currency: countryData.currency_code })
                 .eq('id', user.id);
             }
           }
@@ -231,11 +146,9 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     fetchExchangeRates();
   }, [fetchCountries, fetchExchangeRates]);
 
-  // Handle auto-update of rates every hour
+  // Auto-update rates every hour
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchExchangeRates();
-    }, 3600000); // 1 hour
+    const interval = setInterval(() => { fetchExchangeRates(); }, 3600000);
     return () => clearInterval(interval);
   }, [fetchExchangeRates]);
 
@@ -253,42 +166,21 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Real-time subscription for profile changes
   useEffect(() => {
     if (!user) return;
-
     const channel = supabase
       .channel(`currency-profile-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`
-        },
-        () => {
-          fetchUserPreferences();
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, () => {
+        fetchUserPreferences();
+      })
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [user, fetchUserPreferences]);
 
   // Convert price from source currency to target currency
   const convertPrice = useCallback((amount: number, sourceCurrency: string = 'USD', targetCurrency?: string): number => {
     const target = targetCurrency || userCurrency;
-    
-    // If currencies are same, no conversion needed
-    if (sourceCurrency === target) {
-      return amount;
-    }
-
-    // Convert source to USD first
+    if (sourceCurrency === target) return amount;
     const sourceRate = exchangeRates[sourceCurrency] || 1;
     const amountInUSD = amount / sourceRate;
-
-    // Convert USD to target
     const targetRate = exchangeRates[target] || 1;
     return amountInUSD * targetRate;
   }, [userCurrency, exchangeRates]);
@@ -304,35 +196,27 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const target = targetCurrency || userCurrency;
     const convertedAmount = convertPrice(amount, sourceCurrency, target);
     const symbol = getCurrencySymbol(target);
-    
-    // Format based on currency
     const formatter = new Intl.NumberFormat('en-US', {
       minimumFractionDigits: target === 'JPY' || target === 'KRW' ? 0 : 2,
       maximumFractionDigits: target === 'JPY' || target === 'KRW' ? 0 : 2,
     });
-
     return `${symbol}${formatter.format(convertedAmount)}`;
   }, [userCurrency, convertPrice, getCurrencySymbol]);
 
   // Update user location and currency
   const updateUserLocation = useCallback(async (country: string, city: string) => {
     if (!user) return;
-
     const countryData = countries.find(c => c.country_code === country);
     const currency = countryData?.currency_code || 'USD';
-
     const { error } = await supabase
       .from('profiles')
       .update({ country, city, currency })
       .eq('id', user.id);
-
     if (!error) {
       setUserCountry(country);
       setUserCity(city);
       setUserCurrency(currency);
-      if (countryData) {
-        setUserCurrencySymbol(countryData.currency_symbol);
-      }
+      if (countryData) setUserCurrencySymbol(countryData.currency_symbol);
     }
   }, [user, countries]);
 
@@ -340,10 +224,9 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const lockRate = useCallback((amountUSD: number, targetCurrency?: string) => {
     const currency = targetCurrency || userCurrency;
     const rate = exchangeRates[currency] || 1;
-    const amountLocal = amountUSD * rate;
     return {
       amountUSD,
-      amountLocal,
+      amountLocal: amountUSD * rate,
       currency,
       rate,
       timestamp: new Date().toISOString()
@@ -351,33 +234,13 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [userCurrency, exchangeRates]);
 
   const value = useMemo(() => ({
-    userCurrency,
-    userCurrencySymbol,
-    userCountry,
-    userCity,
-    countries,
-    exchangeRates,
-    loading,
-    convertPrice,
-    formatPrice,
-    getCurrencySymbol,
-    updateUserLocation,
-    refetchRates: fetchExchangeRates,
-    lockRate,
+    userCurrency, userCurrencySymbol, userCountry, userCity, countries,
+    exchangeRates, loading, convertPrice, formatPrice, getCurrencySymbol,
+    updateUserLocation, refetchRates: fetchExchangeRates, lockRate,
   }), [
-    userCurrency,
-    userCurrencySymbol,
-    userCountry,
-    userCity,
-    countries,
-    exchangeRates,
-    loading,
-    convertPrice,
-    formatPrice,
-    getCurrencySymbol,
-    updateUserLocation,
-    fetchExchangeRates,
-    lockRate,
+    userCurrency, userCurrencySymbol, userCountry, userCity, countries,
+    exchangeRates, loading, convertPrice, formatPrice, getCurrencySymbol,
+    updateUserLocation, fetchExchangeRates, lockRate,
   ]);
 
   return (
