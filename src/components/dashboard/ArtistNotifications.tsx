@@ -21,11 +21,12 @@ interface Notification {
 
 interface ArtistNotificationsProps {
   isLoading: boolean;
+  onNotificationClick?: (notification: any) => void;
 }
 
 const ITEMS_PER_PAGE = 10;
 
-const ArtistNotifications = ({ isLoading }: ArtistNotificationsProps) => {
+const ArtistNotifications = ({ isLoading, onNotificationClick }: ArtistNotificationsProps) => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -283,7 +284,10 @@ const ArtistNotifications = ({ isLoading }: ArtistNotificationsProps) => {
                   <div 
                     key={notification.id} 
                     className={`px-4 sm:px-6 py-4 sm:py-5 hover:bg-muted/50 cursor-pointer transition-colors ${!notification.is_read ? "bg-primary/[0.03]" : ""}`}
-                    onClick={() => markAsRead(notification.id)}
+                    onClick={() => {
+                      markAsRead(notification.id);
+                      onNotificationClick?.(notification);
+                    }}
                   >
                     <div className="flex gap-3 sm:gap-4">
                       <div className="mt-1 p-2 bg-muted/50 rounded-lg shrink-0">

@@ -29,6 +29,11 @@ interface Project {
   clientAvatar?: string;
   payment?: string;
   is_locked?: boolean;
+  currency?: string;
+  exchange_rate?: number;
+  artist_avatar?: string;
+  client_name?: string;
+  client_avatar?: string;
 }
 interface ClientReview {
   id: string;
@@ -87,8 +92,10 @@ const ProjectManagement = () => {
         client: project.client_id ? clientProfiles[project.client_id]?.full_name || 'Unknown Client' : 'Unknown Client',
         clientAvatar: project.client_id ? clientProfiles[project.client_id]?.avatar_url || undefined : undefined,
         progress: project.progress ?? (project.status === 'completed' ? 100 : project.status === 'accepted' ? 10 : 0),
-        payment: project.budget ? format(project.budget) : 'Not set',
-        is_locked: !!project.is_locked
+        payment: (project.amount_usd || project.budget) ? format(project.amount_usd || project.budget || 0, project.currency || 'USD', project.exchange_rate) : 'Not set',
+        is_locked: !!project.is_locked,
+        currency: project.currency,
+        exchange_rate: project.exchange_rate
       }));
       setProjects(transformedProjects);
     } catch (err) {

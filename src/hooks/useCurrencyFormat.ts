@@ -17,20 +17,20 @@ export const useCurrencyFormat = () => {
   } = useCurrency();
 
   // Format a price from source currency to user's local currency
-  const format = useCallback((amount: number | null | undefined, sourceCurrency: string = 'USD'): string => {
+  const format = useCallback((amount: number | null | undefined, sourceCurrency: string = 'USD', customRate?: number): string => {
     if (amount === null || amount === undefined) {
       return `${userCurrencySymbol}0`;
     }
-    return formatPrice(amount, sourceCurrency);
+    return formatPrice(amount, sourceCurrency, undefined, customRate);
   }, [formatPrice, userCurrencySymbol]);
 
   // Format with specific currency override
-  const formatWithCurrency = useCallback((amount: number | null | undefined, targetCurrency: string, sourceCurrency: string = 'USD'): string => {
+  const formatWithCurrency = useCallback((amount: number | null | undefined, targetCurrency: string, sourceCurrency: string = 'USD', customRate?: number): string => {
     if (amount === null || amount === undefined) {
       const symbol = getCurrencySymbol(targetCurrency);
       return `${symbol}0`;
     }
-    return formatPrice(amount, sourceCurrency, targetCurrency);
+    return formatPrice(amount, sourceCurrency, targetCurrency, customRate);
   }, [formatPrice, getCurrencySymbol]);
 
   // Get just the converted amount (number)

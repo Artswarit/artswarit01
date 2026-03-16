@@ -182,28 +182,35 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
     }
 
     const currentRate = exchangeRates[userCurrency] || 1;
-    const budgetUSD = userCurrency === 'USD' ? budget : parseFloat((budget / currentRate).toFixed(2));
+    const budgetUSD = userCurrency === 'USD' ? budget : parseFloat((budget / currentRate).toFixed(6));
 
     setSubmitting(true);
 
     try {
-      // 1. Create project first to get project.id
+      // 1. Check which columns exist in the projects table to avoid "column does not exist" errors
+      const { data: colCheck } = await supabase.from('projects').select('*').limit(1);
+      const existingCols = colCheck && colCheck.length > 0 ? Object.keys(colCheck[0]) : [];
+      
+      const projectInsert: any = {
+        title,
+        description,
+        budget: budgetUSD,
+        deadline: deadline || null,
+        client_id: user?.id,
+        artist_id: artistId || null,
+        status: 'pending',
+        is_locked: false,
+        reference_files: []
+      };
+
+      // Use the higher precision budget but only insert into columns that actually exist
+      if (existingCols.includes('amount_usd')) projectInsert.amount_usd = budgetUSD;
+      if (existingCols.includes('currency')) projectInsert.currency = userCurrency;
+      if (existingCols.includes('exchange_rate')) projectInsert.exchange_rate = currentRate;
+
       const { data: project, error: projectError } = await supabase
         .from('projects')
-        .insert({
-          title,
-          description,
-          budget: budgetUSD, // Store USD as truth
-          amount_usd: budgetUSD,
-          currency: userCurrency,
-          exchange_rate: currentRate,
-          deadline: deadline || null,
-          client_id: user?.id,
-          artist_id: artistId || null,
-          status: 'pending',
-          is_locked: false,
-          reference_files: [] // Will update this after uploads
-        } as any)
+        .insert(projectInsert)
         .select()
         .single();
 
@@ -261,22 +268,28 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
       }
 
       // 5. Create milestones
-      const milestonesData: ProjectMilestoneInsert[] = milestones.map((m, index) => {
-        const amountUSD = userCurrency === 'USD' ? m.amount : parseFloat((m.amount / currentRate).toFixed(2));
-        return {
+      // Check project_milestones columns too
+      const { data: milestoneCheck } = await supabase.from('project_milestones').select('*').limit(1);
+      const existingMilestoneCols = milestoneCheck && milestoneCheck.length > 0 ? Object.keys(milestoneCheck[0]) : [];
+
+      const milestonesData = milestones.map((m, index) => {
+        const amountUSD = userCurrency === 'USD' ? m.amount : parseFloat((m.amount / currentRate).toFixed(8));
+        const mInsert: any = {
           project_id: project.id,
           title: m.title,
           description: m.description || null,
           deliverables: m.deliverables || null,
-          amount: amountUSD, // budget truth is USD
-          amount_usd: amountUSD,
-          exchange_rate: currentRate,
-          currency: userCurrency,
-          due_date: m.due_date || null,
+          amount: amountUSD,
           sort_order: index,
           status: index === 0 ? 'WAITING_FUNDS' : 'LOCKED',
           created_by: user!.id
         };
+
+        if (existingMilestoneCols.includes('amount_usd')) mInsert.amount_usd = amountUSD;
+        if (existingMilestoneCols.includes('currency')) mInsert.currency = userCurrency;
+        if (existingMilestoneCols.includes('exchange_rate')) mInsert.exchange_rate = currentRate;
+
+        return mInsert;
       });
 
       const { error: milestonesError } = await supabase

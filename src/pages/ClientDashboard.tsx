@@ -3,7 +3,17 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { LayoutDashboard, Users, MessageSquare, FileText, Settings, CreditCard, Bell, ChevronRight, Search, CheckCircle, Clock, Star, Lock, User, PlusCircle, Bookmark, ShoppingBag } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { LayoutDashboard, Users, MessageSquare, FileText, Settings, CreditCard, Bell, ChevronRight, Search, CheckCircle, Clock, Star, Lock, User, PlusCircle, Bookmark, ShoppingBag, Trash2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import SavedArtists from "@/components/dashboard/SavedArtists";
 import SavedArtworks from "@/components/dashboard/SavedArtworks";
@@ -39,6 +49,8 @@ interface Project {
   rating?: number;
   budget: number;
   isLocked: boolean;
+  currency?: string;
+  exchangeRate?: number;
 }
 interface RecommendedArtist {
   id: string;
@@ -60,9 +72,21 @@ const ClientDashboard = () => {
   const profileIncomplete = profileReady && !isComplete;
   
   const [searchParams, setSearchParams] = useSearchParams();
-  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set([searchParams.get('tab') || 'overview']));
-  const currentTab = searchParams.get('tab') || 'overview';
-  const [selectedTab, setSelectedTab] = useState(currentTab);
+  const currentTabFromUrl = searchParams.get('tab') || 'overview';
+  const [selectedTab, setSelectedTab] = useState(currentTabFromUrl);
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set([selectedTab]));
+
+  // Sync visitedTabs with selectedTab to ensure content is rendered
+  useEffect(() => {
+    if (selectedTab) {
+      setVisitedTabs(prev => {
+        if (prev.has(selectedTab)) return prev;
+        const next = new Set(prev);
+        next.add(selectedTab);
+        return next;
+      });
+    }
+  }, [selectedTab]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [savedArtistsCount, setSavedArtistsCount] = useState(0);
@@ -73,6 +97,7 @@ const ClientDashboard = () => {
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [artistSelectionOpen, setArtistSelectionOpen] = useState(false);
   const [assigningProjectId, setAssigningProjectId] = useState<string | null>(null);
+  const [projectModalInitialTab, setProjectModalInitialTab] = useState<string | undefined>(undefined);
   // Button-level loading state to prevent double-clicks
   const [buttonLoading, setButtonLoading] = useState<Record<string, boolean>>({});
   // Project search state — wired to the projects tab filter
@@ -80,6 +105,7 @@ const ClientDashboard = () => {
   // Load-more state for Projects tab
   const [visibleActive, setVisibleActive] = useState(5);
   const [visibleCompleted, setVisibleCompleted] = useState(5);
+  const [isDeletingProject, setIsDeletingProject] = useState<string | null>(null);
   const PROJECTS_PER_PAGE = 5;
 
   // Force profile tab when profile is incomplete or set default tab
@@ -91,9 +117,9 @@ const ClientDashboard = () => {
           setSearchParams({ tab: 'profile' }, { replace: true });
         }
       } else if (!searchParams.get('tab')) {
-        // Default to overview when complete and no tab specified
-        setSelectedTab('overview');
-        setSearchParams({ tab: 'overview' }, { replace: true });
+        // Default to profile when complete and no tab specified
+        setSelectedTab('profile');
+        setSearchParams({ tab: 'profile' }, { replace: true });
       }
     }
   }, [profileReady, profileIncomplete, searchParams, setSearchParams]);
@@ -198,8 +224,10 @@ const ClientDashboard = () => {
           progress: project.progress ?? (project.status === 'completed' ? 100 : project.status === 'accepted' ? 10 : project.status === 'cancelled' ? 0 : 0),
           status: statusDisplay,
           rating: ratingsMap[project.id] || 0,
-          budget: project.budget || 0,
-          isLocked: !!project.is_locked
+          budget: project.amount_usd || project.budget || 0,
+          isLocked: !!project.is_locked,
+          currency: project.currency,
+          exchangeRate: project.exchange_rate
         };
       });
       setProjects(transformedProjects);
@@ -221,7 +249,9 @@ const ClientDashboard = () => {
       id: n.id,
       content: n.message,
       time: new Date(n.created_at).toLocaleDateString(),
-      read: n.is_read
+      read: n.is_read,
+      type: n.type,
+      metadata: n.metadata
     })));
   }, [user?.id]);
 
@@ -233,7 +263,7 @@ const ClientDashboard = () => {
       } = await supabase.from('saved_artists').select('*', {
         count: 'exact',
         head: true
-      }).eq('user_id', user.id);
+      }).eq('client_id', user.id);
       setSavedArtistsCount(count || 0);
     } catch (err) {
       console.error('Error fetching saved artists:', err);
@@ -242,7 +272,7 @@ const ClientDashboard = () => {
   // Realtime Sync - Moved after function definitions to avoid TDZ error
   useRealtimeSync('projects', fetchProjects);
   useRealtimeSync('notifications', fetchNotifications);
-  useRealtimeSync('artworks', fetchSavedArtistsCount);
+  useRealtimeSync('saved_artists', fetchSavedArtistsCount);
   const fetchRecommendedArtists = useCallback(async () => {
     try {
       // Fetch artists from profiles
@@ -460,6 +490,30 @@ const ClientDashboard = () => {
     }
   };
 
+  const markAsRead = async (id: string) => {
+    try {
+      await supabase.from('notifications').update({
+        is_read: true
+      }).eq('id', id);
+      fetchNotifications();
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
+  };
+
+  const handleNotificationClick = (notification: any) => {
+    if (notification.type === 'message' || notification.type === 'project') {
+      if (notification.metadata?.projectId) {
+        setProjectModalInitialTab(notification.type === 'message' ? 'communication' : 'workflow');
+        setSelectedProjectId(notification.metadata.projectId);
+        setProjectModalOpen(true);
+      } else {
+        setSelectedTab('messages');
+      }
+    }
+    markAsRead(notification.id);
+  };
+
   const handleConfirmProject = async (projectId: string, artistId: string) => {
     const key = `confirm-${projectId}`;
     if (buttonLoading[key]) return;
@@ -521,6 +575,39 @@ const ClientDashboard = () => {
       toast.error(err.message || 'Failed to assign artist');
     } finally {
       setButtonLoading(prev => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    const key = `delete-${projectId}`;
+    if (buttonLoading[key]) return;
+    setButtonLoading(prev => ({ ...prev, [key]: true }));
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', projectId)
+        .select();
+
+      if (error) {
+        throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        console.warn('Delete warning: No rows were deleted. Check RLS or Project ID.');
+      }
+      
+      toast.success('Project deleted successfully');
+      broadcastRefresh('projects');
+      fetchProjects();
+    } catch (err: any) {
+      console.error('Delete project error:', err);
+      toast.error(err.message || 'Failed to delete project', {
+        description: "Please ensure all associated milestones and files are not locked."
+      });
+    } finally {
+      setButtonLoading(prev => ({ ...prev, [key]: false }));
+      setIsDeletingProject(null);
     }
   };
 
@@ -958,10 +1045,15 @@ const ClientDashboard = () => {
                         </div>
                       ) : (
                         notifications.slice(0, 4).map((notification, index) => (
-                          <div key={notification.id} className={cn(
-                            "p-4 flex items-start gap-3 transition-colors hover:bg-muted/5 animate-fade-in",
-                            !notification.read && "bg-blue-50/30 dark:bg-blue-900/10"
-                          )} style={{ animationDelay: `${index * 30}ms` }}>
+                          <div 
+                            key={notification.id} 
+                            onClick={() => handleNotificationClick(notification)}
+                            className={cn(
+                              "p-4 flex items-start gap-3 transition-colors hover:bg-muted/5 animate-fade-in cursor-pointer",
+                              !notification.read && "bg-blue-50/30 dark:bg-blue-900/10"
+                            )} 
+                            style={{ animationDelay: `${index * 30}ms` }}
+                          >
                             {!notification.read && <div className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0" />}
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium leading-relaxed line-clamp-2">{notification.content}</p>
@@ -970,8 +1062,8 @@ const ClientDashboard = () => {
                               </p>
                             </div>
                           </div>
-                      ))
-                    )}
+                        ))
+                      )}
                   </div>
                 </div>
               </div>
@@ -1068,7 +1160,7 @@ const ClientDashboard = () => {
                               <div className="flex items-center gap-3">
                                 <span className="text-[10px] sm:text-xs text-gray-500">Due: {project.dueDate}</span>
                                 {project.budget > 0 && <span className="text-[10px] sm:text-xs text-green-600 font-medium">
-                                    {format(project.budget)}
+                                    {format(project.budget, 'USD', project.exchangeRate)}
                                   </span>}
                               </div>
                               <div className="flex flex-wrap gap-2">
@@ -1078,6 +1170,20 @@ const ClientDashboard = () => {
                                   }}>
                                     View
                                   </Button>
+                                  
+                                  {project.status === 'Draft' && (
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline" 
+                                      className="h-7 sm:h-8 px-2 text-destructive hover:bg-destructive/10 border-destructive"
+                                      disabled={!!buttonLoading[`delete-${project.id}`]}
+                                      onClick={() => setIsDeletingProject(project.id)}
+                                    >
+                                      {buttonLoading[`delete-${project.id}`] ? (
+                                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-destructive border-t-transparent" />
+                                      ) : <Trash2 className="h-4 w-4" />}
+                                    </Button>
+                                  )}
                                   
                                   {(project.status === 'Draft' || project.status === 'Pending Confirm') && (
                                     <>
@@ -1185,7 +1291,7 @@ const ClientDashboard = () => {
                               <div className="flex items-center gap-3">
                                 <span className="text-[10px] sm:text-xs text-gray-500">Completed: {project.completedDate}</span>
                                 {project.budget > 0 && <span className="text-[10px] sm:text-xs text-green-600 font-medium">
-                                    {format(project.budget)}
+                                    {format(project.budget, 'USD', project.exchangeRate)}
                                   </span>}
                               </div>
                               <Button size="sm" variant="outline" className="h-7 sm:h-8 text-xs" onClick={() => {
@@ -1266,7 +1372,15 @@ const ClientDashboard = () => {
         </Tabs>
       </div>
       
-      <ProjectDetailModal projectId={selectedProjectId} open={projectModalOpen} onOpenChange={setProjectModalOpen} />
+      <ProjectDetailModal 
+        projectId={selectedProjectId} 
+        open={projectModalOpen} 
+        onOpenChange={(open) => {
+          setProjectModalOpen(open);
+          if (!open) setProjectModalInitialTab(undefined);
+        }} 
+        initialTab={projectModalInitialTab}
+      />
       
       {/* Create Project Dialog */}
       <Dialog open={createProjectOpen} onOpenChange={setCreateProjectOpen}>
@@ -1293,6 +1407,30 @@ const ClientDashboard = () => {
         }}
         onSelectArtist={handleArtistSelected}
       />
+      <AlertDialog open={!!isDeletingProject} onOpenChange={(open) => !open && setIsDeletingProject(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the draft project
+              and all its associated data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingProject ? !!buttonLoading[`delete-${isDeletingProject}`] : false}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault();
+                if (isDeletingProject) handleDeleteProject(isDeletingProject);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeletingProject ? !!buttonLoading[`delete-${isDeletingProject}`] : false}
+            >
+              {isDeletingProject && buttonLoading[`delete-${isDeletingProject}`] ? "Deleting..." : "Delete Project"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };
 export default ClientDashboard;

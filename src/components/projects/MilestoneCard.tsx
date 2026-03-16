@@ -42,6 +42,7 @@ interface MilestoneCardProps {
   onPaymentSuccess?: () => void;
   getStatusBadge: (status: string) => React.ReactNode;
   onEnablePayments?: () => void;
+  exchangeRate?: number;
 }
 
 export function MilestoneCard({
@@ -61,7 +62,8 @@ export function MilestoneCard({
   onDispute,
   onPaymentSuccess,
   getStatusBadge,
-  onEnablePayments
+  onEnablePayments,
+  exchangeRate
 }: MilestoneCardProps) {
   const { format: formatCurrency } = useCurrencyFormat();
   
@@ -90,7 +92,7 @@ export function MilestoneCard({
           <div className="flex items-center gap-2">
             {getStatusBadge(milestone.status)}
             <Badge variant="outline" className="gap-1">
-              {formatCurrency(milestone.amount)}
+              {formatCurrency(milestone.amount, 'USD', exchangeRate)}
             </Badge>
           </div>
         </div>
