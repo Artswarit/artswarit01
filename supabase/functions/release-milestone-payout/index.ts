@@ -150,9 +150,9 @@ serve(async (req) => {
       });
     }
 
-    // RazorpayX expects INR; convert from USD using same approximation as order creation
-    const USD_TO_INR_RATE = 83.5;
-    const amountINR = Math.round(payoutAmount * USD_TO_INR_RATE * 100) / 100;
+    // RazorpayX expects INR; convert from USD using locked rate or fallback
+    const exchangeRate = milestone.exchange_rate || 83.5;
+    const amountINR = Math.round(payoutAmount * exchangeRate * 100) / 100;
     const amountInPaise = Math.round(amountINR * 100);
 
     const razorpayxAuth = btoa(`${RAZORPAYX_KEY_ID}:${RAZORPAYX_KEY_SECRET}`);

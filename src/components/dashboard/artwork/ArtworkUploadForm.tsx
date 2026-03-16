@@ -51,7 +51,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { userCurrency, userCurrencySymbol } = useCurrency();
+  const { userCurrency, userCurrencySymbol, exchangeRates } = useCurrency();
   const { uploadArtwork } = useArtworks();
   const { canUploadPortfolio, portfolioCount, portfolioLimit, isProArtist, refresh: refreshGating } = useFeatureGating(user?.id);
   const [selectedType, setSelectedType] = useState("image");
@@ -147,7 +147,8 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
       category: selectedCategory,
       media_type: selectedType,
       file: selectedFiles[0], // Use first selected file
-      price: visibilityType === "premium" ? price : null,
+      price: price || null,
+      priceUSD: price ? (userCurrency === 'USD' ? parseFloat(price) : parseFloat((parseFloat(price) / (exchangeRates[userCurrency] || 1)).toFixed(2))) : null,
       currency: userCurrency, // Store user's currency
       visibility,
       access_type: visibilityType,

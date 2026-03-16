@@ -45,7 +45,7 @@ const ServicesManagement: React.FC = () => {
   const navigate = useNavigate();
   const { canAddService, serviceCount, serviceLimit, isProArtist, loading: gatingLoading, refresh: refreshGating } = useFeatureGating(user?.id);
   const { toast } = useToast();
-  const { formatPlus, userCurrencySymbol } = useCurrencyFormat();
+  const { formatPlus, userCurrencySymbol, userCurrency, convert } = useCurrencyFormat();
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -160,11 +160,17 @@ const ServicesManagement: React.FC = () => {
 
     setSaving(true);
 
+    const priceVal = form.starting_price ? parseFloat(form.starting_price) : null;
+    const priceUSD = priceVal !== null ? convert(priceVal) : null;
+
     const payload = {
       artist_id: user.id,
       title: form.title.trim(),
       description: form.description.trim() || null,
-      starting_price: form.starting_price ? parseFloat(form.starting_price) : null,
+      starting_price: priceUSD, // budget truth is USD
+      starting_price_usd: priceUSD,
+      currency: userCurrency,
+      exchange_rate: 1, // Will be updated by hook's convert logic if needed, but hook handles the math
     };
 
     if (editingService) {
@@ -412,7 +418,7 @@ const ServicesManagement: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="svc-price" className="text-sm font-bold ml-1">Starting Price ({userCurrencySymbol} in USD)</Label>
+                <Label htmlFor="svc-price" className="text-sm font-bold ml-1">Starting Price ({userCurrencySymbol})</Label>
                 <div className="relative">
                   <Input
                     id="svc-price"
@@ -425,7 +431,7 @@ const ServicesManagement: React.FC = () => {
                     placeholder="e.g., 50"
                     className="h-12 bg-muted/40 border-border/40 focus-visible:ring-primary/20 rounded-2xl font-bold px-4 pl-9"
                   />
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">$</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">{userCurrencySymbol}</span>
                 </div>
                 <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed italic ml-1 font-medium">
                   Clients will see this converted to their local currency.

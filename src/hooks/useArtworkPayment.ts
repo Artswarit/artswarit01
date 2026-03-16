@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { usePaymentGateway } from './usePaymentGateway';
 
 declare global {
   interface Window {
@@ -47,20 +48,35 @@ export function useArtworkPayment() {
     });
   }, [scriptLoaded]);
 
+  const { provider } = usePaymentGateway();
+
   const initiatePayment = useCallback(async ({ artworkId, onSuccess, onFailure }: ArtworkPaymentOptions) => {
     setLoading(true);
 
     try {
-      // Load Razorpay script
-      const loaded = await loadRazorpayScript();
-      if (!loaded) {
-        throw new Error('Failed to load payment gateway');
-      }
-
       // Get current session
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('Please log in to unlock this artwork');
+      }
+
+      if (provider === 'stripe') {
+        const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+          body: { artworkId },
+        });
+
+        if (error || !data?.url) {
+          throw new Error(error?.message || data?.error || 'Failed to create checkout session');
+        }
+
+        window.location.href = data.url;
+        return;
+      }
+
+      // Load Razorpay script
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        throw new Error('Failed to load payment gateway');
       }
 
       // Create order via edge function
@@ -143,7 +159,7 @@ export function useArtworkPayment() {
     } finally {
       setLoading(false);
     }
-  }, [loadRazorpayScript]);
+  }, [loadRazorpayScript, provider]);
 
   // Check if user has unlocked an artwork
   const checkUnlockStatus = useCallback(async (artworkId: string): Promise<boolean> => {

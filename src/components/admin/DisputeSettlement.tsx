@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { writeAuditLog } from './auditHelpers';
 import { toast } from 'sonner';
 import LogoLoader from '@/components/ui/LogoLoader';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 /* ── Types ── */
 interface DisputeItem {
@@ -42,6 +43,7 @@ interface DisputeItem {
   client_name?: string;
   artist_name?: string;
   raised_by_name?: string;
+  currency?: string;
 }
 
 interface Evidence {
@@ -56,6 +58,7 @@ interface Evidence {
 /* ── Component ── */
 export default function DisputeSettlement() {
   const { user } = useAuth();
+  const { formatPrice, userCurrencySymbol } = useCurrency();
   const [disputes, setDisputes] = useState<DisputeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDispute, setSelectedDispute] = useState<DisputeItem | null>(null);
@@ -79,7 +82,7 @@ export default function DisputeSettlement() {
         .from('disputes')
         .select(`
           *,
-          project:projects(title, client_id, artist_id, budget),
+          project:projects(title, client_id, artist_id, budget, currency),
           milestone:project_milestones(title, amount)
         `)
         .order('created_at', { ascending: false });
@@ -109,6 +112,7 @@ export default function DisputeSettlement() {
         artist_id: d.project?.artist_id,
         milestone_title: d.milestone?.title,
         milestone_amount: d.milestone?.amount || d.project?.budget || 0,
+        currency: d.project?.currency || 'USD',
         client_name: nameMap[d.project?.client_id] || d.project?.client_id?.slice(0, 8),
         artist_name: nameMap[d.project?.artist_id] || d.project?.artist_id?.slice(0, 8),
         raised_by_name: nameMap[d.raised_by] || d.raised_by?.slice(0, 8),
@@ -187,10 +191,10 @@ export default function DisputeSettlement() {
 
       // 3. Notify
       if (artistPayout > 0 && d.artist_id) {
-        await supabase.from('notifications').insert({ user_id: d.artist_id, title: 'Dispute Resolved — Funds Released', message: `₹${artistPayout.toLocaleString('en-IN')} released to you.`, type: 'success' });
+        await supabase.from('notifications').insert({ user_id: d.artist_id, title: 'Dispute Resolved — Funds Released', message: `${formatPrice(artistPayout)} released to you.`, type: 'success' });
       }
       if (clientRefund > 0 && d.client_id) {
-        await supabase.from('notifications').insert({ user_id: d.client_id, title: 'Dispute Resolved — Refund Initiated', message: `₹${clientRefund.toLocaleString('en-IN')} refund initiated to your source payment method.`, type: 'success' });
+        await supabase.from('notifications').insert({ user_id: d.client_id, title: 'Dispute Resolved — Refund Initiated', message: `${formatPrice(clientRefund)} refund initiated to your source payment method.`, type: 'success' });
       }
 
       // 4. Audit & Return
@@ -230,7 +234,7 @@ export default function DisputeSettlement() {
     return <Badge className={`${c.cls} border text-[10px]`}>{c.label}</Badge>;
   };
 
-  const fmt = (n: number) => '₹' + n.toLocaleString('en-IN');
+  const fmt = (n: number) => formatPrice(n);
   const isResolved = (s: string) => s.startsWith('resolved');
   const activeDisputes = disputes.filter(d => !isResolved(d.status));
   const resolvedDisputes = disputes.filter(d => isResolved(d.status));
@@ -435,11 +439,11 @@ export default function DisputeSettlement() {
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4">
                           <div className="flex-1 space-y-1.5">
-                            <Label className="text-xs font-bold text-green-700 dark:text-green-500">Artist Payout (₹)</Label>
+                            <Label className="text-xs font-bold text-green-700 dark:text-green-500">Artist Payout ({userCurrencySymbol})</Label>
                             <Input type="number" min="0" value={customArtistPayout} onChange={e => setCustomArtistPayout(e.target.value)} className="font-mono text-lg font-bold" />
                           </div>
                           <div className="flex-1 space-y-1.5">
-                            <Label className="text-xs font-bold text-blue-700 dark:text-blue-500">Client Refund (₹)</Label>
+                            <Label className="text-xs font-bold text-blue-700 dark:text-blue-500">Client Refund ({userCurrencySymbol})</Label>
                             <Input type="number" min="0" value={customClientRefund} onChange={e => setCustomClientRefund(e.target.value)} className="font-mono text-lg font-bold" />
                           </div>
                         </div>

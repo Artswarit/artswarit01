@@ -73,19 +73,30 @@ serve(async (req) => {
       );
     }
 
+    // Fetch latest exchange rate (INR)
+    const { data: ratesData } = await supabaseClient
+      .from('exchange_rates')
+      .select('rates')
+      .eq('base_currency', 'USD')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    const exchangeRates = (ratesData?.rates as any) || { INR: 83.5 };
+    const currentRate = exchangeRates.INR || 83.5;
+
     // Handle currency logic: if stored as INR, use directly. If USD, convert to INR.
     const metadata = artwork.metadata as { currency?: string } | null;
     const storedCurrency = metadata?.currency ?? 'USD';
-    const USD_TO_INR_RATE = 83.5;
     let priceINR: number;
     let priceUSD: number;
 
     if (storedCurrency === 'INR') {
       priceINR = Number(artwork.price);
-      priceUSD = priceINR / USD_TO_INR_RATE;
+      priceUSD = priceINR / currentRate;
     } else {
       priceUSD = Number(artwork.price);
-      priceINR = priceUSD * USD_TO_INR_RATE;
+      priceINR = priceUSD * currentRate;
     }
 
     // Convert to paise (Razorpay uses smallest currency unit)
@@ -113,7 +124,7 @@ serve(async (req) => {
           amount_usd: priceUSD,
           amount_inr: priceINR,
           stored_currency: storedCurrency,
-          usd_to_inr_rate: USD_TO_INR_RATE,
+          usd_to_inr_rate: currentRate,
         },
       }),
     });

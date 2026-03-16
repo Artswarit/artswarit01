@@ -42,6 +42,9 @@ interface ProjectMilestoneInsert {
   description: string | null;
   deliverables: string | null;
   amount: number;
+  amount_usd: number;
+  exchange_rate: number;
+  currency: string;
   due_date: string | null;
   sort_order: number;
   status: ProjectMilestoneStatus;
@@ -50,7 +53,7 @@ interface ProjectMilestoneInsert {
 
 export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProjectFormProps) {
   const { user } = useAuth();
-  const { userCurrency, userCurrencySymbol } = useCurrency();
+  const { userCurrency, userCurrencySymbol, exchangeRates } = useCurrency();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -178,6 +181,9 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
       return;
     }
 
+    const currentRate = exchangeRates[userCurrency] || 1;
+    const budgetUSD = userCurrency === 'USD' ? budget : parseFloat((budget / currentRate).toFixed(2));
+
     setSubmitting(true);
 
     try {
@@ -187,14 +193,17 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         .insert({
           title,
           description,
-          budget,
+          budget: budgetUSD, // Store USD as truth
+          amount_usd: budgetUSD,
+          currency: userCurrency,
+          exchange_rate: currentRate,
           deadline: deadline || null,
           client_id: user?.id,
           artist_id: artistId || null,
           status: 'pending',
           is_locked: false,
           reference_files: [] // Will update this after uploads
-        })
+        } as any)
         .select()
         .single();
 
@@ -248,30 +257,31 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         
         if (filesError) {
           console.error('Error inserting project files records:', filesError);
-          // We don't throw here to avoid failing the whole project creation 
-          // if just the metadata record fails, but it's not ideal.
         }
       }
 
       // 5. Create milestones
-      // In escrow model:
-      // - First milestone starts in WAITING_FUNDS (client can fund immediately)
-      // - Subsequent milestones start as LOCKED and will be unlocked sequentially
-      const milestonesData: ProjectMilestoneInsert[] = milestones.map((m, index) => ({
-        project_id: project.id,
-        title: m.title,
-        description: m.description || null,
-        deliverables: m.deliverables || null,
-        amount: m.amount,
-        due_date: m.due_date || null,
-        sort_order: index,
-        status: index === 0 ? 'WAITING_FUNDS' : 'LOCKED',
-        created_by: user!.id
-      }));
+      const milestonesData: ProjectMilestoneInsert[] = milestones.map((m, index) => {
+        const amountUSD = userCurrency === 'USD' ? m.amount : parseFloat((m.amount / currentRate).toFixed(2));
+        return {
+          project_id: project.id,
+          title: m.title,
+          description: m.description || null,
+          deliverables: m.deliverables || null,
+          amount: amountUSD, // budget truth is USD
+          amount_usd: amountUSD,
+          exchange_rate: currentRate,
+          currency: userCurrency,
+          due_date: m.due_date || null,
+          sort_order: index,
+          status: index === 0 ? 'WAITING_FUNDS' : 'LOCKED',
+          created_by: user!.id
+        };
+      });
 
       const { error: milestonesError } = await supabase
         .from('project_milestones')
-        .insert(milestonesData);
+        .insert(milestonesData as any);
 
       if (milestonesError) throw milestonesError;
 
@@ -601,6 +611,5 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         </div>
       </CardContent>
     </Card>
-
   );
 }

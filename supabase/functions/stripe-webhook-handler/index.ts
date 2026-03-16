@@ -62,63 +62,93 @@ serve(async (req) => {
 
     // console.log('Verified webhook event:', event.type)
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session
-      const paymentIntentId = session.payment_intent || session.id
+    if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const metadata = session.metadata;
+      const _userId = metadata?.user_id || metadata?.buyer_id;
+      const type = metadata?.type || (metadata?.plan ? 'premium_plan' : 'unknown');
 
-      // Update transaction status to success
-      const { error: updateError } = await supabase
-        .from('transactions')
-        .update({ status: 'success' })
-        .eq('stripe_payment_intent_id', paymentIntentId)
+      console.log(`Processing ${event.type} for type: ${type}`);
 
-      if (updateError) {
-        console.error('Transaction update error:', updateError)
-        return new Response(
-          JSON.stringify({ error: 'Failed to update transaction' }),
-          { 
-            status: 500, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
+      if (type === 'artwork_purchase') {
+        const artworkId = metadata?.artwork_id;
+        const buyerId = metadata?.buyer_id;
+        const sellerId = metadata?.seller_id;
 
-      // Get transaction details
-      const { data: transaction } = await supabase
-        .from('transactions')
-        .select('*, artworks(*)')
-        .eq('stripe_payment_intent_id', paymentIntentId)
-        .single()
+        // 1. Update transaction
+        await supabase
+          .from('transactions')
+          .update({ status: 'success' })
+          .eq('stripe_payment_intent_id', session.id);
 
-      if (transaction) {
-        // Update artwork status (no longer for sale)
+        // 2. Clear price and archive artwork
         await supabase
           .from('artworks')
-          .update({ 
-            price: null,
-            status: 'archived'
-          })
-          .eq('id', transaction.artwork_id)
+          .update({ price: null, status: 'archived' })
+          .eq('id', artworkId);
 
-        // Create notifications
+        // 3. Insert into artwork_unlocks
         await supabase
-          .from('notifications')
-          .insert([
-            {
-              user_id: transaction.seller_id,
-              type: 'sale',
-              title: 'Artwork Sold!',
-              message: `Your artwork "${transaction.artworks.title}" has been sold for $${transaction.amount}`,
-              metadata: { transaction_id: transaction.id }
-            },
-            {
-              user_id: transaction.buyer_id,
-              type: 'purchase',
-              title: 'Purchase Confirmed',
-              message: `You have successfully purchased "${transaction.artworks.title}"`,
-              metadata: { transaction_id: transaction.id }
-            }
-          ])
+          .from('artwork_unlocks')
+          .insert({ artwork_id: artworkId, user_id: buyerId });
+
+        // 4. Notifications
+        await supabase.from('notifications').insert([
+          { user_id: sellerId, type: 'sale', title: 'Artwork Sold!', message: `Your artwork has been sold.` },
+          { user_id: buyerId, type: 'purchase', title: 'Purchase Confirmed', message: `You have unlocked new artwork.` }
+        ]);
+      } else if (type === 'milestone_payment') {
+        const milestoneId = metadata?.milestone_id;
+        const _projectId = metadata?.project_id;
+        const clientId = metadata?.buyer_id;
+        const artistId = metadata?.seller_id;
+
+        // 1. Update transaction
+        await supabase
+          .from('transactions')
+          .update({ status: 'success' })
+          .eq('stripe_payment_intent_id', session.id);
+
+        // 2. Update milestone status to PAID (escrow)
+        await supabase
+          .from('project_milestones')
+          .update({ status: 'PAID' })
+          .eq('id', milestoneId);
+        
+        // 3. Update payment record
+        await supabase
+          .from('payments')
+          .update({ status: 'success', stripe_session_id: session.id })
+          .eq('milestone_id', milestoneId);
+
+        // 4. Notifications
+        await supabase.from('notifications').insert([
+          { user_id: artistId, type: 'milestone_paid', title: 'Milestone Funded', message: `A milestone for your project has been funded.` },
+          { user_id: clientId, type: 'payment_success', title: 'Payment Successful', message: `Milestone payment was successful.` }
+        ]);
+      } else if (type === 'premium_plan') {
+        const userId = metadata?.user_id;
+        const plan = metadata?.plan;
+
+        // Update user's subscriber status
+        const { error: subError } = await supabase
+          .from('subscribers')
+          .insert({
+            user_id: userId,
+            plan: plan,
+            is_active: true,
+            started_at: new Date().toISOString(),
+          });
+
+        if (subError) console.error('Subscription insert error:', subError);
+
+        // Notification
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          type: 'system',
+          title: 'Premium Activated',
+          message: `Welcome to ${plan}! You now have 0% platform fees.`
+        });
       }
     }
 

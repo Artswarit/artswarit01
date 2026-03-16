@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { usePaymentGateway } from './usePaymentGateway';
 
 declare global {
   interface Window {
@@ -47,26 +48,47 @@ export function usePremiumPayment() {
     });
   }, [scriptLoaded]);
 
+  const { provider } = usePaymentGateway();
+
   const initiateSubscription = useCallback(async ({ plan, onSuccess, onFailure }: SubscriptionOptions) => {
     setLoading(true);
 
     try {
-      // Load Razorpay script
-      const loaded = await loadRazorpayScript();
-      if (!loaded) {
-        throw new Error('Failed to load payment gateway');
-      }
-
       // Get current session
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error('Please log in to subscribe');
       }
 
-      // Create subscription via edge function (direct fetch for better reliability)
       const baseUrl = (supabase as any).supabaseUrl;
       const anonKey = (supabase as any).supabaseKey;
-      
+
+      if (provider === 'stripe') {
+        const response = await fetch(`${baseUrl}/functions/v1/create-premium-checkout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': anonKey,
+          },
+          body: JSON.stringify({ plan }),
+        });
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        } else {
+          throw new Error(data.error || 'Failed to create Stripe subscription');
+        }
+      }
+
+      // Load Razorpay script
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        throw new Error('Failed to load payment gateway');
+      }
+
+      // Create subscription via edge function
       const response = await fetch(`${baseUrl}/functions/v1/create-razorpay-subscription`, {
         method: 'POST',
         headers: {
@@ -85,8 +107,6 @@ export function usePremiumPayment() {
 
       if (data?.url) {
         toast.info('Opening subscription page...');
-        // Use location.href instead of window.open to avoid popup blockers 
-        // and provide a better experience on Mobile/PWA
         setTimeout(() => {
           window.location.href = data.url;
         }, 1000);

@@ -161,22 +161,34 @@ serve(async (req) => {
     const isProArtist = !!subscription;
     const commissionRate = isProArtist ? PRO_COMMISSION : STARTER_COMMISSION;
     
-    // Calculate amounts
-    const storedCurrency = milestone.project.currency || 'USD';
-    const amountBase = Number(milestone.amount);
-    const USD_TO_INR_RATE = 83.5; 
+    // Fetch latest exchange rate (INR)
+    const { data: ratesData } = await supabase
+      .from('exchange_rates')
+      .select('rates')
+      .eq('base_currency', 'USD')
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     
-    let amountINR: number;
-    let amountUSD: number;
+    const exchangeRates = (ratesData?.rates as any) || { INR: 83.5 };
+    const currentRate = exchangeRates.INR || 83.5;
 
-    if (storedCurrency === 'INR') {
-      amountINR = amountBase;
-      amountUSD = amountINR / USD_TO_INR_RATE;
-    } else {
-      amountUSD = amountBase;
-      amountINR = Math.round(amountUSD * USD_TO_INR_RATE * 100) / 100;
-    }
+    // Calculate amounts
+    const amountBase = Number(milestone.amount);
     
+    // Lock the amount in USD and the current rate
+    const amountUSD = amountBase; // truth is USD
+    const amountINR = Math.round(amountUSD * currentRate * 100) / 100;
+    
+    // Update milestone with locked rate and USD amount
+    await supabase
+      .from('project_milestones')
+      .update({
+        amount_usd: amountUSD,
+        exchange_rate: currentRate
+      })
+      .eq('id', milestoneId);
+
     const platformFee = Math.round(amountUSD * commissionRate * 100) / 100;
     const artistPayout = Math.round((amountUSD - platformFee) * 100) / 100;
     const amountInPaise = Math.round(amountINR * 100);
@@ -213,12 +225,11 @@ serve(async (req) => {
           artist_id: milestone.project.artist_id,
           amount_usd: amountUSD, 
           amount_inr: amountINR,
-          stored_currency: storedCurrency,
           platform_fee_usd: platformFee,
           artist_payout_usd: artistPayout,
           is_pro_artist: isProArtist,
           commission_rate: commissionRate,
-          usd_to_inr_rate: USD_TO_INR_RATE,
+          usd_to_inr_rate: currentRate,
         },
       }),
     });
@@ -249,7 +260,7 @@ serve(async (req) => {
         amount: amountBase,
         platform_fee: platformFee,
         artist_payout: artistPayout,
-        currency: storedCurrency,
+        currency: 'USD',
         razorpay_order_id: order.id,
         status: 'pending',
       });
@@ -272,7 +283,7 @@ serve(async (req) => {
       isProArtist,
       platformFee,
       artistPayout,
-      exchangeRate: USD_TO_INR_RATE,
+      exchangeRate: currentRate,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

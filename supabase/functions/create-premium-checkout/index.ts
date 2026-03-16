@@ -41,24 +41,32 @@ serve(async (req) => {
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
 
-    // NEW PLAN CONFIG: Pro Artist only at ₹499/month (49900 paise)
-    // Keeping monthly as the only option since the new model is simpler
+    // Fetch user profile to check country
+    const { data: profile } = await supabaseClient
+      .from('public_profiles')
+      .select('country')
+      .eq('id', user.id)
+      .single();
+    
+    const isIndian = profile?.country === 'IN' || profile?.country === 'India';
+    const currency = isIndian ? "inr" : "usd";
+
+    // NEW PLAN CONFIG: Regional pricing
     const planConfigs: Record<string, { price: number; name: string; interval?: "month" | "year"; id: string }> = {
       pro: {
-        price: 49900, // ₹499 in paise
+        price: isIndian ? 49900 : 599, // ₹499 or $5.99
         name: "Pro Artist",
         interval: "month",
         id: "artswarit-pro-artist"
       },
-      // Keep old plans for backward compatibility
       monthly: {
-        price: 49900,
+        price: isIndian ? 49900 : 599,
         name: "Pro Artist Monthly",
         interval: "month",
         id: "artswarit-pro-monthly"
       },
       yearly: {
-        price: 499900, // ₹4999 (save ~17%)
+        price: isIndian ? 499900 : 5999, // ₹4999 or $59.99
         name: "Pro Artist Yearly",
         interval: "year",
         id: "artswarit-pro-yearly"
@@ -70,7 +78,7 @@ serve(async (req) => {
 
     const lineItem = {
       price_data: {
-        currency: "inr",
+        currency: currency,
         product_data: {
           name: config.name,
           description: "0% platform fees • Unlimited portfolio • Priority ranking • Featured rotation"
