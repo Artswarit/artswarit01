@@ -233,7 +233,7 @@ const ClientDashboard = () => {
       } = await supabase.from('saved_artists').select('*', {
         count: 'exact',
         head: true
-      }).eq('user_id', user.id);
+      }).eq('client_id', user.id);
       setSavedArtistsCount(count || 0);
     } catch (err) {
       console.error('Error fetching saved artists:', err);
