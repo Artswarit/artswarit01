@@ -75,7 +75,7 @@ const ArtistDashboard = () => {
       if (savedTab) {
         setSearchParams({ tab: savedTab }, { replace: true });
       } else if (isComplete) {
-        setSearchParams({ tab: 'artworks' }, { replace: true });
+        setSearchParams({ tab: 'profile' }, { replace: true });
       }
     }
   }, [profileReady, profileIncomplete, isComplete, tab, navigate]);
@@ -91,6 +91,14 @@ const ArtistDashboard = () => {
       return;
     }
     setSearchParams({ tab: newTab });
+  };
+
+  const handleNotificationClick = (notification: any) => {
+    if (notification.type === 'message' || notification.type === 'comment') {
+      setSearchParams({ tab: 'messages' });
+    } else if (notification.type === 'project') {
+      setSearchParams({ tab: 'projects' });
+    }
   };
 
   // Scroll Position Tracking
@@ -287,10 +295,8 @@ const ArtistDashboard = () => {
                   {visitedTabs.has('messages') && <MessagingModule onChatActiveChange={setIsChatActive} />}
                 </div>
               </TabsContent>
-              <TabsContent value="notifications" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'notifications' && "hidden")}>
-                  {visitedTabs.has('notifications') && <ArtistNotifications isLoading={profileLoading} />}
-                </div>
+              <TabsContent value="notifications" className="animate-fade-in outline-none focus-visible:ring-0">
+                {visitedTabs.has('notifications') && <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />}
               </TabsContent>
               <TabsContent value="settings" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'settings' && "hidden")}>

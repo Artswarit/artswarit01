@@ -148,7 +148,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
       media_type: selectedType,
       file: selectedFiles[0], // Use first selected file
       price: price || null,
-      priceUSD: price ? (userCurrency === 'USD' ? parseFloat(price) : parseFloat((parseFloat(price) / (exchangeRates[userCurrency] || 1)).toFixed(2))) : null,
+      priceUSD: price ? (userCurrency === 'USD' ? parseFloat(price) : parseFloat((parseFloat(price) / (exchangeRates[userCurrency] || 1)).toFixed(6))) : null,
       currency: userCurrency, // Store user's currency
       visibility,
       access_type: visibilityType,

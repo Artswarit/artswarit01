@@ -47,6 +47,9 @@ interface Project {
   client_id: string | null;
   artist_id: string | null;
   auto_approve_days: number;
+  currency?: string | null;
+  exchange_rate?: number | null;
+  amount_usd?: number | null;
 }
 
 interface MilestoneWorkflowProps {
@@ -295,7 +298,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     );
   }
 
-  const budgetMatch = getTotalBudget() === (project.budget || 0);
+  const budgetMatch = Math.abs(getTotalBudget() - (project.amount_usd || project.budget || 0)) < 0.05;
   const hasApprovedMilestones = milestones.some(m => m.status === 'approved');
 
   return (
@@ -334,7 +337,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
               <CardDescription>{project.description}</CardDescription>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold">{formatCurrency(project.budget)}</p>
+              <p className="text-2xl font-bold">{formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}</p>
               <p className="text-sm text-muted-foreground">Total Budget</p>
             </div>
           </div>
@@ -346,7 +349,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
               <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
                 <p className="text-sm text-destructive">
-                  Milestone total ({formatCurrency(getTotalBudget())}) doesn't match project budget ({formatCurrency(project.budget)}). 
+                  Milestone total ({formatCurrency(getTotalBudget(), 'USD', project.exchange_rate || undefined)}) doesn't match project budget ({formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}). 
                   Please adjust milestones before proceeding.
                 </p>
               </div>
@@ -360,8 +363,8 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
               </div>
               <Progress value={calculateProgress()} className="h-2" />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{formatCurrency(getPaidAmount())} paid</span>
-                <span>{formatCurrency(getTotalBudget() - getPaidAmount())} remaining</span>
+                <span>{formatCurrency(getPaidAmount(), 'USD', project.exchange_rate || undefined)} paid</span>
+                <span>{formatCurrency(getTotalBudget() - getPaidAmount(), 'USD', project.exchange_rate || undefined)} remaining</span>
               </div>
             </div>
           </div>
@@ -419,6 +422,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
                 }}
                 getStatusBadge={getStatusBadge}
                 onEnablePayments={() => setEnablePaymentsOpen(true)}
+                exchangeRate={project.exchange_rate || undefined}
               />
             ))
           )}

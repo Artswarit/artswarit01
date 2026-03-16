@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { FileText, MessageSquare, CheckCircle, Upload, Calendar, User, Clock, Plus, Trash2, Loader2, Download, GitBranch, DollarSign } from "lucide-react";
+import { FileText, MessageSquare, CheckCircle, Upload, Calendar, User, Clock, Plus, Trash2, Loader2, Download, GitBranch, DollarSign, SendHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -23,6 +23,7 @@ interface ProjectDetailModalProps {
   projectId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialTab?: string;
 }
 interface Milestone {
   id: string;
@@ -66,11 +67,15 @@ interface ProjectData {
   artist_avatar?: string;
   client_name?: string;
   client_avatar?: string;
+  currency?: string;
+  exchange_rate?: number;
+  amount_usd?: number | null;
 }
 const ProjectDetailModal = ({
   projectId,
   open,
-  onOpenChange
+  onOpenChange,
+  initialTab
 }: ProjectDetailModalProps) => {
   const {
     user
@@ -104,15 +109,21 @@ const ProjectDetailModal = ({
     }
   };
 
-  const fetchProjectData = useCallback(async (signal?: AbortSignal) => {
+  useEffect(() => {
+    if (initialTab && open) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, open]);
+
+  const fetchProjectData = useCallback(async (signal?: AbortSignal, showLoading = true) => {
     if (!projectId) return;
-    setLoading(true);
+    if (showLoading) setLoading(true);
     try {
       // Fetch project
       const {
         data: projectData,
         error: projectError
-      } = await (supabase.from('projects').select('*').eq('id', projectId).maybeSingle() as any).abortSignal(signal);
+      } = await supabase.from('projects').select('*, artist:artist_id(full_name, avatar_url), client:client_id(full_name, avatar_url)').eq('id', projectId).maybeSingle();
       if (projectError) {
         if (projectError.name === 'AbortError' || (projectError as any).code === 'ABORT') return;
         throw projectError;
@@ -122,62 +133,44 @@ const ProjectDetailModal = ({
         onOpenChange(false);
         return;
       }
-
-      // Fetch artist and client profiles
-      const profileIds = [projectData.artist_id, projectData.client_id].filter(Boolean) as string[];
-      let profiles: Record<string, {
-        full_name: string | null;
-        avatar_url: string | null;
-      }> = {};
-      if (profileIds.length > 0) {
-        const {
-          data: profilesData
-        } = await (supabase.from('public_profiles').select('id, full_name, avatar_url').in('id', profileIds) as any).abortSignal(signal);
-        (profilesData || []).forEach(p => {
-          if (p.id) profiles[p.id] = {
-            full_name: p.full_name,
-            avatar_url: p.avatar_url
-          };
-        });
-      }
       setProject({
         ...projectData,
-        artist_name: profiles[projectData.artist_id!]?.full_name || 'Unassigned',
-        artist_avatar: profiles[projectData.artist_id!]?.avatar_url || undefined,
-        client_name: profiles[projectData.client_id!]?.full_name || 'Unknown',
-        client_avatar: profiles[projectData.client_id!]?.avatar_url || undefined
+        artist_name: (projectData as any).artist?.full_name || 'Unassigned',
+        artist_avatar: (projectData as any).artist?.avatar_url || undefined,
+        client_name: (projectData as any).client?.full_name || 'Unknown',
+        client_avatar: (projectData as any).client?.avatar_url || undefined
       });
 
-      // Fetch milestones
-      const {
-        data: milestonesData
-      } = await (supabase.from('project_milestones').select('*').eq('project_id', projectId).order('sort_order', {
-        ascending: true
-      }) as any).abortSignal(signal);
-      setMilestones(milestonesData || []);
+      // Use Promise.all for independent fetches to speed up loading
+      const [milestonesRes, filesRes] = await Promise.all([
+        supabase.from('project_milestones').select('*').eq('project_id', projectId).order('sort_order', {
+          ascending: true
+        }),
+        supabase.from('project_files').select('*').eq('project_id', projectId).order('created_at', {
+          ascending: false
+        })
+      ]);
 
-      // Fetch files
-      const {
-        data: filesData
-      } = await (supabase.from('project_files').select('*').eq('project_id', projectId).order('created_at', {
-        ascending: false
-      }) as any).abortSignal(signal);
-      setFiles(filesData || []);
+      if (milestonesRes.error) throw milestonesRes.error;
+      if (filesRes.error) throw filesRes.error;
+
+      setMilestones(milestonesRes.data || []);
+      setFiles(filesRes.data || []);
 
       // Fetch or create conversation for messages
       if (projectData.artist_id && projectData.client_id) {
         const {
           data: existingConv
-        } = await (supabase.from('conversations').select('id').eq('artist_id', projectData.artist_id).eq('client_id', projectData.client_id).maybeSingle() as any).abortSignal(signal);
+        } = await supabase.from('conversations').select('id').eq('artist_id', projectData.artist_id).eq('client_id', projectData.client_id).maybeSingle();
         if (existingConv) {
           setConversationId(existingConv.id);
 
           // Fetch messages
           const {
             data: messagesData
-          } = await (supabase.from('messages').select('*').eq('conversation_id', existingConv.id).order('created_at', {
+          } = await supabase.from('messages').select('*').eq('conversation_id', existingConv.id).order('created_at', {
             ascending: true
-          }) as any).abortSignal(signal);
+          });
           const senderIds = [...new Set((messagesData || []).map(m => m.sender_id).filter(Boolean))];
           let senderProfiles: Record<string, {
             full_name: string | null;
@@ -186,7 +179,7 @@ const ProjectDetailModal = ({
           if (senderIds.length > 0) {
             const {
               data: senderProfilesData
-            } = await (supabase.from('public_profiles').select('id, full_name, avatar_url').in('id', senderIds as string[]) as any).abortSignal(signal);
+            } = await supabase.from('public_profiles').select('id, full_name, avatar_url').in('id', senderIds as string[]);
             (senderProfilesData || []).forEach(p => {
               if (p.id) senderProfiles[p.id] = {
                 full_name: p.full_name,
@@ -230,7 +223,7 @@ const ProjectDetailModal = ({
       table: 'project_milestones',
       filter: `project_id=eq.${projectId}`
     }, () => {
-      fetchProjectData();
+      fetchProjectData(undefined, false);
     }).subscribe();
     const filesChannel = supabase.channel(`project-files-${projectId}`).on('postgres_changes', {
       event: '*',
@@ -238,7 +231,7 @@ const ProjectDetailModal = ({
       table: 'project_files',
       filter: `project_id=eq.${projectId}`
     }, () => {
-      fetchProjectData();
+      fetchProjectData(undefined, false);
     }).subscribe();
 
     // Subscribe to project updates (for progress changes)
@@ -248,14 +241,14 @@ const ProjectDetailModal = ({
       table: 'projects',
       filter: `id=eq.${projectId}`
     }, () => {
-      fetchProjectData();
+      fetchProjectData(undefined, false);
     }).subscribe();
     return () => {
       supabase.removeChannel(milestonesChannel);
       supabase.removeChannel(filesChannel);
       supabase.removeChannel(projectChannel);
     };
-  }, [open, projectId, fetchProjectData, project]);
+  }, [open, projectId, fetchProjectData]);
   const { userCurrency, userCurrencySymbol, exchangeRates } = useCurrency();
 
   const handleAddMilestone = async () => {
@@ -264,22 +257,30 @@ const ProjectDetailModal = ({
     try {
       const amountLocal = newMilestone.amount ? parseFloat(newMilestone.amount) : 0;
       const rate = exchangeRates[userCurrency] || 1;
-      const amountUSD = userCurrency === 'USD' ? amountLocal : parseFloat((amountLocal / rate).toFixed(2));
+      const amountUSD = userCurrency === 'USD' ? amountLocal : parseFloat((amountLocal / rate).toFixed(8));
 
-      const {
-        error
-      } = await supabase.from('project_milestones').insert({
+      // Check which columns exist in the project_milestones table
+      const { data: milestoneCheck } = await supabase.from('project_milestones').select('*').limit(1);
+      const existingMilestoneCols = milestoneCheck && milestoneCheck.length > 0 ? Object.keys(milestoneCheck[0]) : [];
+
+      const milestoneInsert: any = {
         project_id: projectId,
         title: newMilestone.title,
         description: newMilestone.description || null,
         due_date: newMilestone.due_date || null,
-        amount: amountUSD, // Store USD as truth
-        amount_usd: amountUSD,
-        exchange_rate: rate,
-        currency: userCurrency,
+        amount: amountUSD, // Store USD as primary truth
         created_by: user.id,
         sort_order: milestones.length
-      });
+      };
+
+      // Add extra currency columns only if they exist in DB
+      if (existingMilestoneCols.includes('amount_usd')) milestoneInsert.amount_usd = amountUSD;
+      if (existingMilestoneCols.includes('currency')) milestoneInsert.currency = userCurrency;
+      if (existingMilestoneCols.includes('exchange_rate')) milestoneInsert.exchange_rate = rate;
+
+      const {
+        error
+      } = await supabase.from('project_milestones').insert(milestoneInsert);
       if (error) throw error;
       toast.success("Milestone added!");
       setNewMilestone({
@@ -426,7 +427,7 @@ const ProjectDetailModal = ({
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] bg-background/95 backdrop-blur-xl border-none shadow-2xl">
+        <DialogContent className="max-w-none w-screen h-screen max-h-none bg-background/95 backdrop-blur-xl border-none shadow-none flex flex-col items-center justify-center p-0">
           <DialogHeader className="sr-only">
             <DialogTitle>Loading Project Details</DialogTitle>
             <DialogDescription>Please wait while we fetch the project details.</DialogDescription>
@@ -466,15 +467,15 @@ const ProjectDetailModal = ({
           </div>
         </DialogContent>
       ) : (
-        <DialogContent className="max-w-6xl w-[95vw] h-[95vh] sm:h-[92vh] overflow-hidden flex flex-col p-0 gap-0 border-none shadow-[0_0_50px_-12px_rgba(0,0,0,0.25)] bg-background/95 backdrop-blur-2xl ring-1 ring-white/10 dark:ring-white/5">
+        <DialogContent className="max-w-none w-screen h-screen max-h-none overflow-hidden flex flex-col p-0 gap-0 border-none shadow-none bg-background backdrop-blur-2xl rounded-none">
           <DialogHeader className="sr-only">
             <DialogTitle>{project.title}</DialogTitle>
             <DialogDescription>Project details and collaboration workspace</DialogDescription>
           </DialogHeader>
           <ScrollArea className="flex-1 h-full">
-            <div className="flex flex-col min-h-full">
+            <div className="flex flex-col min-h-full max-w-7xl mx-auto w-full relative border-x border-border/5">
             {/* Ultra Modern Header Section */}
-            <div className="relative overflow-hidden pt-12 pb-10 px-6 sm:px-12 border-b bg-gradient-to-br from-primary/[0.07] via-background to-primary/[0.03]">
+            <div className="relative overflow-hidden pt-16 pb-10 px-6 sm:px-12 border-b bg-gradient-to-br from-primary/[0.07] via-background to-primary/[0.03]">
               {/* Abstract Background Shapes */}
               <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
               <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -490,10 +491,10 @@ const ProjectDetailModal = ({
                     </Badge>
                   </div>
                   
-                  <div className="space-y-2">
-                    <DialogTitle className="text-3xl sm:text-5xl font-black tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/60">
-                      {project.title}
-                    </DialogTitle>
+                    <div className="space-y-1 sm:space-y-2">
+                      <DialogTitle className="text-3xl sm:text-5xl font-black tracking-tight leading-tight sm:leading-[1.1] pb-2 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/60">
+                        {project.title}
+                      </DialogTitle>
                     <div className="flex items-center gap-4 flex-wrap">
                       <Badge 
                         className={cn(
@@ -556,7 +557,10 @@ const ProjectDetailModal = ({
                   <div className="space-y-1">
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Total Budget</p>
                     <h3 className="text-3xl font-black tracking-tighter text-foreground">
-                      {project.budget ? formatCurrency(project.budget) : 'Not set'}
+                      {project.amount_usd || project.budget ? 
+                        formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate) : 
+                        'Not set'
+                      }
                     </h3>
                   </div>
                   <div className="flex items-center gap-2">
@@ -630,7 +634,7 @@ const ProjectDetailModal = ({
 
             {/* Enhanced Sticky Navigation */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="sticky top-0 z-30 -mx-6 sm:-mx-12 px-6 sm:px-12 pt-6 pb-8 bg-background/80 backdrop-blur-2xl border-b border-border/40 mb-8 transition-all duration-300">
+                <div className="relative z-10 -mx-6 sm:-mx-12 px-6 sm:px-12 pt-6 pb-8 bg-background border-b border-border/40 mb-8">
                   <div className="relative group/tabs">
                     {/* Scroll Gradient Indicators */}
                     <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 opacity-0 group-hover/tabs:opacity-100 transition-opacity pointer-events-none" />
@@ -870,18 +874,18 @@ const ProjectDetailModal = ({
                 </TabsContent>
 
                 <TabsContent id="project-tab-content-communication" value="communication" className="mt-0 outline-none focus-visible:ring-0">
-                  <div className="rounded-[2.5rem] border border-border/40 bg-white/40 dark:bg-card/20 overflow-hidden flex flex-col shadow-sm transition-all duration-500 hover:shadow-md">
-                    <div className="p-6 sm:p-8 border-b border-border/40 bg-muted/5 flex items-center gap-3">
-                      <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-600">
-                        <MessageSquare className="h-6 w-6" />
+                  <div className="rounded-[2.5rem] border border-border/40 bg-white/40 dark:bg-card/20 overflow-hidden flex flex-col shadow-sm transition-all duration-500 hover:shadow-md h-[450px]">
+                    <div className="p-4 sm:p-5 border-b border-border/40 bg-muted/5 flex items-center gap-3 shrink-0">
+                      <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600">
+                        <MessageSquare className="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-bold tracking-tight">Project Discussion</h3>
-                        <p className="text-sm text-muted-foreground">Direct communication for this project.</p>
+                        <h3 className="text-lg font-bold tracking-tight">Project Discussion</h3>
+                        <p className="text-[11px] text-muted-foreground">Direct communication for this project.</p>
                       </div>
                     </div>
 
-                    <ScrollArea className="h-[450px] p-6 sm:p-8">
+                    <ScrollArea className="flex-1 p-4 sm:p-5">
                       <div className="space-y-6">
                         {messages.length === 0 ? (
                           <div className="py-20 text-center space-y-4">
@@ -914,14 +918,14 @@ const ProjectDetailModal = ({
                       </div>
                     </ScrollArea>
 
-                    <div className="p-6 sm:p-8 bg-muted/5 border-t border-border/40">
+                    <div className="p-4 sm:p-5 bg-muted/5 border-t border-border/40 shrink-0">
                       <div className="flex flex-col sm:flex-row gap-4">
                         <div className="relative flex-1 group">
                           <Textarea 
                             placeholder="Type your update or question here..." 
                             value={newMessage} 
                             onChange={e => setNewMessage(e.target.value)} 
-                            className="min-h-[100px] sm:min-h-[120px] resize-none rounded-[1.5rem] bg-white dark:bg-card border-border/40 focus:ring-primary/10 focus:border-primary/30 p-5 text-sm transition-all shadow-inner hover:border-primary/30" 
+                            className="min-h-[44px] sm:min-h-[50px] resize-none rounded-2xl bg-white dark:bg-card border-border/40 focus:ring-primary/10 focus:border-primary/30 p-3.5 text-sm transition-all shadow-inner hover:border-primary/30" 
                             onKeyDown={e => {
                               if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
@@ -934,10 +938,10 @@ const ProjectDetailModal = ({
                           <Button 
                             onClick={handleSendMessage} 
                             disabled={sendingMessage || !newMessage.trim()}
-                            className="flex-1 sm:flex-none h-14 sm:w-14 rounded-2xl bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all active:scale-95 group"
+                            className="flex-1 sm:flex-none h-12 sm:w-12 rounded-xl bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all active:scale-95 group"
                             size="icon"
                           >
-                            {sendingMessage ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageSquare className="h-6 w-6 group-hover:scale-110 transition-transform" />}
+                            {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-5 w-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />}
                           </Button>
                         </div>
                       </div>

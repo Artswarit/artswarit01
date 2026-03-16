@@ -22,8 +22,8 @@ interface CurrencyContextType {
   countries: CountryCurrency[];
   exchangeRates: ExchangeRates;
   loading: boolean;
-  convertPrice: (amount: number, sourceCurrency?: string, targetCurrency?: string) => number;
-  formatPrice: (amount: number, sourceCurrency?: string, targetCurrency?: string) => string;
+  convertPrice: (amount: number, sourceCurrency?: string, targetCurrency?: string, customRate?: number) => number;
+  formatPrice: (amount: number, sourceCurrency?: string, targetCurrency?: string, customRate?: number) => string;
   getCurrencySymbol: (currencyCode: string) => string;
   updateUserLocation: (country: string, city: string) => Promise<void>;
   refetchRates: () => Promise<void>;
@@ -43,7 +43,7 @@ const FALLBACK_RATES: ExchangeRates = {
   USD: 1,
   EUR: 0.92,
   GBP: 0.79,
-  INR: 83.12,
+  INR: 92.24,
   JPY: 149.50,
   CNY: 7.24,
   AUD: 1.53,
@@ -152,7 +152,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .maybeSingle();
 
       const oneHourAgo = new Date();
-      oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+      oneHourAgo.setMinutes(oneHourAgo.getMinutes() - 15);
 
       if (dbRates && new Date(dbRates.updated_at) > oneHourAgo) {
         setExchangeRates(dbRates.rates);
@@ -276,12 +276,17 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [user, fetchUserPreferences]);
 
   // Convert price from source currency to target currency
-  const convertPrice = useCallback((amount: number, sourceCurrency: string = 'USD', targetCurrency?: string): number => {
+  const convertPrice = useCallback((amount: number, sourceCurrency: string = 'USD', targetCurrency?: string, customRate?: number): number => {
     const target = targetCurrency || userCurrency;
     
     // If currencies are same, no conversion needed
     if (sourceCurrency === target) {
       return amount;
+    }
+
+    // Use custom rate if provided (usually for bypassing live rate drift)
+    if (customRate && sourceCurrency === 'USD' && target === userCurrency) {
+      return amount * customRate;
     }
 
     // Convert source to USD first
@@ -300,9 +305,9 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [countries]);
 
   // Format price with currency symbol
-  const formatPrice = useCallback((amount: number, sourceCurrency: string = 'USD', targetCurrency?: string): string => {
+  const formatPrice = useCallback((amount: number, sourceCurrency: string = 'USD', targetCurrency?: string, customRate?: number): string => {
     const target = targetCurrency || userCurrency;
-    const convertedAmount = convertPrice(amount, sourceCurrency, target);
+    const convertedAmount = convertPrice(amount, sourceCurrency, target, customRate);
     const symbol = getCurrencySymbol(target);
     
     // Format based on currency
