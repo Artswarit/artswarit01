@@ -58,7 +58,9 @@ const UniversalChatbot: React.FC = () => {
 
   const chatRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    setTimeout(() => {
+      if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }, 50);
   }, [messages, open]);
 
   const callChatGpt = async (

@@ -335,13 +335,15 @@ const ProjectDetailModal = ({
   // Handle chat auto-scroll
   useEffect(() => {
     if (activeTab === 'communication' && messages.length > 0) {
-      const scrollArea = document.getElementById('chat-scroll-area');
-      if (scrollArea) {
-        const viewport = scrollArea.querySelector('[data-radix-scroll-area-viewport]');
-        if (viewport) {
-          viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+      setTimeout(() => {
+        const scrollArea = document.getElementById('chat-scroll-area');
+        if (scrollArea) {
+          const viewport = scrollArea.querySelector('[data-radix-scroll-area-viewport]');
+          if (viewport) {
+            viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+          }
         }
-      }
+      }, 50);
     }
   }, [messages, activeTab]);
 

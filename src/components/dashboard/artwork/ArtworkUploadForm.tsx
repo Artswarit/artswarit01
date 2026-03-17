@@ -76,9 +76,55 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
     navigate('/artist-dashboard?tab=premium');
   };
 
+  // File size limits per type (in bytes)
+  const FILE_SIZE_LIMITS: Record<string, number> = {
+    image: 50 * 1024 * 1024,   // 50 MB
+    audio: 100 * 1024 * 1024,  // 100 MB
+    video: 500 * 1024 * 1024,  // 500 MB
+  };
+
+  const ALLOWED_FORMATS: Record<string, string[]> = {
+    image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp', 'image/tiff'],
+    audio: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/aac', 'audio/mp4', 'audio/x-m4a'],
+    video: ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'],
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const fileArray = Array.from(e.target.files);
+      const maxSize = FILE_SIZE_LIMITS[selectedType] || FILE_SIZE_LIMITS.image;
+      const allowedTypes = ALLOWED_FORMATS[selectedType] || ALLOWED_FORMATS.image;
+
+      // Validate file formats
+      const invalidFormat = fileArray.find(f => !allowedTypes.some(t => f.type.startsWith(t.split('/')[0]) || f.type === t));
+      if (invalidFormat) {
+        toast({
+          title: 'Invalid file format',
+          description: `"${invalidFormat.name}" is not a supported ${selectedType} file. Please select a valid ${selectedType} file.`,
+          variant: 'destructive',
+        });
+        e.target.value = ''; // reset input
+        return;
+      }
+
+      // Validate file sizes
+      const oversized = fileArray.find(f => f.size > maxSize);
+      if (oversized) {
+        toast({
+          title: 'File too large',
+          description: `"${oversized.name}" (${formatFileSize(oversized.size)}) exceeds the ${formatFileSize(maxSize)} limit for ${selectedType} files.`,
+          variant: 'destructive',
+        });
+        e.target.value = ''; // reset input
+        return;
+      }
+
       setSelectedFiles(fileArray);
     }
   }

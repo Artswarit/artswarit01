@@ -31,15 +31,22 @@ export const broadcastRefresh = (type: SyncEventType) => {
 /**
  * Hook to listen for sync events and trigger refetch
  */
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
+  const latestRefetch = useRef(refetch);
+  
+  // Keep the latest refetch function without triggering effect re-runs
+  useEffect(() => {
+    latestRefetch.current = refetch;
+  }, [refetch]);
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const { type: eventType } = event.data;
       if (eventType === type || type === 'all' || eventType === 'all') {
         console.log(`[RealtimeSync] Received refresh trigger for: ${eventType}`);
-        refetch();
+        latestRefetch.current();
       }
     };
 
@@ -49,7 +56,7 @@ export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log(`[RealtimeSync] Page visible, triggering refresh for: ${type}`);
-        refetch();
+        latestRefetch.current();
       }
     };
 
@@ -63,5 +70,5 @@ export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
     };
-  }, [type, refetch]);
+  }, [type]); // Removed refetch from dependency array!
 };

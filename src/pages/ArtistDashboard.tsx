@@ -295,8 +295,10 @@ const ArtistDashboard = () => {
                   {visitedTabs.has('messages') && <MessagingModule onChatActiveChange={setIsChatActive} />}
                 </div>
               </TabsContent>
-              <TabsContent value="notifications" className="animate-fade-in outline-none focus-visible:ring-0">
-                {visitedTabs.has('notifications') && <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />}
+              <TabsContent value="notifications" className="outline-none focus-visible:ring-0" forceMount>
+                <div className={cn(activeTab !== 'notifications' && "hidden")}>
+                  {visitedTabs.has('notifications') && <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />}
+                </div>
               </TabsContent>
               <TabsContent value="settings" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'settings' && "hidden")}>

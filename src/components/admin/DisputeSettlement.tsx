@@ -177,33 +177,27 @@ export default function DisputeSettlement() {
   const completeSettlement = async (d: DisputeItem, res: string, status: string, artistPayout: number, clientRefund: number, logType: string) => {
     setProcessing(true);
     try {
-      // 1. Update dispute record
-      await supabase.from('disputes').update({
-        status, resolution: res,
-        resolved_by: user?.id, resolved_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }).eq('id', d.id);
+      const { data, error } = await supabase.functions.invoke('resolve-dispute', {
+        body: {
+          disputeId: d.id,
+          resolution: res,
+          status,
+          artistPayout,
+          clientRefund,
+          logType
+        }
+      });
 
-      // 2. Clear milestones
-      if (d.milestone_id) {
-        await supabase.from('project_milestones').update({ status: artistPayout > 0 ? 'COMPLETED' : 'WAITING_FUNDS' }).eq('id', d.milestone_id);
+      if (error || data?.error) {
+        throw new Error(error?.message || data?.error || 'Settlement failed to complete execution.');
       }
 
-      // 3. Notify
-      if (artistPayout > 0 && d.artist_id) {
-        await supabase.from('notifications').insert({ user_id: d.artist_id, title: 'Dispute Resolved — Funds Released', message: `${formatPrice(artistPayout)} released to you.`, type: 'success' });
-      }
-      if (clientRefund > 0 && d.client_id) {
-        await supabase.from('notifications').insert({ user_id: d.client_id, title: 'Dispute Resolved — Refund Initiated', message: `${formatPrice(clientRefund)} refund initiated to your source payment method.`, type: 'success' });
-      }
-
-      // 4. Audit & Return
-      await writeAuditLog(user?.id || 'system', logType, d.id, res, { artistPayout, clientRefund });
-      toast.success('Dispute resolved safely and logged.');
+      toast.success('Dispute resolved securely. Financial transfers initiated.');
       fetchDisputes();
       setDialogOpen(false);
     } catch (err: any) {
-      toast.error(err.message || 'Settlement failed');
+      console.error(err);
+      toast.error(err.message || 'Settlement failed securely');
     } finally { setProcessing(false); }
   };
 
