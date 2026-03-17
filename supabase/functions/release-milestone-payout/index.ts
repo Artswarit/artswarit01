@@ -164,8 +164,8 @@ serve(async (req) => {
 
       const isProArtist = !!subscription;
       const feeRate = isProArtist ? PRO_COMMISSION : STARTER_COMMISSION;
-      platformFee = Number((grossAmount * feeRate).toFixed(2));
-      payoutAmount = Number((grossAmount - platformFee).toFixed(2));
+      platformFee = grossAmount * feeRate;
+      payoutAmount = grossAmount - platformFee;
       console.log(`Recalculated: isProArtist=${isProArtist}, fee=${platformFee}, payout=${payoutAmount}`);
     }
 
