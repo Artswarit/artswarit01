@@ -197,8 +197,8 @@ serve(async (req) => {
         .eq('id', milestoneId);
     }
 
-    const platformFee = Math.round(amountUSD * commissionRate * 100) / 100;
-    const artistPayout = Math.round((amountUSD - platformFee) * 100) / 100;
+    const platformFee = amountUSD * commissionRate;
+    const artistPayout = amountUSD - platformFee;
     const amountInPaise = Math.round(amountINR * 100);
 
     // Check for required environment variables

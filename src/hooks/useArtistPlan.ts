@@ -149,8 +149,11 @@ export const useArtistPlan = (userId: string | undefined | null) => {
 // Utility function to calculate earnings
 export const calculateEarnings = (amount: number, isProArtist: boolean) => {
   const feeRate = isProArtist ? PLANS.pro.platformFee : PLANS.starter.platformFee;
-  const platformFee = Math.round(amount * feeRate * 100) / 100;
-  const artistPayout = Math.round((amount - platformFee) * 100) / 100;
+  
+  // High-precision calculation for platform fee and artist payout
+  // We avoid rounding to 2 decimals here to prevent drift in micro-transactions
+  const platformFee = amount * feeRate;
+  const artistPayout = amount - platformFee;
   
   return {
     total: amount,
