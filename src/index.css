@@ -93,18 +93,24 @@
     @apply w-full;
     margin: 0;
     padding: 0;
-    overflow-y: scroll; /* Force vertical scrollbar gutter to stay visible */
+    overflow-y: scroll; 
     overflow-x: hidden;
     scroll-behavior: smooth;
-    height: 100%;
+    height: -webkit-fill-available; /* Fixed viewport height for PWA */
+    width: 100vw;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
   }
 
   body {
     @apply bg-background text-foreground font-sans w-full;
-    min-height: 100%;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
     margin: 0;
     padding: 0;
-    overflow: visible; /* Prevent body from spawning its own scrollbar */
+    overflow-x: hidden !important; /* Prevent horizontal scroll */
+    position: relative;
+    padding-top: var(--safe-top);
     padding-bottom: var(--safe-bottom);
     background-image:
       radial-gradient(
@@ -458,7 +464,7 @@
 /* Enhanced mobile responsiveness */
 @media (max-width: 640px) {
   .container {
-    @apply px-3;
+    @apply px-4;
   }
 
   /* Ensure touch targets are large enough */
@@ -466,11 +472,28 @@
     @apply min-h-[44px];
   }
 
-  /* Improve mobile text readability */
+  /* Improve mobile text readability and prevent auto-zoom */
   body {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
+
+  input, textarea, select {
+    font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
+  }
+}
+
+/* Fix for horizontal drag problem */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  touch-action: pan-y; /* Allow vertical pan, prevent horizontal drag */
+}
+
+/* Reset horizontal scroll for all containers */
+.w-screen, .w-full {
+  max-width: 100% !important;
 }
 
 /* Consolidated root overflow settings */

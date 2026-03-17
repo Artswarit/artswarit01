@@ -87,16 +87,21 @@ const ProjectManagement = () => {
           };
         });
       }
-      const transformedProjects = (data || []).map((project: any) => ({
-        ...project,
-        client: project.client_id ? clientProfiles[project.client_id]?.full_name || 'Client' : 'Client',
-        clientAvatar: project.client_id ? clientProfiles[project.client_id]?.avatar_url || undefined : undefined,
-        progress: project.progress ?? (project.status === 'completed' ? 100 : project.status === 'accepted' ? 10 : 0),
-        payment: (project.amount_usd || project.budget) ? format(project.amount_usd || project.budget || 0, project.currency || 'USD', project.exchange_rate) : 'Not set',
-        is_locked: !!project.is_locked,
-        currency: project.currency,
-        exchange_rate: project.exchange_rate
-      }));
+        const transformedProjects = (data || []).map((project: any) => {
+          const displayAmount = project.amount_usd ?? project.budget ?? 0;
+          const sourceCurrency = project.amount_usd ? 'USD' : (project.currency || 'USD');
+          
+          return {
+            ...project,
+            client: project.client_id ? clientProfiles[project.client_id]?.full_name || 'Client' : 'Client',
+            clientAvatar: project.client_id ? clientProfiles[project.client_id]?.avatar_url || undefined : undefined,
+            progress: project.progress ?? (project.status === 'completed' ? 100 : project.status === 'accepted' ? 10 : 0),
+            payment: displayAmount > 0 ? format(displayAmount, sourceCurrency, project.exchange_rate) : 'Not set',
+            is_locked: !!project.is_locked,
+            currency: project.currency,
+            exchange_rate: project.exchange_rate
+          };
+        });
       setProjects(transformedProjects);
     } catch (err) {
       console.error('Error fetching projects:', err);

@@ -324,31 +324,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
-      setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Signout error:', error);
-        return { error };
-      }
-
-      // Clear user and session state immediately
+      // 1. Clear application state immediately for UI feedback
       setUser(null);
       setSession(null);
+      setSubscription(null);
+      setProfile(null);
+      
+      // 2. Perform the actual Supabase sign out
+      // We await this to ensure the session is invalidated in the database/storage
+      await supabase.auth.signOut();
+
+      // 3. Clear storage keys related to Supabase to prevent ghost sessions
+      // This is a safety measure if signOut didn't clean everything
+      const keys = Object.keys(localStorage);
+      for (const key of keys) {
+        if (key.includes('supabase.auth.token') || key.startsWith('sb-')) {
+          localStorage.removeItem(key);
+        }
+      }
+
+      // 4. Force a hard refresh to home page to clear any remaining in-memory state
+      // Use replace to avoid the "back button" logging them back in
+      window.location.replace('/');
 
       toast({
         title: "Signed out",
         description: "You've been successfully signed out."
       });
 
-      // Redirect to home page after logout
-      window.location.href = '/';
-
       return { error: null };
     } catch (error: any) {
+      console.error('Signout error:', error);
+      // Even if it fails, try to force a redirect to home for safety
+      window.location.replace('/');
       return { error };
-    } finally {
-      setLoading(false);
     }
   };
 
