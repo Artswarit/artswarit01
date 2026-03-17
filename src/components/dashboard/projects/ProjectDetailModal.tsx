@@ -679,7 +679,7 @@ const ProjectDetailModal = ({
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Total Budget</p>
                     <h3 className="text-3xl font-black tracking-tighter text-foreground">
                       {project.amount_usd || project.budget ? 
-                        formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate) : 
+                        formatCurrency(project.amount_usd || project.budget || 0, project.amount_usd ? 'USD' : (project.currency || 'USD'), project.exchange_rate) : 
                         'Not set'
                       }
                     </h3>

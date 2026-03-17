@@ -224,7 +224,8 @@ const ClientDashboard = () => {
           progress: project.progress ?? (project.status === 'completed' ? 100 : project.status === 'accepted' ? 10 : project.status === 'cancelled' ? 0 : 0),
           status: statusDisplay,
           rating: ratingsMap[project.id] || 0,
-          budget: project.amount_usd || project.budget || 0,
+          budget: project.amount_usd ?? project.budget ?? 0,
+          sourceCurrency: project.amount_usd ? 'USD' : (project.currency || 'USD'),
           isLocked: !!project.is_locked,
           currency: project.currency,
           exchangeRate: project.exchange_rate
@@ -634,7 +635,7 @@ const ClientDashboard = () => {
   return <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
       <Navbar />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 pt-28 sm:pt-32 lg:pt-36">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 pt-[calc(6.5rem+var(--safe-top))] sm:pt-[calc(8rem+var(--safe-top))] lg:pt-[calc(9rem+var(--safe-top))]">
         {/* Dashboard Header */}
         <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
           <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black mb-1 sm:mb-2">Client Dashboard</h1>

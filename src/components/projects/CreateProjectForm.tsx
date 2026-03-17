@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Upload, X, FileText, AlertTriangle, Check, GripVertical, Calendar, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Upload, X, FileText, AlertTriangle, Check, GripVertical, Calendar, Loader2, TrendingUp } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { cn } from '@/lib/utils';
 
@@ -360,6 +360,12 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                   onChange={(e) => setBudget(Number(e.target.value))}
                 />
               </div>
+              {userCurrency === 'INR' && budget > 0 && (
+                <div className="flex items-center gap-2 mt-1.5 ml-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-primary/5 w-fit px-2 py-1 rounded-lg">
+                  <TrendingUp className="h-3 w-3" />
+                  <span>Est. ${(budget / (exchangeRates['INR'] || 83.5)).toFixed(2)} USD</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -378,14 +384,13 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
           <div className="space-y-2.5">
             <Label htmlFor="deadline" className="text-sm font-bold ml-1">Project Deadline</Label>
             <div className="relative group">
-              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
               <Input
                 id="deadline"
                 type="date"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="pl-12 h-14 rounded-2xl bg-white/50 border-border/40 focus:ring-primary/20 transition-all text-base appearance-none"
+                className="h-14 rounded-2xl bg-white/50 border-border/40 focus:ring-primary/20 transition-all text-base appearance-none px-4"
               />
             </div>
           </div>
@@ -574,13 +579,12 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                                 <div className="space-y-2.5">
                                   <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Due Date</Label>
                                   <div className="relative">
-                                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                     <Input
                                       type="date"
                                       value={milestone.due_date}
                                       onChange={(e) => updateMilestone(index, 'due_date', e.target.value)}
                                       min={new Date().toISOString().split('T')[0]}
-                                      className="pl-11 h-12 rounded-xl bg-white/50 border-border/40 focus:ring-primary/20 text-sm appearance-none"
+                                      className="h-12 rounded-xl bg-white/50 border-border/40 focus:ring-primary/20 text-sm appearance-none px-4"
                                     />
                                   </div>
                                 </div>
@@ -610,7 +614,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
             </Button>
           )}
           <Button 
-            className="flex-1 h-14 sm:h-12 px-8 rounded-2xl font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 active:scale-[0.98]"
+            className="flex-1 h-14 sm:h-12 px-4 sm:px-8 rounded-2xl font-black uppercase tracking-wider text-[10px] sm:text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 active:scale-[0.98]"
             onClick={handleSubmit}
             disabled={submitting || !budgetMatches || !title.trim() || budget <= 0}
           >
