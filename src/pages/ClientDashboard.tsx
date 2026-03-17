@@ -208,7 +208,7 @@ const ClientDashboard = () => {
           id: project.id,
           title: project.title,
           description: project.description || '',
-          artist: artistProfile.full_name || 'Unassigned',
+          artist: artistProfile.full_name || (project.artist_id ? 'Artist' : 'Unassigned'),
           artistId: project.artist_id || '',
           artistAvatar: artistProfile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${project.artist_id || 'default'}`,
           dueDate: project.deadline ? new Date(project.deadline).toLocaleDateString('en-US', {

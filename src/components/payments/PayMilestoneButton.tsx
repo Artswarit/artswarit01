@@ -26,6 +26,7 @@ interface PayMilestoneButtonProps {
   onSuccess?: () => void;
   disabled?: boolean;
   className?: string;
+  exchangeRate?: number;
 }
 
 export function PayMilestoneButton({
@@ -36,11 +37,12 @@ export function PayMilestoneButton({
   onSuccess,
   disabled,
   className,
+  exchangeRate,
 }: PayMilestoneButtonProps) {
   const { initiatePayment, loading } = useRazorpay();
   const { format: formatCurrency } = useCurrencyFormat();
   const { isProArtist } = useArtistPlan(artistId);
-  const { formatGatewayAmount, gatewayCurrency, isIndian, provider } = usePaymentGateway();
+  const { formatGatewayAmount, gatewayCurrency, isIndian, provider } = usePaymentGateway(exchangeRate);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Calculate earnings based on artist plan (in USD base)

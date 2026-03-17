@@ -30,11 +30,11 @@ export interface PaymentGatewayInfo {
  * - Display: Indian users see INR, foreign users see their local currency
  * - Razorpay MUST NEVER receive USD amounts
  */
-export function usePaymentGateway(): PaymentGatewayInfo {
+export function usePaymentGateway(customExchangeRate?: number): PaymentGatewayInfo {
   const { userCountry, userCurrency, userCurrencySymbol, exchangeRates, formatPrice } = useCurrency();
 
-  // Get current INR rate
-  const currentInrRate = exchangeRates['INR'] || 83.5;
+  // Get current INR rate or use custom one
+  const currentInrRate = customExchangeRate || exchangeRates['INR'] || 83.5;
 
   // Convert USD to INR for Razorpay
   const convertToINR = useCallback((amountUSD: number): number => {

@@ -251,6 +251,7 @@ export function MilestoneCard({
                   amount={milestone.amount}
                   milestoneTitle={milestone.title}
                   onSuccess={onPaymentSuccess}
+                  exchangeRate={exchangeRate}
                 />
               )}
               {isCompleted && (

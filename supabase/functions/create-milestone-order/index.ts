@@ -161,33 +161,41 @@ serve(async (req) => {
     const isProArtist = !!subscription;
     const commissionRate = isProArtist ? PRO_COMMISSION : STARTER_COMMISSION;
     
-    // Fetch latest exchange rate (INR)
-    const { data: ratesData } = await supabase
-      .from('exchange_rates')
-      .select('rates')
-      .eq('base_currency', 'USD')
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    
-    const exchangeRates = (ratesData?.rates as any) || { INR: 83.5 };
-    const currentRate = exchangeRates.INR || 83.5;
+    // Use pinned exchange rate if available to prevent mismatch
+    const pinnedRate = milestone.exchange_rate || milestone.project?.exchange_rate;
+    let currentRate = pinnedRate;
+
+    if (!currentRate) {
+      // Fetch latest exchange rate (INR) only if not pinned
+      const { data: ratesData } = await supabase
+        .from('exchange_rates')
+        .select('rates')
+        .eq('base_currency', 'USD')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      const exchangeRates = (ratesData?.rates as any) || { INR: 83.5 };
+      currentRate = exchangeRates.INR || 83.5;
+    }
 
     // Calculate amounts
     const amountBase = Number(milestone.amount);
     
-    // Lock the amount in USD and the current rate
-    const amountUSD = amountBase; // truth is USD
+    // Truth is USD
+    const amountUSD = amountBase; 
     const amountINR = Math.round(amountUSD * currentRate * 100) / 100;
     
-    // Update milestone with locked rate and USD amount
-    await supabase
-      .from('project_milestones')
-      .update({
-        amount_usd: amountUSD,
-        exchange_rate: currentRate
-      })
-      .eq('id', milestoneId);
+    // Update milestone with locked rate and USD amount if not already set
+    if (!milestone.exchange_rate || !milestone.amount_usd) {
+      await supabase
+        .from('project_milestones')
+        .update({
+          amount_usd: amountUSD,
+          exchange_rate: currentRate
+        })
+        .eq('id', milestoneId);
+    }
 
     const platformFee = Math.round(amountUSD * commissionRate * 100) / 100;
     const artistPayout = Math.round((amountUSD - platformFee) * 100) / 100;
