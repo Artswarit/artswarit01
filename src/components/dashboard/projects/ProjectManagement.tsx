@@ -100,6 +100,7 @@ const ProjectManagement = () => {
       setProjects(transformedProjects);
     } catch (err) {
       console.error('Error fetching projects:', err);
+      toast.error('Failed to load projects. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -137,14 +138,12 @@ const ProjectManagement = () => {
     }, async (payload) => {
       const projectId = (payload?.new as any)?.project_id || (payload?.old as any)?.project_id;
       if (projectId) {
-        await checkProjectReady(projectId);
-        await autoCompleteIfReady(projectId);
+        const isReady = await checkProjectReady(projectId);
+        await autoCompleteIfReady(projectId, isReady);
       } else {
-        // Fallback: re-evaluate all active projects
-        for (const p of projects) {
-          await checkProjectReady(p.id);
-          await autoCompleteIfReady(p.id);
-        }
+        // Fallback: If no project_id in payload, just fetch projects to remain synced
+        // without looping through a stale 'projects' state array.
+        fetchProjects();
       }
     }).subscribe();
     const reviewsChannel = supabase.channel(`client-reviews-realtime:${user.id}`).on('postgres_changes', {
@@ -165,28 +164,43 @@ const ProjectManagement = () => {
       .from('project_milestones')
       .select('status, paid_at')
       .eq('project_id', projectId);
-    const ms = (milestones ?? []) as any[];
-    const hasMilestones = ms.length > 0;
-    const allComplete = hasMilestones && ms.every(m => m.status === 'approved' || m.status === 'paid');
-    const allPaid = hasMilestones && ms.every(m => Boolean(m.paid_at));
-    const noDispute = hasMilestones && ms.every(m => m.status !== 'disputed');
-    const ready = hasMilestones && allComplete && allPaid && noDispute;
-    setReadyMap(prev => ({ ...prev, [projectId]: ready }));
+    
+    // Safety check if no milestones exist
+    if (!milestones || milestones.length === 0) return false;
+
+    const allComplete = milestones.every(m => m.status === 'COMPLETED');
+    const allPaid = milestones.every(m => Boolean(m.paid_at) || m.status === 'COMPLETED'); // Disputed can block completion
+    const noDispute = milestones.every(m => m.status !== 'DISPUTED');
+    
+    const isReady = allComplete && allPaid && noDispute;
+    setReadyMap(prev => ({ ...prev, [projectId]: isReady }));
+    return isReady;
   }, []);
 
-  const autoCompleteIfReady = useCallback(async (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    if (!project || project.status === 'completed') return;
-    const ready = readyMap[projectId];
-    if (!ready) return;
+  const autoCompleteIfReady = useCallback(async (projectId: string, isReady: boolean) => {
+    if (!isReady) return;
+    
+    // Prevent concurrent executions for the same project
     if (autoCompleting[projectId]) return;
+    
     setAutoCompleting(prev => ({ ...prev, [projectId]: true }));
     try {
+      // Fetch fresh project state instead of relying on stale closure array
+      const { data: project } = await supabase
+        .from('projects')
+        .select('id, status, title, client_id')
+        .eq('id', projectId)
+        .single();
+
+      if (!project || project.status === 'completed') return;
+
       const { error: updateError } = await supabase
         .from('projects')
         .update({ status: 'completed', progress: 100 })
         .eq('id', projectId);
+        
       if (updateError) throw updateError;
+      
       // Notify client
       if (project.client_id && project.client_id !== user?.id) {
         const { data: artistProfile } = await supabase
@@ -194,6 +208,7 @@ const ProjectManagement = () => {
           .select('full_name')
           .eq('id', user?.id)
           .maybeSingle();
+
         await supabase.from('notifications').insert({
           user_id: project.client_id,
           type: 'project_completed',
@@ -209,7 +224,8 @@ const ProjectManagement = () => {
     } finally {
       setAutoCompleting(prev => ({ ...prev, [projectId]: false }));
     }
-  }, [projects, readyMap, user?.id, fetchProjects, autoCompleting]);
+  }, [user?.id, fetchProjects, autoCompleting]);
+
   const handleAcceptProject = async (project: Project, e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();

@@ -17,8 +17,9 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-// Platform fee: 15% as per escrow model
-const PLATFORM_FEE_RATE = 0.15;
+// Fallback fee rates — only used if the payment record doesn't have pre-calculated values
+const STARTER_COMMISSION = 0.15; // 15% for Starter artists
+const PRO_COMMISSION = 0;         // 0% for Pro artists
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -137,10 +138,36 @@ serve(async (req) => {
       });
     }
 
-    // Calculate payout amounts (base currency is USD in payments table)
+    // Use the pre-calculated values from the payment record (set during order creation
+    // which correctly checks Pro vs Starter status). Only fall back to recalculation
+    // if the stored values are missing.
     const grossAmount = Number(payment.amount);
-    const platformFee = Number((grossAmount * PLATFORM_FEE_RATE).toFixed(2));
-    const payoutAmount = Number((grossAmount - platformFee).toFixed(2));
+    let platformFee: number;
+    let payoutAmount: number;
+
+    if (payment.platform_fee != null && payment.artist_payout != null) {
+      // Trust the values stored at order-creation time (Pro = 0%, Starter = 15%)
+      platformFee = Number(payment.platform_fee);
+      payoutAmount = Number(payment.artist_payout);
+      console.log(`Using stored fee breakdown: fee=${platformFee}, payout=${payoutAmount}`);
+    } else {
+      // Fallback: check artist subscription to determine correct rate
+      console.log('Payment record missing fee breakdown, recalculating...');
+      const { data: subscription } = await supabaseAdmin
+        .from('subscribers')
+        .select('*')
+        .eq('user_id', milestone.project.artist_id)
+        .eq('is_active', true)
+        .order('started_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const isProArtist = !!subscription;
+      const feeRate = isProArtist ? PRO_COMMISSION : STARTER_COMMISSION;
+      platformFee = Number((grossAmount * feeRate).toFixed(2));
+      payoutAmount = Number((grossAmount - platformFee).toFixed(2));
+      console.log(`Recalculated: isProArtist=${isProArtist}, fee=${platformFee}, payout=${payoutAmount}`);
+    }
 
     if (payoutAmount <= 0) {
       console.error('Invalid payout amount:', payoutAmount);
@@ -228,6 +255,17 @@ serve(async (req) => {
             .from('project_milestones')
             .update({ status: 'WAITING_FUNDS' })
             .eq('id', nextMilestone.id);
+        }
+      } else {
+        // This is the last milestone, mark the project as completed
+        console.log(`Last milestone ${milestoneId} completed. Marking project ${milestone.project_id} as complete.`);
+        const { error: projectCompleteError } = await supabaseAdmin
+          .from('projects')
+          .update({ status: 'completed', progress: 100 })
+          .eq('id', milestone.project_id);
+          
+        if (projectCompleteError) {
+          console.error('Failed to complete project:', projectCompleteError);
         }
       }
     }

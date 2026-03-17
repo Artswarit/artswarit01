@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -46,10 +46,27 @@ export function MilestoneSubmissionDialog({
 }: MilestoneSubmissionDialogProps) {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(() => {
+    try {
+      const draft = localStorage.getItem(`milestone_draft_${milestone?.id}`);
+      return draft || '';
+    } catch {
+      return '';
+    }
+  });
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (milestone?.id) {
+      if (notes) {
+        localStorage.setItem(`milestone_draft_${milestone.id}`, notes);
+      } else {
+        localStorage.removeItem(`milestone_draft_${milestone.id}`);
+      }
+    }
+  }, [notes, milestone?.id]);
 
   const isCompleted = milestone.status === 'COMPLETED';
   const isFinalUpload = isCompleted;
@@ -185,6 +202,7 @@ export function MilestoneSubmissionDialog({
     setNotes('');
     setFiles([]);
     setAgreed(false);
+    localStorage.removeItem(`milestone_draft_${milestone?.id}`);
   };
 
   return (

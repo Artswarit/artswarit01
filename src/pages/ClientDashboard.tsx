@@ -232,7 +232,8 @@ const ClientDashboard = () => {
       });
       setProjects(transformedProjects);
     } catch (err) {
-      // Error fetching projects
+      console.error('Error fetching projects:', err);
+      toast.error('Failed to load projects. Please refresh the page.');
     } finally {
       setLoading(false);
     }

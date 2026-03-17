@@ -62,6 +62,13 @@ const ServicesManagement: React.FC = () => {
     starting_price: "",
   });
 
+  // Auto-save draft for new services
+  useEffect(() => {
+    if (isDialogOpen && !editingService) {
+      localStorage.setItem("draft_service_form", JSON.stringify(form));
+    }
+  }, [form, isDialogOpen, editingService]);
+
   const fetchServices = async () => {
     if (!user?.id) return;
     setLoading(true);
@@ -123,7 +130,16 @@ const ServicesManagement: React.FC = () => {
 
   const openCreateDialog = () => {
     setEditingService(null);
-    setForm({ title: "", description: "", starting_price: "" });
+    const savedDraft = localStorage.getItem("draft_service_form");
+    if (savedDraft) {
+      try {
+        setForm(JSON.parse(savedDraft));
+      } catch (e) {
+        setForm({ title: "", description: "", starting_price: "" });
+      }
+    } else {
+      setForm({ title: "", description: "", starting_price: "" });
+    }
     setIsDialogOpen(true);
   };
 
@@ -199,6 +215,7 @@ const ServicesManagement: React.FC = () => {
       } else {
         console.log("[ServicesManagement] Service created successfully");
         toast({ title: "Service created" });
+        localStorage.removeItem("draft_service_form"); // clear draft on success
         setIsDialogOpen(false);
         // Update local state for instant feedback
         fetchServices();
