@@ -19,6 +19,8 @@ import { Link } from "react-router-dom";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { useCurrency } from "@/contexts/CurrencyContext";
 import { MilestoneWorkflow } from "@/components/projects";
+import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
+import { RefreshCw } from "lucide-react";
 interface ProjectDetailModalProps {
   projectId: string | null;
   open: boolean;
@@ -109,21 +111,61 @@ const ProjectDetailModal = ({
     }
   };
 
+  const fetchMessages = useCallback(async (convId: string) => {
+    try {
+      const { data: messagesData } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', convId)
+        .order('created_at', { ascending: true });
+      
+      const senderIds = [...new Set((messagesData || []).map(m => m.sender_id).filter(Boolean))];
+      let senderProfiles: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
+      
+      if (senderIds.length > 0) {
+        const { data: senderProfilesData } = await supabase
+          .from('public_profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', senderIds as string[]);
+        
+        (senderProfilesData || []).forEach(p => {
+          if (p.id) senderProfiles[p.id] = {
+            full_name: p.full_name,
+            avatar_url: p.avatar_url
+          };
+        });
+      }
+
+      setMessages((messagesData || []).map(m => ({
+        id: m.id,
+        content: m.content,
+        sender_id: m.sender_id || '',
+        created_at: m.created_at,
+        sender_name: m.sender_id ? senderProfiles[m.sender_id]?.full_name || 'Unknown' : 'Unknown',
+        sender_avatar: m.sender_id ? senderProfiles[m.sender_id]?.avatar_url || undefined : undefined
+      })));
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+    }
+  }, []);
+
   useEffect(() => {
     if (initialTab && open) {
       setActiveTab(initialTab);
     }
   }, [initialTab, open]);
 
-  const fetchProjectData = useCallback(async (signal?: AbortSignal, showLoading = true) => {
+  const fetchProjectData = useCallback(async (signal?: AbortSignal, silent = false) => {
     if (!projectId) return;
-    if (showLoading) setLoading(true);
+    if (!silent && !project) setLoading(true);
     try {
       // Fetch project
-      const {
-        data: projectData,
-        error: projectError
-      } = await supabase.from('projects').select('*, artist:artist_id(full_name, avatar_url), client:client_id(full_name, avatar_url)').eq('id', projectId).maybeSingle();
+      const { data: projectData, error: projectError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('id', projectId)
+        .maybeSingle();
+
       if (projectError) {
         if (projectError.name === 'AbortError' || (projectError as any).code === 'ABORT') return;
         throw projectError;
@@ -133,12 +175,45 @@ const ProjectDetailModal = ({
         onOpenChange(false);
         return;
       }
+
+      // Fetch profiles separately for maximum reliability
+      let artistName = 'Unassigned';
+      let artistAvatar = undefined;
+      let clientName = 'Client';
+      let clientAvatar = undefined;
+
+      if (projectData.artist_id) {
+        const { data: artistProfile } = await supabase
+          .from('public_profiles')
+          .select('full_name, avatar_url')
+          .eq('id', projectData.artist_id)
+          .maybeSingle();
+        if (artistProfile) {
+          artistName = artistProfile.full_name || 'Artist';
+          artistAvatar = artistProfile.avatar_url || undefined;
+        } else {
+          artistName = 'Artist';
+        }
+      }
+
+      if (projectData.client_id) {
+        const { data: clientProfile } = await supabase
+          .from('public_profiles')
+          .select('full_name, avatar_url')
+          .eq('id', projectData.client_id)
+          .maybeSingle();
+        if (clientProfile) {
+          clientName = clientProfile.full_name || 'Client';
+          clientAvatar = clientProfile.avatar_url || undefined;
+        }
+      }
+
       setProject({
         ...projectData,
-        artist_name: (projectData as any).artist?.full_name || 'Unassigned',
-        artist_avatar: (projectData as any).artist?.avatar_url || undefined,
-        client_name: (projectData as any).client?.full_name || 'Unknown',
-        client_avatar: (projectData as any).client?.avatar_url || undefined
+        artist_name: artistName,
+        artist_avatar: artistAvatar,
+        client_name: clientName,
+        client_avatar: clientAvatar
       });
 
       // Use Promise.all for independent fetches to speed up loading
@@ -164,37 +239,7 @@ const ProjectDetailModal = ({
         } = await supabase.from('conversations').select('id').eq('artist_id', projectData.artist_id).eq('client_id', projectData.client_id).maybeSingle();
         if (existingConv) {
           setConversationId(existingConv.id);
-
-          // Fetch messages
-          const {
-            data: messagesData
-          } = await supabase.from('messages').select('*').eq('conversation_id', existingConv.id).order('created_at', {
-            ascending: true
-          });
-          const senderIds = [...new Set((messagesData || []).map(m => m.sender_id).filter(Boolean))];
-          let senderProfiles: Record<string, {
-            full_name: string | null;
-            avatar_url: string | null;
-          }> = {};
-          if (senderIds.length > 0) {
-            const {
-              data: senderProfilesData
-            } = await supabase.from('public_profiles').select('id, full_name, avatar_url').in('id', senderIds as string[]);
-            (senderProfilesData || []).forEach(p => {
-              if (p.id) senderProfiles[p.id] = {
-                full_name: p.full_name,
-                avatar_url: p.avatar_url
-              };
-            });
-          }
-          setMessages((messagesData || []).map(m => ({
-            id: m.id,
-            content: m.content,
-            sender_id: m.sender_id || '',
-            created_at: m.created_at,
-            sender_name: m.sender_id ? senderProfiles[m.sender_id]?.full_name || 'Unknown' : 'Unknown',
-            sender_avatar: m.sender_id ? senderProfiles[m.sender_id]?.avatar_url || undefined : undefined
-          })));
+          await fetchMessages(existingConv.id);
         }
       }
     } catch (err: any) {
@@ -243,13 +288,70 @@ const ProjectDetailModal = ({
     }, () => {
       fetchProjectData(undefined, false);
     }).subscribe();
+    // Subscribe to messages
+    let messagesChannel: any;
+    if (conversationId) {
+      messagesChannel = supabase.channel(`messages-${conversationId}`).on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`
+      }, () => {
+        fetchMessages(conversationId);
+      }).subscribe();
+    }
+
+    // Subscribe to payments
+    const paymentsChannel = supabase.channel(`project-payments-${projectId}`).on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'payments',
+      filter: `project_id=eq.${projectId}`
+    }, (payload) => {
+      console.log('Payment update in modal:', payload);
+      if ((payload.new as any)?.status === 'success') {
+        toast.success('Payment confirmed! Your project is being updated...');
+        fetchProjectData(undefined, false);
+      } else {
+        fetchProjectData(undefined, false);
+      }
+    }).subscribe();
+
     return () => {
       supabase.removeChannel(milestonesChannel);
       supabase.removeChannel(filesChannel);
       supabase.removeChannel(projectChannel);
+      supabase.removeChannel(paymentsChannel);
+      if (messagesChannel) supabase.removeChannel(messagesChannel);
     };
-  }, [open, projectId, fetchProjectData]);
+  }, [open, projectId, conversationId, fetchProjectData, fetchMessages]);
+
+  useEffect(() => {
+    if (initialTab && open) {
+      scrollToTab(initialTab);
+    }
+  }, [initialTab, open]);
+
+  // Handle chat auto-scroll
+  useEffect(() => {
+    if (activeTab === 'communication' && messages.length > 0) {
+      const scrollArea = document.getElementById('chat-scroll-area');
+      if (scrollArea) {
+        const viewport = scrollArea.querySelector('[data-radix-scroll-area-viewport]');
+        if (viewport) {
+          viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+        }
+      }
+    }
+  }, [messages, activeTab]);
+
   const { userCurrency, userCurrencySymbol, exchangeRates } = useCurrency();
+
+  // Cross-tab and visibility sync
+  useRealtimeSync('projects', () => fetchProjectData(undefined, true));
+  useRealtimeSync('milestones', () => fetchProjectData(undefined, true));
+  useRealtimeSync('messages', () => conversationId && fetchMessages(conversationId));
+  useRealtimeSync('payments', () => fetchProjectData(undefined, true));
 
   const handleAddMilestone = async () => {
     if (!projectId || !user?.id || !newMilestone.title.trim()) return;
@@ -289,7 +391,8 @@ const ProjectDetailModal = ({
         due_date: "",
         amount: ""
       });
-      fetchProjectData();
+      broadcastRefresh('milestones');
+      fetchProjectData(undefined, true);
     } catch (err: any) {
       toast.error(err.message || "Failed to add milestone");
     } finally {
@@ -305,7 +408,8 @@ const ProjectDetailModal = ({
         status: newStatus as any
       }).eq('id', milestone.id);
       if (error) throw error;
-      fetchProjectData();
+      broadcastRefresh('milestones');
+      fetchProjectData(undefined, true);
     } catch (err: any) {
       toast.error("Failed to update milestone");
     }
@@ -317,7 +421,7 @@ const ProjectDetailModal = ({
       } = await supabase.from('project_milestones').delete().eq('id', milestoneId);
       if (error) throw error;
       toast.success("Milestone deleted");
-      fetchProjectData();
+      fetchProjectData(undefined, true);
     } catch (err: any) {
       toast.error("Failed to delete milestone");
     }
@@ -344,7 +448,7 @@ const ProjectDetailModal = ({
       });
       if (insertError) throw insertError;
       toast.success("File uploaded!");
-      fetchProjectData();
+      fetchProjectData(undefined, true);
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
     } finally {
@@ -376,7 +480,7 @@ const ProjectDetailModal = ({
       } = await supabase.from('project_files').delete().eq('id', fileId);
       if (error) throw error;
       toast.success("File deleted");
-      fetchProjectData();
+      fetchProjectData(undefined, true);
     } catch (err: any) {
       toast.error("Failed to delete file");
     }
@@ -411,7 +515,8 @@ const ProjectDetailModal = ({
       });
       if (error) throw error;
       setNewMessage("");
-      fetchProjectData();
+      broadcastRefresh('messages');
+      fetchMessages(convId);
     } catch (err: any) {
       toast.error(err.message || "Failed to send message");
     } finally {
@@ -423,11 +528,14 @@ const ProjectDetailModal = ({
   const completedMilestones = milestones.filter(m => m.status === 'COMPLETED').length;
   const milestoneProgress = milestones.length > 0 ? Math.round(completedMilestones / milestones.length * 100) : 0;
   const progress = project?.progress ?? milestoneProgress;
+  
+  const isArtist = user?.id === project?.artist_id;
+  const isClient = user?.id === project?.client_id;
 
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-none w-screen h-screen max-h-none bg-background/95 backdrop-blur-xl border-none shadow-none flex flex-col items-center justify-center p-0">
+        <DialogContent className="max-w-none w-screen h-screen max-h-none bg-background/95 backdrop-blur-xl border-none shadow-none flex flex-col items-center justify-center p-0 pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)]">
           <DialogHeader className="sr-only">
             <DialogTitle>Loading Project Details</DialogTitle>
             <DialogDescription>Please wait while we fetch the project details.</DialogDescription>
@@ -452,7 +560,7 @@ const ProjectDetailModal = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {!project ? (
-        <DialogContent>
+        <DialogContent className="pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)]">
           <DialogHeader className="sr-only">
             <DialogTitle>Project Not Found</DialogTitle>
             <DialogDescription>The requested project could not be located.</DialogDescription>
@@ -467,7 +575,7 @@ const ProjectDetailModal = ({
           </div>
         </DialogContent>
       ) : (
-        <DialogContent className="max-w-none w-screen h-screen max-h-none overflow-hidden flex flex-col p-0 gap-0 border-none shadow-none bg-background backdrop-blur-2xl rounded-none">
+        <DialogContent className="max-w-none w-screen h-screen max-h-none overflow-hidden flex flex-col p-0 pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] gap-0 border-none shadow-none bg-background backdrop-blur-2xl rounded-none">
           <DialogHeader className="sr-only">
             <DialogTitle>{project.title}</DialogTitle>
             <DialogDescription>Project details and collaboration workspace</DialogDescription>
@@ -489,6 +597,17 @@ const ProjectDetailModal = ({
                     <Badge variant="outline" className="px-3 py-1 rounded-full bg-background/50 backdrop-blur-md border-primary/20 text-primary font-bold tracking-wide uppercase text-[10px]">
                       Project ID: #{project.id.slice(0, 8)}
                     </Badge>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 rounded-full hover:bg-primary/10 text-primary/60 hover:text-primary transition-all ml-auto"
+                      onClick={() => {
+                        toast.info('Syncing latest updates...');
+                        fetchProjectData(undefined, false);
+                      }}
+                    >
+                      <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                    </Button>
                   </div>
                   
                     <div className="space-y-1 sm:space-y-2">
@@ -508,7 +627,7 @@ const ProjectDetailModal = ({
                       </Badge>
                       <Separator orientation="vertical" className="h-4 bg-border/40" />
                       <Link 
-                        to={user?.id === project.artist_id ? `/profile/${project.client_id}` : `/profile/${project.artist_id}`} 
+                        to={user?.id === project.artist_id ? `/profile/${project.client_id}` : `/artist/${project.artist_id}`} 
                         className="flex items-center gap-2 group cursor-pointer"
                       >
                         <Avatar className="h-8 w-8 ring-2 ring-background ring-offset-2 ring-offset-primary/10 transition-transform group-hover:scale-110">
@@ -527,7 +646,7 @@ const ProjectDetailModal = ({
 
                 <div className="flex flex-col items-start sm:items-end gap-3">
                   <div className="flex -space-x-3">
-                    <Link to={`/profile/${project.artist_id}`}>
+                    <Link to={`/artist/${project.artist_id}`}>
                       <Avatar className="h-10 w-10 ring-4 ring-background hover:scale-105 transition-transform">
                         <AvatarImage src={project.artist_avatar} />
                         <AvatarFallback className="bg-primary/10 text-primary font-bold">A</AvatarFallback>
@@ -741,15 +860,26 @@ const ProjectDetailModal = ({
                                     <p className="text-sm text-muted-foreground/90 leading-relaxed max-w-2xl">{milestone.description}</p>
                                   )}
                                   
-                                  <div className="flex flex-wrap items-center gap-5 mt-4">
-                                    <div className="flex items-center gap-2 py-1.5 px-3 rounded-full bg-muted/30 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80">
-                                      <Calendar className="h-3.5 w-3.5 text-primary/60" />
-                                      <span>{milestone.due_date ? formatDate(new Date(milestone.due_date), 'MMM d, yyyy') : 'No date'}</span>
-                                    </div>
-                                    {milestone.status === 'COMPLETED' && (
+                                  <div className="flex items-center gap-2">
+                                    {milestone.status === 'COMPLETED' ? (
                                       <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-emerald-500/10 text-emerald-600 text-[11px] font-bold uppercase tracking-wider">
                                         <CheckCircle className="h-3.5 w-3.5" />
                                         <span>Completed</span>
+                                      </div>
+                                    ) : milestone.status === 'ACTIVE' ? (
+                                      <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-blue-500/10 text-blue-600 text-[11px] font-bold uppercase tracking-wider">
+                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        <span>In Progress</span>
+                                      </div>
+                                    ) : milestone.status === 'WAITING_FUNDS' ? (
+                                      <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-amber-500/10 text-amber-600 text-[11px] font-bold uppercase tracking-wider border border-amber-500/20">
+                                        <Clock className="h-3.5 w-3.5" />
+                                        <span>Awaiting Funds</span>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-muted text-muted-foreground text-[11px] font-bold uppercase tracking-wider">
+                                        <Lock className="h-3.5 w-3.5" />
+                                        <span>{milestone.status || 'Locked'}</span>
                                       </div>
                                     )}
                                   </div>
@@ -757,14 +887,33 @@ const ProjectDetailModal = ({
                               </div>
 
                               <div className="flex items-center gap-2">
-                                {milestone.status === 'COMPLETED' && (
+                                {isArtist && (milestone.status === 'ACTIVE' || milestone.status === 'COMPLETED') && (
                                   <Button 
-                                    variant="default"
-                                    className="h-12 px-6 rounded-xl font-bold text-xs uppercase tracking-wider bg-emerald-500 hover:bg-emerald-600"
+                                    onClick={() => handleToggleMilestoneStatus(milestone)}
+                                    size="sm"
+                                    variant="outline"
+                                    className="rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/5"
                                   >
-                                    Completed
+                                    {milestone.status === 'COMPLETED' ? 'Mark Active' : 'Mark Done'}
                                   </Button>
                                 )}
+                                {isClient && milestone.status === 'WAITING_FUNDS' && (
+                                  <Button 
+                                    variant="link" 
+                                    onClick={() => setActiveTab('workflow')} 
+                                    className="h-auto p-0 text-[10px] font-black uppercase text-primary hover:underline px-4"
+                                  >
+                                    Pay in Workflow
+                                  </Button>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteMilestone(milestone.id)}
+                                  className="text-muted-foreground hover:text-destructive transition-colors"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -874,7 +1023,7 @@ const ProjectDetailModal = ({
                 </TabsContent>
 
                 <TabsContent id="project-tab-content-communication" value="communication" className="mt-0 outline-none focus-visible:ring-0">
-                  <div className="rounded-[2.5rem] border border-border/40 bg-white/40 dark:bg-card/20 overflow-hidden flex flex-col shadow-sm transition-all duration-500 hover:shadow-md h-[450px]">
+                  <div className="rounded-[2.5rem] border border-border/40 bg-white/40 dark:bg-card/20 overflow-hidden flex flex-col shadow-sm transition-all duration-500 hover:shadow-md h-[650px]">
                     <div className="p-4 sm:p-5 border-b border-border/40 bg-muted/5 flex items-center gap-3 shrink-0">
                       <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600">
                         <MessageSquare className="h-5 w-5" />
@@ -885,8 +1034,8 @@ const ProjectDetailModal = ({
                       </div>
                     </div>
 
-                    <ScrollArea className="flex-1 p-4 sm:p-5">
-                      <div className="space-y-6">
+                    <ScrollArea className="flex-1 p-4 sm:p-5 h-full" id="chat-scroll-area">
+                      <div className="space-y-6 pb-4">
                         {messages.length === 0 ? (
                           <div className="py-20 text-center space-y-4">
                             <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto">

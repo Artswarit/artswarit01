@@ -89,7 +89,7 @@ const ProjectManagement = () => {
       }
       const transformedProjects = (data || []).map((project: any) => ({
         ...project,
-        client: project.client_id ? clientProfiles[project.client_id]?.full_name || 'Unknown Client' : 'Unknown Client',
+        client: project.client_id ? clientProfiles[project.client_id]?.full_name || 'Client' : 'Client',
         clientAvatar: project.client_id ? clientProfiles[project.client_id]?.avatar_url || undefined : undefined,
         progress: project.progress ?? (project.status === 'completed' ? 100 : project.status === 'accepted' ? 10 : 0),
         payment: (project.amount_usd || project.budget) ? format(project.amount_usd || project.budget || 0, project.currency || 'USD', project.exchange_rate) : 'Not set',
