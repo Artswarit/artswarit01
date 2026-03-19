@@ -869,8 +869,8 @@ const ClientDashboard = () => {
           onValueChange={handleTabChange}
         >
           <div className="relative mb-4 sm:mb-6 group">
-            <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 pb-4">
-              <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex sm:flex sm:flex-wrap lg:grid lg:grid-cols-5 xl:grid-cols-10 gap-2 p-1.5 rounded-[1.5rem] shadow-xl border border-border/40 min-w-full sm:min-w-0 h-auto min-h-[80px] sm:min-h-0">
+            <div className="overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 pb-4 scrollbar-hide">
+              <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex flex-nowrap items-center gap-2 p-1.5 rounded-[1.5rem] shadow-xl border border-border/40 w-max sm:min-w-0 h-auto sm:min-h-0">
                 <TabsTrigger
                   value="overview"
                   disabled={profileIncomplete}

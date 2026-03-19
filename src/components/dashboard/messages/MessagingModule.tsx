@@ -766,7 +766,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                             >
                               <AvatarImage src={isOwn ? user?.user_metadata?.avatar_url : activeConversation?.otherUser?.avatar} className="object-cover" />
                               <AvatarFallback className="text-[10px] bg-primary/5 text-primary">
-                                {isOwn ? user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) : activeConversation?.otherUser?.name?.charAt(0)}
+                                {isOwn ? (user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0)) : activeConversation?.otherUser?.name?.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                           )}

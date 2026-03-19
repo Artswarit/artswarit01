@@ -245,7 +245,7 @@ const AboutTab = ({
 /* ── Art Grid ── */
 const ArtGrid = ({
   tab, paged, hasMore, page, setPage, exclusiveStatus, unlockedArtworkIds,
-  isArtistOwner, onArtworkClick, handleUnlockArtwork, handleRequestAccess,
+  isArtistOwner, onArtworkClick, handleUnlockArtwork, handleRequestAccess, unlockingId,
 }: {
   tab: string;
   paged: GalleryArtwork[];
@@ -254,6 +254,7 @@ const ArtGrid = ({
   setPage: (p: number) => void;
   exclusiveStatus: string;
   unlockedArtworkIds: Set<string>;
+  unlockingId: string | null;
   isArtistOwner: boolean;
   onArtworkClick?: (art: GalleryArtwork) => void;
   handleUnlockArtwork: (id: string) => void;
@@ -264,6 +265,7 @@ const ArtGrid = ({
       {paged.map((art) => {
         const hasExclusiveAccess = art.isExclusive && exclusiveStatus === "approved";
         const isUnlocked = unlockedArtworkIds.has(art.id) || isArtistOwner || hasExclusiveAccess;
+        const isUnlocking = unlockingId === art.id;
         if (tab === "premium" || tab === "exclusive") {
           return (
             <ArtworkCardModern
@@ -277,6 +279,7 @@ const ArtGrid = ({
               isPremium={art.isPremium}
               isExclusive={art.isExclusive}
               isUnlocked={isUnlocked as any}
+              isUnlocking={isUnlocking}
               onViewFull={() => onArtworkClick?.({ ...art } as any)}
               onUnlock={() => handleUnlockArtwork(art.id)}
               onRequestAccess={() => handleRequestAccess(art.id, art.artistName)}
@@ -324,10 +327,11 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
   const [page, setPage] = useState(1);
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const { initiatePayment } = useArtworkPayment();
+  const { initiatePayment, loading: isPaymentLoading } = useArtworkPayment();
   const { toast } = useToast();
   const { formatPlus, userCurrencySymbol } = useCurrencyFormat();
   const [unlockedArtworkIds, setUnlockedArtworkIds] = useState<Set<string>>(new Set());
+  const [unlockingId, setUnlockingId] = useState<string | null>(null);
   const [exclusiveStatus, setExclusiveStatus] = useState<"none" | "pending" | "approved" | "rejected">("none");
   const [exclusiveLoading, setExclusiveLoading] = useState(false);
 
@@ -379,7 +383,18 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
       toast({ title: "Login Required", description: "Please log in to unlock premium artworks.", variant: "destructive" });
       return;
     }
-    initiatePayment({ artworkId, onSuccess: () => setUnlockedArtworkIds((prev) => new Set([...prev, artworkId])) });
+    setUnlockingId(artworkId);
+    initiatePayment({ 
+      artworkId, 
+      artistId, 
+      onSuccess: () => {
+        setUnlockedArtworkIds((prev) => new Set([...prev, artworkId]));
+        setUnlockingId(null);
+      },
+      onFailure: () => {
+        setUnlockingId(null);
+      }
+    });
   }, [user, initiatePayment, toast]);
 
   const handleRequestAccess = useCallback(async (artworkId: string, artistName?: string) => {
@@ -462,6 +477,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
             <ArtGrid
               tab={tab} paged={paged} hasMore={hasMore} page={page} setPage={setPage}
               exclusiveStatus={exclusiveStatus} unlockedArtworkIds={unlockedArtworkIds}
+              unlockingId={unlockingId}
               isArtistOwner={isArtistOwner} onArtworkClick={onArtworkClick}
               handleUnlockArtwork={handleUnlockArtwork} handleRequestAccess={handleRequestAccess}
             />

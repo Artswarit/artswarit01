@@ -31,6 +31,7 @@ import {
   GitBranch,
   DollarSign,
   SendHorizontal,
+  Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,6 +56,7 @@ interface Milestone {
   due_date: string | null;
   status: string;
   sort_order: number;
+  amount?: number | null;
 }
 interface ProjectFile {
   id: string;
@@ -1322,7 +1324,16 @@ const ProjectDetailModal = ({
                                   >
                                     Download
                                   </Button>
-                                  {file.uploader_id === user?.id && <></>}
+                                  {file.uploader_id === user?.id && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleDeleteFile(file.id, file.storage_path)}
+                                      className="h-9 w-9 rounded-xl text-muted-foreground hover:text-destructive transition-all active:scale-95 ml-auto"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             </div>

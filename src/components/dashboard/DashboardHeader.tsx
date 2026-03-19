@@ -194,7 +194,7 @@ const DashboardHeader = ({
   }, [user?.id, fetchStats]);
 
   return (
-    <div className="space-y-6 sm:space-y-10 py-4 sm:py-6 my-2 sm:my-10">
+    <div className="space-y-6 sm:space-y-8 py-2 sm:py-4 my-1 sm:my-4">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6 px-1">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-left-4 duration-500">
