@@ -159,13 +159,18 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
       <div className="bg-purple-50 rounded-lg px-5 py-4 border border-purple-100 shadow flex flex-col gap-3">
         <div className="flex items-center gap-3 mb-1">
           <img
-            src={clientAvatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50"}
+            src={
+              clientAvatar ||
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50"
+            }
             alt={clientName}
             className="w-8 h-8 rounded-full object-cover"
           />
-          <span className="font-semibold text-sm text-purple-700">{clientName}</span>
+          <span className="font-semibold text-sm text-purple-700">
+            {clientName}
+          </span>
         </div>
-        
+
         <div className="space-y-3">
           <div>
             <label className="text-sm font-medium mb-1 block">Rating</label>
@@ -210,11 +215,16 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 mb-1">
           <img
-            src={clientAvatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50"}
+            src={
+              clientAvatar ||
+              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50"
+            }
             alt={clientName}
             className="w-8 h-8 rounded-full object-cover"
           />
-          <span className="font-semibold text-sm text-purple-700">{clientName}</span>
+          <span className="font-semibold text-sm text-purple-700">
+            {clientName}
+          </span>
           <span className="flex gap-0.5 ml-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
@@ -254,7 +264,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Review</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete this review? This action cannot be undone.
+                    Are you sure you want to delete this review? This action
+                    cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -273,9 +284,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
         )}
       </div>
 
-      {reviewText && (
-        <p className="text-gray-700 italic">"{reviewText}"</p>
-      )}
+      {reviewText && <p className="text-gray-700 italic">"{reviewText}"</p>}
       <div className="text-xs text-muted-foreground mt-1">
         {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
       </div>
@@ -283,11 +292,15 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
       {/* Artist Response */}
       {artistResponse && (
         <div className="mt-3 pl-4 border-l-2 border-primary/30 bg-background/50 rounded-r-md p-3">
-          <p className="text-sm font-medium text-primary mb-1">Artist Response:</p>
+          <p className="text-sm font-medium text-primary mb-1">
+            Artist Response:
+          </p>
           <p className="text-sm text-foreground">{artistResponse}</p>
           {artistResponseAt && (
             <p className="text-xs text-muted-foreground mt-1">
-              {formatDistanceToNow(new Date(artistResponseAt), { addSuffix: true })}
+              {formatDistanceToNow(new Date(artistResponseAt), {
+                addSuffix: true,
+              })}
             </p>
           )}
         </div>
@@ -353,3 +366,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 };
 
 export default ReviewCard;
+
+
+
+
+

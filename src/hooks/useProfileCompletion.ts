@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useProfile } from './useProfile';
+import { useMemo } from "react";
+import { useProfile } from "./useProfile";
 
 interface ProfileCompletionStatus {
   isComplete: boolean;
@@ -19,7 +19,7 @@ type ProfileLike = {
 };
 
 export const computeProfileCompletion = (
-  profile: ProfileLike | null | undefined
+  profile: ProfileLike | null | undefined,
 ): ProfileCompletionStatus => {
   if (!profile) {
     return {
@@ -32,19 +32,19 @@ export const computeProfileCompletion = (
 
   // Define required fields for profile completion - BOTH artists and clients need country
   const baseFields = [
-    { key: 'full_name', label: 'Display Name' },
-    { key: 'bio', label: 'Bio' },
-    { key: 'avatar_url', label: 'Profile Picture' },
-    { key: 'country', label: 'Country' },
+    { key: "full_name", label: "Display Name" },
+    { key: "bio", label: "Bio" },
+    { key: "avatar_url", label: "Profile Picture" },
+    { key: "country", label: "Country" },
   ];
 
   // Additional fields for artists only
   const artistFields = [
-    { key: 'city', label: 'City' },
-    { key: 'tags', label: 'Categories/Skills' }
+    { key: "city", label: "City" },
+    { key: "tags", label: "Categories/Skills" },
   ];
 
-  const isArtist = profile.role === 'artist' || profile.role === 'premium';
+  const isArtist = profile.role === "artist" || profile.role === "premium";
   const allRequiredFields = isArtist
     ? [...baseFields, ...artistFields]
     : baseFields;
@@ -54,29 +54,31 @@ export const computeProfileCompletion = (
   allRequiredFields.forEach((field) => {
     const value = (profile as any)[field.key];
 
-    if (field.key === 'tags') {
+    if (field.key === "tags") {
       if (!value || (Array.isArray(value) && value.length === 0)) {
         missingFields.push(field.label);
       }
-    } else if (field.key === 'avatar_url') {
+    } else if (field.key === "avatar_url") {
       // Avatar must exist and not be a generated placeholder
-      const avatarUrl = (typeof value === 'string' ? value.trim() : '') || '';
-      const isValidAvatar = avatarUrl !== '' && 
-        !avatarUrl.includes('ui-avatars.com') && 
-        !avatarUrl.includes('placeholder');
+      const avatarUrl = (typeof value === "string" ? value.trim() : "") || "";
+      const isValidAvatar =
+        avatarUrl !== "" &&
+        !avatarUrl.includes("ui-avatars.com") &&
+        !avatarUrl.includes("placeholder");
       if (!isValidAvatar) {
         missingFields.push(field.label);
       }
-    } else if (field.key === 'bio') {
+    } else if (field.key === "bio") {
       // Bio must exist and not be empty or default placeholder
-      const bio = (typeof value === 'string' ? value.trim() : '') || '';
-      const isValidBio = bio !== '' && 
-        bio.toLowerCase() !== 'artist on artswarit' && 
-        bio.toLowerCase() !== 'tell others about yourself and your art...';
+      const bio = (typeof value === "string" ? value.trim() : "") || "";
+      const isValidBio =
+        bio !== "" &&
+        bio.toLowerCase() !== "artist on artswarit" &&
+        bio.toLowerCase() !== "tell others about yourself and your art...";
       if (!isValidBio) {
         missingFields.push(field.label);
       }
-    } else if (!value || (typeof value === 'string' && value.trim() === '')) {
+    } else if (!value || (typeof value === "string" && value.trim() === "")) {
       missingFields.push(field.label);
     }
   });
@@ -95,7 +97,9 @@ export const computeProfileCompletion = (
   };
 };
 
-export const useProfileCompletion = (): ProfileCompletionStatus & { loading: boolean } => {
+export const useProfileCompletion = (): ProfileCompletionStatus & {
+  loading: boolean;
+} => {
   const { profile, loading, error } = useProfile();
 
   const completionStatus = useMemo((): ProfileCompletionStatus => {
@@ -117,3 +121,8 @@ export const useProfileCompletion = (): ProfileCompletionStatus & { loading: boo
     loading,
   };
 };
+
+
+
+
+

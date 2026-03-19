@@ -8,7 +8,11 @@ interface ProBadgeProps {
   className?: string;
 }
 
-export function ProBadge({ userId, size = "md", className = "" }: ProBadgeProps) {
+export function ProBadge({
+  userId,
+  size = "md",
+  className = "",
+}: ProBadgeProps) {
   const { isProArtist, loading } = useArtistPlan(userId);
 
   if (loading || !isProArtist) return null;
@@ -16,19 +20,19 @@ export function ProBadge({ userId, size = "md", className = "" }: ProBadgeProps)
   const sizeClasses = {
     sm: "text-xs px-2 py-0.5",
     md: "text-sm px-3 py-1",
-    lg: "text-base px-4 py-1.5"
+    lg: "text-base px-4 py-1.5",
   };
 
   const iconSizes = {
     sm: 12,
     md: 14,
-    lg: 16
+    lg: 16,
   };
 
   return (
     <div className={`inline-flex items-center gap-1.5 ${className}`}>
       <span className="relative isolate inline-block">
-        <Badge 
+        <Badge
           className={`bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 flex items-center gap-1 font-semibold border border-yellow-100/40 overflow-hidden relative ${sizeClasses[size]}`}
         >
           <Crown size={iconSizes[size]} />
@@ -54,3 +58,8 @@ export function ProBadge({ userId, size = "md", className = "" }: ProBadgeProps)
 }
 
 export default ProBadge;
+
+
+
+
+

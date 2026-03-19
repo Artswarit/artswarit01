@@ -5,7 +5,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import LogoWithName from "@/components/LogoWithName";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Loader2, CheckCircle, RefreshCw, ArrowLeft } from "lucide-react";
@@ -39,8 +45,10 @@ const EmailVerification = () => {
 
   useEffect(() => {
     // Listen for auth state changes to detect email verification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'USER_UPDATED' && session?.user?.email_confirmed_at) {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "USER_UPDATED" && session?.user?.email_confirmed_at) {
         setIsVerified(true);
         toast({
           title: "Email verified!",
@@ -57,26 +65,26 @@ const EmailVerification = () => {
 
   const redirectToDashboard = async () => {
     if (!user) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
     try {
       const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
         .single();
 
-      if (profile?.role === 'artist' || profile?.role === 'premium') {
-        navigate('/artist-dashboard');
-      } else if (profile?.role === 'admin') {
-        navigate('/admin-dashboard');
+      if (profile?.role === "artist" || profile?.role === "premium") {
+        navigate("/artist-dashboard");
+      } else if (profile?.role === "admin") {
+        navigate("/admin-dashboard");
       } else {
-        navigate('/client-dashboard');
+        navigate("/client-dashboard");
       }
     } catch (error) {
-      navigate('/');
+      navigate("/");
     }
   };
 
@@ -87,7 +95,7 @@ const EmailVerification = () => {
 
     try {
       const { error } = await supabase.auth.resend({
-        type: 'signup',
+        type: "signup",
         email: user.email,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
@@ -95,7 +103,7 @@ const EmailVerification = () => {
       });
 
       if (error) {
-        console.error('Resend verification error:', error);
+        console.error("Resend verification error:", error);
         toast({
           title: "Error",
           description: error.message,
@@ -109,7 +117,7 @@ const EmailVerification = () => {
         setCooldown(60); // 60 second cooldown
       }
     } catch (error: any) {
-      console.error('Resend verification error:', error);
+      console.error("Resend verification error:", error);
       toast({
         title: "Error",
         description: "Failed to resend verification email. Please try again.",
@@ -121,7 +129,9 @@ const EmailVerification = () => {
   };
 
   const handleRefreshStatus = async () => {
-    const { data: { user: refreshedUser } } = await supabase.auth.getUser();
+    const {
+      data: { user: refreshedUser },
+    } = await supabase.auth.getUser();
     if (refreshedUser?.email_confirmed_at) {
       setIsVerified(true);
       toast({
@@ -146,7 +156,9 @@ const EmailVerification = () => {
         <div className="flex-1 flex items-center justify-center">
           <Card className="glass-card border-0 shadow-xl max-w-md">
             <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground">Please log in to verify your email.</p>
+              <p className="text-muted-foreground">
+                Please log in to verify your email.
+              </p>
               <Button asChild className="mt-4">
                 <Link to="/login">Go to Login</Link>
               </Button>
@@ -173,10 +185,9 @@ const EmailVerification = () => {
                 {isVerified ? "Email Verified!" : "Verify Your Email"}
               </CardTitle>
               <CardDescription className="text-center text-sm sm:text-base">
-                {isVerified 
+                {isVerified
                   ? "Your email has been verified. Redirecting..."
-                  : "Please verify your email to continue"
-                }
+                  : "Please verify your email to continue"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -188,8 +199,8 @@ const EmailVerification = () => {
                     </div>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    Your email has been successfully verified. 
-                    Redirecting you to your dashboard...
+                    Your email has been successfully verified. Redirecting you
+                    to your dashboard...
                   </p>
                   <div className="flex justify-center">
                     <Loader2 className="h-5 w-5 animate-spin text-artswarit-purple" />
@@ -202,19 +213,18 @@ const EmailVerification = () => {
                       <Mail className="h-8 w-8 text-blue-600" />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <p className="text-muted-foreground text-sm">
                       We've sent a verification email to:
                     </p>
-                    <p className="font-medium text-foreground">
-                      {user.email}
-                    </p>
+                    <p className="font-medium text-foreground">{user.email}</p>
                   </div>
 
                   <p className="text-muted-foreground text-xs">
-                    Please check your inbox and click the verification link to activate your account.
-                    Don't forget to check your spam folder!
+                    Please check your inbox and click the verification link to
+                    activate your account. Don't forget to check your spam
+                    folder!
                   </p>
 
                   <div className="flex flex-col gap-2 pt-2">
@@ -269,3 +279,8 @@ const EmailVerification = () => {
 };
 
 export default EmailVerification;
+
+
+
+
+

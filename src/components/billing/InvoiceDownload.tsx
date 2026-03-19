@@ -1,11 +1,11 @@
-import { Button } from '@/components/ui/button';
-import { Download, FileText, Loader2 } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button";
+import { Download, FileText, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface InvoiceData {
   id: string;
-  type: 'payment' | 'payout' | 'subscription';
+  type: "payment" | "payout" | "subscription";
   amount: number;
   currency?: string;
   date: string;
@@ -17,16 +17,21 @@ interface InvoiceData {
 
 interface InvoiceDownloadProps {
   invoice: InvoiceData;
-  variant?: 'default' | 'ghost' | 'outline';
-  size?: 'default' | 'sm' | 'icon';
+  variant?: "default" | "ghost" | "outline";
+  size?: "default" | "sm" | "icon";
 }
 
-export function InvoiceDownload({ invoice, variant = 'outline', size = 'sm' }: InvoiceDownloadProps) {
+export function InvoiceDownload({
+  invoice,
+  variant = "outline",
+  size = "sm",
+}: InvoiceDownloadProps) {
   const [downloading, setDownloading] = useState(false);
 
   const generateInvoiceHTML = () => {
-    const currencySymbol = invoice.currency === 'USD' ? '$' : invoice.currency === 'INR' ? '₹' : '$';
-    
+    const currencySymbol =
+      invoice.currency === "USD" ? "$" : invoice.currency === "INR" ? "₹" : "$";
+
     return `
 <!DOCTYPE html>
 <html>
@@ -67,13 +72,13 @@ export function InvoiceDownload({ invoice, variant = 'outline', size = 'sm' }: I
     
     <div class="details">
       <div class="details-section">
-        <h3>${invoice.type === 'payout' ? 'From' : 'Bill To'}</h3>
-        <p><strong>${invoice.type === 'payout' ? invoice.from || 'Client' : invoice.to || 'Customer'}</strong></p>
+        <h3>${invoice.type === "payout" ? "From" : "Bill To"}</h3>
+        <p><strong>${invoice.type === "payout" ? invoice.from || "Client" : invoice.to || "Customer"}</strong></p>
         <p>Via Artswarit Platform</p>
       </div>
       <div class="details-section">
         <h3>Invoice Details</h3>
-        <p><strong>Date:</strong> ${new Date(invoice.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <p><strong>Date:</strong> ${new Date(invoice.date).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}</p>
         <p><strong>Status:</strong> <span class="status status-${invoice.status}">${invoice.status.toUpperCase()}</span></p>
       </div>
     </div>
@@ -88,11 +93,11 @@ export function InvoiceDownload({ invoice, variant = 'outline', size = 'sm' }: I
       <tbody>
         <tr>
           <td>${invoice.description}</td>
-          <td style="text-align: right">${currencySymbol}${invoice.amount.toLocaleString('en-IN')}</td>
+          <td style="text-align: right">${currencySymbol}${invoice.amount.toLocaleString("en-IN")}</td>
         </tr>
         <tr class="total-row">
           <td><strong>Total</strong></td>
-          <td style="text-align: right"><strong>${currencySymbol}${invoice.amount.toLocaleString('en-IN')}</strong></td>
+          <td style="text-align: right"><strong>${currencySymbol}${invoice.amount.toLocaleString("en-IN")}</strong></td>
         </tr>
       </tbody>
     </table>
@@ -110,38 +115,38 @@ export function InvoiceDownload({ invoice, variant = 'outline', size = 'sm' }: I
 
   const handleDownload = async () => {
     setDownloading(true);
-    
+
     try {
       const html = generateInvoiceHTML();
-      
+
       // Create a new window for printing
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open("", "_blank");
       if (printWindow) {
         printWindow.document.write(html);
         printWindow.document.close();
-        
+
         // Wait for content to load then trigger print
         printWindow.onload = () => {
           printWindow.print();
         };
-        
-        toast.success('Invoice opened for download/print');
+
+        toast.success("Invoice opened for download/print");
       } else {
         // Fallback: download as HTML file
-        const blob = new Blob([html], { type: 'text/html' });
+        const blob = new Blob([html], { type: "text/html" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = `invoice-${invoice.id.slice(0, 8)}.html`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        toast.success('Invoice downloaded');
+        toast.success("Invoice downloaded");
       }
     } catch (error) {
-      console.error('Error generating invoice:', error);
-      toast.error('Failed to generate invoice');
+      console.error("Error generating invoice:", error);
+      toast.error("Failed to generate invoice");
     } finally {
       setDownloading(false);
     }
@@ -156,7 +161,7 @@ export function InvoiceDownload({ invoice, variant = 'outline', size = 'sm' }: I
     >
       {downloading ? (
         <Loader2 className="h-4 w-4 animate-spin" />
-      ) : size === 'icon' ? (
+      ) : size === "icon" ? (
         <Download className="h-4 w-4" />
       ) : (
         <>
@@ -167,3 +172,8 @@ export function InvoiceDownload({ invoice, variant = 'outline', size = 'sm' }: I
     </Button>
   );
 }
+
+
+
+
+

@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { usePaymentGateway } from './usePaymentGateway';
+import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { usePaymentGateway } from "./usePaymentGateway";
 
 declare global {
   interface Window {
@@ -10,7 +10,7 @@ declare global {
 }
 
 interface SubscriptionOptions {
-  plan: 'monthly' | 'yearly' | 'lifetime';
+  plan: "monthly" | "yearly" | "lifetime";
   onSuccess?: () => void;
   onFailure?: (error: string) => void;
 }
@@ -33,15 +33,15 @@ export function usePremiumPayment() {
         return;
       }
 
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.async = true;
       script.onload = () => {
         setScriptLoaded(true);
         resolve(true);
       };
       script.onerror = () => {
-        console.error('Failed to load Razorpay script');
+        console.error("Failed to load Razorpay script");
         resolve(false);
       };
       document.body.appendChild(script);
@@ -50,171 +50,198 @@ export function usePremiumPayment() {
 
   const { provider } = usePaymentGateway();
 
-  const initiateSubscription = useCallback(async ({ plan, onSuccess, onFailure }: SubscriptionOptions) => {
-    setLoading(true);
+  const initiateSubscription = useCallback(
+    async ({ plan, onSuccess, onFailure }: SubscriptionOptions) => {
+      setLoading(true);
 
-    try {
-      // Get current session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error('Please log in to subscribe');
-      }
-
-      const baseUrl = (supabase as any).supabaseUrl;
-      const anonKey = (supabase as any).supabaseKey;
-
-      if (provider === 'stripe') {
-        const response = await fetch(`${baseUrl}/functions/v1/create-premium-checkout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-            'apikey': anonKey,
-          },
-          body: JSON.stringify({ plan }),
-        });
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url;
-          return;
-        } else {
-          throw new Error(data.error || 'Failed to create Stripe subscription');
+      try {
+        // Get current session
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) {
+          throw new Error("Please log in to subscribe");
         }
-      }
 
-      // Load Razorpay script
-      const loaded = await loadRazorpayScript();
-      if (!loaded) {
-        throw new Error('Failed to load payment gateway');
-      }
+        const baseUrl = (supabase as any).supabaseUrl;
+        const anonKey = (supabase as any).supabaseKey;
 
-      // Create subscription via edge function
-      const response = await fetch(`${baseUrl}/functions/v1/create-razorpay-subscription`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': anonKey,
-        },
-        body: JSON.stringify({ plan }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data?.error || `Failed to create subscription (HTTP ${response.status})`);
-      }
-
-      if (data?.url) {
-        toast.info('Opening subscription page...');
-        setTimeout(() => {
-          window.location.href = data.url;
-        }, 1000);
-        return;
-      }
-
-      if (!data?.subscriptionId && !data?.orderId) {
-        throw new Error(data?.error || 'Failed to create subscription');
-      }
-
-      console.log('Subscription/Order created:', data);
-
-      // Configure Razorpay options
-      const options: any = {
-        key: data.keyId,
-        name: 'Artswarit',
-        description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Premium Subscription`,
-        prefill: {
-          email: session.user.email,
-        },
-        theme: {
-          color: '#f59e0b', // Yellow/orange for premium
-        },
-        modal: {
-          ondismiss: () => {
-            setLoading(false);
-            console.log('Payment modal closed');
-          },
-        },
-      };
-
-      // For subscriptions vs one-time (lifetime)
-      if (data.subscriptionId) {
-        options.subscription_id = data.subscriptionId;
-        options.handler = async (response: any) => {
-          console.log('Subscription response:', response);
-          toast.success('Premium subscription activated!');
-          onSuccess?.();
-        };
-      } else {
-        // One-time payment for lifetime
-        options.order_id = data.orderId;
-        options.amount = data.amount;
-        options.currency = data.currency;
-        options.handler = async (response: any) => {
-          console.log('Payment response:', response);
-          
-          try {
-            // Verify payment
-            const { data: verifyData, error: verifyError } = await supabase.functions.invoke('razorpay-subscription-webhook', {
-              body: {
-                event: 'payment.captured',
-                payload: {
-                  payment: {
-                    entity: {
-                      id: response.razorpay_payment_id,
-                      order_id: response.razorpay_order_id,
-                    }
-                  }
-                }
+        if (provider === "stripe") {
+          const response = await fetch(
+            `${baseUrl}/functions/v1/create-premium-checkout`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+                apikey: anonKey,
               },
-            });
-
-            if (verifyError) {
-              console.error('Verification error:', verifyError);
-            }
-
-            toast.success('Lifetime Premium activated! 🎉');
-            onSuccess?.();
-          } catch (err: any) {
-            console.error('Verification error:', err);
-            // Still show success since payment went through
-            toast.success('Premium activated!');
-            onSuccess?.();
+              body: JSON.stringify({ plan }),
+            },
+          );
+          const data = await response.json();
+          if (data.url) {
+            window.location.href = data.url;
+            return;
+          } else {
+            throw new Error(
+              data.error || "Failed to create Stripe subscription",
+            );
           }
-        };
-      }
+        }
 
-      // Open Razorpay checkout
-      const razorpay = new window.Razorpay(options);
-      razorpay.on('payment.failed', (response: any) => {
-        console.error('Payment failed:', response.error);
-        toast.error(response.error.description || 'Payment failed');
-        onFailure?.(response.error.description);
+        // Load Razorpay script
+        const loaded = await loadRazorpayScript();
+        if (!loaded) {
+          throw new Error("Failed to load payment gateway");
+        }
+
+        // Create subscription via edge function
+        const response = await fetch(
+          `${baseUrl}/functions/v1/create-razorpay-subscription`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+              apikey: anonKey,
+            },
+            body: JSON.stringify({ plan }),
+          },
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+              `Failed to create subscription (HTTP ${response.status})`,
+          );
+        }
+
+        if (data?.url) {
+          toast.info("Opening subscription page...");
+          setTimeout(() => {
+            window.location.href = data.url;
+          }, 1000);
+          return;
+        }
+
+        if (!data?.subscriptionId && !data?.orderId) {
+          throw new Error(data?.error || "Failed to create subscription");
+        }
+
+        console.log("Subscription/Order created:", data);
+
+        // Configure Razorpay options
+        const options: any = {
+          key: data.keyId,
+          name: "Artswarit",
+          description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Premium Subscription`,
+          prefill: {
+            email: session.user.email,
+          },
+          theme: {
+            color: "#f59e0b", // Yellow/orange for premium
+          },
+          modal: {
+            ondismiss: () => {
+              setLoading(false);
+              console.log("Payment modal closed");
+            },
+          },
+        };
+
+        // For subscriptions vs one-time (lifetime)
+        if (data.subscriptionId) {
+          options.subscription_id = data.subscriptionId;
+          options.handler = async (response: any) => {
+            console.log("Subscription response:", response);
+            toast.success("Premium subscription activated!");
+            onSuccess?.();
+          };
+        } else {
+          // One-time payment for lifetime
+          options.order_id = data.orderId;
+          options.amount = data.amount;
+          options.currency = data.currency;
+          options.handler = async (response: any) => {
+            console.log("Payment response:", response);
+
+            try {
+              // Verify payment
+              const { data: verifyData, error: verifyError } =
+                await supabase.functions.invoke(
+                  "razorpay-subscription-webhook",
+                  {
+                    body: {
+                      event: "payment.captured",
+                      payload: {
+                        payment: {
+                          entity: {
+                            id: response.razorpay_payment_id,
+                            order_id: response.razorpay_order_id,
+                          },
+                        },
+                      },
+                    },
+                  },
+                );
+
+              if (verifyError) {
+                console.error("Verification error:", verifyError);
+              }
+
+              toast.success("Lifetime Premium activated! 🎉");
+              onSuccess?.();
+            } catch (err: any) {
+              console.error("Verification error:", err);
+              // Still show success since payment went through
+              toast.success("Premium activated!");
+              onSuccess?.();
+            }
+          };
+        }
+
+        // Open Razorpay checkout
+        const razorpay = new window.Razorpay(options);
+        razorpay.on("payment.failed", (response: any) => {
+          console.error("Payment failed:", response.error);
+          toast.error(response.error.description || "Payment failed");
+          onFailure?.(response.error.description);
+          setLoading(false);
+        });
+
+        razorpay.open();
+      } catch (error: any) {
+        console.error("Subscription error:", error);
+
+        // Fallback: If there's an error, opening the direct payment link can be a reliable backup
+        const isAuthError =
+          error.message?.includes("Unauthorized") ||
+          error.message?.includes("log in");
+
+        if (!isAuthError) {
+          toast.info("Redirecting to secure subscription page...");
+          setTimeout(() => {
+            window.location.href = "https://rzp.io/rzp/JgMbYCOw";
+          }, 1500);
+        } else {
+          toast.error(error.message || "Subscription failed");
+        }
+
+        onFailure?.(error.message);
+      } finally {
         setLoading(false);
-      });
-      
-      razorpay.open();
-    } catch (error: any) {
-      console.error('Subscription error:', error);
-      
-      // Fallback: If there's an error, opening the direct payment link can be a reliable backup
-      const isAuthError = error.message?.includes('Unauthorized') || error.message?.includes('log in');
-      
-      if (!isAuthError) {
-        toast.info('Redirecting to secure subscription page...');
-        setTimeout(() => {
-          window.location.href = 'https://rzp.io/rzp/JgMbYCOw';
-        }, 1500);
-      } else {
-        toast.error(error.message || 'Subscription failed');
       }
-      
-      onFailure?.(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [loadRazorpayScript]);
+    },
+    [loadRazorpayScript],
+  );
 
   return { initiateSubscription, loading };
 }
+
+
+
+
+

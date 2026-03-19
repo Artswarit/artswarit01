@@ -1,13 +1,21 @@
-import { usePaymentGateway } from '@/hooks/usePaymentGateway';
-import { CreditCard, Smartphone, Building2, Info } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { usePaymentGateway } from "@/hooks/usePaymentGateway";
+import { CreditCard, Smartphone, Building2, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface PaymentMethodBadgeProps {
   showLegalCopy?: boolean;
   compact?: boolean;
 }
 
-export function PaymentMethodBadge({ showLegalCopy = false, compact = false }: PaymentMethodBadgeProps) {
+export function PaymentMethodBadge({
+  showLegalCopy = false,
+  compact = false,
+}: PaymentMethodBadgeProps) {
   const { provider, isIndian, displayMethods, legalCopy } = usePaymentGateway();
 
   if (compact) {
@@ -75,7 +83,7 @@ export function PaymentMethodBadge({ showLegalCopy = false, compact = false }: P
       {/* Provider badge */}
       <div className="flex items-center gap-1 text-xs text-muted-foreground/70">
         <span>Powered by</span>
-        {provider === 'razorpay' ? (
+        {provider === "razorpay" ? (
           <span className="font-medium text-primary">Razorpay</span>
         ) : (
           <span className="font-medium text-primary">Stripe</span>
@@ -84,3 +92,8 @@ export function PaymentMethodBadge({ showLegalCopy = false, compact = false }: P
     </div>
   );
 }
+
+
+
+
+

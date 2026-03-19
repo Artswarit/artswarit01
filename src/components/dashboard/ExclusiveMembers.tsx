@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +40,9 @@ const ExclusiveMembers = () => {
 
     supabase
       .from("exclusive_memberships")
-      .select("id, client_id, status, created_at, profiles!exclusive_memberships_client_id_fkey (id, full_name, avatar_url)")
+      .select(
+        "id, client_id, status, created_at, profiles!exclusive_memberships_client_id_fkey (id, full_name, avatar_url)",
+      )
       .eq("artist_id", user.id)
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
@@ -43,7 +51,7 @@ const ExclusiveMembers = () => {
           toast({
             title: "Error",
             description: "Could not load exclusive members.",
-            variant: "destructive"
+            variant: "destructive",
           });
         } else if (data) {
           setMembers(data as ExclusiveMember[]);
@@ -63,7 +71,7 @@ const ExclusiveMembers = () => {
         status,
         updated_at: new Date().toISOString(),
         approved_at: status === "approved" ? new Date().toISOString() : null,
-        rejected_at: status === "rejected" ? new Date().toISOString() : null
+        rejected_at: status === "rejected" ? new Date().toISOString() : null,
       })
       .eq("id", id)
       .eq("artist_id", user.id)
@@ -74,20 +82,21 @@ const ExclusiveMembers = () => {
           toast({
             title: "Update Failed",
             description: "Could not update member status.",
-            variant: "destructive"
+            variant: "destructive",
           });
           return;
         }
 
         setMembers((prev) =>
-          prev.map((m) => (m.id === id ? { ...m, status } : m))
+          prev.map((m) => (m.id === id ? { ...m, status } : m)),
         );
 
         const member = members.find((m) => m.id === id);
         if (status === "approved" && member) {
           const clientId = member.client_id;
           const clientName = member?.profiles?.full_name || "Client";
-          const artistName = user?.user_metadata?.full_name || user?.email || "Artist";
+          const artistName =
+            user?.user_metadata?.full_name || user?.email || "Artist";
           try {
             await supabase.from("notifications").insert({
               user_id: clientId,
@@ -96,7 +105,10 @@ const ExclusiveMembers = () => {
               type: "success",
             });
           } catch (notifyError) {
-            console.error("Failed to send exclusive approval notification", notifyError);
+            console.error(
+              "Failed to send exclusive approval notification",
+              notifyError,
+            );
           }
         }
 
@@ -105,7 +117,7 @@ const ExclusiveMembers = () => {
           description:
             status === "approved"
               ? "This client can now see your exclusive content."
-              : "This request has been rejected."
+              : "This request has been rejected.",
         });
       });
   };
@@ -152,7 +164,9 @@ const ExclusiveMembers = () => {
                 >
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={member.profiles?.avatar_url || undefined} />
+                      <AvatarImage
+                        src={member.profiles?.avatar_url || undefined}
+                      />
                       <AvatarFallback>
                         {member.profiles?.full_name
                           ? member.profiles.full_name[0]?.toUpperCase()
@@ -164,7 +178,8 @@ const ExclusiveMembers = () => {
                         {member.profiles?.full_name || "Client"}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Requested on {new Date(member.created_at).toLocaleDateString()}
+                        Requested on{" "}
+                        {new Date(member.created_at).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -223,7 +238,9 @@ const ExclusiveMembers = () => {
                 >
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={member.profiles?.avatar_url || undefined} />
+                      <AvatarImage
+                        src={member.profiles?.avatar_url || undefined}
+                      />
                       <AvatarFallback>
                         {member.profiles?.full_name
                           ? member.profiles.full_name[0]?.toUpperCase()
@@ -261,3 +278,8 @@ const ExclusiveMembers = () => {
 };
 
 export default ExclusiveMembers;
+
+
+
+
+

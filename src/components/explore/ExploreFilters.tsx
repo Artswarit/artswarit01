@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Search, Filter, X } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Search, Filter, X } from "lucide-react";
 
 interface FiltersProps {
   onFiltersChange: (filters: {
@@ -28,78 +34,78 @@ interface FiltersProps {
 }
 
 const categories = [
-  'All Categories',
-  'Digital Art',
-  'Photography', 
-  'Painting',
-  'Illustration',
-  'Sculpture',
-  'Mixed Media',
-  'Abstract',
-  'Portrait',
-  'Landscape',
-  'Street Art',
-  'Singer',
-  'Scriptwriter',
-  'Dancer',
-  'Editor',
-  'Rapper',
-  'Writer',
-  'Voice Actor',
-  'Animator'
+  "All Categories",
+  "Digital Art",
+  "Photography",
+  "Painting",
+  "Illustration",
+  "Sculpture",
+  "Mixed Media",
+  "Abstract",
+  "Portrait",
+  "Landscape",
+  "Street Art",
+  "Singer",
+  "Scriptwriter",
+  "Dancer",
+  "Editor",
+  "Rapper",
+  "Writer",
+  "Voice Actor",
+  "Animator",
 ];
 
 const artworkTypes = [
-  { value: 'all', label: 'All Types' },
-  { value: 'image', label: 'Images' },
-  { value: 'video', label: 'Videos' },
-  { value: 'audio', label: 'Audio' },
-  { value: 'document', label: 'Documents/Text' },
+  { value: "all", label: "All Types" },
+  { value: "image", label: "Images" },
+  { value: "video", label: "Videos" },
+  { value: "audio", label: "Audio" },
+  { value: "document", label: "Documents/Text" },
 ];
 
 const sortOptions = [
-  { value: 'artist_name', label: 'Artist Name A-Z' },
-  { value: 'most_recent', label: 'Most Recent' },
-  { value: 'most_viewed', label: 'Most Viewed' },
-  { value: 'most_liked', label: 'Most Liked' },
-  { value: 'top_rated', label: 'Top Rated' },
-  { value: 'price_low', label: 'Price: Low to High' },
-  { value: 'price_high', label: 'Price: High to Low' },
+  { value: "artist_name", label: "Artist Name A-Z" },
+  { value: "most_recent", label: "Most Recent" },
+  { value: "most_viewed", label: "Most Viewed" },
+  { value: "most_liked", label: "Most Liked" },
+  { value: "top_rated", label: "Top Rated" },
+  { value: "price_low", label: "Price: Low to High" },
+  { value: "price_high", label: "Price: High to Low" },
 ];
 
 const priceRanges = [
-  { value: 'all', label: 'All Prices' },
-  { value: 'free', label: 'Free' },
-  { value: '0-50', label: '$0 - $50' },
-  { value: '50-100', label: '$50 - $100' },
-  { value: '100-500', label: '$100 - $500' },
-  { value: '500+', label: '$500+' },
+  { value: "all", label: "All Prices" },
+  { value: "free", label: "Free" },
+  { value: "0-50", label: "$0 - $50" },
+  { value: "50-100", label: "$50 - $100" },
+  { value: "100-500", label: "$100 - $500" },
+  { value: "500+", label: "$500+" },
 ];
 
 const approvalStatuses = [
-  { value: 'all', label: 'All Statuses' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'rejected', label: 'Rejected' },
+  { value: "all", label: "All Statuses" },
+  { value: "approved", label: "Approved" },
+  { value: "pending", label: "Pending" },
+  { value: "rejected", label: "Rejected" },
 ];
 
 const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
   const [filters, setFilters] = useState({
-    search: '',
-    category: 'All Categories',
-    artworkType: 'all',
-    priceRange: 'all',
+    search: "",
+    category: "All Categories",
+    artworkType: "all",
+    priceRange: "all",
     tags: [] as string[],
-    sortBy: 'artist_name',
-    location: '',
-    approvalStatus: 'all',
+    sortBy: "artist_name",
+    location: "",
+    approvalStatus: "all",
     minLikes: 0,
     minViews: 0,
     hasAudio: false,
     hasVideo: false,
     forSaleOnly: false,
   });
-  const [tagInput, setTagInput] = useState('');
+  const [tagInput, setTagInput] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
   const updateFilters = (newFilters: typeof filters) => {
@@ -108,37 +114,37 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
   };
 
   const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
+    if (e.key === "Enter" && tagInput.trim()) {
       const newTag = tagInput.trim();
       if (!filters.tags.includes(newTag)) {
         const newFilters = {
           ...filters,
-          tags: [...filters.tags, newTag]
+          tags: [...filters.tags, newTag],
         };
         updateFilters(newFilters);
       }
-      setTagInput('');
+      setTagInput("");
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
     const newFilters = {
       ...filters,
-      tags: filters.tags.filter(tag => tag !== tagToRemove)
+      tags: filters.tags.filter((tag) => tag !== tagToRemove),
     };
     updateFilters(newFilters);
   };
 
   const clearAllFilters = () => {
     const clearedFilters = {
-      search: '',
-      category: 'All Categories',
-      artworkType: 'all',
-      priceRange: 'all',
+      search: "",
+      category: "All Categories",
+      artworkType: "all",
+      priceRange: "all",
       tags: [],
-      sortBy: 'artist_name',
-      location: '',
-      approvalStatus: 'all',
+      sortBy: "artist_name",
+      location: "",
+      approvalStatus: "all",
       minLikes: 0,
       minViews: 0,
       hasAudio: false,
@@ -146,7 +152,7 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
       forSaleOnly: false,
     };
     updateFilters(clearedFilters);
-    setTagInput('');
+    setTagInput("");
   };
 
   return (
@@ -159,7 +165,7 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
           </Button>
         </CardHeader>
       )}
-      
+
       <CardContent className="space-y-6">
         {/* Search */}
         <div>
@@ -169,7 +175,9 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
             <Input
               placeholder="Artist name, artwork title, tags..."
               value={filters.search}
-              onChange={(e) => updateFilters({ ...filters, search: e.target.value })}
+              onChange={(e) =>
+                updateFilters({ ...filters, search: e.target.value })
+              }
               className="pl-10"
             />
           </div>
@@ -177,10 +185,14 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
 
         {/* Artist Category */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Artist Category</label>
+          <label className="text-sm font-medium mb-2 block">
+            Artist Category
+          </label>
           <Select
             value={filters.category}
-            onValueChange={(value) => updateFilters({ ...filters, category: value })}
+            onValueChange={(value) =>
+              updateFilters({ ...filters, category: value })
+            }
           >
             <SelectTrigger>
               <SelectValue />
@@ -200,7 +212,9 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
           <label className="text-sm font-medium mb-2 block">Artwork Type</label>
           <Select
             value={filters.artworkType}
-            onValueChange={(value) => updateFilters({ ...filters, artworkType: value })}
+            onValueChange={(value) =>
+              updateFilters({ ...filters, artworkType: value })
+            }
           >
             <SelectTrigger>
               <SelectValue />
@@ -220,7 +234,9 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
           <label className="text-sm font-medium mb-2 block">Sort By</label>
           <Select
             value={filters.sortBy}
-            onValueChange={(value) => updateFilters({ ...filters, sortBy: value })}
+            onValueChange={(value) =>
+              updateFilters({ ...filters, sortBy: value })
+            }
           >
             <SelectTrigger>
               <SelectValue />
@@ -240,7 +256,9 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
           <label className="text-sm font-medium mb-2 block">Price Range</label>
           <Select
             value={filters.priceRange}
-            onValueChange={(value) => updateFilters({ ...filters, priceRange: value })}
+            onValueChange={(value) =>
+              updateFilters({ ...filters, priceRange: value })
+            }
           >
             <SelectTrigger>
               <SelectValue />
@@ -267,7 +285,11 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
           {filters.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {filters.tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className="flex items-center gap-1"
+                >
                   {tag}
                   <Button
                     variant="ghost"
@@ -285,20 +307,28 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
 
         {/* Location */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Artist Location</label>
+          <label className="text-sm font-medium mb-2 block">
+            Artist Location
+          </label>
           <Input
             placeholder="City, Country..."
             value={filters.location}
-            onChange={(e) => updateFilters({ ...filters, location: e.target.value })}
+            onChange={(e) =>
+              updateFilters({ ...filters, location: e.target.value })
+            }
           />
         </div>
 
         {/* Approval Status */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Approval Status</label>
+          <label className="text-sm font-medium mb-2 block">
+            Approval Status
+          </label>
           <Select
             value={filters.approvalStatus}
-            onValueChange={(value) => updateFilters({ ...filters, approvalStatus: value })}
+            onValueChange={(value) =>
+              updateFilters({ ...filters, approvalStatus: value })
+            }
           >
             <SelectTrigger>
               <SelectValue />
@@ -315,13 +345,17 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
 
         {/* Minimum Likes */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Minimum Likes</label>
+          <label className="text-sm font-medium mb-2 block">
+            Minimum Likes
+          </label>
           <Slider
             min={0}
             max={5000}
             step={10}
             value={[filters.minLikes]}
-            onValueChange={([val]) => updateFilters({ ...filters, minLikes: val })}
+            onValueChange={([val]) =>
+              updateFilters({ ...filters, minLikes: val })
+            }
           />
           <span className="text-xs text-gray-600 mt-1 block">
             {filters.minLikes}+
@@ -330,13 +364,17 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
 
         {/* Minimum Views */}
         <div>
-          <label className="text-sm font-medium mb-2 block">Minimum Views</label>
+          <label className="text-sm font-medium mb-2 block">
+            Minimum Views
+          </label>
           <Slider
             min={0}
             max={100000}
             step={100}
             value={[filters.minViews]}
-            onValueChange={([val]) => updateFilters({ ...filters, minViews: val })}
+            onValueChange={([val]) =>
+              updateFilters({ ...filters, minViews: val })
+            }
           />
           <span className="text-xs text-gray-600 mt-1 block">
             {filters.minViews}+
@@ -349,24 +387,32 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
             <label className="text-xs font-medium block mb-2">With Audio</label>
             <Switch
               checked={filters.hasAudio}
-              onCheckedChange={(checked) => updateFilters({ ...filters, hasAudio: checked as boolean })}
+              onCheckedChange={(checked) =>
+                updateFilters({ ...filters, hasAudio: checked as boolean })
+              }
             />
           </div>
           <div>
             <label className="text-xs font-medium block mb-2">With Video</label>
             <Switch
               checked={filters.hasVideo}
-              onCheckedChange={(checked) => updateFilters({ ...filters, hasVideo: checked as boolean })}
+              onCheckedChange={(checked) =>
+                updateFilters({ ...filters, hasVideo: checked as boolean })
+              }
             />
           </div>
         </div>
 
         {/* For Sale Only */}
         <div>
-          <label className="text-xs font-medium block mb-2">For Sale Only</label>
+          <label className="text-xs font-medium block mb-2">
+            For Sale Only
+          </label>
           <Switch
             checked={filters.forSaleOnly}
-            onCheckedChange={(checked) => updateFilters({ ...filters, forSaleOnly: checked as boolean })}
+            onCheckedChange={(checked) =>
+              updateFilters({ ...filters, forSaleOnly: checked as boolean })
+            }
           />
         </div>
 
@@ -380,3 +426,8 @@ const ExploreFilters = ({ onFiltersChange, onClose }: FiltersProps) => {
 };
 
 export default ExploreFilters;
+
+
+
+
+

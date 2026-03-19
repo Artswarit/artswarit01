@@ -9,7 +9,10 @@ const SignupHeader = () => {
       </h1>
       <p className="text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link to="/login" className="font-medium text-primary hover:text-primary/80 underline">
+        <Link
+          to="/login"
+          className="font-medium text-primary hover:text-primary/80 underline"
+        >
           Log in
         </Link>
       </p>
@@ -18,3 +21,8 @@ const SignupHeader = () => {
 };
 
 export default SignupHeader;
+
+
+
+
+

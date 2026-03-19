@@ -1,10 +1,15 @@
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-
-import LogoLoader from '@/components/ui/LogoLoader';
+import LogoLoader from "@/components/ui/LogoLoader";
 
 interface UserProfile {
   id: string;
@@ -26,7 +31,11 @@ interface AuthContextType {
   isPremium: boolean;
   profile: UserProfile | null;
   refreshProfile: () => Promise<void>;
-  signUp: (email: string, password: string, userData: { full_name: string; role: string; country?: string }) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    userData: { full_name: string; role: string; country?: string },
+  ) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
@@ -37,19 +46,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<any | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const { toast } = useToast();
-  const isPremium = subscription?.is_active === true && subscription?.subscription_tier === 'pro';
+  const isPremium =
+    subscription?.is_active === true &&
+    subscription?.subscription_tier === "pro";
 
   // Fetch the current user's profile from the DB
   const refreshProfile = useCallback(async (userId?: string) => {
@@ -57,24 +70,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!uid) return;
     try {
       const { data } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url, bio, role, cover_url, tags, location, website')
-        .eq('id', uid)
+        .from("profiles")
+        .select(
+          "id, full_name, avatar_url, bio, role, cover_url, tags, location, website",
+        )
+        .eq("id", uid)
         .maybeSingle();
       if (data) setProfile(data as UserProfile);
-    } catch { /* silent */ }
+    } catch {
+      /* silent */
+    }
   }, []);
   useEffect(() => {
     // Fetch initial subscription
     const fetchSubscription = async (userId: string) => {
       try {
         const { data, error } = await supabase
-          .from('subscribers')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('is_active', true)
+          .from("subscribers")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("is_active", true)
           .maybeSingle();
-        
+
         if (error) {
           return;
         }
@@ -87,40 +104,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let authListenerFired = false;
 
     // Set up auth state listener - MUST be synchronous to avoid deadlocks
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        authListenerFired = true;
-        // Only synchronous state updates here
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        
-        if (session?.user) {
-          fetchSubscription(session.user.id);
-          refreshProfile(session.user.id);
-        } else {
-          setSubscription(null);
-          setProfile(null);
-        }
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Check if there's a pending signup role (from Google OAuth signup)
-          const pendingRole = localStorage.getItem('pendingSignupRole');
-          if (pendingRole) {
-            // Clear the pending role immediately
-            localStorage.removeItem('pendingSignupRole');
-            
-            // Defer Supabase calls with setTimeout to avoid deadlock
-            setTimeout(() => {
-              handleGoogleSignupProfile(session.user, pendingRole);
-            }, 0);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          // Clean up any stale pending signup role on sign out
-          localStorage.removeItem('pendingSignupRole');
-        }
+    const {
+      data: { subscription: authSubscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      authListenerFired = true;
+      // Only synchronous state updates here
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+
+      if (session?.user) {
+        fetchSubscription(session.user.id);
+        refreshProfile(session.user.id);
+      } else {
+        setSubscription(null);
+        setProfile(null);
       }
-    );
+
+      if (event === "SIGNED_IN" && session?.user) {
+        // Check if there's a pending signup role (from Google OAuth signup)
+        const pendingRole = localStorage.getItem("pendingSignupRole");
+        if (pendingRole) {
+          // Clear the pending role immediately
+          localStorage.removeItem("pendingSignupRole");
+
+          // Defer Supabase calls with setTimeout to avoid deadlock
+          setTimeout(() => {
+            handleGoogleSignupProfile(session.user, pendingRole);
+          }, 0);
+        }
+      } else if (event === "SIGNED_OUT") {
+        // Clean up any stale pending signup role on sign out
+        localStorage.removeItem("pendingSignupRole");
+      }
+    });
 
     // Fallback: check for existing session only if onAuthStateChange hasn't fired yet
     // This handles the edge case where the page loads with an existing session
@@ -153,12 +170,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const subChannel = supabase
       .channel(`user-subscription-${user.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'subscribers',
-          filter: `user_id=eq.${user.id}`
+          event: "*",
+          schema: "public",
+          table: "subscribers",
+          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
           if (payload.new && (payload.new as any).is_active) {
@@ -166,7 +183,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             setSubscription(null);
           }
-        }
+        },
       )
       .subscribe();
 
@@ -174,9 +191,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const profileChannel = supabase
       .channel(`user-profile-sync-${user.id}`)
       .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
-        () => refreshProfile(user.id)
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${user.id}`,
+        },
+        () => refreshProfile(user.id),
       )
       .subscribe();
 
@@ -190,11 +212,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleGoogleSignupProfile = async (user: User, pendingRole: string) => {
     try {
       const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id, role')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("id, role")
+        .eq("id", user.id)
         .single();
-      
+
       if (existingProfile) {
         // Profile already exists — this is a returning Google user.
         // Don't overwrite their existing role with the pending role.
@@ -202,51 +224,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // No profile exists — this is a new Google OAuth signup. Create profile with selected role.
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: user.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
-          role: pendingRole,
-          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || ''
-        });
-        
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: user.id,
+        email: user.email || "",
+        full_name:
+          user.user_metadata?.full_name || user.user_metadata?.name || "",
+        role: pendingRole,
+        avatar_url:
+          user.user_metadata?.avatar_url || user.user_metadata?.picture || "",
+      });
+
       if (profileError) {
-        console.error('Failed to create Google OAuth profile:', profileError);
+        console.error("Failed to create Google OAuth profile:", profileError);
         toast({
           title: "Profile Setup Issue",
-          description: "Your account was created but we couldn't set up your profile. Please update your profile in settings.",
-          variant: "destructive"
+          description:
+            "Your account was created but we couldn't set up your profile. Please update your profile in settings.",
+          variant: "destructive",
         });
       } else {
         // Refresh profile after creation
         refreshProfile(user.id);
       }
     } catch (error) {
-      console.error('Error in handleGoogleSignupProfile:', error);
+      console.error("Error in handleGoogleSignupProfile:", error);
     }
   };
 
-  const signUp = async (email: string, password: string, userData: { full_name: string; role: string; country?: string }) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    userData: { full_name: string; role: string; country?: string },
+  ) => {
     try {
       setLoading(true);
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { error, data } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: userData
-        }
+          data: userData,
+        },
       });
 
       if (error) {
         toast({
           title: "Sign up failed",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
         return { error };
       }
@@ -257,15 +284,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (identities && identities.length === 0) {
         toast({
           title: "Account already exists",
-          description: "An account with this email already exists. Please sign in instead, or use 'Forgot Password' to reset your password.",
-          variant: "destructive"
+          description:
+            "An account with this email already exists. Please sign in instead, or use 'Forgot Password' to reset your password.",
+          variant: "destructive",
         });
-        return { error: { message: 'Account already exists' } };
+        return { error: { message: "Account already exists" } };
       }
 
       toast({
         title: "Account created successfully!",
-        description: "Please check your email to verify your account."
+        description: "Please check your email to verify your account.",
       });
 
       return { error: null };
@@ -281,40 +309,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const { error, data } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
 
       if (error) {
-        console.error('Signin error:', error);
+        console.error("Signin error:", error);
         let errorMessage = error.message;
-        
+
         // Provide user-friendly error messages
-        if (error.message === 'Invalid login credentials') {
-          errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-        } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = 'Please verify your email address before signing in.';
+        if (error.message === "Invalid login credentials") {
+          errorMessage =
+            "Invalid email or password. Please check your credentials and try again.";
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Please verify your email address before signing in.";
         }
-        
+
         toast({
           title: "Sign in failed",
           description: errorMessage,
-          variant: "destructive"
+          variant: "destructive",
         });
         return { error };
       }
 
       toast({
         title: "Welcome back!",
-        description: "You've successfully signed in."
+        description: "You've successfully signed in.",
       });
 
       return { error: null, user: data.user };
     } catch (error: any) {
-      console.error('Signin error:', error);
+      console.error("Signin error:", error);
       toast({
         title: "Sign in failed",
         description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return { error };
     } finally {
@@ -329,7 +358,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setSubscription(null);
       setProfile(null);
-      
+
       // 2. Perform the actual Supabase sign out
       // We await this to ensure the session is invalidated in the database/storage
       await supabase.auth.signOut();
@@ -338,25 +367,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // This is a safety measure if signOut didn't clean everything
       const keys = Object.keys(localStorage);
       for (const key of keys) {
-        if (key.includes('supabase.auth.token') || key.startsWith('sb-')) {
+        if (key.includes("supabase.auth.token") || key.startsWith("sb-")) {
           localStorage.removeItem(key);
         }
       }
 
       // 4. Force a hard refresh to home page to clear any remaining in-memory state
       // Use replace to avoid the "back button" logging them back in
-      window.location.replace('/');
+      window.location.replace("/");
 
       toast({
         title: "Signed out",
-        description: "You've been successfully signed out."
+        description: "You've been successfully signed out.",
       });
 
       return { error: null };
     } catch (error: any) {
-      console.error('Signout error:', error);
+      console.error("Signout error:", error);
       // Even if it fails, try to force a redirect to home for safety
-      window.location.replace('/');
+      window.location.replace("/");
       return { error };
     }
   };
@@ -365,17 +394,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/`
-        }
+          redirectTo: `${window.location.origin}/`,
+        },
       });
 
       if (error) {
         toast({
           title: "Google sign in failed",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
         return { error };
       }
@@ -399,15 +428,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signIn,
     signOut,
-    signInWithGoogle
+    signInWithGoogle,
   };
 
   return (
     <AuthContext.Provider value={value}>
       {loading && <LogoLoader fullPage text="Loading Artswarit…" />}
-      <div style={loading ? { visibility: 'hidden', overflow: 'hidden', height: 0 } : undefined}>
+      <div
+        style={
+          loading
+            ? { visibility: "hidden", overflow: "hidden", height: 0 }
+            : undefined
+        }
+      >
         {children}
       </div>
     </AuthContext.Provider>
   );
 };
+
+
+
+
+

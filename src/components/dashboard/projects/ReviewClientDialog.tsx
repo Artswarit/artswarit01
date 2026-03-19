@@ -43,7 +43,9 @@ const ReviewClientDialog: React.FC<ReviewClientDialogProps> = ({
 }) => {
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [reviewText, setReviewText] = useState(existingReview?.review_text || "");
+  const [reviewText, setReviewText] = useState(
+    existingReview?.review_text || "",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -141,7 +143,12 @@ const ReviewClientDialog: React.FC<ReviewClientDialogProps> = ({
     );
   };
 
-  const initials = project.client?.split(" ").map((n) => n[0]).join("").toUpperCase() || "?";
+  const initials =
+    project.client
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase() || "?";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -160,17 +167,25 @@ const ReviewClientDialog: React.FC<ReviewClientDialogProps> = ({
           <div className="flex items-center gap-4 p-4 bg-muted/30 backdrop-blur-md rounded-2xl border border-border/10">
             <Avatar className="h-14 w-14 border-2 border-background shadow-lg">
               <AvatarImage src={project.clientAvatar} />
-              <AvatarFallback className="bg-primary/10 text-primary font-black text-lg">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-primary font-black text-lg">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <div className="space-y-0.5">
-              <p className="font-black text-foreground/90">{project.client || "Client"}</p>
-              <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Project: {project.title}</p>
+              <p className="font-black text-foreground/90">
+                {project.client || "Client"}
+              </p>
+              <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">
+                Project: {project.title}
+              </p>
             </div>
           </div>
 
           {/* Rating */}
           <div className="space-y-3">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Overall Rating *</label>
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">
+              Overall Rating *
+            </label>
             <div className="flex flex-col items-center gap-2 p-4 bg-muted/20 rounded-2xl border border-border/5">
               <div className="flex justify-center py-2">{renderStars()}</div>
               <p className="text-xs font-black uppercase tracking-widest text-primary/80">
@@ -186,7 +201,9 @@ const ReviewClientDialog: React.FC<ReviewClientDialogProps> = ({
 
           {/* Review Text */}
           <div className="space-y-3">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Your Experience (Optional)</label>
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">
+              Your Experience (Optional)
+            </label>
             <div className="relative">
               <Textarea
                 value={reviewText}
@@ -232,3 +249,8 @@ const ReviewClientDialog: React.FC<ReviewClientDialogProps> = ({
 };
 
 export default ReviewClientDialog;
+
+
+
+
+

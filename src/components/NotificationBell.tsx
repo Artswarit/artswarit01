@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Bell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from "react";
+import { Bell } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { Link } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
+} from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 
 interface Notification {
   id: string;
@@ -34,15 +34,15 @@ const NotificationBell = () => {
       if (!user?.id) return;
 
       const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
         .limit(50);
 
       if (!error && data) {
         setNotifications(data as Notification[]);
-        setUnreadCount(data.filter(n => !n.is_read).length);
+        setUnreadCount(data.filter((n) => !n.is_read).length);
       }
     }
 
@@ -52,31 +52,31 @@ const NotificationBell = () => {
     const channel = supabase
       .channel(`user-notifications-${user?.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user?.id}`
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user?.id}`,
         },
         (payload) => {
           const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev.slice(0, 49)]);
-          setUnreadCount(prev => prev + 1);
-        }
+          setNotifications((prev) => [newNotification, ...prev.slice(0, 49)]);
+          setUnreadCount((prev) => prev + 1);
+        },
       )
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user?.id}`
+          event: "UPDATE",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user?.id}`,
         },
         () => {
           // Refetch on updates
           fetchNotifications();
-        }
+        },
       )
       .subscribe();
 
@@ -88,14 +88,14 @@ const NotificationBell = () => {
   // Mark notification as read
   const markAsRead = async (notificationId: string) => {
     await supabase
-      .from('notifications')
+      .from("notifications")
       .update({ is_read: true })
-      .eq('id', notificationId);
+      .eq("id", notificationId);
 
-    setNotifications(prev =>
-      prev.map(n => (n.id === notificationId ? { ...n, is_read: true } : n))
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n)),
     );
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    setUnreadCount((prev) => Math.max(0, prev - 1));
   };
 
   // Mark all as read
@@ -103,37 +103,39 @@ const NotificationBell = () => {
     if (!user?.id) return;
 
     await supabase
-      .from('notifications')
+      .from("notifications")
       .update({ is_read: true })
-      .eq('user_id', user.id)
-      .eq('is_read', false);
+      .eq("user_id", user.id)
+      .eq("is_read", false);
 
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     setUnreadCount(0);
   };
 
   const getNotificationLink = (notification: Notification) => {
-    if (notification.type === 'like' && notification.metadata?.artwork_id) {
+    if (notification.type === "like" && notification.metadata?.artwork_id) {
       return `/artwork/${notification.metadata.artwork_id}`;
     }
-    if (notification.type === 'follow' && notification.metadata?.follower_id) {
+    if (notification.type === "follow" && notification.metadata?.follower_id) {
       return `/artist/${notification.metadata.follower_id}`;
     }
 
     // Review notifications
     if (
-      (notification.type === 'review_response' || notification.type === 'new_review') &&
+      (notification.type === "review_response" ||
+        notification.type === "new_review") &&
       notification.metadata?.artist_id
     ) {
       const reviewId = notification.metadata?.review_id;
       return `/artist/${notification.metadata.artist_id}?tab=about${
-        reviewId ? `&review=${reviewId}` : ''
+        reviewId ? `&review=${reviewId}` : ""
       }`;
     }
 
     // Fallback for older review notifications that only have review_id
     if (
-      (notification.type === 'review_response' || notification.type === 'new_review') &&
+      (notification.type === "review_response" ||
+        notification.type === "new_review") &&
       notification.metadata?.review_id
     ) {
       return `/review/${notification.metadata.review_id}`;
@@ -141,15 +143,15 @@ const NotificationBell = () => {
 
     // Project-related notifications
     if (
-      (notification.type === 'project_accepted' ||
-        notification.type === 'project_rejected' ||
-        notification.type === 'project_progress' ||
-        notification.type === 'project_completed') &&
+      (notification.type === "project_accepted" ||
+        notification.type === "project_rejected" ||
+        notification.type === "project_progress" ||
+        notification.type === "project_completed") &&
       notification.metadata?.project_id
     ) {
       return `/client-dashboard?tab=projects`;
     }
-    return '#';
+    return "#";
   };
 
   if (!user) return null;
@@ -161,7 +163,7 @@ const NotificationBell = () => {
           <Bell className="h-5 w-5 text-gray-600" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full">
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </Button>
@@ -189,15 +191,24 @@ const NotificationBell = () => {
           </div>
         ) : (
           notifications.map((notification) => {
-            const isAlert = notification.type === 'error' || notification.type === 'warning' || notification.type === 'ADMIN_DISPUTE_MESSAGE_SENT';
-            const isSuccess = notification.type === 'success';
-            
+            const isAlert =
+              notification.type === "error" ||
+              notification.type === "warning" ||
+              notification.type === "ADMIN_DISPUTE_MESSAGE_SENT";
+            const isSuccess = notification.type === "success";
+
             return (
               <DropdownMenuItem
                 key={notification.id}
                 asChild
                 className={`px-4 py-3 cursor-pointer focus:bg-gray-50 border-l-4 ${
-                  !notification.is_read ? (isAlert ? 'bg-red-500/10 border-red-500' : 'bg-primary/5 border-primary') : (isAlert ? 'border-red-200 bg-red-50' : 'border-transparent')
+                  !notification.is_read
+                    ? isAlert
+                      ? "bg-red-500/10 border-red-500"
+                      : "bg-primary/5 border-primary"
+                    : isAlert
+                      ? "border-red-200 bg-red-50"
+                      : "border-transparent"
                 }`}
               >
                 <Link
@@ -213,20 +224,33 @@ const NotificationBell = () => {
                   <div className="flex items-start gap-3">
                     <div
                       className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${
-                        !notification.is_read ? (isAlert ? 'bg-red-500 animate-pulse' : 'bg-primary') : 'bg-transparent'
+                        !notification.is_read
+                          ? isAlert
+                            ? "bg-red-500 animate-pulse"
+                            : "bg-primary"
+                          : "bg-transparent"
                       }`}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className={`font-bold text-sm truncate ${isAlert ? 'text-red-700' : 'text-foreground'}`}>
+                      <p
+                        className={`font-bold text-sm truncate ${isAlert ? "text-red-700" : "text-foreground"}`}
+                      >
                         {notification.title}
                       </p>
-                      <p className={`text-xs mt-0.5 line-clamp-3 leading-relaxed ${isAlert ? 'text-red-600/90 font-medium' : 'text-muted-foreground'}`}>
+                      <p
+                        className={`text-xs mt-0.5 line-clamp-3 leading-relaxed ${isAlert ? "text-red-600/90 font-medium" : "text-muted-foreground"}`}
+                      >
                         {notification.message}
                       </p>
-                      <p className={`text-[10px] mt-1.5 ${isAlert ? 'text-red-500/70 font-bold' : 'text-muted-foreground/70'}`}>
-                        {formatDistanceToNow(new Date(notification.created_at), {
-                          addSuffix: true,
-                        })}
+                      <p
+                        className={`text-[10px] mt-1.5 ${isAlert ? "text-red-500/70 font-bold" : "text-muted-foreground/70"}`}
+                      >
+                        {formatDistanceToNow(
+                          new Date(notification.created_at),
+                          {
+                            addSuffix: true,
+                          },
+                        )}
                       </p>
                     </div>
                   </div>
@@ -241,3 +265,8 @@ const NotificationBell = () => {
 };
 
 export default NotificationBell;
+
+
+
+
+

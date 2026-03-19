@@ -9,7 +9,7 @@ export const TopLoadingBar = () => {
   useEffect(() => {
     setLoading(true);
     setProgress(30);
-    
+
     const timer = setTimeout(() => {
       setProgress(100);
       setTimeout(() => {
@@ -25,10 +25,15 @@ export const TopLoadingBar = () => {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[200] h-1">
-      <div 
+      <div
         className="h-full bg-gradient-to-r from-artswarit-purple via-blue-500 to-primary transition-all duration-300 ease-out"
         style={{ width: `${progress}%` }}
       />
     </div>
   );
 };
+
+
+
+
+

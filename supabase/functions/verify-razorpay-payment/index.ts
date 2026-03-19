@@ -124,30 +124,25 @@ serve(async (req) => {
       });
     }
 
-    // Check if already processed
-    if (payment.status === 'success') {
-      return new Response(JSON.stringify({ success: true, message: 'Payment already processed' }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Update payment record only if not already success
+    if (payment.status !== 'success') {
+      const { error: updatePaymentError } = await supabaseAdmin
+        .from('payments')
+        .update({
+          razorpay_payment_id,
+          razorpay_signature,
+          status: 'success',
+          paid_at: new Date().toISOString(),
+        })
+        .eq('id', payment.id);
+
+      if (updatePaymentError) {
+        console.error('Failed to update payment:', updatePaymentError);
+      }
     }
 
-    // Update payment record
-    const { error: updatePaymentError } = await supabaseAdmin
-      .from('payments')
-      .update({
-        razorpay_payment_id,
-        razorpay_signature,
-        status: 'success',
-        paid_at: new Date().toISOString(),
-      })
-      .eq('id', payment.id);
-
-    if (updatePaymentError) {
-      console.error('Failed to update payment:', updatePaymentError);
-    }
-
-    // Update milestone status to ACTIVE (funds secured in escrow)
+    // Force Update milestone status to ACTIVE (funds secured in escrow)
+    // We execute this EVEN IF payment was already 'success' to ensure parity
     const { error: updateMilestoneError } = await supabaseAdmin
       .from('project_milestones')
       .update({
@@ -159,6 +154,10 @@ serve(async (req) => {
 
     if (updateMilestoneError) {
       console.error('Failed to update milestone:', updateMilestoneError);
+      return new Response(JSON.stringify({ success: false, error: 'Failed to update milestone status', details: updateMilestoneError }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Log activity

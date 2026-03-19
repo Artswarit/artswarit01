@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface RecentlyViewedItem {
   id: string;
-  item_type: 'artwork' | 'artist';
+  item_type: "artwork" | "artist";
   item_id: string;
   viewed_at: string;
   // Populated data
@@ -31,10 +31,10 @@ export function useRecentlyViewed() {
 
     try {
       const { data, error } = await supabase
-        .from('recently_viewed')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('viewed_at', { ascending: false })
+        .from("recently_viewed")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("viewed_at", { ascending: false })
         .limit(MAX_ITEMS);
 
       if (error) throw error;
@@ -43,14 +43,14 @@ export function useRecentlyViewed() {
       const enrichedItems: RecentlyViewedItem[] = [];
 
       for (const item of data || []) {
-        const itemType = item.item_type as 'artwork' | 'artist';
-        
-        if (itemType === 'artwork') {
+        const itemType = item.item_type as "artwork" | "artist";
+
+        if (itemType === "artwork") {
           const { data: artwork } = await supabase
-            .from('artworks')
-            .select('title, media_url')
-            .eq('id', item.item_id)
-            .eq('status', 'public')
+            .from("artworks")
+            .select("title, media_url")
+            .eq("id", item.item_id)
+            .eq("status", "public")
             .maybeSingle();
 
           if (artwork) {
@@ -58,16 +58,16 @@ export function useRecentlyViewed() {
               id: item.id,
               item_type: itemType,
               item_id: item.item_id,
-              viewed_at: item.viewed_at || '',
+              viewed_at: item.viewed_at || "",
               title: artwork.title,
               imageUrl: artwork.media_url,
             });
           }
-        } else if (itemType === 'artist') {
+        } else if (itemType === "artist") {
           const { data: artist } = await supabase
-            .from('public_profiles')
-            .select('full_name, avatar_url')
-            .eq('id', item.item_id)
+            .from("public_profiles")
+            .select("full_name, avatar_url")
+            .eq("id", item.item_id)
             .maybeSingle();
 
           if (artist) {
@@ -75,7 +75,7 @@ export function useRecentlyViewed() {
               id: item.id,
               item_type: itemType,
               item_id: item.item_id,
-              viewed_at: item.viewed_at || '',
+              viewed_at: item.viewed_at || "",
               name: artist.full_name,
               avatarUrl: artist.avatar_url,
             });
@@ -85,7 +85,7 @@ export function useRecentlyViewed() {
 
       setItems(enrichedItems);
     } catch (err) {
-      console.error('Error fetching recently viewed:', err);
+      console.error("Error fetching recently viewed:", err);
     } finally {
       setLoading(false);
     }
@@ -96,14 +96,13 @@ export function useRecentlyViewed() {
   }, [fetchItems]);
 
   // Track a view
-  const trackView = useCallback(async (itemType: 'artwork' | 'artist', itemId: string) => {
-    if (!user?.id) return;
+  const trackView = useCallback(
+    async (itemType: "artwork" | "artist", itemId: string) => {
+      if (!user?.id) return;
 
-    try {
-      // Upsert to update viewed_at if exists, or insert new
-      const { error } = await supabase
-        .from('recently_viewed')
-        .upsert(
+      try {
+        // Upsert to update viewed_at if exists, or insert new
+        const { error } = await supabase.from("recently_viewed").upsert(
           {
             user_id: user.id,
             item_type: itemType,
@@ -111,18 +110,20 @@ export function useRecentlyViewed() {
             viewed_at: new Date().toISOString(),
           },
           {
-            onConflict: 'user_id,item_type,item_id',
-          }
+            onConflict: "user_id,item_type,item_id",
+          },
         );
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Refresh the list
-      fetchItems();
-    } catch (err) {
-      console.error('Error tracking view:', err);
-    }
-  }, [user?.id, fetchItems]);
+        // Refresh the list
+        fetchItems();
+      } catch (err) {
+        console.error("Error tracking view:", err);
+      }
+    },
+    [user?.id, fetchItems],
+  );
 
   // Clear all recently viewed
   const clearAll = useCallback(async () => {
@@ -130,15 +131,15 @@ export function useRecentlyViewed() {
 
     try {
       const { error } = await supabase
-        .from('recently_viewed')
+        .from("recently_viewed")
         .delete()
-        .eq('user_id', user.id);
+        .eq("user_id", user.id);
 
       if (error) throw error;
 
       setItems([]);
     } catch (err) {
-      console.error('Error clearing recently viewed:', err);
+      console.error("Error clearing recently viewed:", err);
     }
   }, [user?.id]);
 
@@ -150,3 +151,8 @@ export function useRecentlyViewed() {
     refresh: fetchItems,
   };
 }
+
+
+
+
+
