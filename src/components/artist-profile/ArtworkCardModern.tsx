@@ -5,7 +5,7 @@ import {
   Heart,
   Download,
   Lock,
-  Sparkles,
+  ShieldCheck,
   MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ interface ArtworkCardProps {
   isUnlocked?: boolean;
   onUnlock?: () => void;
   onRequestAccess?: () => void;
+  isUnlocking?: boolean;
 }
 
 /* ── Lock Overlay ── */
@@ -38,6 +39,7 @@ const LockOverlay = ({
   currency,
   onUnlock,
   onRequestAccess,
+  isUnlocking,
 }: {
   isPremium?: boolean;
   isExclusive?: boolean;
@@ -45,44 +47,54 @@ const LockOverlay = ({
   currency?: string;
   onUnlock: (e: React.MouseEvent) => void;
   onRequestAccess: (e: React.MouseEvent) => void;
+  isUnlocking?: boolean;
 }) => {
   const { format: formatCurrency } = useCurrencyFormat();
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 backdrop-blur-[2px]">
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[6px] transition-all duration-300 group-hover:backdrop-blur-[8px]">
       <div
-        className={`p-3 rounded-full ${
+        className={`p-4 rounded-full ${
           isExclusive
-            ? "bg-purple-500/90 shadow-lg shadow-purple-500/30"
-            : "bg-yellow-500/90 shadow-lg shadow-yellow-500/30"
-        } mb-3`}
+            ? "bg-gradient-to-br from-purple-500 to-indigo-600 shadow-xl shadow-purple-500/40 border border-purple-400/30"
+            : "bg-gradient-to-br from-yellow-400 to-amber-600 shadow-xl shadow-yellow-500/40 border border-yellow-300/30"
+        } mb-4 relative transition-transform duration-300 group-hover:scale-110`}
       >
-        <Lock className="w-6 h-6 text-white" />
+        <Lock className="w-7 h-7 text-white" />
       </div>
       {isPremium && !isExclusive && (
-        <div className="text-center px-4">
-          <p className="text-white font-semibold text-sm mb-2">
-            {formatCurrency(price, currency)} to Unlock
+        <div className="text-center px-5 max-w-[200px]">
+          <p className="text-white font-bold text-base mb-3 drop-shadow-md">
+            {formatCurrency(price, currency)}
           </p>
           <Button
             onClick={onUnlock}
+            disabled={isUnlocking}
             size="sm"
-            className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold shadow-lg"
+            className="w-full bg-white text-gray-900 hover:bg-white/90 font-bold shadow-2xl rounded-xl h-10 transition-all active:scale-95 border-none"
           >
-            <Sparkles className="w-4 h-4 mr-1" />
-            Unlock Now
+            {isUnlocking ? (
+              <>
+                <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mr-2" />
+                Processing...
+              </>
+            ) : (
+              <>
+                Unlock for {formatCurrency(price, currency)}
+              </>
+            )}
           </Button>
         </div>
       )}
       {isExclusive && (
-        <div className="text-center px-4">
-          <p className="text-white/90 text-xs mb-2">Exclusive Content</p>
+        <div className="text-center px-5 max-w-[200px]">
+          <p className="text-white/90 text-xs font-bold mb-3 uppercase tracking-wider drop-shadow-md">Exclusive Content</p>
           <Button
             onClick={onRequestAccess}
             size="sm"
-            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-lg"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-2xl rounded-xl h-10 transition-all active:scale-95 border-none"
           >
-            <MessageSquare className="w-4 h-4 mr-1" />
-            Request Access
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Join Now
           </Button>
         </div>
       )}
@@ -189,7 +201,7 @@ const CardFooter = ({
 const ArtworkCardModern: React.FC<ArtworkCardProps> = ({
   title, img, views, likes, price, isPremium, isExclusive, currency,
   isLiked, onLike, onViewFull, downloadable, onDownload,
-  isUnlocked = false, onUnlock, onRequestAccess,
+  isUnlocked = false, onUnlock, onRequestAccess, isUnlocking = false,
 }) => {
   const [hovered, setHovered] = useState(false);
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false);
@@ -247,13 +259,14 @@ const ArtworkCardModern: React.FC<ArtworkCardProps> = ({
             currency={currency}
             onUnlock={handleUnlock}
             onRequestAccess={handleRequestAccess}
+            isUnlocking={isUnlocking}
           />
         )}
 
         {showUnlockAnimation && (
           <div className="absolute inset-0 flex items-center justify-center bg-green-500/20 animate-pulse">
             <div className="text-white font-bold text-lg flex items-center gap-2 bg-green-600/90 px-4 py-2 rounded-full shadow-xl">
-              <Sparkles className="w-5 h-5" />
+              <ShieldCheck className="w-5 h-5" />
               Unlocked!
             </div>
           </div>
@@ -267,7 +280,7 @@ const ArtworkCardModern: React.FC<ArtworkCardProps> = ({
               {shouldBlur ? (
                 <><Lock size={13} /> {isExclusive ? "Exclusive" : "Premium"}</>
               ) : (
-                <><Sparkles size={13} /> {isExclusive ? "Exclusive Access" : "Unlocked"}</>
+                <><ShieldCheck size={13} /> {isExclusive ? "Exclusive Access" : "Unlocked"}</>
               )}
             </span>
           </div>

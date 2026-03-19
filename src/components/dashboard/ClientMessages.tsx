@@ -119,8 +119,8 @@ const ConversationItem = ({ conversation, isSelected, onClick }: { conversation:
 
 /* ── Message Bubble ── */
 /* ── Message Bubble ── */
-const MessageBubble = ({ message, isOwn, isLastInGroup, artistAvatar, artistName, userAvatar, onProfileClick }: {
-  message: Message; isOwn: boolean; isLastInGroup: boolean; artistAvatar?: string; artistName?: string; userAvatar?: string; onProfileClick?: () => void;
+const MessageBubble = ({ message, isOwn, isLastInGroup, artistAvatar, artistName, userAvatar, userInitial, onProfileClick }: {
+  message: Message; isOwn: boolean; isLastInGroup: boolean; artistAvatar?: string; artistName?: string; userAvatar?: string; userInitial?: string; onProfileClick?: () => void;
 }) => (
   <div className={cn("flex gap-2.5 sm:gap-3 animate-fade-in group", isOwn ? "flex-row-reverse" : "flex-row")}>
     <div className="w-8 shrink-0 self-end mb-1">
@@ -134,7 +134,7 @@ const MessageBubble = ({ message, isOwn, isLastInGroup, artistAvatar, artistName
         >
           <AvatarImage src={isOwn ? userAvatar : artistAvatar} className="object-cover" />
           <AvatarFallback className="text-[10px] bg-primary/5 text-primary">
-            {isOwn ? user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) : artistName?.charAt(0)}
+            {isOwn ? userInitial : artistName?.charAt(0)}
           </AvatarFallback>
         </Avatar>
       )}
@@ -607,6 +607,7 @@ const ClientMessages = () => {
                             artistAvatar={selectedConversation.artistAvatar} 
                             artistName={selectedConversation.artistName} 
                             userAvatar={user?.user_metadata?.avatar_url}
+                            userInitial={user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0)}
                             onProfileClick={() => handleViewProfile(isOwn ? user?.id : selectedConversation.artist_id)}
                           />
                         </div>

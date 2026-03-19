@@ -675,39 +675,19 @@ export default function ArtworkDetails({
                 </p>
               </div>
             )}
-
-            {/* ── VIEWS ───────────────────────────────────────────────── */}
-            <div className="px-3 sm:px-4 pb-2">
-              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                {viewCount.toLocaleString()} views
-              </p>
             </div>
 
-            {/* ── PRICE / PURCHASE CTA ────────────────────────────────── */}
-            {artwork.price > 0 &&
-              (artwork.accessType === "premium" ||
-                artwork.accessType === "exclusive") && (
-                <div className="px-3 sm:px-4 pb-3">
-                  <Button className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-md">
-                    <Crown className="h-4 w-4 mr-2" />
-                    Purchase for {format(artwork.price, artwork.currency)}
-                  </Button>
-                </div>
-              )}
+            {/* ── COMMENT BOTTOM SHEET ───────────────────────────────── */}
+            {id && (
+              <ArtworkFeedback
+                artworkId={id}
+                isOpen={commentsOpen}
+                onClose={() => setCommentsOpen(false)}
+              />
+            )}
           </div>
-
-          {/* ── COMMENT BOTTOM SHEET ───────────────────────────────── */}
-          {id && (
-            <ArtworkFeedback
-              artworkId={id}
-              isOpen={commentsOpen}
-              onClose={() => setCommentsOpen(false)}
-            />
-          )}
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
   );
 }
 

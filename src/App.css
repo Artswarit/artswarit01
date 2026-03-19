@@ -26,7 +26,6 @@ body {
   padding: 0;
   width: 100%;
   overflow-x: hidden;
-  padding-top: 64px; /* Same as navbar height */
 }
 
 @media (prefers-reduced-motion: no-preference) {

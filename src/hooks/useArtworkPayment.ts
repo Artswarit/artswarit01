@@ -11,6 +11,7 @@ declare global {
 
 interface ArtworkPaymentOptions {
   artworkId: string;
+  artistId?: string;
   onSuccess?: () => void;
   onFailure?: (error: string) => void;
 }
@@ -51,7 +52,7 @@ export function useArtworkPayment() {
   const { provider } = usePaymentGateway();
 
   const initiatePayment = useCallback(
-    async ({ artworkId, onSuccess, onFailure }: ArtworkPaymentOptions) => {
+    async ({ artworkId, artistId, onSuccess, onFailure }: ArtworkPaymentOptions) => {
       setLoading(true);
 
       try {
@@ -59,6 +60,7 @@ export function useArtworkPayment() {
         const {
           data: { session },
         } = await supabase.auth.getSession();
+
         if (!session) {
           throw new Error("Please log in to unlock this artwork");
         }
@@ -90,6 +92,10 @@ export function useArtworkPayment() {
         }
 
         // Create order via edge function
+        toast.info("Preparing payment gateway...", {
+          description: "This won't take long.",
+        });
+
         const { data, error } = await supabase.functions.invoke(
           "create-artwork-order",
           {
@@ -153,6 +159,7 @@ export function useArtworkPayment() {
           modal: {
             ondismiss: () => {
               setLoading(false);
+              onFailure?.("Payment cancelled");
               console.log("Payment modal closed");
             },
           },
@@ -170,8 +177,18 @@ export function useArtworkPayment() {
         razorpay.open();
       } catch (error: any) {
         console.error("Payment error:", error);
-        toast.error(error.message || "Payment failed");
-        onFailure?.(error.message);
+        
+        let errorMessage = error.message || "Payment failed";
+        if (errorMessage.includes("credentials not configured") || errorMessage.includes("Razorpay Key ID missing")) {
+          errorMessage = "Razorpay is not configured for this account yet. Please set up your payment keys in the settings.";
+          toast.error("Config Required", {
+            description: "Razorpay keys are missing. If you're an artist, set them in your dashboard.",
+          });
+        } else {
+          toast.error(errorMessage);
+        }
+        
+        onFailure?.(errorMessage);
       } finally {
         setLoading(false);
       }

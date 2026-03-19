@@ -285,8 +285,8 @@ const ArtistDashboard = () => {
             {/* Mobile scroll indicator gradient */}
             <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-gray-50/50 dark:from-background to-transparent z-10 pointer-events-none md:hidden" />
 
-            <div className="overflow-x-auto pb-4 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-              <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex sm:flex sm:flex-wrap lg:grid lg:grid-cols-5 xl:grid-cols-10 gap-2 p-1.5 rounded-[1.5rem] shadow-xl border border-border/40 min-w-full sm:min-w-0 h-auto min-h-[80px] sm:min-h-0">
+            <div className="overflow-x-auto pb-4 -mx-3 px-3 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory scroll-smooth relative z-20">
+              <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex flex-nowrap items-center gap-2 p-1.5 rounded-[1.5rem] shadow-xl border border-border/40 w-max sm:min-w-0 h-auto sm:min-h-0">
                 {tabs.map((tabItem) => {
                   const Icon = tabItem.icon;
                   const isDisabled =
