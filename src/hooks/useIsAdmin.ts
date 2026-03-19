@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,3 +40,8 @@ export function useIsAdmin() {
   }, [user]);
   return { isAdmin, loading };
 }
+
+
+
+
+

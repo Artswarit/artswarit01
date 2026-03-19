@@ -1,8 +1,8 @@
-
 #root {
+  max-width: none;
   margin: 0;
   padding: 0;
-  text-align: center;
+  text-align: left;
   width: 100%;
 }
 
@@ -26,7 +26,6 @@ body {
   padding: 0;
   width: 100%;
   overflow-x: hidden;
-  /* Add padding-top to account for fixed navbar */
   padding-top: 64px; /* Same as navbar height */
 }
 
@@ -34,13 +33,4 @@ body {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
-}
-
-/* Remove #root styling from App.css that might conflict */
-#root {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  text-align: left;
-  width: 100%;
 }

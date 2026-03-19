@@ -1,43 +1,48 @@
-
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, X } from 'lucide-react';
-import { useArtworks } from '@/hooks/useArtworks';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Upload, X } from "lucide-react";
+import { useArtworks } from "@/hooks/useArtworks";
 
 interface ArtworkUploadProps {
   onClose?: () => void;
 }
 
 const categories = [
-  'Digital Art',
-  'Photography',
-  'Painting',
-  'Illustration',
-  'Sculpture',
-  'Mixed Media',
-  'Abstract',
-  'Portrait',
-  'Landscape',
-  'Street Art'
+  "Digital Art",
+  "Photography",
+  "Painting",
+  "Illustration",
+  "Sculpture",
+  "Mixed Media",
+  "Abstract",
+  "Portrait",
+  "Landscape",
+  "Street Art",
 ];
 
 const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
   const { uploadArtwork, loading } = useArtworks();
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '',
-    tags: '',
-    price: '',
+    title: "",
+    description: "",
+    category: "",
+    tags: "",
+    price: "",
     is_for_sale: false,
     is_pinned: false,
-    release_date: '',
+    release_date: "",
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -61,19 +66,22 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedFile) {
       return;
     }
 
-    const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-    
+    const tagsArray = formData.tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
+
     const result = await uploadArtwork({
       title: formData.title,
       description: formData.description,
       category: formData.category,
       tags: tagsArray,
-      price: formData.price ? parseFloat(formData.price) : undefined,
+      price: formData.price ? Number.parseFloat(formData.price) : undefined,
       is_for_sale: formData.is_for_sale,
       is_pinned: formData.is_pinned,
       release_date: formData.release_date || undefined,
@@ -83,14 +91,14 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
     if (!result?.error) {
       // Reset form
       setFormData({
-        title: '',
-        description: '',
-        category: '',
-        tags: '',
-        price: '',
+        title: "",
+        description: "",
+        category: "",
+        tags: "",
+        price: "",
         is_for_sale: false,
         is_pinned: false,
-        release_date: '',
+        release_date: "",
       });
       handleRemoveFile();
       onClose?.();
@@ -119,7 +127,9 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
                 <Upload className="mx-auto h-12 w-12 text-gray-400" />
                 <div className="mt-2">
                   <label htmlFor="file" className="cursor-pointer">
-                    <span className="text-primary hover:text-primary/90">Upload a file</span>
+                    <span className="text-primary hover:text-primary/90">
+                      Upload a file
+                    </span>
                     <input
                       id="file"
                       type="file"
@@ -129,7 +139,9 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
                     />
                   </label>
                 </div>
-                <p className="text-sm text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                <p className="text-sm text-gray-500">
+                  PNG, JPG, GIF up to 10MB
+                </p>
               </div>
             ) : (
               <div className="relative">
@@ -157,7 +169,9 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               required
               placeholder="Enter artwork title"
             />
@@ -169,7 +183,9 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Describe your artwork"
               rows={3}
             />
@@ -178,7 +194,12 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
           {/* Category */}
           <div className="space-y-2">
             <Label>Category</Label>
-            <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+            <Select
+              value={formData.category}
+              onValueChange={(value) =>
+                setFormData({ ...formData, category: value })
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
@@ -198,7 +219,9 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
             <Input
               id="tags"
               value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, tags: e.target.value })
+              }
               placeholder="Enter tags separated by commas"
             />
           </div>
@@ -209,7 +232,9 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
               <Checkbox
                 id="is_for_sale"
                 checked={formData.is_for_sale}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_for_sale: !!checked })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, is_for_sale: !!checked })
+                }
               />
               <Label htmlFor="is_for_sale">For Sale</Label>
             </div>
@@ -220,7 +245,9 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
                   step="0.01"
                   min="0"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
                   placeholder="Price ($)"
                 />
               </div>
@@ -232,7 +259,9 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
             <Checkbox
               id="is_pinned"
               checked={formData.is_pinned}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_pinned: !!checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, is_pinned: !!checked })
+              }
             />
             <Label htmlFor="is_pinned">Pin to top of profile</Label>
           </div>
@@ -244,12 +273,18 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
               id="release_date"
               type="datetime-local"
               value={formData.release_date}
-              onChange={(e) => setFormData({ ...formData, release_date: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, release_date: e.target.value })
+              }
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading || !selectedFile}>
-            {loading ? 'Uploading...' : 'Upload Artwork'}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading || !selectedFile}
+          >
+            {loading ? "Uploading..." : "Upload Artwork"}
           </Button>
         </form>
       </CardContent>
@@ -258,3 +293,8 @@ const ArtworkUpload = ({ onClose }: ArtworkUploadProps) => {
 };
 
 export default ArtworkUpload;
+
+
+
+
+

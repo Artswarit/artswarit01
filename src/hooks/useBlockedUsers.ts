@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface BlockedUser {
   id: string;
@@ -31,29 +31,29 @@ export function useBlockedUsers() {
 
     try {
       const { data, error } = await supabase
-        .from('user_blocks')
-        .select('*')
-        .eq('blocker_id', user.id)
-        .order('created_at', { ascending: false });
+        .from("user_blocks")
+        .select("*")
+        .eq("blocker_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      const userIds = (data || []).map(b => b.blocked_id);
+      const userIds = (data || []).map((b) => b.blocked_id);
       setBlockedUserIds(new Set(userIds));
 
       // Enrich with user data
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
-          .from('public_profiles')
-          .select('id, full_name, avatar_url')
-          .in('id', userIds);
+          .from("public_profiles")
+          .select("id, full_name, avatar_url")
+          .in("id", userIds);
 
         const profileMap: Record<string, any> = {};
-        (profiles || []).forEach(p => {
+        (profiles || []).forEach((p) => {
           if (p.id) profileMap[p.id] = p;
         });
 
-        const enriched: BlockedUser[] = (data || []).map(block => {
+        const enriched: BlockedUser[] = (data || []).map((block) => {
           const profile = profileMap[block.blocked_id];
           return {
             id: block.id,
@@ -70,7 +70,7 @@ export function useBlockedUsers() {
         setBlockedUsers([]);
       }
     } catch (err) {
-      console.error('Error fetching blocked users:', err);
+      console.error("Error fetching blocked users:", err);
     } finally {
       setLoading(false);
     }
@@ -81,96 +81,103 @@ export function useBlockedUsers() {
   }, [fetchBlockedUsers]);
 
   // Check if a user is blocked
-  const isUserBlocked = useCallback((userId: string) => {
-    return blockedUserIds.has(userId);
-  }, [blockedUserIds]);
+  const isUserBlocked = useCallback(
+    (userId: string) => {
+      return blockedUserIds.has(userId);
+    },
+    [blockedUserIds],
+  );
 
   // Block a user
-  const blockUser = useCallback(async (userId: string, reason?: string) => {
-    if (!user?.id) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to block users.",
-      });
-      return false;
-    }
+  const blockUser = useCallback(
+    async (userId: string, reason?: string) => {
+      if (!user?.id) {
+        toast({
+          title: "Sign in required",
+          description: "Please sign in to block users.",
+        });
+        return false;
+      }
 
-    if (userId === user.id) {
-      toast({
-        title: "Cannot block yourself",
-        description: "You cannot block your own account.",
-        variant: "destructive",
-      });
-      return false;
-    }
+      if (userId === user.id) {
+        toast({
+          title: "Cannot block yourself",
+          description: "You cannot block your own account.",
+          variant: "destructive",
+        });
+        return false;
+      }
 
-    try {
-      const { error } = await supabase
-        .from('user_blocks')
-        .insert({
+      try {
+        const { error } = await supabase.from("user_blocks").insert({
           blocker_id: user.id,
           blocked_id: userId,
           reason,
         });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setBlockedUserIds(prev => new Set(prev).add(userId));
-      
-      toast({
-        title: "User blocked",
-        description: "You will no longer see content from this user.",
-      });
+        setBlockedUserIds((prev) => new Set(prev).add(userId));
 
-      fetchBlockedUsers();
-      return true;
-    } catch (err) {
-      console.error('Error blocking user:', err);
-      toast({
-        title: "Error",
-        description: "Failed to block user.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  }, [user?.id, toast, fetchBlockedUsers]);
+        toast({
+          title: "User blocked",
+          description: "You will no longer see content from this user.",
+        });
+
+        fetchBlockedUsers();
+        return true;
+      } catch (err) {
+        console.error("Error blocking user:", err);
+        toast({
+          title: "Error",
+          description: "Failed to block user.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    },
+    [user?.id, toast, fetchBlockedUsers],
+  );
 
   // Unblock a user
-  const unblockUser = useCallback(async (userId: string) => {
-    if (!user?.id) return false;
+  const unblockUser = useCallback(
+    async (userId: string) => {
+      if (!user?.id) return false;
 
-    try {
-      const { error } = await supabase
-        .from('user_blocks')
-        .delete()
-        .eq('blocker_id', user.id)
-        .eq('blocked_id', userId);
+      try {
+        const { error } = await supabase
+          .from("user_blocks")
+          .delete()
+          .eq("blocker_id", user.id)
+          .eq("blocked_id", userId);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setBlockedUserIds(prev => {
-        const next = new Set(prev);
-        next.delete(userId);
-        return next;
-      });
+        setBlockedUserIds((prev) => {
+          const next = new Set(prev);
+          next.delete(userId);
+          return next;
+        });
 
-      toast({
-        title: "User unblocked",
-        description: "You can now see content from this user.",
-      });
+        toast({
+          title: "User unblocked",
+          description: "You can now see content from this user.",
+        });
 
-      fetchBlockedUsers();
-      return true;
-    } catch (err) {
-      console.error('Error unblocking user:', err);
-      toast({
-        title: "Error",
-        description: "Failed to unblock user.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  }, [user?.id, toast, fetchBlockedUsers]);
+        fetchBlockedUsers();
+        return true;
+      } catch (err) {
+        console.error("Error unblocking user:", err);
+        toast({
+          title: "Error",
+          description: "Failed to unblock user.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    },
+    [user?.id, toast, fetchBlockedUsers],
+  );
 
   return {
     blockedUsers,
@@ -182,3 +189,8 @@ export function useBlockedUsers() {
     refresh: fetchBlockedUsers,
   };
 }
+
+
+
+
+

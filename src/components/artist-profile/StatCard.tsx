@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Users, Heart, Eye, Star } from "lucide-react";
 
@@ -46,9 +45,16 @@ const StatCard: React.FC<StatCardProps> = ({ type, value, label }) => {
           {formatValue(value)}
         </span>
       </div>
-      <span className="text-white/80 text-[10px] sm:text-xs leading-tight">{label}</span>
+      <span className="text-white/80 text-[10px] sm:text-xs leading-tight">
+        {label}
+      </span>
     </div>
   );
 };
 
 export default StatCard;
+
+
+
+
+

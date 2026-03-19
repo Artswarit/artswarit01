@@ -1,18 +1,32 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Bell, Check, Info, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import LogoLoader from '@/components/ui/LogoLoader';
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Bell,
+  Check,
+  Info,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Trash2,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   is_read: boolean;
   created_at: string;
 }
@@ -29,20 +43,22 @@ const NotificationCenter = () => {
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('notifications').select('*').eq('user_id', user?.id).order('created_at', {
-        ascending: false
-      }).limit(200);
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", {
+          ascending: false,
+        })
+        .limit(200);
       if (error) {
-        console.error('Error fetching notifications:', error);
+        console.error("Error fetching notifications:", error);
         setNotifications([]);
         return;
       }
-      setNotifications(data as Notification[] || []);
+      setNotifications((data as Notification[]) || []);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
       setNotifications([]);
     } finally {
       setLoading(false);
@@ -58,14 +74,21 @@ const NotificationCenter = () => {
   // Real-time subscription for notifications
   useEffect(() => {
     if (!user?.id) return;
-    const channel = supabase.channel(`notification-center-${user.id}`).on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'notifications',
-      filter: `user_id=eq.${user.id}`
-    }, () => {
-      fetchNotifications();
-    }).subscribe();
+    const channel = supabase
+      .channel(`notification-center-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchNotifications();
+        },
+      )
+      .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
@@ -77,7 +100,7 @@ const NotificationCenter = () => {
   const handleLoadMore = () => {
     setLoadingMore(true);
     setTimeout(() => {
-      setDisplayCount(prev => prev + ITEMS_PER_PAGE);
+      setDisplayCount((prev) => prev + ITEMS_PER_PAGE);
       setLoadingMore(false);
     }, 300);
   };
@@ -85,58 +108,84 @@ const NotificationCenter = () => {
   const markAsRead = async (notificationId: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from("notifications")
         .update({ is_read: true })
-        .eq('id', notificationId);
+        .eq("id", notificationId);
 
       if (error) {
-        console.error('Error marking notification as read:', error);
+        console.error("Error marking notification as read:", error);
         return;
       }
 
-      setNotifications(prev =>
-        prev.map(notif =>
-          notif.id === notificationId ? { ...notif, is_read: true } : notif
-        )
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.id === notificationId ? { ...notif, is_read: true } : notif,
+        ),
       );
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
+    }
+  };
+
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from("notifications")
+        .delete()
+        .eq("id", notificationId);
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to delete notification",
+        });
+        return;
+      }
+
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+      toast({
+        title: "Deleted",
+        description: "Notification removed",
+      });
+    } catch (error) {
+      console.error("Error deleting notification:", error);
     }
   };
 
   const markAllAsRead = async () => {
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from("notifications")
         .update({ is_read: true })
-        .eq('user_id', user?.id)
-        .eq('is_read', false);
+        .eq("user_id", user?.id)
+        .eq("is_read", false);
 
       if (error) {
-        console.error('Error marking all notifications as read:', error);
+        console.error("Error marking all notifications as read:", error);
         return;
       }
 
-      setNotifications(prev =>
-        prev.map(notif => ({ ...notif, is_read: true }))
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, is_read: true })),
       );
 
       toast({
         title: "Success",
-        description: "All notifications marked as read"
+        description: "All notifications marked as read",
       });
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     }
   };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'success':
+      case "success":
         return <CheckCircle className="h-5 w-5 text-emerald-500" />;
-      case 'warning':
+      case "warning":
         return <AlertTriangle className="h-5 w-5 text-amber-500" />;
-      case 'error':
+      case "error":
         return <XCircle className="h-5 w-5 text-destructive" />;
       default:
         return <Info className="h-5 w-5 text-primary" />;
@@ -145,18 +194,18 @@ const NotificationCenter = () => {
 
   const getNotificationBadgeColor = (type: string) => {
     switch (type) {
-      case 'success':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400';
-      case 'warning':
-        return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400';
-      case 'error':
-        return 'bg-destructive/10 text-destructive';
+      case "success":
+        return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
+      case "warning":
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
+      case "error":
+        return "bg-destructive/10 text-destructive";
       default:
-        return 'bg-primary/10 text-primary';
+        return "bg-primary/10 text-primary";
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   if (loading) {
     return (
@@ -200,8 +249,8 @@ const NotificationCenter = () => {
               key={notification.id}
               className={`transition-all ${
                 !notification.is_read
-                  ? 'border-l-4 border-l-primary bg-primary/5'
-                  : 'border-l-4 border-l-muted'
+                  ? "border-l-4 border-l-primary bg-primary/5"
+                  : "border-l-4 border-l-muted"
               }`}
             >
               <CardHeader className="pb-3">
@@ -209,7 +258,9 @@ const NotificationCenter = () => {
                   <div className="flex items-start gap-3">
                     {getNotificationIcon(notification.type)}
                     <div>
-                      <CardTitle className="text-base">{notification.title}</CardTitle>
+                      <CardTitle className="text-base">
+                        {notification.title}
+                      </CardTitle>
                       <CardDescription className="mt-1">
                         {notification.message}
                       </CardDescription>
@@ -222,16 +273,28 @@ const NotificationCenter = () => {
                     >
                       {notification.type}
                     </Badge>
-                    {!notification.is_read && (
+                    <div className="flex items-center gap-1">
+                      {!notification.is_read && (
+                        <Button
+                          onClick={() => markAsRead(notification.id)}
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 hover:text-emerald-500"
+                          title="Mark as read"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => deleteNotification(notification.id)}
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 hover:text-destructive"
+                        title="Delete"
                       >
-                        <Check className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </div>
               </CardHeader>
@@ -242,11 +305,11 @@ const NotificationCenter = () => {
               </CardContent>
             </Card>
           ))}
-          
+
           {hasMore && (
             <div className="flex justify-center pt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleLoadMore}
                 disabled={loadingMore}
               >
@@ -261,3 +324,8 @@ const NotificationCenter = () => {
 };
 
 export default NotificationCenter;
+
+
+
+
+

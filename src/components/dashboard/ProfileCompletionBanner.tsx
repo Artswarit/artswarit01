@@ -7,8 +7,11 @@ interface ProfileCompletionBannerProps {
   onGoToProfile: () => void;
 }
 
-const ProfileCompletionBanner = ({ onGoToProfile }: ProfileCompletionBannerProps) => {
-  const { isComplete, completionPercentage, missingFields, loading } = useProfileCompletion();
+const ProfileCompletionBanner = ({
+  onGoToProfile,
+}: ProfileCompletionBannerProps) => {
+  const { isComplete, completionPercentage, missingFields, loading } =
+    useProfileCompletion();
 
   if (loading || isComplete) {
     return null;
@@ -22,13 +25,16 @@ const ProfileCompletionBanner = ({ onGoToProfile }: ProfileCompletionBannerProps
             <AlertCircle className="h-5 w-5 text-amber-600" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-foreground">Complete Your Profile</h3>
+            <h3 className="font-semibold text-foreground">
+              Complete Your Profile
+            </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Your profile is {completionPercentage}% complete. Add missing information to get discovered by clients.
+              Your profile is {completionPercentage}% complete. Add missing
+              information to get discovered by clients.
             </p>
             {missingFields.length > 0 && (
               <p className="text-sm text-amber-600 mt-2">
-                Missing: {missingFields.join(', ')}
+                Missing: {missingFields.join(", ")}
               </p>
             )}
             <div className="mt-3">
@@ -36,7 +42,7 @@ const ProfileCompletionBanner = ({ onGoToProfile }: ProfileCompletionBannerProps
             </div>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={onGoToProfile}
           className="shrink-0 bg-amber-600 hover:bg-amber-700 text-white"
         >
@@ -49,3 +55,8 @@ const ProfileCompletionBanner = ({ onGoToProfile }: ProfileCompletionBannerProps
 };
 
 export default ProfileCompletionBanner;
+
+
+
+
+

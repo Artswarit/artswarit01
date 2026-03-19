@@ -31,15 +31,13 @@ const SignupForm = ({
   handleSubmit,
   loading = false
 }: SignupFormProps) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
   // Pre-select role from URL parameter
   useEffect(() => {
-    const role = searchParams.get('role');
-    if (role && (role === 'artist' || role === 'client') && !formData.role) {
+    const role = searchParams.get("role");
+    if (role && (role === "artist" || role === "client") && !formData.role) {
       handleRoleChange(role);
     }
   }, [searchParams, formData.role, handleRoleChange]);
@@ -66,7 +64,8 @@ const SignupForm = ({
     if (!formData.acceptTerms) {
       toast({
         title: "Terms not accepted",
-        description: "Please accept the Terms of Service and Privacy Policy to continue.",
+        description:
+        "Please accept the Terms of Service and Privacy Policy to continue.",
         variant: "destructive"
       });
       return;
@@ -81,78 +80,154 @@ const SignupForm = ({
     }
     handleSubmit(event);
   };
-  return <form className="space-y-4 sm:space-y-6" onSubmit={validateAndSubmit}>
+  return (
+    <form className="space-y-4 sm:space-y-6" onSubmit={validateAndSubmit}>
       <div className="space-y-3 sm:space-y-4">
         <div>
-          <Label htmlFor="name" className="text-sm sm:text-base">Full name</Label>
-          <Input id="name" name="name" type="text" placeholder="John Doe" value={formData.name} onChange={handleChange} required className="mt-1 h-11 sm:h-10 text-base" disabled={loading} />
+          <Label htmlFor="name" className="text-sm sm:text-base">
+            Full name
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="John Doe"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="mt-1 h-11 sm:h-10 text-base"
+            disabled={loading} />
+          
         </div>
         <div>
-          <Label htmlFor="email" className="text-sm sm:text-base">Email address</Label>
-          <Input id="email" name="email" type="email" placeholder="name@example.com" value={formData.email} onChange={handleChange} required className="mt-1 h-11 sm:h-10 text-base" disabled={loading} />
+          <Label htmlFor="email" className="text-sm sm:text-base">
+            Email address
+          </Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="name@example.com"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="mt-1 h-11 sm:h-10 text-base"
+            disabled={loading} />
+          
         </div>
         <div>
-          <Label htmlFor="password" className="text-sm sm:text-base">Password</Label>
-          <Input id="password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required className="mt-1 h-11 sm:h-10 text-base" disabled={loading} />
+          <Label htmlFor="password" className="text-sm sm:text-base">
+            Password
+          </Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="mt-1 h-11 sm:h-10 text-base"
+            disabled={loading} />
+          
         </div>
         <div>
-          <Label htmlFor="confirmPassword" className="text-sm sm:text-base">Confirm password</Label>
-          <Input id="confirmPassword" name="confirmPassword" type="password" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} required className="mt-1 h-11 sm:h-10 text-base" disabled={loading} />
+          <Label htmlFor="confirmPassword" className="text-sm sm:text-base">
+            Confirm password
+          </Label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            className="mt-1 h-11 sm:h-10 text-base"
+            disabled={loading} />
+          
         </div>
         <div>
           <div className="mb-3">
-            <Label className="text-sm sm:text-base">I want to join as <span className="text-destructive">*</span></Label>
+            <Label className="text-sm sm:text-base">
+              I want to join as <span className="text-destructive">*</span>
+            </Label>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div onClick={() => !loading && handleRoleChange('artist')} className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.role === 'artist' ? 'border-primary bg-primary/5 shadow-md' : 'border-muted hover:border-primary/50 hover:bg-muted/50'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <div
+              onClick={() => !loading && handleRoleChange("artist")}
+              className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.role === "artist" ? "border-primary bg-primary/5 shadow-md" : "border-muted hover:border-primary/50 hover:bg-muted/50"} ${loading ? "opacity-50 cursor-not-allowed" : ""}`} role="button" tabIndex={0} onKeyDown={(e) => {if (e.key === "Enter" || e.key === " ") {e.preventDefault();(() => !loading && handleRoleChange("artist"))(e);}}}>
+              
               <div className="flex flex-col items-center text-center gap-2">
-                <div className={`p-2 rounded-full ${formData.role === 'artist' ? 'bg-primary/20' : 'bg-muted'}`}>
-                  <Palette className={`h-5 w-5 ${formData.role === 'artist' ? 'text-primary' : 'text-muted-foreground'}`} />
+                <div
+                  className={`p-2 rounded-full ${formData.role === "artist" ? "bg-primary/20" : "bg-muted"}`}>
+                  
+                  <Palette
+                    className={`h-5 w-5 ${formData.role === "artist" ? "text-primary" : "text-muted-foreground"}`} />
+                  
                 </div>
                 <span className="font-semibold">Artist</span>
                 <span className="text-xs text-muted-foreground">
                   Showcase & earn from your creativity
                 </span>
-                {formData.role === 'artist' && <div className="absolute top-2 right-2">
-                    
-                  </div>}
+                {formData.role === "artist" &&
+                <div className="absolute top-2 right-2"></div>
+                }
               </div>
             </div>
-            
-            <div onClick={() => !loading && handleRoleChange('client')} className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.role === 'client' ? 'border-primary bg-primary/5 shadow-md' : 'border-muted hover:border-primary/50 hover:bg-muted/50'} ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+
+            <div
+              onClick={() => !loading && handleRoleChange("client")}
+              className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.role === "client" ? "border-primary bg-primary/5 shadow-md" : "border-muted hover:border-primary/50 hover:bg-muted/50"} ${loading ? "opacity-50 cursor-not-allowed" : ""}`} role="button" tabIndex={0} onKeyDown={(e) => {if (e.key === "Enter" || e.key === " ") {e.preventDefault();(() => !loading && handleRoleChange("client"))(e);}}}>
+              
               <div className="flex flex-col items-center text-center gap-2">
-                <div className={`p-2 rounded-full ${formData.role === 'client' ? 'bg-primary/20' : 'bg-muted'}`}>
-                  <Users className={`h-5 w-5 ${formData.role === 'client' ? 'text-primary' : 'text-muted-foreground'}`} />
+                <div
+                  className={`p-2 rounded-full ${formData.role === "client" ? "bg-primary/20" : "bg-muted"}`}>
+                  
+                  <Users
+                    className={`h-5 w-5 ${formData.role === "client" ? "text-primary" : "text-muted-foreground"}`} />
+                  
                 </div>
                 <span className="font-semibold">Client</span>
                 <span className="text-xs text-muted-foreground">
                   Find & hire talented artists
                 </span>
-                {formData.role === 'client' && <div className="absolute top-2 right-2">
+                {formData.role === "client" &&
+                <div className="absolute top-2 right-2">
                     <Sparkles className="h-4 w-4 text-yellow-500" />
-                  </div>}
+                  </div>
+                }
               </div>
             </div>
           </div>
-          
+
           {/* Artist info hint */}
-          {formData.role === 'artist'}
+          {formData.role === "artist"}
         </div>
         <div className="flex items-center space-x-2 py-1">
-          <Checkbox 
-            id="terms" 
-            checked={formData.acceptTerms} 
-            onCheckedChange={handleTermsChange} 
-            required 
-            disabled={loading}
-          />
-          <Label htmlFor="terms" className="text-xs sm:text-sm font-medium leading-none cursor-pointer flex-1">
+          <Checkbox
+            id="terms"
+            checked={formData.acceptTerms}
+            onCheckedChange={handleTermsChange}
+            required
+            disabled={loading} />
+          
+          <Label
+            htmlFor="terms"
+            className="text-xs sm:text-sm font-medium leading-none cursor-pointer flex-1">
+            
             I accept the{" "}
-            <Link to="/terms-of-service" className="text-primary hover:underline font-bold">
+            <Link
+              to="/terms-of-service"
+              className="text-primary hover:underline font-bold">
+              
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link to="/privacy-policy" className="text-primary hover:underline font-bold">
+            <Link
+              to="/privacy-policy"
+              className="text-primary hover:underline font-bold">
+              
               Privacy Policy
             </Link>
             <span className="text-destructive"> *</span>
@@ -160,9 +235,18 @@ const SignupForm = ({
         </div>
       </div>
 
-      <Button type="submit" className="w-full min-h-[44px] text-base font-medium" disabled={loading}>
+      <Button
+        type="submit"
+        className="w-full min-h-[44px] text-base font-medium"
+        disabled={loading}>
+        
         {loading ? "Creating account..." : "Create account"}
       </Button>
-    </form>;
+    </form>);
+
 };
 export default SignupForm;
+
+
+
+

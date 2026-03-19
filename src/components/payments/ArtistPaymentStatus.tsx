@@ -1,13 +1,26 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useArtistPaymentAccount } from '@/hooks/useArtistPaymentAccount';
-import { EnablePaymentsDialog } from './EnablePaymentsDialog';
-import { CreditCard, CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useArtistPaymentAccount } from "@/hooks/useArtistPaymentAccount";
+import { EnablePaymentsDialog } from "./EnablePaymentsDialog";
+import {
+  CreditCard,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 
 export function ArtistPaymentStatus() {
-  const { account, loading, isPayoutsEnabled, kycStatus } = useArtistPaymentAccount();
+  const { account, loading, isPayoutsEnabled, kycStatus } =
+    useArtistPaymentAccount();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   if (loading) {
@@ -29,8 +42,8 @@ export function ArtistPaymentStatus() {
         </Badge>
       );
     }
-    
-    if (kycStatus === 'submitted') {
+
+    if (kycStatus === "submitted") {
       return (
         <Badge className="bg-yellow-500/20 text-yellow-600 gap-1">
           <Clock className="h-3 w-3" />
@@ -38,7 +51,7 @@ export function ArtistPaymentStatus() {
         </Badge>
       );
     }
-    
+
     return (
       <Badge className="bg-muted text-muted-foreground gap-1">
         <AlertCircle className="h-3 w-3" />
@@ -60,8 +73,8 @@ export function ArtistPaymentStatus() {
           </div>
           <CardDescription>
             {isPayoutsEnabled
-              ? 'Your payment account is active. You can receive payouts for completed milestones.'
-              : 'Set up your payment account to receive payouts when clients pay for milestones.'}
+              ? "Your payment account is active. You can receive payouts for completed milestones."
+              : "Set up your payment account to receive payouts when clients pay for milestones."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,22 +82,31 @@ export function ArtistPaymentStatus() {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Account Name</span>
-                <span>{account?.bank_account_name || 'N/A'}</span>
+                <span>{account?.bank_account_name || "N/A"}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Account Number</span>
-                <span>****{account?.bank_account_number?.slice(-4) || 'N/A'}</span>
+                <span>
+                  ****{account?.bank_account_number?.slice(-4) || "N/A"}
+                </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Country</span>
-                <span>{account?.country || 'N/A'}</span>
+                <span>{account?.country || "N/A"}</span>
               </div>
-              <Button variant="outline" className="w-full mt-4 h-12 sm:h-10 min-h-[48px] sm:min-h-[40px]" onClick={() => setDialogOpen(true)}>
+              <Button
+                variant="outline"
+                className="w-full mt-4 h-12 sm:h-10 min-h-[48px] sm:min-h-[40px]"
+                onClick={() => setDialogOpen(true)}
+              >
                 Update Details
               </Button>
             </div>
           ) : (
-            <Button className="w-full h-12 sm:h-11 min-h-[48px] sm:min-h-[44px]" onClick={() => setDialogOpen(true)}>
+            <Button
+              className="w-full h-12 sm:h-11 min-h-[48px] sm:min-h-[44px]"
+              onClick={() => setDialogOpen(true)}
+            >
               Enable Payments
             </Button>
           )}
@@ -95,3 +117,8 @@ export function ArtistPaymentStatus() {
     </>
   );
 }
+
+
+
+
+

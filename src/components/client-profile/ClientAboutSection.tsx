@@ -1,9 +1,13 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  FileText, Briefcase, Target, Clock, 
-  MessageSquare, CheckSquare
+import {
+  FileText,
+  Briefcase,
+  Target,
+  Clock,
+  MessageSquare,
+  CheckSquare,
 } from "lucide-react";
 
 interface ClientAboutSectionProps {
@@ -12,13 +16,13 @@ interface ClientAboutSectionProps {
   workingStyle: string | null;
 }
 
-const ClientAboutSection: React.FC<ClientAboutSectionProps> = ({ 
-  bio, 
+const ClientAboutSection: React.FC<ClientAboutSectionProps> = ({
+  bio,
   projectTypes,
-  workingStyle
+  workingStyle,
 }) => {
   // Default project types based on common patterns
-  const defaultProjectTypes = ['Digital Art', 'Illustration', 'Design'];
+  const defaultProjectTypes = ["Digital Art", "Illustration", "Design"];
 
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50">
@@ -54,11 +58,13 @@ const ClientAboutSection: React.FC<ClientAboutSectionProps> = ({
             Typical Project Requests
           </h4>
           <div className="flex flex-wrap gap-2 pl-6">
-            {(projectTypes.length > 0 ? projectTypes : defaultProjectTypes).map((type, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
-                {type}
-              </Badge>
-            ))}
+            {(projectTypes.length > 0 ? projectTypes : defaultProjectTypes).map(
+              (type, index) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  {type}
+                </Badge>
+              ),
+            )}
           </div>
         </div>
 
@@ -93,7 +99,7 @@ const ClientAboutSection: React.FC<ClientAboutSectionProps> = ({
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                <span>{workingStyle || 'Prefers messaging for updates'}</span>
+                <span>{workingStyle || "Prefers messaging for updates"}</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
@@ -112,3 +118,8 @@ const ClientAboutSection: React.FC<ClientAboutSectionProps> = ({
 };
 
 export default ClientAboutSection;
+
+
+
+
+

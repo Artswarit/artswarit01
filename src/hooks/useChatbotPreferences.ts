@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 
 // Store/retrieve preferences in localStorage
@@ -22,10 +21,18 @@ export function useChatbotPreferences() {
   }, []);
 
   // Update single preference
-  const update = useCallback((newData: any) => {
-    const current = get();
-    set({ ...current, ...newData });
-  }, [get, set]);
+  const update = useCallback(
+    (newData: any) => {
+      const current = get();
+      set({ ...current, ...newData });
+    },
+    [get, set],
+  );
 
   return { get, set, update };
 }
+
+
+
+
+

@@ -17,7 +17,10 @@ import { Star } from "lucide-react";
 
 const reviewSchema = z.object({
   rating: z.number().min(1, "Please select a rating").max(5),
-  reviewText: z.string().max(1000, "Review must be less than 1000 characters").optional(),
+  reviewText: z
+    .string()
+    .max(1000, "Review must be less than 1000 characters")
+    .optional(),
 });
 
 interface LeaveReviewDialogProps {
@@ -46,8 +49,11 @@ const LeaveReviewDialog: React.FC<LeaveReviewDialogProps> = ({
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async () => {
-    const validation = reviewSchema.safeParse({ rating, reviewText: reviewText.trim() || undefined });
-    
+    const validation = reviewSchema.safeParse({
+      rating,
+      reviewText: reviewText.trim() || undefined,
+    });
+
     if (!validation.success) {
       toast({
         variant: "destructive",
@@ -82,15 +88,18 @@ const LeaveReviewDialog: React.FC<LeaveReviewDialogProps> = ({
     }
 
     // Create notification for the artist
-    const { error: notifError } = await supabase
-      .from("notifications")
-      .insert({
-        user_id: artistId,
-        type: "new_review",
-        title: "New Review Received",
-        message: `A client has left a ${rating}-star review on your profile.`,
-        metadata: { project_id: projectId, rating, review_id: newReview.id, artist_id: artistId },
-      });
+    const { error: notifError } = await supabase.from("notifications").insert({
+      user_id: artistId,
+      type: "new_review",
+      title: "New Review Received",
+      message: `A client has left a ${rating}-star review on your profile.`,
+      metadata: {
+        project_id: projectId,
+        rating,
+        review_id: newReview.id,
+        artist_id: artistId,
+      },
+    });
 
     if (notifError) {
       console.error("Failed to create notification:", notifError);
@@ -153,7 +162,11 @@ const LeaveReviewDialog: React.FC<LeaveReviewDialogProps> = ({
           </div>
         </div>
         <DialogFooter className="flex-col gap-2 sm:flex-row">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={saving}
+          >
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={saving || rating === 0}>
@@ -166,3 +179,8 @@ const LeaveReviewDialog: React.FC<LeaveReviewDialogProps> = ({
 };
 
 export default LeaveReviewDialog;
+
+
+
+
+

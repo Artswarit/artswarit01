@@ -1,41 +1,56 @@
-import { useState, useMemo } from 'react';
-import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
-import { useArtworks } from '@/hooks/useArtworks';
-import { useAuth } from '@/contexts/AuthContext';
-import { useArtistPlan } from '@/hooks/useArtistPlan';
-import { useFeatureGating } from '@/hooks/useFeatureGating';
-import { useRealAnalytics } from '@/hooks/useRealAnalytics';
-import { broadcastRefresh } from '@/lib/realtime-sync';
-import { Grid3X3, List, Plus, BarChart3, ImagePlus, FolderOpen, Pin, Lock, Crown } from 'lucide-react';
-import ArtworkUploadForm from './artwork/ArtworkUploadForm';
-import ArtworkEditModal from './artwork/ArtworkEditModal';
-import ArtworkSearchFilters from './artwork/ArtworkSearchFilters';
-import ArtworkBulkActions from './artwork/ArtworkBulkActions';
-import ArtworkAnalytics from './artwork/ArtworkAnalytics';
-import ArtworkManagementCard from './artwork/ArtworkManagementCard';
+import { useState, useMemo } from "react";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { useArtworks } from "@/hooks/useArtworks";
+import { useAuth } from "@/contexts/AuthContext";
+import { useArtistPlan } from "@/hooks/useArtistPlan";
+import { useFeatureGating } from "@/hooks/useFeatureGating";
+import { useRealAnalytics } from "@/hooks/useRealAnalytics";
+import { broadcastRefresh } from "@/lib/realtime-sync";
+import {
+  Grid3X3,
+  List,
+  Plus,
+  BarChart3,
+  ImagePlus,
+  FolderOpen,
+  Pin,
+  Lock,
+  Crown,
+} from "lucide-react";
+import ArtworkUploadForm from "./artwork/ArtworkUploadForm";
+import ArtworkEditModal from "./artwork/ArtworkEditModal";
+import ArtworkSearchFilters from "./artwork/ArtworkSearchFilters";
+import ArtworkBulkActions from "./artwork/ArtworkBulkActions";
+import ArtworkAnalytics from "./artwork/ArtworkAnalytics";
+import ArtworkManagementCard from "./artwork/ArtworkManagementCard";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Link } from 'react-router-dom';
-import LogoLoader from '@/components/ui/LogoLoader';
+} from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 const ArtworkManagement = () => {
   const { user } = useAuth();
   const { artworks, loading, error: fetchError, fetchArtworks } = useArtworks();
   const { toast } = useToast();
-  const { isProArtist, portfolioLimit, loading: gatingLoading, refresh: refreshGating } = useFeatureGating(user?.id);
+  const {
+    isProArtist,
+    portfolioLimit,
+    loading: gatingLoading,
+    refresh: refreshGating,
+  } = useFeatureGating(user?.id);
   const { analytics, loading: analyticsLoading } = useRealAnalytics();
-  
+
   const [selectedArtworks, setSelectedArtworks] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [editingArtwork, setEditingArtwork] = useState<any>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
@@ -43,12 +58,12 @@ const ArtworkManagement = () => {
   const [bulkLoading, setBulkLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filters, setFilters] = useState({
-    search: '',
-    category: 'all',
-    status: 'all',
-    type: 'all',
+    search: "",
+    category: "all",
+    status: "all",
+    type: "all",
     tags: [] as string[],
-    sortBy: 'newest',
+    sortBy: "newest",
   });
 
   // Handle upload button click with premium gating
@@ -76,49 +91,69 @@ const ArtworkManagement = () => {
       const searchTerm = filters.search.toLowerCase();
       filtered = filtered.filter(
         (artwork) =>
-          (artwork.title?.toLowerCase().includes(searchTerm)) ||
-          (artwork.description?.toLowerCase().includes(searchTerm)) ||
-          (artwork.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm)))
+          artwork.title?.toLowerCase().includes(searchTerm) ||
+          artwork.description?.toLowerCase().includes(searchTerm) ||
+          artwork.tags?.some((tag: string) =>
+            tag.toLowerCase().includes(searchTerm),
+          ),
       );
     }
 
-    if (filters.category !== 'all') {
-      filtered = filtered.filter((artwork) => artwork.category === filters.category);
+    if (filters.category !== "all") {
+      filtered = filtered.filter(
+        (artwork) => artwork.category === filters.category,
+      );
     }
 
-    if (filters.status !== 'all') {
-      filtered = filtered.filter((artwork) => artwork.status === filters.status);
+    if (filters.status !== "all") {
+      filtered = filtered.filter(
+        (artwork) => artwork.status === filters.status,
+      );
     }
 
-    if (filters.type !== 'all') {
-      filtered = filtered.filter((artwork) => artwork.media_type === filters.type);
+    if (filters.type !== "all") {
+      filtered = filtered.filter(
+        (artwork) => artwork.media_type === filters.type,
+      );
     }
 
     if (filters.tags.length > 0) {
       filtered = filtered.filter((artwork) =>
-        artwork.tags?.some((tag: string) => filters.tags.includes(tag))
+        artwork.tags?.some((tag: string) => filters.tags.includes(tag)),
       );
     }
 
     // Apply sorting based on filter
     switch (filters.sortBy) {
-      case 'oldest':
-        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      case "oldest":
+        filtered.sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        );
         break;
-      case 'most_liked':
-        filtered.sort((a, b) => (b.metadata?.likes_count || 0) - (a.metadata?.likes_count || 0));
+      case "most_liked":
+        filtered.sort(
+          (a, b) =>
+            (b.metadata?.likes_count || 0) - (a.metadata?.likes_count || 0),
+        );
         break;
-      case 'most_viewed':
-        filtered.sort((a, b) => (b.metadata?.views_count || 0) - (a.metadata?.views_count || 0));
+      case "most_viewed":
+        filtered.sort(
+          (a, b) =>
+            (b.metadata?.views_count || 0) - (a.metadata?.views_count || 0),
+        );
         break;
-      case 'price_high':
+      case "price_high":
         filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
         break;
-      case 'price_low':
+      case "price_low":
         filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
         break;
       default:
-        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        filtered.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
         break;
     }
 
@@ -161,84 +196,93 @@ const ArtworkManagement = () => {
     setBulkLoading(true);
     try {
       switch (action) {
-        case 'delete': {
+        case "delete": {
           // Parallel delete — previously this was a serial for-loop (N×RTT)
           await Promise.all(
-            selectedArtworks.map(artworkId =>
-              supabase.functions.invoke('delete-artwork-and-media', { body: { artworkId } })
-                .then(({ error }) => { if (error) throw error; })
-            )
+            selectedArtworks.map((artworkId) =>
+              supabase.functions
+                .invoke("delete-artwork-and-media", { body: { artworkId } })
+                .then(({ error }) => {
+                  if (error) throw error;
+                }),
+            ),
           );
           toast({
-            title: 'Artworks Deleted',
+            title: "Artworks Deleted",
             description: `${selectedArtworks.length} artwork(s) have been deleted.`,
           });
           setSelectedArtworks([]);
-          broadcastRefresh('artworks');
+          broadcastRefresh("artworks");
           fetchArtworks();
           break;
         }
-        case 'changeStatus': {
+        case "changeStatus": {
           const { error } = await supabase
-            .from('artworks')
+            .from("artworks")
             .update({ status: options.status })
-            .in('id', selectedArtworks);
+            .in("id", selectedArtworks);
           if (error) throw error;
           toast({
-            title: 'Status Updated',
+            title: "Status Updated",
             description: `${selectedArtworks.length} artwork(s) status changed to ${options.status}.`,
           });
-          broadcastRefresh('artworks');
+          broadcastRefresh("artworks");
           fetchArtworks();
           break;
         }
-        case 'archive': {
+        case "archive": {
           const { error } = await supabase
-            .from('artworks')
-            .update({ status: 'archived' })
-            .in('id', selectedArtworks);
+            .from("artworks")
+            .update({ status: "archived" })
+            .in("id", selectedArtworks);
           if (error) throw error;
           toast({
-            title: 'Artworks Archived',
+            title: "Artworks Archived",
             description: `${selectedArtworks.length} artwork(s) have been archived.`,
           });
           setSelectedArtworks([]);
-          broadcastRefresh('artworks');
+          broadcastRefresh("artworks");
           fetchArtworks();
           break;
         }
-        case 'export': {
-          const exportData = artworks.filter(a => selectedArtworks.includes(a.id));
-          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        case "export": {
+          const exportData = artworks.filter((a) =>
+            selectedArtworks.includes(a.id),
+          );
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+            type: "application/json",
+          });
           const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
+          const a = document.createElement("a");
           a.href = url;
-          a.download = `artworks-export-${new Date().toISOString().split('T')[0]}.json`;
+          a.download = `artworks-export-${new Date().toISOString().split("T")[0]}.json`;
           a.click();
           URL.revokeObjectURL(url);
           toast({
-            title: 'Export Complete',
+            title: "Export Complete",
             description: `${selectedArtworks.length} artwork(s) exported.`,
           });
           break;
         }
       }
     } catch (err: any) {
-      const detail = err?.message?.includes('not found') ? 'One or more artworks were not found.'
-        : err?.message?.includes('unauthorized') || err?.status === 401 ? 'Permission denied — you can only edit your own artworks.'
-        : err?.message || 'Bulk action failed';
-      toast({ title: 'Error', description: detail, variant: 'destructive' });
+      const detail = err?.message?.includes("not found")
+        ? "One or more artworks were not found."
+        : err?.message?.includes("unauthorized") || err?.status === 401
+          ? "Permission denied — you can only edit your own artworks."
+          : err?.message || "Bulk action failed";
+      toast({ title: "Error", description: detail, variant: "destructive" });
     } finally {
       setBulkLoading(false);
     }
   };
 
   const handleArtworkUpdate = (updatedArtwork: any) => {
-    broadcastRefresh('artworks');
+    broadcastRefresh("artworks");
     fetchArtworks(); // Refresh the list
     toast({
-      title: 'Artwork Updated',
-      description: 'Your artwork has been updated successfully.',
+      title: "Artwork Updated",
+      description: "Your artwork has been updated successfully.",
     });
   };
 
@@ -246,29 +290,33 @@ const ArtworkManagement = () => {
     if (deletingId) return; // Prevent double-delete
     setDeletingId(artworkId);
     try {
-      const { data, error } = await supabase.functions.invoke('delete-artwork-and-media', {
-        body: { artworkId }
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "delete-artwork-and-media",
+        {
+          body: { artworkId },
+        },
+      );
 
       if (error) throw error;
 
       toast({
-        title: 'Artwork Deleted',
-        description: 'Your artwork has been deleted successfully.',
+        title: "Artwork Deleted",
+        description: "Your artwork has been deleted successfully.",
       });
-      broadcastRefresh('artworks');
+      broadcastRefresh("artworks");
       fetchArtworks();
       refreshGating();
     } catch (err: any) {
-      const detail = err?.message?.includes('not found') ? 'Artwork not found or already deleted.'
-        : err?.message?.includes('unauthorized') ? 'Permission denied — you can only delete your own artworks.'
-        : err?.message || 'Failed to delete artwork.';
-      toast({ title: 'Error', description: detail, variant: 'destructive' });
+      const detail = err?.message?.includes("not found")
+        ? "Artwork not found or already deleted."
+        : err?.message?.includes("unauthorized")
+          ? "Permission denied — you can only delete your own artworks."
+          : err?.message || "Failed to delete artwork.";
+      toast({ title: "Error", description: detail, variant: "destructive" });
     } finally {
       setDeletingId(null);
     }
   };
-
 
   if (loading) {
     return (
@@ -307,12 +355,12 @@ const ArtworkManagement = () => {
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
           <Button
-            variant={showAnalytics ? 'secondary' : 'outline'}
+            variant={showAnalytics ? "secondary" : "outline"}
             size="sm"
             onClick={handleAnalyticsClick}
             className={cn(
               "flex-1 sm:flex-none gap-2 h-10 sm:h-12 px-4 sm:px-6 rounded-2xl font-bold shadow-sm transition-all hover:shadow-md border-border/40",
-              showAnalytics && "bg-primary/10 text-primary border-primary/20"
+              showAnalytics && "bg-primary/10 text-primary border-primary/20",
             )}
           >
             {isProArtist ? (
@@ -321,11 +369,13 @@ const ArtworkManagement = () => {
               <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground/60" />
             )}
             <span className="text-xs sm:text-sm">Analytics</span>
-            {!isProArtist && <Crown className="h-3.5 w-3.5 text-yellow-500 animate-pulse" />}
+            {!isProArtist && (
+              <Crown className="h-3.5 w-3.5 text-yellow-500 animate-pulse" />
+            )}
           </Button>
-          <Button 
-            onClick={handleUploadClick} 
-            size="sm" 
+          <Button
+            onClick={handleUploadClick}
+            size="sm"
             className="flex-1 sm:flex-none gap-2 h-10 sm:h-12 px-4 sm:px-6 rounded-2xl font-black shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
           >
             <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -360,12 +410,18 @@ const ArtworkManagement = () => {
           {filteredArtworks.length > 0 && (
             <div className="flex items-center gap-3.5 group cursor-pointer">
               <Checkbox
-                checked={selectedArtworks.length === filteredArtworks.length && filteredArtworks.length > 0}
+                checked={
+                  selectedArtworks.length === filteredArtworks.length &&
+                  filteredArtworks.length > 0
+                }
                 onCheckedChange={handleSelectAll}
                 id="select-all"
                 className="h-5.5 w-5.5 rounded-lg border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
               />
-              <label htmlFor="select-all" className="text-xs sm:text-sm font-black text-foreground/70 cursor-pointer select-none group-hover:text-primary transition-colors uppercase tracking-widest">
+              <label
+                htmlFor="select-all"
+                className="text-xs sm:text-sm font-black text-foreground/70 cursor-pointer select-none group-hover:text-primary transition-colors uppercase tracking-widest"
+              >
                 Select All
               </label>
             </div>
@@ -381,29 +437,35 @@ const ArtworkManagement = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-4 sm:pt-0 border-t border-border/10 sm:border-none">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 sm:hidden">Layout View</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 sm:hidden">
+            Layout View
+          </span>
           <div className="flex items-center gap-2 rounded-2xl border border-border/40 bg-background/60 p-1.5 shadow-inner">
             <Button
-              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+              variant={viewMode === "grid" ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setViewMode('grid')}
+              onClick={() => setViewMode("grid")}
               className={cn(
                 "h-11 px-4 sm:px-5 rounded-xl transition-all font-black uppercase tracking-tighter text-[10px] sm:text-xs",
-                viewMode === 'grid' ? "shadow-lg bg-background text-primary" : "text-muted-foreground hover:text-foreground"
+                viewMode === "grid"
+                  ? "shadow-lg bg-background text-primary"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Grid3X3 className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">Grid</span>
             </Button>
             <Button
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              variant={viewMode === "list" ? "secondary" : "ghost"}
               size="sm"
-              onClick={() => setViewMode('list')}
+              onClick={() => setViewMode("list")}
               className={cn(
                 "h-11 px-4 sm:px-5 rounded-xl transition-all font-black uppercase tracking-tighter text-[10px] sm:text-xs",
-                viewMode === 'list' ? "shadow-lg bg-background text-primary" : "text-muted-foreground hover:text-foreground"
+                viewMode === "list"
+                  ? "shadow-lg bg-background text-primary"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <List className="h-4 w-4 sm:mr-2" />
@@ -418,9 +480,9 @@ const ArtworkManagement = () => {
         {filteredArtworks.length > 0 ? (
           <div
             className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8'
-                : 'space-y-4 sm:space-y-6'
+              viewMode === "grid"
+                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8"
+                : "space-y-4 sm:space-y-6"
             }
           >
             {filteredArtworks.map((artwork) => (
@@ -428,7 +490,9 @@ const ArtworkManagement = () => {
                 key={artwork.id}
                 artwork={artwork}
                 isSelected={selectedArtworks.includes(artwork.id)}
-                onSelect={(checked) => handleSelectArtwork(artwork.id, checked as boolean)}
+                onSelect={(checked) =>
+                  handleSelectArtwork(artwork.id, checked as boolean)
+                }
                 onEdit={() => setEditingArtwork(artwork)}
                 onDelete={() => handleDeleteArtwork(artwork.id)}
                 onUpdate={handleArtworkUpdate}
@@ -443,14 +507,19 @@ const ArtworkManagement = () => {
             <div className="rounded-[2rem] bg-muted/50 p-6 mb-6 shadow-inner">
               <FolderOpen className="h-10 w-10 text-muted-foreground/40" />
             </div>
-            <h3 className="text-xl font-black text-foreground mb-2 tracking-tight">No artworks found</h3>
+            <h3 className="text-xl font-black text-foreground mb-2 tracking-tight">
+              No artworks found
+            </h3>
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-sm mb-8 font-medium leading-relaxed opacity-70">
               {artworks.length === 0
                 ? "Your creative journey starts here. Build your portfolio by uploading your first masterpiece."
                 : "No artworks match your current filters. Try refining your search or clearing filters."}
             </p>
             {artworks.length === 0 && (
-              <Button onClick={handleUploadClick} className="gap-3 h-12 px-8 rounded-2xl font-black shadow-lg shadow-primary/20 hover:shadow-xl transition-all hover:-translate-y-0.5">
+              <Button
+                onClick={handleUploadClick}
+                className="gap-3 h-12 px-8 rounded-2xl font-black shadow-lg shadow-primary/20 hover:shadow-xl transition-all hover:-translate-y-0.5"
+              >
                 <Plus className="h-5 w-5" />
                 Upload First Artwork
               </Button>
@@ -476,7 +545,13 @@ const ArtworkManagement = () => {
             </DialogHeader>
           </div>
           <div className="p-6 sm:p-8">
-            <ArtworkUploadForm onCancel={() => setShowUploadForm(false)} onSuccess={() => { setShowUploadForm(false); fetchArtworks(); }} />
+            <ArtworkUploadForm
+              onCancel={() => setShowUploadForm(false)}
+              onSuccess={() => {
+                setShowUploadForm(false);
+                fetchArtworks();
+              }}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -503,7 +578,9 @@ const ArtworkManagement = () => {
               Unlock Advanced Analytics
             </DialogTitle>
             <DialogDescription>
-              Advanced analytics are available exclusively for Pro Artists. Upgrade to see detailed performance metrics, revenue trends, and engagement insights.
+              Advanced analytics are available exclusively for Pro Artists.
+              Upgrade to see detailed performance metrics, revenue trends, and
+              engagement insights.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -517,13 +594,18 @@ const ArtworkManagement = () => {
               </ul>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowUpgradePrompt(false)} className="flex-1">
+              <Button
+                variant="outline"
+                onClick={() => setShowUpgradePrompt(false)}
+                className="flex-1"
+              >
                 Maybe Later
               </Button>
-              <Button asChild className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600">
-                <Link to="/artist-dashboard?tab=premium">
-                  Upgrade to Pro
-                </Link>
+              <Button
+                asChild
+                className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+              >
+                <Link to="/artist-dashboard?tab=premium">Upgrade to Pro</Link>
               </Button>
             </div>
           </div>
@@ -534,3 +616,8 @@ const ArtworkManagement = () => {
 };
 
 export default ArtworkManagement;
+
+
+
+
+
