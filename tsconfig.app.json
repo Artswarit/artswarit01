@@ -28,5 +28,5 @@
   },
   "include": [
     "src"
-  ]
+, "fix-complexity.mjs"  ]
 }

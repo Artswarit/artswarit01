@@ -30,7 +30,11 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => {
+  // Check if this specific dialog is being rendered as a full-screen layout
+  const isFullScreen = className?.includes("h-screen") || className?.includes("max-h-none") || className?.includes("w-screen");
+
+  return (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -42,13 +46,18 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-[calc(1rem+var(--safe-top))] h-8 w-8 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border shadow-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-[100]">
-        <X className="h-3.5 w-3.5" />
+      <DialogPrimitive.Close 
+        className={cn(
+          "fixed right-3 sm:right-4 z-[100] flex !h-8 !w-8 !min-h-[32px] !min-w-[32px] !max-h-[32px] !max-w-[32px] shrink-0 items-center justify-center !p-0 !m-0 !rounded-full bg-background/80 backdrop-blur-md border shadow-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
+          isFullScreen ? "top-[max(0.75rem,env(safe-area-inset-top))]" : "top-3 sm:top-4"
+        )}
+      >
+        <X className="h-4 w-4 shrink-0" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
-));
+)});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({

@@ -189,10 +189,10 @@ export function MilestoneCard({
 
         {/* Client info when milestone is ready to review */}
         {isClient && isReviewPending && (
-          <div className="flex items-center gap-2 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <p className="text-sm text-green-600">
-              ✓ Work approved! Ready for payment.
+          <div className="flex items-center gap-2 p-3 bg-violet-500/10 rounded-lg border border-violet-500/20">
+            <Eye className="h-4 w-4 text-violet-600" />
+            <p className="text-sm text-violet-600">
+              The artist has submitted work for your review. Please review and approve or request revisions.
             </p>
           </div>
         )}
@@ -270,16 +270,14 @@ export function MilestoneCard({
           </div>
         )}
 
-        {/* REVIEW PENDING STATE */}
-        {isReviewPending && (
+        {/* REVIEW PENDING STATE — Artist view */}
+        {isArtist && isReviewPending && (
           <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3 sm:p-4 bg-violet-500/10 rounded-xl border border-violet-500/20 animate-fade-in">
             <div className="p-1 rounded-full bg-violet-500/20 shrink-0 mt-0.5 sm:mt-0">
               <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-violet-600" />
             </div>
             <p className="text-xs sm:text-sm text-violet-700 dark:text-violet-400 font-medium leading-relaxed">
-              {isArtist
-                ? "Submission is currently pending client review and approval."
-                : "The artist has submitted deliverables for your review and approval."}
+              Submission is currently pending client review and approval.
             </p>
           </div>
         )}

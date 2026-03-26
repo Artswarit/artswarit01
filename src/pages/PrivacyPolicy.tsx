@@ -1,4 +1,6 @@
 import React from "react";
+// TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
+const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,7 +40,7 @@ const PrivacyPolicy = () => {
               <strong>Last Updated:</strong> 27th February, 2026
             </p>
             <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Artswarit (Sole Proprietorship of Ashwareet Basu) is committed to
+              Artswarit {!HIDE_PERSONAL_INFO && "(Sole Proprietorship of Ashwareet Basu)"} is committed to
               protecting your personal data. This Privacy Policy explains how we
               collect, use, store, and protect your information in compliance
               with the Digital Personal Data Protection Act, 2023, the IT Act
@@ -61,24 +63,26 @@ const PrivacyPolicy = () => {
                   Act, 2023) for all personal data processed through
                   artswarit.com is:
                 </p>
-                <div className="p-4 rounded-xl bg-muted/40 border border-border/50 space-y-1">
-                  <p className="font-bold text-foreground">Ashwareet Basu</p>
-                  <p>Proprietor, Artswarit</p>
-                  <p>
-                    Registered Office: Bairiya Bazar, Turkaulia, Purbi
-                    Champaran, Bihar — 845437, India
-                  </p>
-                  <p>Operations Hub: Kalkaji, New Delhi — 110019, India</p>
-                  <p>
-                    Email:{" "}
-                    <a
-                      href="mailto:privacy@artswarit.com"
-                      className="text-primary font-semibold"
-                    >
-                      privacy@artswarit.com
-                    </a>
-                  </p>
-                </div>
+                {!HIDE_PERSONAL_INFO && (
+                  <div className="p-4 rounded-xl bg-muted/40 border border-border/50 space-y-1">
+                    <p className="font-bold text-foreground">Ashwareet Basu</p>
+                    <p>Proprietor, Artswarit</p>
+                    <p>
+                      Registered Office: Bairiya Bazar, Turkaulia, Purbi
+                      Champaran, Bihar — 845437, India
+                    </p>
+                    <p>Operations Hub: Kalkaji, New Delhi — 110019, India</p>
+                    <p>
+                      Email:{" "}
+                      <a
+                        href="mailto:privacy@artswarit.com"
+                        className="text-primary font-semibold"
+                      >
+                        privacy@artswarit.com
+                      </a>
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -590,7 +594,7 @@ const PrivacyPolicy = () => {
                       privacy@artswarit.com
                     </a>
                   </p>
-                  <p>
+                  <p className={HIDE_PERSONAL_INFO ? "invisible" : ""}>
                     <strong>Grievance Officer:</strong> Ashwareet Basu —{" "}
                     <a
                       href="mailto:grievance@artswarit.com"
@@ -610,10 +614,12 @@ const PrivacyPolicy = () => {
 
           {/* Footer */}
           <div className="text-center space-y-3 pt-4">
-            <p className="text-xs text-muted-foreground/60">
-              © 2026 Artswarit · Sole Proprietorship of Ashwareet Basu · All
-              rights reserved.
-            </p>
+            {!HIDE_PERSONAL_INFO && (
+              <p className="text-xs text-muted-foreground/60">
+                © 2026 Artswarit · Sole Proprietorship of Ashwareet Basu · All
+                rights reserved.
+              </p>
+            )}
           </div>
         </div>
       </main>

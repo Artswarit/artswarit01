@@ -12,6 +12,15 @@ interface FeaturedArtistCardProps {
   imageUrl: string;
   followers?: number;
   bio?: string;
+  // Accept but ignore extra props from the hook so no TS errors
+  likes?: number;
+  views?: number;
+  rating?: number;
+  score?: number;
+  rank?: number;
+  tags?: string[];
+  verified?: boolean;
+  location?: string;
 }
 
 const FeaturedArtistCard = ({
@@ -82,8 +91,3 @@ const FeaturedArtistCard = ({
 };
 
 export default FeaturedArtistCard;
-
-
-
-
-

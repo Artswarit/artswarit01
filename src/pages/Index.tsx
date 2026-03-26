@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
@@ -13,6 +12,7 @@ import {
   User,
   Briefcase,
   ArrowRight,
+  Sparkles,
 } from "lucide-react";
 import AnimatedHeroSlider from "@/components/AnimatedHeroSlider";
 import ArtworkCarousel from "@/components/ArtworkCarousel";
@@ -25,157 +25,12 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { useCategoryCounts } from "@/hooks/useCategoryCounts";
+import { useFeaturedArtists } from "@/hooks/useFeaturedArtists";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Mock data - In a real application, this would come from an API
-const allArtists = [
-  {
-    id: "1",
-    name: "Alex Rivera",
-    category: "Musician",
-    imageUrl:
-      "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    followers: 12543,
-    likes: 4580,
-    views: 28750,
-    bio: "Multi-platinum musician with over 10 years of experience in the industry.",
-  },
-  {
-    id: "2",
-    name: "Maya Johnson",
-    category: "Writer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1544717305-2782549b5136?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-    followers: 8765,
-    likes: 3240,
-    views: 19500,
-    bio: "Award-winning author specializing in fantasy and science fiction novels.",
-  },
-  {
-    id: "3",
-    name: "Jordan Smith",
-    category: "Rapper",
-    imageUrl:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    followers: 6421,
-    likes: 2870,
-    views: 16200,
-    bio: "Underground hip-hop artist known for thought-provoking lyrics and innovative beats.",
-  },
-  {
-    id: "4",
-    name: "Taylor Reed",
-    category: "Editor",
-    imageUrl:
-      "https://images.unsplash.com/photo-1573496358961-3c82861ab8f4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=688&q=80",
-    followers: 3827,
-    likes: 1950,
-    views: 9800,
-    bio: "Professional editor with experience working with major publishing houses.",
-  },
-  {
-    id: "5",
-    name: "Elena Rodriguez",
-    category: "Photographer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1171&q=80",
-    followers: 11243,
-    likes: 4120,
-    views: 24600,
-    bio: "Specializing in portrait and landscape photography with a unique artistic style.",
-  },
-  {
-    id: "6",
-    name: "Marcus Bell",
-    category: "Illustrator",
-    imageUrl:
-      "https://images.unsplash.com/photo-1610088441520-4352457e7095?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-    followers: 9876,
-    likes: 3680,
-    views: 21300,
-    bio: "Digital illustrator creating vibrant fantasy scenes and character designs.",
-  },
-  {
-    id: "7",
-    name: "Sarah Chen",
-    category: "Voice Artist",
-    imageUrl:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    followers: 7650,
-    likes: 3050,
-    views: 18200,
-    bio: "Versatile voice artist with experience in commercials, animation and audiobooks.",
-  },
-  {
-    id: "8",
-    name: "Jamal Wilson",
-    category: "Animator",
-    imageUrl:
-      "https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    followers: 5430,
-    likes: 2340,
-    views: 13800,
-    bio: "3D animator creating captivating characters and environments for games and films.",
-  },
-  {
-    id: "9",
-    name: "Lisa Zhang",
-    category: "Musician",
-    imageUrl:
-      "https://images.unsplash.com/photo-1494790108755-2616c4e7e01c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-    followers: 8900,
-    likes: 2100,
-    views: 15400,
-    bio: "Classical pianist turned electronic music producer.",
-  },
-  {
-    id: "10",
-    name: "David Park",
-    category: "Writer",
-    imageUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    followers: 4200,
-    likes: 1800,
-    views: 9200,
-    bio: "Freelance journalist and creative writer focusing on technology and culture.",
-  },
-  {
-    id: "11",
-    name: "Maria Santos",
-    category: "Rapper",
-    imageUrl:
-      "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    followers: 7800,
-    likes: 3400,
-    views: 18600,
-    bio: "Bilingual rapper blending Latin influences with modern hip-hop.",
-  },
-];
-
-// Testimonials
-const testimonials = [
-  {
-    content:
-      "Artswarit helped me showcase my music to a broader audience and connect with clients I never thought possible.",
-    author: "Marcus Williams",
-    role: "Musician",
-  },
-  {
-    content:
-      "As a writer, I was struggling to monetize my work. Artswarit provided the perfect platform to share and earn from my passion.",
-    author: "Sophia Chen",
-    role: "Writer",
-  },
-  {
-    content:
-      "The verification badge gave my profile the credibility it needed. Now clients trust my work before even hearing it.",
-    author: "Derek Johnson",
-    role: "Rapper",
-  },
-];
 const Index = () => {
   const location = useLocation();
-  const [featuredArtists, setFeaturedArtists] = useState([]);
+  const { artists: featuredArtists, loading: artistsLoading } = useFeaturedArtists(8);
   const { getCount, loading: categoriesLoading } = useCategoryCounts();
 
   // Base categories with icons and slugs
@@ -233,18 +88,6 @@ const Index = () => {
     count: getCount(cat.title),
   }));
 
-  // Effect to sort and update featured artists based on popularity metrics
-  useEffect(() => {
-    // Sort artists by a combined popularity score (followers, likes, views)
-    const sortedArtists = [...allArtists].sort((a, b) => {
-      const scoreA = a.followers * 0.4 + a.likes * 0.3 + a.views * 0.3;
-      const scoreB = b.followers * 0.4 + b.likes * 0.3 + b.views * 0.3;
-      return scoreB - scoreA;
-    });
-
-    // Get top artists
-    setFeaturedArtists(sortedArtists.slice(0, 6));
-  }, []);
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navbar />
@@ -256,47 +99,77 @@ const Index = () => {
         id="featured-artists"
         className="container mx-auto px-4 py-12 sm:py-16 sm:px-6 lg:px-8 mt-4 sm:mt-8"
       >
-        <div className="text-center mb-8 sm:mb-12">
-          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-artswarit-purple to-blue-500">
-            Featured Artists
-          </h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-            Discover trending creators making waves on Artswarit, updated
-            regularly based on popularity.
-          </p>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12 px-4 shadow-none">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 tracking-tight">
+              Featured Artists
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
+              Discover trending creators making waves on Artswarit, updated
+              regularly based on popularity.
+            </p>
+          </div>
         </div>
 
-        <div className="relative">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            plugins={[
-              Autoplay({
-                delay: 4000,
-                stopOnInteraction: false,
-                stopOnMouseEnter: true,
-              }),
-            ]}
-            className="w-full group"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {featuredArtists.map((artist) => (
-                <CarouselItem
-                  key={artist.id}
-                  className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
-                >
-                  <div className="h-full">
-                    <FeaturedArtistCard {...artist} />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="left-2 bg-white/80 backdrop-blur-md border border-white/30 text-primary hover:bg-white/90 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <CarouselNext className="right-2 bg-white/80 backdrop-blur-md border border-white/30 text-primary hover:bg-white/90 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </Carousel>
-        </div>
+        {artistsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-80 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : featuredArtists.length > 0 ? (
+          <div className="relative">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              plugins={[
+                Autoplay({
+                  delay: 4500,
+                  stopOnInteraction: false,
+                  stopOnMouseEnter: true,
+                }),
+              ]}
+              className="w-full group"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {featuredArtists.map((artist, index) => (
+                  <CarouselItem
+                    key={artist.id}
+                    className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3"
+                  >
+                    <div className="h-full">
+                      <FeaturedArtistCard {...artist} rank={index + 1} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-2 bg-white/80 backdrop-blur-md border border-white/30 text-primary hover:bg-white/90 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <CarouselNext className="right-2 bg-white/80 backdrop-blur-md border border-white/30 text-primary hover:bg-white/90 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </Carousel>
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-muted/20 rounded-3xl border border-dashed">
+            <p className="text-muted-foreground">No featured artists yet. Be the first!</p>
+            <Button asChild variant="link" className="mt-2 text-primary font-semibold">
+              <Link to="/signup">Join as Artist</Link>
+            </Button>
+          </div>
+        )}
+
+        {featuredArtists.length > 0 && (
+          <div className="text-center mt-8">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="border-artswarit-purple text-artswarit-purple hover:bg-artswarit-purple hover:text-white transition-all"
+            >
+              <Link to="/explore-artists">View All Artists</Link>
+            </Button>
+          </div>
+        )}
       </section>
 
       {/* Artwork Carousel Section */}
@@ -420,7 +293,23 @@ const Index = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {testimonials.map((testimonial, index) => (
+            {[
+              {
+                content: "Artswarit helped me showcase my music to a broader audience and connect with clients I never thought possible.",
+                author: "Marcus Williams",
+                role: "Musician",
+              },
+              {
+                content: "As a writer, I was struggling to monetize my work. Artswarit provided the perfect platform to share and earn from my passion.",
+                author: "Sophia Chen",
+                role: "Writer",
+              },
+              {
+                content: "The verification badge gave my profile the credibility it needed. Now clients trust my work before even hearing it.",
+                author: "Derek Johnson",
+                role: "Rapper",
+              },
+            ].map((testimonial, index) => (
               <div
                 key={index}
                 className="bg-white/60 backdrop-blur-sm p-4 sm:p-6 rounded-xl shadow-sm border border-blue-100 hover:shadow-md transition-all"

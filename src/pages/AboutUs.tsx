@@ -1,4 +1,6 @@
 import React from "react";
+// TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
+const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -49,8 +51,9 @@ const AboutUs = () => {
                     Our Mission
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Artswarit is an initiative by{" "}
-                    <strong>Ashwareet Basu</strong> (Sole Proprietor) to bridge
+                    Artswarit is an initiative {!HIDE_PERSONAL_INFO && (
+                      <span>by <strong>Ashwareet Basu</strong> (Sole Proprietor)</span>
+                    )} to bridge
                     the gap between global artists and clients across the world.
                     We believe that every artist — regardless of geography,
                     language, or background — deserves a secure, transparent,
@@ -256,72 +259,74 @@ const AboutUs = () => {
           </div>
 
           {/* Entity Information */}
-          <Card className="mb-8 border-primary/10 shadow-lg overflow-hidden">
-            <CardContent className="p-6 sm:p-10">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 shrink-0">
-                  <Building2 className="h-6 w-6 text-indigo-600" />
+          {!HIDE_PERSONAL_INFO && (
+            <Card className="mb-8 border-primary/10 shadow-lg overflow-hidden">
+              <CardContent className="p-6 sm:p-10">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 shrink-0">
+                    <Building2 className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+                    Entity & Office Information
+                  </h2>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-                  Entity & Office Information
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
-                  <p className="text-xs font-bold text-primary uppercase tracking-widest">
-                    Sole Proprietor
-                  </p>
-                  <p className="font-bold text-lg">Ashwareet Basu</p>
-                  <p className="text-sm text-muted-foreground">
-                    Proprietor, Artswarit
-                  </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
+                    <p className="text-xs font-bold text-primary uppercase tracking-widest">
+                      Sole Proprietor
+                    </p>
+                    <p className="font-bold text-lg">Ashwareet Basu</p>
+                    <p className="text-sm text-muted-foreground">
+                      Proprietor, Artswarit
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
+                    <p className="text-xs font-bold text-primary uppercase tracking-widest">
+                      Registered Office
+                    </p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Bairiya Bazar, Turkaulia,
+                      <br />
+                      Purbi Champaran, Bihar — 845437
+                      <br />
+                      India
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
+                    <p className="text-xs font-bold text-primary uppercase tracking-widest">
+                      Operations Hub
+                    </p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Kalkaji, New Delhi — 110019
+                      <br />
+                      India
+                    </p>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
+                    <p className="text-xs font-bold text-primary uppercase tracking-widest">
+                      Contact
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      <a
+                        href="mailto:support@artswarit.com"
+                        className="text-primary hover:underline font-semibold"
+                      >
+                        support@artswarit.com
+                      </a>
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      <Link
+                        to="/contact-us"
+                        className="text-primary hover:underline font-semibold"
+                      >
+                        Grievance Redressal →
+                      </Link>
+                    </p>
+                  </div>
                 </div>
-                <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
-                  <p className="text-xs font-bold text-primary uppercase tracking-widest">
-                    Registered Office
-                  </p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Bairiya Bazar, Turkaulia,
-                    <br />
-                    Purbi Champaran, Bihar — 845437
-                    <br />
-                    India
-                  </p>
-                </div>
-                <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
-                  <p className="text-xs font-bold text-primary uppercase tracking-widest">
-                    Operations Hub
-                  </p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Kalkaji, New Delhi — 110019
-                    <br />
-                    India
-                  </p>
-                </div>
-                <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
-                  <p className="text-xs font-bold text-primary uppercase tracking-widest">
-                    Contact
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    <a
-                      href="mailto:support@artswarit.com"
-                      className="text-primary hover:underline font-semibold"
-                    >
-                      support@artswarit.com
-                    </a>
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    <Link
-                      to="/contact-us"
-                      className="text-primary hover:underline font-semibold"
-                    >
-                      Grievance Redressal →
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* CTA */}
           <div className="text-center space-y-4 pt-4">

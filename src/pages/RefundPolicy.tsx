@@ -1,4 +1,6 @@
 import React from "react";
+// TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
+const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -456,10 +458,12 @@ const RefundPolicy = () => {
               </Link>{" "}
               page.
             </p>
-            <p className="text-xs text-muted-foreground/60">
-              © 2026 Artswarit · Sole Proprietorship of Ashwareet Basu · All
-              rights reserved.
-            </p>
+            {!HIDE_PERSONAL_INFO && (
+              <p className="text-xs text-muted-foreground/60">
+                © 2026 Artswarit · Sole Proprietorship of Ashwareet Basu · All
+                rights reserved.
+              </p>
+            )}
           </div>
         </div>
       </main>
