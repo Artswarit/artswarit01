@@ -1,4 +1,6 @@
 import React from "react";
+// TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
+const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,8 +39,7 @@ const TermsOfService = () => {
             </p>
             <p className="text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               These Terms of Service ("Terms") constitute a legally binding
-              agreement between you and Artswarit (Sole Proprietorship of
-              Ashwareet Basu). By accessing or using artswarit.com, you agree to
+              agreement between you and Artswarit {!HIDE_PERSONAL_INFO && "(Sole Proprietorship of Ashwareet Basu)"}. By accessing or using artswarit.com, you agree to
               be bound by these Terms in their entirety.
             </p>
           </div>
@@ -448,7 +449,7 @@ const TermsOfService = () => {
                 <p>
                   <strong>Platform IP:</strong> The Artswarit name, logo, design
                   elements, underlying technology, and all proprietary content
-                  are the exclusive intellectual property of Ashwareet Basu /
+                  are the exclusive intellectual property of {!HIDE_PERSONAL_INFO && "Ashwareet Basu / "}
                   Artswarit.
                 </p>
               </div>
@@ -600,10 +601,12 @@ const TermsOfService = () => {
               </Link>{" "}
               page.
             </p>
-            <p className="text-xs text-muted-foreground/60">
-              © 2026 Artswarit · Sole Proprietorship of Ashwareet Basu · All
-              rights reserved.
-            </p>
+            {!HIDE_PERSONAL_INFO && (
+              <p className="text-xs text-muted-foreground/60">
+                © 2026 Artswarit · Sole Proprietorship of Ashwareet Basu · All
+                rights reserved.
+              </p>
+            )}
           </div>
         </div>
       </main>

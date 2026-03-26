@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+// TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
+const HIDE_PERSONAL_INFO = true;
 import { Download, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -104,7 +106,7 @@ export function InvoiceDownload({
     
     <div class="footer">
       <p>Thank you for using Artswarit!</p>
-      <p>Platform Name: Artswarit | Legal Name (PAN Holder): Ashwareet Basu</p>
+      <p>Platform Name: Artswarit <span style="${HIDE_PERSONAL_INFO ? "visibility: hidden" : ""}">| Legal Name (PAN Holder): Ashwareet Basu</span></p>
       <p>For queries, contact support@artswarit.com</p>
     </div>
   </div>

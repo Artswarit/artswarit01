@@ -37,6 +37,7 @@ interface MilestoneSubmissionDialogProps {
   onOpenChange: (open: boolean) => void;
   milestone: Milestone;
   projectId: string;
+  autoApproveDays?: number;
   onSuccess: () => void;
 }
 
@@ -50,6 +51,7 @@ export function MilestoneSubmissionDialog({
   onOpenChange,
   milestone,
   projectId,
+  autoApproveDays = 3,
   onSuccess
 }: MilestoneSubmissionDialogProps) {
   const { user } = useAuth();
@@ -168,7 +170,7 @@ export function MilestoneSubmissionDialog({
       // Update milestone status based on submission type
       if (!isFinalUpload) {
         const autoApproveAt = new Date();
-        autoApproveAt.setDate(autoApproveAt.getDate() + 3); // Default 3 days
+        autoApproveAt.setDate(autoApproveAt.getDate() + autoApproveDays);
         await supabase.
         from("project_milestones").
         update({

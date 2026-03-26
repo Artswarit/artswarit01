@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom";
 
+// TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
+const HIDE_PERSONAL_INFO = true;
+const HIDE_BUSINESS_INFO = true;
+
 const Footer = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -171,14 +175,16 @@ const Footer = () => {
                   Refund & Cancellation
                 </Link>
               </li>
-              <li>
-                <Link
-                  to="/contact-us"
-                  className="text-[15px] text-white/70 hover:text-white hover:translate-x-1 inline-block transition-all duration-200 py-2 sm:py-1"
-                >
-                  Contact & Grievance
-                </Link>
-              </li>
+              {!HIDE_BUSINESS_INFO && (
+                <li>
+                  <Link
+                    to="/contact-us"
+                    className="text-[15px] text-white/70 hover:text-white hover:translate-x-1 inline-block transition-all duration-200 py-2 sm:py-1"
+                  >
+                    Contact & Grievance
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -193,95 +199,109 @@ const Footer = () => {
                 Legal Entity
               </p>
               <p className="text-sm font-bold text-white/80">Artswarit</p>
-              <p className="text-xs text-white/50">
-                Sole Proprietorship of{" "}
-                <span className="text-white/70 font-semibold">
-                  Ashwareet Basu
-                </span>
-              </p>
+              {!HIDE_PERSONAL_INFO && (
+                <p className="text-xs text-white/50">
+                  Sole Proprietorship of{" "}
+                  <span className="text-white/70 font-semibold">
+                    Ashwareet Basu
+                  </span>
+                </p>
+              )}
             </div>
 
             {/* Registered Office */}
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
-                Registered Office
-              </p>
-              <p className="text-xs text-white/50 leading-relaxed">
-                Bairiya Bazar, Turkaulia,
-                <br />
-                Purbi Champaran, Bihar — 845437, India
-              </p>
-            </div>
+            {!HIDE_BUSINESS_INFO && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                  Registered Office
+                </p>
+                <p className="text-xs text-white/50 leading-relaxed">
+                  Bairiya Bazar, Turkaulia,
+                  <br />
+                  Purbi Champaran, Bihar — 845437, India
+                </p>
+              </div>
+            )}
 
             {/* Operations Hub */}
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
-                Operations Hub
-              </p>
-              <p className="text-xs text-white/50 leading-relaxed">
-                Kalkaji, New Delhi — 110019, India
-              </p>
-            </div>
+            {!HIDE_BUSINESS_INFO && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                  Operations Hub
+                </p>
+                <p className="text-xs text-white/50 leading-relaxed">
+                  Kalkaji, New Delhi — 110019, India
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Grievance & Payment Aggregator Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
             {/* Nodal / Grievance Officer */}
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
-                Nodal / Grievance Officer
-              </p>
-              <p className="text-xs text-white/70 font-semibold">
-                Ashwareet Basu
-              </p>
-              <p className="text-xs text-white/50">
-                <a
-                  href="mailto:grievance@artswarit.com"
-                  className="hover:text-primary transition-colors underline underline-offset-2"
-                >
-                  grievance@artswarit.com
-                </a>
-              </p>
-              <p className="text-[10px] text-white/30">
-                Acknowledgement within 24 hrs · Resolution within 15 days
-              </p>
-            </div>
+            {!HIDE_BUSINESS_INFO && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                  Nodal / Grievance Officer
+                </p>
+                {!HIDE_PERSONAL_INFO && (
+                  <p className="text-xs text-white/70 font-semibold">
+                    Ashwareet Basu
+                  </p>
+                )}
+                <p className="text-xs text-white/50">
+                  <a
+                    href="mailto:grievance@artswarit.com"
+                    className="hover:text-primary transition-colors underline underline-offset-2"
+                  >
+                    grievance@artswarit.com
+                  </a>
+                </p>
+                <p className="text-[10px] text-white/30">
+                  Acknowledgement within 24 hrs · Resolution within 15 days
+                </p>
+              </div>
+            )}
 
             {/* Payment Aggregator */}
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
-                Payment Partner
-              </p>
-              <p className="text-xs text-white/70 font-semibold">
-                Razorpay Software Pvt. Ltd.
-              </p>
-              <p className="text-[10px] text-white/40 leading-relaxed">
-                PCI-DSS Level 1 Compliant · RBI Authorised PA
-                <br />
-                All payments processed in INR via escrow settlement
-              </p>
-            </div>
+            {!HIDE_BUSINESS_INFO && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                  Payment Partner
+                </p>
+                <p className="text-xs text-white/70 font-semibold">
+                  Razorpay Software Pvt. Ltd.
+                </p>
+                <p className="text-[10px] text-white/40 leading-relaxed">
+                  PCI-DSS Level 1 Compliant · RBI Authorised PA
+                  <br />
+                  All payments processed in INR via escrow settlement
+                </p>
+              </div>
+            )}
 
             {/* Compliance Badges */}
-            <div className="space-y-1.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
-                Compliance
-              </p>
-              <div className="flex flex-wrap gap-1.5 justify-center md:justify-start">
-                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-white/5 text-white/50 border border-white/10">
-                  RBI PA/PG 2026
-                </span>
-                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-white/5 text-white/50 border border-white/10">
-                  IT Act 2000
-                </span>
-                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-white/5 text-white/50 border border-white/10">
-                  DPDP 2023
-                </span>
-                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-white/5 text-white/50 border border-white/10">
-                  IT Rules 2021
-                </span>
+            {!HIDE_BUSINESS_INFO && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+                  Compliance
+                </p>
+                <div className="flex flex-wrap gap-1.5 justify-center md:justify-start">
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-white/5 text-white/50 border border-white/10">
+                    RBI PA/PG 2026
+                  </span>
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-white/5 text-white/50 border border-white/10">
+                    IT Act 2000
+                  </span>
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-white/5 text-white/50 border border-white/10">
+                    DPDP 2023
+                  </span>
+                  <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-white/5 text-white/50 border border-white/10">
+                    IT Rules 2021
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Merchant Policy Links — RBI 2026 Mandate */}
@@ -308,36 +328,48 @@ const Footer = () => {
                 >
                   Refund & Cancellation
                 </Link>
-                <span className="text-white/15">|</span>
-                <Link
-                  to="/contact-us"
-                  className="hover:text-white/70 transition-colors underline underline-offset-2"
-                >
-                  Grievance Redressal
-                </Link>
-                <span className="text-white/15">|</span>
-                <a
-                  href="mailto:support@artswarit.com"
-                  className="hover:text-white/70 transition-colors underline underline-offset-2"
-                >
-                  support@artswarit.com
-                </a>
+                {!HIDE_BUSINESS_INFO && (
+                  <>
+                    <span className="text-white/15">|</span>
+                    <Link
+                      to="/contact-us"
+                      className="hover:text-white/70 transition-colors underline underline-offset-2"
+                    >
+                      Grievance Redressal
+                    </Link>
+                  </>
+                )}
+                {!HIDE_BUSINESS_INFO && (
+                  <>
+                    <span className="text-white/15">|</span>
+                    <a
+                      href="mailto:support@artswarit.com"
+                      className="hover:text-white/70 transition-colors underline underline-offset-2"
+                    >
+                      support@artswarit.com
+                    </a>
+                  </>
+                )}
               </div>
-              <p className="text-[11px] font-medium text-white/30 text-center sm:text-right whitespace-nowrap">
-                © {new Date().getFullYear()} Artswarit · All rights reserved.
-              </p>
+              {!HIDE_BUSINESS_INFO && (
+                <p className="text-[11px] font-medium text-white/30 text-center sm:text-right">
+                  © {new Date().getFullYear()} Artswarit · All rights reserved.
+                </p>
+              )}
             </div>
           </div>
 
           {/* Fine print — Intermediary Disclaimer */}
-          <p className="text-[10px] text-white/25 text-center leading-relaxed max-w-3xl mx-auto">
-            Artswarit is a digital intermediary under Section 2(1)(w) of the
-            Information Technology Act, 2000. We do not own, produce, or endorse
-            any artwork or creative content listed on this platform. All
-            payments are held in escrow and settled per RBI Master Directions on
-            Payment Aggregators (2026). Platform fee: 15% (Free plan) / 0% (Pro
-            plan). Registered under the Sole Proprietorship of Ashwareet Basu.
-          </p>
+          {!HIDE_PERSONAL_INFO && (
+            <p className="text-[10px] text-white/25 text-center leading-relaxed max-w-3xl mx-auto">
+              Artswarit is a digital intermediary under Section 2(1)(w) of the
+              Information Technology Act, 2000. We do not own, produce, or endorse
+              any artwork or creative content listed on this platform. All
+              payments are held in escrow and settled per RBI Master Directions on
+              Payment Aggregators (2026). Platform fee: 15% (Free plan) / 0% (Pro
+              plan). Registered under the Sole Proprietorship of Ashwareet Basu.
+            </p>
+          )}
         </div>
       </div>
     </footer>

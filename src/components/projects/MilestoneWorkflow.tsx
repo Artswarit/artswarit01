@@ -623,6 +623,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
             onOpenChange={setSubmissionDialogOpen}
             milestone={selectedMilestone}
             projectId={projectId}
+            autoApproveDays={project.auto_approve_days}
             onSuccess={() => {
               broadcastRefresh("milestones");
               fetchMilestones();

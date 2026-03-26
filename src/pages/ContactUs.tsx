@@ -1,4 +1,6 @@
 import React from "react";
+// TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
+const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -126,7 +128,7 @@ const ContactUs = () => {
                       <p className="text-xs font-bold text-red-600 uppercase tracking-widest">
                         Nodal Contact Officer / Grievance Officer
                       </p>
-                      <p className="font-black text-lg text-foreground">
+                      <p className={`font-black text-lg text-foreground ${HIDE_PERSONAL_INFO ? "invisible" : ""}`}>
                         Ashwareet Basu
                       </p>
                     </div>
@@ -136,7 +138,7 @@ const ContactUs = () => {
                       <p className="text-xs font-bold text-muted-foreground/70 uppercase tracking-wider">
                         Designation
                       </p>
-                      <p className="font-semibold text-foreground">
+                      <p className={`font-semibold text-foreground ${HIDE_PERSONAL_INFO ? "invisible" : ""}`}>
                         Proprietor & Nodal Officer
                       </p>
                     </div>
@@ -261,51 +263,53 @@ const ContactUs = () => {
           </Card>
 
           {/* Office Addresses */}
-          <Card className="mb-8 border-primary/10 shadow-lg overflow-hidden">
-            <CardContent className="p-6 sm:p-10">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 shrink-0">
-                  <Building2 className="h-6 w-6 text-indigo-600" />
+          {!HIDE_PERSONAL_INFO && (
+            <Card className="mb-8 border-primary/10 shadow-lg overflow-hidden">
+              <CardContent className="p-6 sm:p-10">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 shrink-0">
+                    <Building2 className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight">
+                    Office Addresses
+                  </h2>
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight">
-                  Office Addresses
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <p className="text-xs font-bold text-primary uppercase tracking-widest">
-                      Registered Office
-                    </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <p className="text-xs font-bold text-primary uppercase tracking-widest">
+                        Registered Office
+                      </p>
+                    </div>
+                    <div className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="font-bold text-foreground mb-1">
+                        Ashwareet Basu
+                      </p>
+                      <p>Bairiya Bazar, Turkaulia,</p>
+                      <p>Purbi Champaran, Bihar — 845437</p>
+                      <p>India</p>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground leading-relaxed">
-                    <p className="font-bold text-foreground mb-1">
-                      Ashwareet Basu
-                    </p>
-                    <p>Bairiya Bazar, Turkaulia,</p>
-                    <p>Purbi Champaran, Bihar — 845437</p>
-                    <p>India</p>
-                  </div>
-                </div>
-                <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-emerald-600" />
-                    <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-                      Operations Hub
-                    </p>
-                  </div>
-                  <div className="text-sm text-muted-foreground leading-relaxed">
-                    <p className="font-bold text-foreground mb-1">
-                      Artswarit Operations
-                    </p>
-                    <p>Kalkaji, New Delhi — 110019</p>
-                    <p>India</p>
+                  <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-emerald-600" />
+                      <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
+                        Operations Hub
+                      </p>
+                    </div>
+                    <div className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="font-bold text-foreground mb-1">
+                        Artswarit Operations
+                      </p>
+                      <p>Kalkaji, New Delhi — 110019</p>
+                      <p>India</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Legal Compliance Note */}
           <Card className="mb-6 border-primary/10 shadow-md">
@@ -383,10 +387,12 @@ const ContactUs = () => {
                 About Us
               </Link>
             </div>
-            <p className="text-xs text-muted-foreground/60">
-              © 2026 Artswarit · Sole Proprietorship of Ashwareet Basu · All
-              rights reserved.
-            </p>
+            {!HIDE_PERSONAL_INFO && (
+              <p className="text-xs text-muted-foreground/60">
+                © 2026 Artswarit · Sole Proprietorship of Ashwareet Basu · All
+                rights reserved.
+              </p>
+            )}
           </div>
         </div>
       </main>
