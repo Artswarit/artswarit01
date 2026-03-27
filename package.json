@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "postbuild": "react-snap"
   },
-  "react-snap": {
+  "reactSnap": {
+    "source": "dist",
     "skipThirdPartyRequests": true,
     "include": [
       "/",
