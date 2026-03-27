@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -90,6 +91,42 @@ const Index = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <SEOHead
+        title="Artswarit — Hire Artists Online | Freelance Artist Marketplace India"
+        description="India's leading artist marketplace. Hire freelance musicians, writers, illustrators, photographers & more. Commission artwork with escrow-secured payments. Browse verified creative professionals."
+        canonicalPath="/"
+        keywords="hire artists online, freelance artists platform, commission artwork India, artist marketplace, hire musicians, hire illustrators, creative freelancers"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: "How do I hire an artist on Artswarit?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Browse our verified artists by category, view their portfolios, and send a project request. Payments are secured through escrow until you approve the work.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Is Artswarit free for artists?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes! Artists can create a profile, upload their portfolio, and receive commissions for free. Pro artists get 0% platform fees.",
+              },
+            },
+            {
+              "@type": "Question",
+              name: "What types of artists are on Artswarit?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Artswarit features musicians, writers, rappers, photographers, illustrators, editors, voice artists, animators, scriptwriters, and more.",
+              },
+            },
+          ],
+        }}
+      />
       <Navbar />
 
       <AnimatedHeroSlider />
