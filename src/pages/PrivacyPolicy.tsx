@@ -1,4 +1,5 @@
 import React from "react";
+import SEOHead from "@/components/SEOHead";
 // TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
 const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
@@ -23,6 +24,11 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
       <Navbar />
+      <SEOHead
+        title="Privacy Policy | Artswarit"
+        description="Artswarit's Privacy Policy. Learn how we collect, use, and protect your personal data on our artist marketplace platform."
+        canonicalPath="/privacy-policy"
+      />
 
       <main className="flex-1 pt-20 sm:pt-24 pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-4xl">

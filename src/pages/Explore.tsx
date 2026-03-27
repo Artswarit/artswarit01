@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import SEOHead from "@/components/SEOHead";
 import { cn } from "@/lib/utils";
 import { usePublicArtworks } from "@/hooks/usePublicArtworks";
 import Navbar from "@/components/Navbar";
@@ -329,6 +330,20 @@ const Explore = () => {
       className="min-h-screen bg-background selection:bg-primary/20"
       ref={scrollRef}
     >
+      <SEOHead
+        title="Explore Artworks — Browse & Buy Art Online | Artswarit"
+        description="Explore a curated collection of digital art, music, illustrations, photography & more from verified freelance artists worldwide. Filter by category, price, and style."
+        canonicalPath="/explore"
+        keywords="browse art online, buy digital art, art gallery online, freelance artist portfolio, commission artwork"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: "https://artswarit.com" },
+            { "@type": "ListItem", position: 2, name: "Explore Artworks", item: "https://artswarit.com/explore" },
+          ],
+        }}
+      />
       <Navbar />
 
       {/* Hero Section */}

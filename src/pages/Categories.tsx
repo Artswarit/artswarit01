@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SEOHead from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -101,6 +102,12 @@ const Categories = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navbar />
+      <SEOHead
+        title="Artist Categories — Find Musicians, Writers, Illustrators & More | Artswarit"
+        description="Browse all artist categories on Artswarit — musicians, writers, rappers, photographers, illustrators, voice artists, animators, and more. Find the perfect creative professional for your project."
+        canonicalPath="/categories"
+        keywords="artist categories, hire musicians online, freelance illustrators, voice artists for hire, creative professionals India"
+      />
 
       <main className="container mx-auto px-4 pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+1rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+2rem)] pb-16 sm:px-6 lg:px-8">
         <div className="text-center mb-12">

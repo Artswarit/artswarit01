@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import LogoLoader from "@/components/ui/LogoLoader";
+import SEOHead from "@/components/SEOHead";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -49,7 +50,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <SEOHead title="Secure Area" description="Account dashboard" noindex={true} />
+      {children}
+    </>
+  );
 };
 
 export default ProtectedRoute;

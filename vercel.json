@@ -1,5 +1,16 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    {
+      "src": "^/(.*)$",
+      "headers": {
+        "host": "^artswarit\\.com$"
+      },
+      "status": 308,
+      "headers_out": {
+        "Location": "https://www.artswarit.com/$1"
+      }
+    },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
