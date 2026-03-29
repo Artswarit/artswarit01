@@ -66,9 +66,6 @@ const AnimatedHeroSlider = () => {
                 src={slide.imageUrl}
                 alt={slide.title}
                 className="absolute inset-0 w-full h-full object-cover"
-                loading={index === 0 ? "eager" : "lazy"}
-                decoding={index === 0 ? "sync" : "async"}
-                {...(index === 0 ? { fetchPriority: "high" as const } : {})}
               />
               <div
                 className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`}

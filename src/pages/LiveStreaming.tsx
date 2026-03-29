@@ -1,5 +1,4 @@
 import { useState } from "react";
-import SEOHead from "@/components/SEOHead";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LiveStreamPlayer from "@/components/streaming/LiveStreamPlayer";
@@ -75,12 +74,6 @@ const LiveStreaming = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
       <Navbar />
-      <SEOHead
-        title="Live Art Streaming — Watch Artists Create in Real-Time | Artswarit"
-        description="Watch artists create in real-time — digital art, music production, photography & more. Join live sessions, interact with creators, and discover new talent."
-        canonicalPath="/live-streaming"
-        keywords="live art streaming, watch artists create, art live sessions, creative livestream"
-      />
 
       <main className="container mx-auto px-4 py-8 pt-24">
         <div className="space-y-8">

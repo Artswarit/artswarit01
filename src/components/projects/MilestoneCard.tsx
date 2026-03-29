@@ -90,12 +90,10 @@ export function MilestoneCard({
   const isLockedStatus = milestone.status === "LOCKED";
   const hasBeenPaid = !!milestone.paid_at;
   const isWaitingFunds = milestone.status === "WAITING_FUNDS" && !hasBeenPaid;
-  const isActive = milestone.status === "ACTIVE" || (milestone.status === "WAITING_FUNDS" && hasBeenPaid) || milestone.status === "IN_PROGRESS";
-  const isReviewPending = milestone.status === "REVIEW_PENDING" || milestone.status === "FINAL_REVIEW_PENDING";
+  const isActive = milestone.status === "ACTIVE" || (milestone.status === "WAITING_FUNDS" && hasBeenPaid);
+  const isReviewPending = milestone.status === "REVIEW_PENDING";
   const isRevisionRequested = milestone.status === "REVISION_REQUESTED";
   const isCompleted = milestone.status === "COMPLETED";
-  const isAwaitingFinalFiles = milestone.status === "AWAITING_FINAL_FILES";
-  const isStarted = milestone.status === "IN_PROGRESS" || isReviewPending || isRevisionRequested || isCompleted || isAwaitingFinalFiles;
   const isDisputed = milestone.status === "DISPUTED";
   const isAutoApprovePassed = milestone.auto_approve_at && 
     isReviewPending && 
@@ -174,7 +172,7 @@ export function MilestoneCard({
             <div className="flex items-center gap-1 text-emerald-600">
               <Calendar className="h-4 w-4" />
               <span>
-                Funded: {format(new Date(milestone.paid_at), "MMM d, yyyy")}
+                Paid: {format(new Date(milestone.paid_at), "MMM d, yyyy")}
               </span>
             </div>
           )}
@@ -376,9 +374,8 @@ export function MilestoneCard({
           {isArtist && (
             <>
               {canStart &&
-                !isStarted &&
                 !startBlockedReason &&
-                (isActive) && (
+                (isActive || isRevisionRequested) && (
                   <Button
                     size="sm"
                     onClick={onStart}
@@ -388,7 +385,7 @@ export function MilestoneCard({
                     Start Milestone
                   </Button>
                 )}
-              {(isActive || isRevisionRequested) && isStarted && (
+              {(isActive || isRevisionRequested) && (
                 <Button
                   size="sm"
                   onClick={onSubmit}
@@ -399,8 +396,8 @@ export function MilestoneCard({
                   {isRevisionRequested && isRevisionLimitReached ? "Revision Limit Hit" : "Submit for Review"}
                 </Button>
               )}
-              {isAwaitingFinalFiles && (
-                <Button size="sm" variant="outline" onClick={onSubmit} className="border-purple-500 text-purple-600 hover:bg-purple-50">
+              {isCompleted && (
+                <Button size="sm" variant="outline" onClick={onSubmit}>
                   <Upload className="h-4 w-4 mr-1" />
                   Upload Final Files
                 </Button>

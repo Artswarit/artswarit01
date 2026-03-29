@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import SEOHead from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -116,12 +115,6 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
       )}
     >
       {!isModal && <Navbar />}
-      <SEOHead
-        title="Join Artswarit Free — Sign Up as Artist or Client"
-        description="Create your free Artswarit account. Join as an artist to showcase your portfolio and get commissions, or as a client to hire talented freelance artists."
-        canonicalPath="/signup"
-        keywords="sign up artswarit, join artist marketplace, create artist profile, hire artists free"
-      />
 
       {isModal && (
         <button

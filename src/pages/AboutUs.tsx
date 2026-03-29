@@ -1,5 +1,4 @@
 import React from "react";
-import SEOHead from "@/components/SEOHead";
 // TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
 const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
@@ -21,12 +20,6 @@ const AboutUs = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
       <Navbar />
-      <SEOHead
-        title="About Artswarit — India's Trusted Artist Marketplace | Our Mission"
-        description="Learn about Artswarit — India's trust-first digital marketplace connecting global artists with clients worldwide. RBI 2026 compliant, escrow-secured payments, complete transparency."
-        canonicalPath="/about-us"
-        keywords="about artswarit, artist marketplace India, escrow payments artists, trusted art platform"
-      />
 
       <main className="flex-1 pt-20 sm:pt-24 pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-4xl">

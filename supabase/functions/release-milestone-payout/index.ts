@@ -90,9 +90,9 @@ serve(async (req) => {
       });
     }
 
-    // Validation: milestone must be in REVIEW_PENDING or FINAL_REVIEW_PENDING state
-    if (milestone.status !== 'REVIEW_PENDING' && milestone.status !== 'FINAL_REVIEW_PENDING') {
-      console.error('Milestone not in an acceptable review state:', milestone.status);
+    // Validation: milestone must be in REVIEW_PENDING state
+    if (milestone.status !== 'REVIEW_PENDING') {
+      console.error('Milestone not in REVIEW_PENDING state:', milestone.status);
       return new Response(JSON.stringify({ error: `Payout can only be released when milestone is awaiting review. Current status: ${milestone.status}` }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
