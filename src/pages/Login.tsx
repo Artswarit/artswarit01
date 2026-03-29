@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import SEOHead from "@/components/SEOHead";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -117,6 +118,11 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
       )}
     >
       {!isModal && <Navbar />}
+      <SEOHead
+        title="Sign In to Artswarit | Artist & Client Login"
+        description="Sign in to your Artswarit account. Access your artist dashboard, manage commissions, and connect with clients worldwide."
+        canonicalPath="/login"
+      />
 
       {isModal && (
         <button
