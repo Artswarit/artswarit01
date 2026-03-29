@@ -9,7 +9,24 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "test": "node ./src/tests/run-tests.cjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postbuild": "react-snap"
+  },
+  "reactSnap": {
+    "source": "dist",
+    "skipThirdPartyRequests": true,
+    "include": [
+      "/",
+      "/explore",
+      "/artists",
+      "/about",
+      "/privacy",
+      "/terms"
+    ],
+    "puppeteerArgs": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox"
+    ]
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
