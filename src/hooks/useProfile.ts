@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { broadcastRefresh, useRealtimeSync } from '@/lib/realtime-sync';
 
 interface SocialLinks {
   instagram?: string;
@@ -54,13 +54,13 @@ export const useProfile = () => {
       setError(null);
 
       const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
         .single();
 
       if (error) {
-        console.error("Error fetching profile:", error);
+        console.error('Error fetching profile:', error);
         setError(error.message);
         return;
       }
@@ -68,11 +68,11 @@ export const useProfile = () => {
       // Cast social_links to proper type
       const profileData: Profile = {
         ...data,
-        social_links: data.social_links as SocialLinks | null,
+        social_links: data.social_links as SocialLinks | null
       };
       setProfile(profileData);
     } catch (err: any) {
-      console.error("Error fetching profile:", err);
+      console.error('Error fetching profile:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -80,7 +80,7 @@ export const useProfile = () => {
   }, [user]);
 
   // Realtime Sync
-  useRealtimeSync("profile", fetchProfile);
+  useRealtimeSync('profile', fetchProfile);
 
   useEffect(() => {
     fetchProfile();
@@ -93,16 +93,16 @@ export const useProfile = () => {
     const channel = supabase
       .channel(`profile-${user.id}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "profiles",
-          filter: `id=eq.${user.id}`,
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
         },
         () => {
           fetchProfile();
-        },
+        }
       )
       .subscribe();
 
@@ -112,107 +112,104 @@ export const useProfile = () => {
   }, [user, fetchProfile]);
 
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return { error: "No user logged in" };
+    if (!user) return { error: 'No user logged in' };
 
     try {
       const { error } = await supabase
-        .from("profiles")
+        .from('profiles')
         .update(updates)
-        .eq("id", user.id);
+        .eq('id', user.id);
 
       if (error) {
-        console.error("Error updating profile:", error);
+        console.error('Error updating profile:', error);
         toast({
           title: "Update failed",
           description: error.message,
-          variant: "destructive",
+          variant: "destructive"
         });
         return { error };
       }
 
       // Broadcast update
-      broadcastRefresh("profile");
+      broadcastRefresh('profile');
 
       // Refresh profile data
       await fetchProfile();
-
+      
       toast({
         title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        description: "Your profile has been updated successfully."
       });
 
       return { error: null };
     } catch (err: any) {
-      console.error("Error updating profile:", err);
+      console.error('Error updating profile:', err);
       return { error: err.message };
     }
   };
 
-  const uploadImage = async (
-    file: File,
-    type: "avatar" | "cover",
-  ): Promise<string | null> => {
+  const uploadImage = async (file: File, type: 'avatar' | 'cover'): Promise<string | null> => {
     if (!user) return null;
 
     try {
-      const fileExt = file.name.split(".").pop();
+      const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${type}-${Date.now()}.${fileExt}`;
       const filePath = fileName;
 
       const { error: uploadError } = await supabase.storage
-        .from("avatars")
+        .from('avatars')
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) {
-        console.error("Upload error:", uploadError);
+        console.error('Upload error:', uploadError);
         toast({
           title: "Upload failed",
           description: uploadError.message,
-          variant: "destructive",
+          variant: "destructive"
         });
         return null;
       }
 
       const { data: publicUrlData } = supabase.storage
-        .from("avatars")
+        .from('avatars')
         .getPublicUrl(filePath);
 
       const publicUrl = publicUrlData.publicUrl;
 
       // Update profile with new image URL
-      const updateField = type === "avatar" ? "avatar_url" : "cover_url";
+      const updateField = type === 'avatar' ? 'avatar_url' : 'cover_url';
       const { error: updateError } = await supabase
-        .from("profiles")
+        .from('profiles')
         .update({ [updateField]: publicUrl })
-        .eq("id", user.id);
+        .eq('id', user.id);
 
       if (updateError) {
-        console.error("Profile update error:", updateError);
+        console.error('Profile update error:', updateError);
         toast({
           title: "Update failed",
           description: updateError.message,
-          variant: "destructive",
+          variant: "destructive"
         });
         return null;
       }
 
       // Broadcast update
-      broadcastRefresh("profile");
+      broadcastRefresh('profile');
 
       await fetchProfile();
 
       toast({
         title: "Image updated",
-        description: `Your ${type === "avatar" ? "profile" : "cover"} image has been updated.`,
+        description: `Your ${type === 'avatar' ? 'profile' : 'cover'} image has been updated.`
       });
 
       return publicUrl;
     } catch (err: any) {
-      console.error("Upload error:", err);
+      console.error('Upload error:', err);
       toast({
         title: "Upload failed",
         description: err.message,
-        variant: "destructive",
+        variant: "destructive"
       });
       return null;
     }
@@ -224,11 +221,6 @@ export const useProfile = () => {
     error,
     updateProfile,
     uploadImage,
-    refetch: fetchProfile,
+    refetch: fetchProfile
   };
 };
-
-
-
-
-

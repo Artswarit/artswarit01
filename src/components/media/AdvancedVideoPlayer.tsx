@@ -1,16 +1,8 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Maximize,
-  SkipBack,
-  SkipForward,
-  Settings,
-} from "lucide-react";
+
+import { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Settings } from 'lucide-react';
 
 interface AdvancedVideoPlayerProps {
   src: string;
@@ -19,12 +11,7 @@ interface AdvancedVideoPlayerProps {
   autoPlay?: boolean;
 }
 
-const AdvancedVideoPlayer = ({
-  src,
-  poster,
-  title,
-  autoPlay = false,
-}: AdvancedVideoPlayerProps) => {
+const AdvancedVideoPlayer = ({ src, poster, title, autoPlay = false }: AdvancedVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -43,16 +30,16 @@ const AdvancedVideoPlayer = ({
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
 
-    video.addEventListener("timeupdate", handleTimeUpdate);
-    video.addEventListener("durationchange", handleDurationChange);
-    video.addEventListener("play", handlePlay);
-    video.addEventListener("pause", handlePause);
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('durationchange', handleDurationChange);
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
 
     return () => {
-      video.removeEventListener("timeupdate", handleTimeUpdate);
-      video.removeEventListener("durationchange", handleDurationChange);
-      video.removeEventListener("play", handlePlay);
-      video.removeEventListener("pause", handlePause);
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('durationchange', handleDurationChange);
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
     };
   }, []);
 
@@ -93,10 +80,7 @@ const AdvancedVideoPlayer = ({
 
   const skipTime = (seconds: number) => {
     if (videoRef.current) {
-      videoRef.current.currentTime = Math.max(
-        0,
-        Math.min(duration, currentTime + seconds),
-      );
+      videoRef.current.currentTime = Math.max(0, Math.min(duration, currentTime + seconds));
     }
   };
 
@@ -120,11 +104,11 @@ const AdvancedVideoPlayer = ({
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   return (
-    <div
+    <div 
       className="relative group bg-black rounded-lg overflow-hidden"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
@@ -141,9 +125,7 @@ const AdvancedVideoPlayer = ({
       </video>
 
       {/* Controls Overlay */}
-      <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${showControls ? "opacity-100" : "opacity-0"}`}
-      >
+      <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
         {/* Progress Bar */}
         <div className="mb-4">
           <Slider
@@ -162,49 +144,21 @@ const AdvancedVideoPlayer = ({
         {/* Control Buttons */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={togglePlay}
-              className="text-white hover:bg-white/20"
-            >
-              {isPlaying ? (
-                <Pause className="h-5 w-5" />
-              ) : (
-                <Play className="h-5 w-5" />
-              )}
+            <Button variant="ghost" size="icon" onClick={togglePlay} className="text-white hover:bg-white/20">
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
             </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => skipTime(-10)}
-              className="text-white hover:bg-white/20"
-            >
+            
+            <Button variant="ghost" size="icon" onClick={() => skipTime(-10)} className="text-white hover:bg-white/20">
               <SkipBack className="h-4 w-4" />
             </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => skipTime(10)}
-              className="text-white hover:bg-white/20"
-            >
+            
+            <Button variant="ghost" size="icon" onClick={() => skipTime(10)} className="text-white hover:bg-white/20">
               <SkipForward className="h-4 w-4" />
             </Button>
 
             <div className="flex items-center gap-2 ml-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleMute}
-                className="text-white hover:bg-white/20"
-              >
-                {isMuted ? (
-                  <VolumeX className="h-4 w-4" />
-                ) : (
-                  <Volume2 className="h-4 w-4" />
-                )}
+              <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white hover:bg-white/20">
+                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </Button>
               <div className="w-20">
                 <Slider
@@ -223,32 +177,15 @@ const AdvancedVideoPlayer = ({
               onChange={(e) => changePlaybackRate(Number(e.target.value))}
               className="bg-transparent text-white text-sm border border-white/30 rounded px-2 py-1"
             >
-              <option value={0.5} className="text-black">
-                0.5x
-              </option>
-              <option value={0.75} className="text-black">
-                0.75x
-              </option>
-              <option value={1} className="text-black">
-                1x
-              </option>
-              <option value={1.25} className="text-black">
-                1.25x
-              </option>
-              <option value={1.5} className="text-black">
-                1.5x
-              </option>
-              <option value={2} className="text-black">
-                2x
-              </option>
+              <option value={0.5} className="text-black">0.5x</option>
+              <option value={0.75} className="text-black">0.75x</option>
+              <option value={1} className="text-black">1x</option>
+              <option value={1.25} className="text-black">1.25x</option>
+              <option value={1.5} className="text-black">1.5x</option>
+              <option value={2} className="text-black">2x</option>
             </select>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleFullscreen}
-              className="text-white hover:bg-white/20"
-            >
+            
+            <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-white hover:bg-white/20">
               <Maximize className="h-4 w-4" />
             </Button>
           </div>
@@ -265,8 +202,3 @@ const AdvancedVideoPlayer = ({
 };
 
 export default AdvancedVideoPlayer;
-
-
-
-
-

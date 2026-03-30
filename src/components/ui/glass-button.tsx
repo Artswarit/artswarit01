@@ -1,45 +1,33 @@
-import React from "react";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { cn } from '@/lib/utils';
 interface GlassButtonProps {
   children: React.ReactNode;
   className?: string;
-  variant?: "primary" | "secondary" | "ghost";
-  size?: "sm" | "md" | "lg";
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
   onClick?: () => void;
   disabled?: boolean;
 }
 export const GlassButton: React.FC<GlassButtonProps> = ({
   children,
   className,
-  variant = "primary",
-  size = "md",
+  variant = 'primary',
+  size = 'md',
   onClick,
-  disabled = false,
+  disabled = false
 }) => {
   const variantClasses = {
-    primary:
-      "bg-gradient-to-r from-blue-500/80 to-purple-600/80 hover:from-blue-600/90 hover:to-purple-700/90 text-white border-white/30",
-    secondary: "bg-white/20 hover:bg-white/30 text-gray-800 border-white/40",
-    ghost: "bg-transparent hover:bg-white/10 text-gray-700 border-transparent",
+    primary: 'bg-gradient-to-r from-blue-500/80 to-purple-600/80 hover:from-blue-600/90 hover:to-purple-700/90 text-white border-white/30',
+    secondary: 'bg-white/20 hover:bg-white/30 text-gray-800 border-white/40',
+    ghost: 'bg-transparent hover:bg-white/10 text-gray-700 border-transparent'
   };
   const sizeClasses = {
-    sm: "px-4 py-2 text-sm",
-    md: "px-6 py-3 text-base",
-    lg: "px-8 py-4 text-lg",
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-3 text-base',
+    lg: 'px-8 py-4 text-lg'
   };
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="text-whi rounded-md"
-    >
+  return <button onClick={onClick} disabled={disabled} className="text-whi rounded-md">
       {children}
-    </button>
-  );
+    </button>;
 };
 export default GlassButton;
-
-
-
-
-

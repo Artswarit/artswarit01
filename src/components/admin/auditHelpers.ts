@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Audit Log Entry — every admin action writes here.
@@ -15,7 +15,7 @@ export interface AuditEntry {
 }
 
 // In-memory log for demo / when Supabase table doesn't exist yet
-const memoryLog: AuditEntry[] = [];
+let memoryLog: AuditEntry[] = [];
 
 /**
  * Write an immutable audit log entry.
@@ -26,7 +26,7 @@ export async function writeAuditLog(
   action: string,
   targetId: string,
   reason: string,
-  metadata: Record<string, any> = {},
+  metadata: Record<string, any> = {}
 ): Promise<void> {
   const entry: AuditEntry = {
     id: `audit-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -39,7 +39,7 @@ export async function writeAuditLog(
   };
 
   try {
-    const { error } = await supabase.from("admin_audit_logs" as any).insert({
+    const { error } = await supabase.from('admin_audit_logs' as any).insert({
       admin_id: adminId,
       action,
       target_id: targetId,
@@ -50,7 +50,7 @@ export async function writeAuditLog(
   } catch {
     // Supabase table may not exist yet — store in memory
     memoryLog.push(entry);
-    console.info("[AuditLog] Stored in memory:", entry);
+    console.info('[AuditLog] Stored in memory:', entry);
   }
 }
 
@@ -60,26 +60,19 @@ export async function writeAuditLog(
 export async function readAuditLog(): Promise<AuditEntry[]> {
   try {
     const { data, error } = await supabase
-      .from("admin_audit_logs" as any)
-      .select("*")
-      .order("created_at", { ascending: false })
+      .from('admin_audit_logs' as any)
+      .select('*')
+      .order('created_at', { ascending: false })
       .limit(200);
     if (error) throw error;
     // Merge with any memory entries
     const combined = [...memoryLog, ...(data || [])].sort(
-      (a: any, b: any) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
     return combined as AuditEntry[];
   } catch {
     return [...memoryLog].sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   }
 }
-
-
-
-
-

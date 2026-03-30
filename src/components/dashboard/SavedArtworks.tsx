@@ -1,21 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Heart,
-  Eye,
-  Bookmark,
-  Trash2,
-  ExternalLink,
-  Loader2,
-} from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
-import { useSavedArtworks } from "@/hooks/useSavedArtworks";
-import { toast } from "sonner";
+import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Heart, Eye, Bookmark, Trash2, ExternalLink, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
+import { useSavedArtworks } from '@/hooks/useSavedArtworks';
+import { toast } from 'sonner';
 
 interface SavedArtworkItem {
   id: string;
@@ -34,8 +27,7 @@ interface SavedArtworkItem {
 export default function SavedArtworks() {
   const { user } = useAuth();
   const { format } = useCurrencyFormat();
-  const { savedArtworks, loading, toggleSaveArtwork, refresh } =
-    useSavedArtworks();
+  const { savedArtworks, loading, toggleSaveArtwork, refresh } = useSavedArtworks();
   const [artworkDetails, setArtworkDetails] = useState<SavedArtworkItem[]>([]);
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [visibleCount, setVisibleCount] = useState(8);
@@ -50,82 +42,76 @@ export default function SavedArtworks() {
     }
 
     try {
-      const artworkIds = savedArtworks.map((sa) => sa.artwork_id);
-
+      const artworkIds = savedArtworks.map(sa => sa.artwork_id);
+      
       // Fetch artwork details
       const { data: artworks, error } = await supabase
-        .from("artworks")
-        .select("id, title, media_url, media_type, artist_id, price")
-        .in("id", artworkIds);
+        .from('artworks')
+        .select('id, title, media_url, media_type, artist_id, price')
+        .in('id', artworkIds);
 
       if (error) throw error;
 
       // Get artist info
-      const artistIds = [
-        ...new Set((artworks || []).map((a) => a.artist_id).filter(Boolean)),
-      ];
-      const artistProfiles: Record<string, string> = {};
-
+      const artistIds = [...new Set((artworks || []).map(a => a.artist_id).filter(Boolean))];
+      let artistProfiles: Record<string, string> = {};
+      
       if (artistIds.length > 0) {
         const { data: profiles } = await supabase
-          .from("public_profiles")
-          .select("id, full_name")
-          .in("id", artistIds);
-
-        (profiles || []).forEach((p) => {
-          if (p.id) artistProfiles[p.id] = p.full_name || "Unknown Artist";
+          .from('public_profiles')
+          .select('id, full_name')
+          .in('id', artistIds);
+        
+        (profiles || []).forEach(p => {
+          if (p.id) artistProfiles[p.id] = p.full_name || 'Unknown Artist';
         });
       }
 
       // Get like/view counts
       const likeCounts: Record<string, number> = {};
       const viewCounts: Record<string, number> = {};
-
+      
       if (artworkIds.length > 0) {
         const { data: likes } = await supabase
-          .from("artwork_likes")
-          .select("artwork_id")
-          .in("artwork_id", artworkIds);
-
-        (likes || []).forEach((l) => {
-          if (l.artwork_id)
-            likeCounts[l.artwork_id] = (likeCounts[l.artwork_id] || 0) + 1;
+          .from('artwork_likes')
+          .select('artwork_id')
+          .in('artwork_id', artworkIds);
+        
+        (likes || []).forEach(l => {
+          if (l.artwork_id) likeCounts[l.artwork_id] = (likeCounts[l.artwork_id] || 0) + 1;
         });
 
         const { data: views } = await supabase
-          .from("artwork_views")
-          .select("artwork_id")
-          .in("artwork_id", artworkIds);
-
-        (views || []).forEach((v) => {
-          if (v.artwork_id)
-            viewCounts[v.artwork_id] = (viewCounts[v.artwork_id] || 0) + 1;
+          .from('artwork_views')
+          .select('artwork_id')
+          .in('artwork_id', artworkIds);
+        
+        (views || []).forEach(v => {
+          if (v.artwork_id) viewCounts[v.artwork_id] = (viewCounts[v.artwork_id] || 0) + 1;
         });
       }
 
       // Build enriched list
-      const enriched: SavedArtworkItem[] = savedArtworks.map((saved) => {
-        const artwork = artworks?.find((a) => a.id === saved.artwork_id);
+      const enriched: SavedArtworkItem[] = savedArtworks.map(saved => {
+        const artwork = artworks?.find(a => a.id === saved.artwork_id);
         return {
           id: saved.id,
           artwork_id: saved.artwork_id,
           created_at: saved.created_at,
-          title: artwork?.title || "Unknown Artwork",
-          imageUrl: artwork?.media_url || "/placeholder.svg",
-          artistId: artwork?.artist_id || "",
-          artistName: artwork?.artist_id
-            ? artistProfiles[artwork.artist_id] || "Unknown"
-            : "Unknown",
+          title: artwork?.title || 'Unknown Artwork',
+          imageUrl: artwork?.media_url || '/placeholder.svg',
+          artistId: artwork?.artist_id || '',
+          artistName: artwork?.artist_id ? artistProfiles[artwork.artist_id] || 'Unknown' : 'Unknown',
           price: artwork?.price || null,
           likes: likeCounts[saved.artwork_id] || 0,
           views: viewCounts[saved.artwork_id] || 0,
-          mediaType: artwork?.media_type || "image",
+          mediaType: artwork?.media_type || 'image',
         };
       });
 
       setArtworkDetails(enriched);
     } catch (err) {
-      console.error("Error fetching artwork details:", err);
+      console.error('Error fetching artwork details:', err);
     } finally {
       setLoadingDetails(false);
     }
@@ -142,16 +128,16 @@ export default function SavedArtworks() {
     const channel = supabase
       .channel(`saved-artworks-${user.id}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "saved_artworks",
-          filter: `user_id=eq.${user.id}`,
+          event: '*',
+          schema: 'public',
+          table: 'saved_artworks',
+          filter: `user_id=eq.${user.id}`
         },
         () => {
           refresh();
-        },
+        }
       )
       .subscribe();
 
@@ -162,7 +148,7 @@ export default function SavedArtworks() {
 
   const handleRemove = async (artworkId: string) => {
     await toggleSaveArtwork(artworkId);
-    toast.success("Artwork removed from saved");
+    toast.success('Artwork removed from saved');
   };
 
   if (loading || loadingDetails) {
@@ -206,107 +192,97 @@ export default function SavedArtworks() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {artworkDetails.slice(0, visibleCount).map((artwork) => (
-                <div
-                  key={artwork.id}
-                  className="group relative bg-card border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
-                >
-                  {/* Image */}
-                  <Link to={`/artwork/${artwork.artwork_id}`} className="block">
-                    <div className="aspect-square overflow-hidden">
-                      <img
-                        src={artwork.imageUrl}
-                        alt={artwork.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {artworkDetails.slice(0, visibleCount).map((artwork) => (
+              <div
+                key={artwork.id}
+                className="group relative bg-card border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300"
+              >
+                {/* Image */}
+                <Link to={`/artwork/${artwork.artwork_id}`} className="block">
+                  <div className="aspect-square overflow-hidden">
+                    <img
+                      src={artwork.imageUrl}
+                      alt={artwork.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                </Link>
+
+                {/* Content */}
+                <div className="p-3">
+                  <Link 
+                    to={`/artwork/${artwork.artwork_id}`}
+                    className="font-medium text-sm line-clamp-1 hover:text-primary transition-colors"
+                  >
+                    {artwork.title}
+                  </Link>
+                  <Link 
+                    to={`/artist/${artwork.artistId}`}
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    by {artwork.artistName}
                   </Link>
 
-                  {/* Content */}
-                  <div className="p-3">
-                    <Link
-                      to={`/artwork/${artwork.artwork_id}`}
-                      className="font-medium text-sm line-clamp-1 hover:text-primary transition-colors"
-                    >
-                      {artwork.title}
-                    </Link>
-                    <Link
-                      to={`/artist/${artwork.artistId}`}
-                      className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      by {artwork.artistName}
-                    </Link>
-
-                    <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Heart className="h-3 w-3" />
-                          {artwork.likes}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          {artwork.views}
-                        </span>
-                      </div>
-                      {artwork.price !== null && artwork.price > 0 && (
-                        <Badge variant="secondary" className="text-xs">
-                          {format(artwork.price)}
-                        </Badge>
-                      )}
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Heart className="h-3 w-3" />
+                        {artwork.likes}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        {artwork.views}
+                      </span>
                     </div>
+                    {artwork.price !== null && artwork.price > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {format(artwork.price)}
+                      </Badge>
+                    )}
+                  </div>
 
-                    <div className="flex gap-2 mt-3">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 h-8 text-xs"
-                        asChild
-                      >
-                        <Link to={`/artwork/${artwork.artwork_id}`}>
-                          <ExternalLink className="h-3 w-3 mr-1" />
-                          View
-                        </Link>
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => handleRemove(artwork.artwork_id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 h-8 text-xs"
+                      asChild
+                    >
+                      <Link to={`/artwork/${artwork.artwork_id}`}>
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        View
+                      </Link>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => handleRemove(artwork.artwork_id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Load More */}
-            {visibleCount < artworkDetails.length && (
-              <div className="flex justify-center pt-4">
-                <Button
-                  variant="outline"
-                  className="h-11 px-10 rounded-2xl font-black text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all"
-                  onClick={() => setVisibleCount((c) => c + ITEMS_PER_PAGE)}
-                >
-                  Load More ·{" "}
-                  {Math.min(
-                    ITEMS_PER_PAGE,
-                    artworkDetails.length - visibleCount,
-                  )}{" "}
-                  of {artworkDetails.length - visibleCount} remaining
-                </Button>
               </div>
-            )}
+            ))}
+          </div>
+
+          {/* Load More */}
+          {visibleCount < artworkDetails.length && (
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                className="h-11 px-10 rounded-2xl font-black text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all"
+                onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
+              >
+                Load More · {Math.min(ITEMS_PER_PAGE, artworkDetails.length - visibleCount)} of {artworkDetails.length - visibleCount} remaining
+              </Button>
+            </div>
+          )}
           </>
         )}
       </CardContent>
     </Card>
   );
 }
-
-
-
-
-

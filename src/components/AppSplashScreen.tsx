@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,26 +26,26 @@ export const AppSplashScreen = () => {
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{
-              duration: 0.8,
+            transition={{ 
+              duration: 0.8, 
               ease: "easeOut",
               repeat: Infinity,
-              repeatType: "reverse",
+              repeatType: "reverse" 
             }}
             className="relative"
           >
-            <img
-              src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
-              alt="Artswarit Logo"
+            <img 
+              src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png" 
+              alt="Artswarit Logo" 
               className="h-24 w-24 sm:h-32 sm:w-32 object-contain"
             />
-            <motion.div
+            <motion.div 
               className="absolute -inset-4 bg-primary/10 rounded-full blur-2xl"
               animate={{ opacity: [0.3, 0.6, 0.3] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
           </motion.div>
-
+          
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -55,7 +56,7 @@ export const AppSplashScreen = () => {
               ARTSWARIT
             </h1>
             <div className="mt-4 w-48 h-1 bg-muted rounded-full overflow-hidden">
-              <motion.div
+              <motion.div 
                 className="h-full bg-primary"
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
@@ -68,8 +69,3 @@ export const AppSplashScreen = () => {
     </AnimatePresence>
   );
 };
-
-
-
-
-

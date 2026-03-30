@@ -4,13 +4,7 @@ import { TrendingUp, Calendar, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FollowersList } from "@/components/dashboard/FollowersList";
 import { useRealtimeSync } from "@/lib/realtime-sync";
 
@@ -28,12 +22,7 @@ type ArtistStats = {
   followers: number;
 };
 
-const DashboardHeader = ({
-  user,
-  profile,
-  title,
-  subtitle,
-}: DashboardHeaderProps) => {
+const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const { format } = useCurrencyFormat();
   const [artistStats, setArtistStats] = useState<ArtistStats>({
@@ -44,22 +33,16 @@ const DashboardHeader = ({
   });
   const [openFollowers, setOpenFollowers] = useState(false);
 
-  const fetchStats = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!user?.id) return;
+  const fetchStats = useCallback(async (signal?: AbortSignal) => {
+    if (!user?.id) return;
+    
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
 
-      const monthStart = new Date();
-      monthStart.setDate(1);
-      monthStart.setHours(0, 0, 0, 0);
-
-      try {
-        const [
-          artworksCountRes,
-          followersCountRes,
-          earningsRes,
-          monthlyEarningsRes,
-          artworksViewsRes,
-        ] = await Promise.all([
+    try {
+      const [artworksCountRes, followersCountRes, earningsRes, monthlyEarningsRes, artworksViewsRes] =
+        await Promise.all([
           supabase
             .from("artworks")
             .select("id", { count: "exact", head: true })
@@ -90,62 +73,50 @@ const DashboardHeader = ({
             .abortSignal(signal),
         ]);
 
-        const isAbortError = (error: any) =>
-          error?.name === "AbortError" ||
-          error?.message === "AbortError: signal is aborted without reason" ||
-          error?.message?.includes("Fetch aborted") ||
-          error?.message?.includes("signal is aborted");
+      const isAbortError = (error: any) => 
+        error?.name === 'AbortError' || 
+        error?.message === 'AbortError: signal is aborted without reason' ||
+        error?.message?.includes('Fetch aborted') ||
+        error?.message?.includes('signal is aborted');
 
-        if (
-          (artworksCountRes.error && !isAbortError(artworksCountRes.error)) ||
-          (followersCountRes.error && !isAbortError(followersCountRes.error)) ||
-          (earningsRes.error && !isAbortError(earningsRes.error)) ||
-          (monthlyEarningsRes.error &&
-            !isAbortError(monthlyEarningsRes.error)) ||
-          (artworksViewsRes.error && !isAbortError(artworksViewsRes.error))
-        ) {
-          return;
-        }
-
-        const totalEarnings = (earningsRes.data ?? []).reduce(
-          (sum, row) => sum + (Number(row.amount) || 0),
-          0,
-        );
-        const monthlyEarnings = (monthlyEarningsRes.data ?? []).reduce(
-          (sum, row) => sum + (Number(row.amount) || 0),
-          0,
-        );
-        const totalViews = (artworksViewsRes.data ?? []).reduce(
-          (sum, row: any) => {
-            const metadata = row?.metadata as any;
-            const views =
-              Number(
-                metadata?.views_count ??
-                  metadata?.views ??
-                  metadata?.viewsCount ??
-                  0,
-              ) || 0;
-            return sum + views;
-          },
-          0,
-        );
-
-        setArtistStats({
-          totalViews,
-          monthlyEarnings,
-          totalArtworks: artworksCountRes.count ?? 0,
-          followers: followersCountRes.count ?? 0,
-        });
-      } catch (err: any) {
-        // Fetch error handled
+      if (
+        (artworksCountRes.error && !isAbortError(artworksCountRes.error)) ||
+        (followersCountRes.error && !isAbortError(followersCountRes.error)) ||
+        (earningsRes.error && !isAbortError(earningsRes.error)) ||
+        (monthlyEarningsRes.error && !isAbortError(monthlyEarningsRes.error)) ||
+        (artworksViewsRes.error && !isAbortError(artworksViewsRes.error))
+      ) {
+        return;
       }
-    },
-    [user?.id],
-  );
+
+      const totalEarnings = (earningsRes.data ?? []).reduce(
+        (sum, row) => sum + (Number(row.amount) || 0),
+        0
+      );
+      const monthlyEarnings = (monthlyEarningsRes.data ?? []).reduce(
+        (sum, row) => sum + (Number(row.amount) || 0),
+        0
+      );
+      const totalViews = (artworksViewsRes.data ?? []).reduce((sum, row: any) => {
+        const metadata = row?.metadata as any;
+        const views = Number(metadata?.views_count ?? metadata?.views ?? metadata?.viewsCount ?? 0) || 0;
+        return sum + views;
+      }, 0);
+
+      setArtistStats({
+        totalViews,
+        monthlyEarnings,
+        totalArtworks: artworksCountRes.count ?? 0,
+        followers: followersCountRes.count ?? 0,
+      });
+    } catch (err: any) {
+      // Fetch error handled
+    }
+  }, [user?.id]);
 
   // Use Realtime Sync for multi-tab updates
-  useRealtimeSync("artworks", fetchStats);
-  useRealtimeSync("all", fetchStats);
+  useRealtimeSync('artworks', fetchStats);
+  useRealtimeSync('all', fetchStats);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -157,33 +128,18 @@ const DashboardHeader = ({
       .channel(`artist-dashboard-stats:${user.id}`)
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "artworks",
-          filter: `artist_id=eq.${user.id}`,
-        },
-        () => fetchStats(),
+        { event: "*", schema: "public", table: "artworks", filter: `artist_id=eq.${user.id}` },
+        () => fetchStats()
       )
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "follows",
-          filter: `following_id=eq.${user.id}`,
-        },
-        () => fetchStats(),
+        { event: "*", schema: "public", table: "follows", filter: `following_id=eq.${user.id}` },
+        () => fetchStats()
       )
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "transactions",
-          filter: `seller_id=eq.${user.id}`,
-        },
-        () => fetchStats(),
+        { event: "*", schema: "public", table: "transactions", filter: `seller_id=eq.${user.id}` },
+        () => fetchStats()
       )
       .subscribe();
 
@@ -194,15 +150,11 @@ const DashboardHeader = ({
   }, [user?.id, fetchStats]);
 
   return (
-    <div className="space-y-6 sm:space-y-8 py-2 sm:py-4 my-1 sm:my-4">
+    <div className="space-y-6 sm:space-y-10 py-4 sm:py-6 my-2 sm:my-10">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6 px-1">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-left-4 duration-500">
-            {title}
-          </h1>
-          <p className="text-muted-foreground text-xs sm:text-base lg:text-lg leading-relaxed font-medium opacity-80 animate-in fade-in slide-in-from-left-6 duration-700">
-            {subtitle}
-          </p>
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-left-4 duration-500">{title}</h1>
+          <p className="text-muted-foreground text-xs sm:text-base lg:text-lg leading-relaxed font-medium opacity-80 animate-in fade-in slide-in-from-left-6 duration-700">{subtitle}</p>
         </div>
       </div>
 
@@ -213,31 +165,21 @@ const DashboardHeader = ({
               <Eye className="h-6 w-6 sm:h-6 sm:w-6 text-purple-600" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">
-                Total Views
-              </p>
-              <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">
-                {artistStats.totalViews.toLocaleString()}
-              </p>
+              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Total Views</p>
+              <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">{artistStats.totalViews.toLocaleString()}</p>
             </div>
           </CardContent>
         </Card>
 
-        {(profile?.show_earnings ??
-          profile?.social_links?.settings?.showEarnings ??
-          true) && (
+        {(profile?.show_earnings ?? (profile?.social_links?.settings?.showEarnings ?? true)) && (
           <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
             <CardContent className="flex items-center p-5 sm:p-6">
               <div className="mr-4 sm:mr-5 bg-green-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">
                 <TrendingUp className="h-6 w-6 sm:h-6 sm:w-6 text-green-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">
-                  Earnings
-                </p>
-                <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">
-                  {format(artistStats.monthlyEarnings)}
-                </p>
+                <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Earnings</p>
+                <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">{format(artistStats.monthlyEarnings)}</p>
               </div>
             </CardContent>
           </Card>
@@ -249,12 +191,8 @@ const DashboardHeader = ({
               <Calendar className="h-6 w-6 sm:h-6 sm:w-6 text-blue-600" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">
-                Artworks
-              </p>
-              <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">
-                {artistStats.totalArtworks}
-              </p>
+              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Artworks</p>
+              <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">{artistStats.totalArtworks}</p>
             </div>
           </CardContent>
         </Card>
@@ -278,9 +216,7 @@ const DashboardHeader = ({
               </svg>
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">
-                Followers
-              </p>
+              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Followers</p>
               <button
                 className="text-xl sm:text-2xl font-black text-primary cursor-pointer hover:underline underline-offset-4 decoration-2 truncate tracking-tight min-h-[48px] flex items-center px-2 -ml-2"
                 onClick={() => setOpenFollowers(true)}
@@ -306,8 +242,3 @@ const DashboardHeader = ({
 };
 
 export default DashboardHeader;
-
-
-
-
-

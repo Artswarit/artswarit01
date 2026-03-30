@@ -1,3 +1,4 @@
+
 import React from "react";
 import { MessageCircle, Save, FilePlus, UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,18 +52,12 @@ const ArtistActionsBar: React.FC<ArtistActionsBarProps> = ({
         onClick={onMessage}
         disabled={!canMessage}
         variant="outline"
-        className={`w-full text-sm min-h-[44px] ${!canMessage ? "border-gray-300 text-gray-500 cursor-not-allowed" : "border-blue-400 text-blue-700 hover:bg-blue-200/60 hover:text-blue-900"}`}
-        title={
-          !canMessage
-            ? "Direct messages are disabled by this artist"
-            : undefined
-        }
+        className={`w-full text-sm min-h-[44px] ${!canMessage ? 'border-gray-300 text-gray-500 cursor-not-allowed' : 'border-blue-400 text-blue-700 hover:bg-blue-200/60 hover:text-blue-900'}`}
+        title={!canMessage ? 'Direct messages are disabled by this artist' : undefined}
       >
         <MessageCircle size={16} className="mr-2" />
-        <span className="hidden xs:inline">
-          {canMessage ? "Message Artist" : "Messages Disabled"}
-        </span>
-        <span className="xs:hidden">{canMessage ? "Message" : "Disabled"}</span>
+        <span className="hidden xs:inline">{canMessage ? 'Message Artist' : 'Messages Disabled'}</span>
+        <span className="xs:hidden">{canMessage ? 'Message' : 'Disabled'}</span>
       </Button>
 
       {/* Action Buttons Row - Always stacked on mobile for better touch targets */}
@@ -72,15 +67,13 @@ const ArtistActionsBar: React.FC<ArtistActionsBarProps> = ({
           variant="outline"
           disabled={loadingSave}
           className={`flex-1 border-pink-400 hover:text-pink-900 text-sm min-h-[44px] ${
-            isSaved
-              ? "bg-pink-100 text-pink-800 hover:bg-pink-200/60"
-              : "text-pink-700 hover:bg-pink-200/50"
+            isSaved 
+              ? 'bg-pink-100 text-pink-800 hover:bg-pink-200/60' 
+              : 'text-pink-700 hover:bg-pink-200/50'
           }`}
         >
           <Save size={16} className="mr-2" />
-          <span className="hidden sm:inline">
-            {isSaved ? "Saved" : "Save Artist"}
-          </span>
+          <span className="hidden sm:inline">{isSaved ? "Saved" : "Save Artist"}</span>
           <span className="sm:hidden">{isSaved ? "Saved" : "Save"}</span>
         </Button>
 
@@ -99,8 +92,3 @@ const ArtistActionsBar: React.FC<ArtistActionsBarProps> = ({
 };
 
 export default ArtistActionsBar;
-
-
-
-
-

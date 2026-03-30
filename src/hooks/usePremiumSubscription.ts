@@ -14,7 +14,7 @@ export const usePremiumSubscription = (userId: string | undefined | null) => {
     isActive: false,
     subscriptionTier: null,
     renewAt: null,
-    startedAt: null,
+    startedAt: null
   });
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +24,7 @@ export const usePremiumSubscription = (userId: string | undefined | null) => {
         isActive: false,
         subscriptionTier: null,
         renewAt: null,
-        startedAt: null,
+        startedAt: null
       });
       setLoading(false);
       return;
@@ -45,21 +45,21 @@ export const usePremiumSubscription = (userId: string | undefined | null) => {
         isActive: true,
         subscriptionTier: data.subscription_tier,
         renewAt: data.renew_at,
-        startedAt: data.started_at,
+        startedAt: data.started_at
       });
     } else {
       setPremium({
         isActive: false,
         subscriptionTier: null,
         renewAt: null,
-        startedAt: null,
+        startedAt: null
       });
     }
     setLoading(false);
   }, [userId]);
 
   // Realtime Sync
-  useRealtimeSync("subscription", fetchPremium);
+  useRealtimeSync('subscription', fetchPremium);
 
   useEffect(() => {
     fetchPremium();
@@ -70,16 +70,16 @@ export const usePremiumSubscription = (userId: string | undefined | null) => {
     const channel = supabase
       .channel(`premium-status-${userId}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "subscribers",
-          filter: `user_id=eq.${userId}`,
+          event: '*',
+          schema: 'public',
+          table: 'subscribers',
+          filter: `user_id=eq.${userId}`
         },
         () => {
           fetchPremium();
-        },
+        }
       )
       .subscribe();
 
@@ -90,8 +90,3 @@ export const usePremiumSubscription = (userId: string | undefined | null) => {
 
   return { ...premium, loading };
 };
-
-
-
-
-

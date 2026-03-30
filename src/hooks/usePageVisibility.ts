@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export function usePageVisibility() {
   const [isVisible, setIsVisible] = useState(!document.hidden);
@@ -17,8 +17,3 @@ export function usePageVisibility() {
 
   return isVisible;
 }
-
-
-
-
-

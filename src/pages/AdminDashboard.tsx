@@ -1,3 +1,4 @@
+
 import React from "react";
 import Navbar from "@/components/Navbar";
 import AdminDashboard from "@/components/admin/AdminDashboard";
@@ -12,8 +13,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-
-
-
-

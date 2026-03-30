@@ -15,8 +15,8 @@ export const PLANS = {
       "Limited portfolio (10 items)",
       "Max 2 services",
       "Standard visibility",
-      "Direct client chat included",
-    ],
+      "Direct client chat included"
+    ]
   },
   pro: {
     name: "Premium Artist",
@@ -31,9 +31,9 @@ export const PLANS = {
       "Premium badge",
       "Priority ranking",
       "Featured rotation",
-      "Trust-first experience",
-    ],
-  },
+      "Trust-first experience"
+    ]
+  }
 } as const;
 
 export type PlanType = "starter" | "pro";
@@ -56,7 +56,7 @@ export const useArtistPlan = (userId: string | undefined | null) => {
     portfolioLimit: PLANS.starter.portfolioLimit,
     serviceLimit: PLANS.starter.serviceLimit,
     renewAt: null,
-    startedAt: null,
+    startedAt: null
   });
   const [loading, setLoading] = useState(true);
 
@@ -69,14 +69,14 @@ export const useArtistPlan = (userId: string | undefined | null) => {
         portfolioLimit: PLANS.starter.portfolioLimit,
         serviceLimit: PLANS.starter.serviceLimit,
         renewAt: null,
-        startedAt: null,
+        startedAt: null
       });
       setLoading(false);
       return;
     }
 
     setLoading(true);
-
+    
     const { data, error } = await supabase
       .from("subscribers")
       .select("*")
@@ -95,7 +95,7 @@ export const useArtistPlan = (userId: string | undefined | null) => {
         portfolioLimit: PLANS.pro.portfolioLimit,
         serviceLimit: PLANS.pro.serviceLimit,
         renewAt: data.renew_at,
-        startedAt: data.started_at,
+        startedAt: data.started_at
       });
     } else {
       // User is on Starter plan
@@ -106,14 +106,14 @@ export const useArtistPlan = (userId: string | undefined | null) => {
         portfolioLimit: PLANS.starter.portfolioLimit,
         serviceLimit: PLANS.starter.serviceLimit,
         renewAt: null,
-        startedAt: null,
+        startedAt: null
       });
     }
     setLoading(false);
   }, [userId]);
 
   // Realtime Sync
-  useRealtimeSync("subscription", fetchPlan);
+  useRealtimeSync('subscription', fetchPlan);
 
   useEffect(() => {
     fetchPlan();
@@ -124,17 +124,17 @@ export const useArtistPlan = (userId: string | undefined | null) => {
     const channel = supabase
       .channel(`artist-plan-${userId}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "subscribers",
-          filter: `user_id=eq.${userId}`,
+          event: '*',
+          schema: 'public',
+          table: 'subscribers',
+          filter: `user_id=eq.${userId}`
         },
         () => {
-          console.log("Plan update received");
+          console.log('Plan update received');
           fetchPlan();
-        },
+        }
       )
       .subscribe();
 
@@ -148,24 +148,17 @@ export const useArtistPlan = (userId: string | undefined | null) => {
 
 // Utility function to calculate earnings
 export const calculateEarnings = (amount: number, isProArtist: boolean) => {
-  const feeRate = isProArtist
-    ? PLANS.pro.platformFee
-    : PLANS.starter.platformFee;
-
+  const feeRate = isProArtist ? PLANS.pro.platformFee : PLANS.starter.platformFee;
+  
   // High-precision calculation for platform fee and artist payout
   // We avoid rounding to 2 decimals here to prevent drift in micro-transactions
   const platformFee = amount * feeRate;
   const artistPayout = amount - platformFee;
-
+  
   return {
     total: amount,
     platformFee,
     artistPayout,
-    feePercentage: feeRate * 100,
+    feePercentage: feeRate * 100
   };
 };
-
-
-
-
-

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,9 +34,9 @@ const PurchasedArtworks = () => {
     try {
       // Fetch unlocks for this user
       const { data: unlocks, error: unlocksError } = await supabase
-        .from("artwork_unlocks")
-        .select("artwork_id")
-        .eq("user_id", user.id);
+        .from('artwork_unlocks')
+        .select('artwork_id')
+        .eq('user_id', user.id);
 
       if (unlocksError) throw unlocksError;
 
@@ -45,42 +46,38 @@ const PurchasedArtworks = () => {
         return;
       }
 
-      const artworkIds = unlocks.map((u) => u.artwork_id);
+      const artworkIds = unlocks.map(u => u.artwork_id);
 
       // Fetch artwork details for those IDs
       const { data: artworkData, error: artworkError } = await supabase
-        .from("artworks")
-        .select(
-          `
+        .from('artworks')
+        .select(`
           *,
           profiles:artist_id (full_name)
-        `,
-        )
-        .in("id", artworkIds);
+        `)
+        .in('id', artworkIds);
 
       if (artworkError) throw artworkError;
 
       // Transform data to match ArtworkCard expectations
-      const transformedArtworks: PurchasedArtwork[] = (artworkData || []).map(
-        (a) => ({
-          id: a.id,
-          title: a.title,
-          artist: (a.profiles as any)?.full_name || "Unknown Artist",
-          artist_id: a.artist_id,
-          type: a.media_type,
-          imageUrl: a.media_url,
-          likes: (a.metadata as any)?.likes_count || 0,
-          views: (a.metadata as any)?.views_count || 0,
-          price: a.price || 0,
-          category: a.category || "Uncategorized",
-          audioUrl: a.media_type === "audio" ? a.media_url : null,
-          videoUrl: a.media_type === "video" ? a.media_url : null,
-        }),
-      );
+      const transformedArtworks: PurchasedArtwork[] = (artworkData || []).map(a => ({
+        id: a.id,
+        title: a.title,
+        artist: (a.profiles as any)?.full_name || 'Unknown Artist',
+        artist_id: a.artist_id,
+        type: a.media_type,
+        imageUrl: a.media_url,
+        likes: (a.metadata as any)?.likes_count || 0,
+        views: (a.metadata as any)?.views_count || 0,
+        price: a.price || 0,
+        category: a.category || 'Uncategorized',
+        audioUrl: a.media_type === 'audio' ? a.media_url : null,
+        videoUrl: a.media_type === 'video' ? a.media_url : null
+      }));
 
       setArtworks(transformedArtworks);
     } catch (error) {
-      console.error("Error fetching purchased artworks:", error);
+      console.error('Error fetching purchased artworks:', error);
     } finally {
       setLoading(false);
     }
@@ -93,23 +90,18 @@ const PurchasedArtworks = () => {
     const unlocksChannel = supabase
       .channel(`collection-unlocks-${user.id}`)
       .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "artwork_unlocks",
-          filter: `user_id=eq.${user.id}`,
-        },
-        () => fetchPurchasedArtworks(),
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'artwork_unlocks', filter: `user_id=eq.${user.id}` },
+        () => fetchPurchasedArtworks()
       )
       .subscribe();
 
     const artworksChannel = supabase
       .channel(`collection-artworks-${user.id}`)
       .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "artworks" },
-        () => fetchPurchasedArtworks(),
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'artworks' },
+        () => fetchPurchasedArtworks()
       )
       .subscribe();
 
@@ -119,10 +111,9 @@ const PurchasedArtworks = () => {
     };
   }, [fetchPurchasedArtworks]);
 
-  const filteredArtworks = artworks.filter(
-    (artwork) =>
-      artwork.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      artwork.artist.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filteredArtworks = artworks.filter(artwork => 
+    artwork.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    artwork.artist.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -141,11 +132,9 @@ const PurchasedArtworks = () => {
             <ShoppingBag className="h-6 w-6 text-primary" />
             My Collection
           </h2>
-          <p className="text-muted-foreground">
-            Artworks you've purchased and unlocked.
-          </p>
+          <p className="text-muted-foreground">Artworks you've purchased and unlocked.</p>
         </div>
-
+        
         <div className="relative w-full md:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -162,9 +151,7 @@ const PurchasedArtworks = () => {
           <div className="text-4xl mb-4">🎨</div>
           <h3 className="text-xl font-semibold mb-2">No artworks found</h3>
           <p className="text-muted-foreground mb-6">
-            {searchQuery
-              ? "No artworks match your search."
-              : "You haven't purchased any artworks yet."}
+            {searchQuery ? "No artworks match your search." : "You haven't purchased any artworks yet."}
           </p>
           {!searchQuery && (
             <a href="/explore">
@@ -200,8 +187,3 @@ const PurchasedArtworks = () => {
 };
 
 export default PurchasedArtworks;
-
-
-
-
-

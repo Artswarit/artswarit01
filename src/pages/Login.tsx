@@ -1,5 +1,5 @@
+
 import { useState, useEffect } from "react";
-import SEOHead from "@/components/SEOHead";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,13 +8,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LogoWithName from "@/components/LogoWithName";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -41,47 +35,43 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
   const redirectBasedOnRole = async () => {
     if (!user) return;
     setIsRedirecting(true);
-
+    
     try {
       // Check both profile role AND user_roles table for admin status
       const [profileResult, adminResult] = await Promise.all([
         supabase
-          .from("profiles")
-          .select("role, full_name, bio, avatar_url, tags")
-          .eq("id", user.id)
+          .from('profiles')
+          .select('role, full_name, bio, avatar_url, tags')
+          .eq('id', user.id)
           .single(),
         supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
           .maybeSingle(),
       ]);
 
       if (profileResult.error) {
-        console.error(
-          "Error fetching profile for redirect:",
-          profileResult.error,
-        );
-        navigate("/");
+        console.error('Error fetching profile for redirect:', profileResult.error);
+        navigate('/');
         return;
       }
 
       const profile = profileResult.data;
-      const isAdmin =
-        profile?.role === "admin" || adminResult.data?.role === "admin";
+      const isAdmin = profile?.role === 'admin' || adminResult.data?.role === 'admin';
 
       // Admin users always go to admin dashboard
       if (isAdmin) {
-        navigate("/admin-dashboard");
-      } else if (profile?.role === "artist" || profile?.role === "premium") {
-        navigate("/artist-dashboard");
+        navigate('/admin-dashboard');
+      } else if (profile?.role === 'artist' || profile?.role === 'premium') {
+        navigate('/artist-dashboard');
       } else {
-        navigate("/client-dashboard");
+        navigate('/client-dashboard');
       }
     } catch (error) {
-      console.error("Error in redirectBasedOnRole:", error);
-      navigate("/");
+      console.error('Error in redirectBasedOnRole:', error);
+      navigate('/');
     } finally {
       setIsRedirecting(false);
     }
@@ -90,13 +80,13 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
-
+    
     const { error } = await signIn(email, password);
-
+    
     if (!error) {
       // Role-based redirect will happen via useEffect when user state updates
     }
-
+    
     setIsSubmitting(false);
   };
 
@@ -111,21 +101,11 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
   };
 
   return (
-    <div
-      className={cn(
-        "min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50",
-        isModal && "min-h-0 bg-none",
-      )}
-    >
+    <div className={cn("min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50", isModal && "min-h-0 bg-none")}>
       {!isModal && <Navbar />}
-      <SEOHead
-        title="Sign In to Artswarit | Artist & Client Login"
-        description="Sign in to your Artswarit account. Access your artist dashboard, manage commissions, and connect with clients worldwide."
-        canonicalPath="/login"
-      />
-
+      
       {isModal && (
-        <button
+        <button 
           onClick={() => navigate(-1)}
           className="absolute top-4 right-4 z-50 h-8 w-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
         >
@@ -133,14 +113,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
         </button>
       )}
 
-      <div
-        className={cn(
-          "flex-1 flex items-center justify-center px-3 sm:px-6 lg:px-8",
-          isModal
-            ? "py-6"
-            : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+2rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+3rem)] pb-20",
-        )}
-      >
+      <div className={cn("flex-1 flex items-center justify-center px-3 sm:px-6 lg:px-8", isModal ? "py-6" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+2rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+3rem)] pb-20")}>
         <div className="w-full max-w-sm sm:max-w-md space-y-4">
           <div className="text-center space-y-0">
             <LogoWithName />
@@ -281,8 +254,3 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 };
 
 export default Login;
-
-
-
-
-

@@ -43,15 +43,6 @@ serve(async (req) => {
       throw new Error("Artwork ID is required");
     }
 
-    // Validate UUID format to prevent Postgres errors
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(artworkId)) {
-      return new Response(
-        JSON.stringify({ error: "Invalid artwork ID format. Demo artworks (like a1, a2) cannot be used with the live payment system. Please use a real uploaded artwork." }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
-      );
-    }
-
     // Get artwork details
     const { data: artwork, error: artworkError } = await supabaseClient
       .from("artworks")
@@ -60,8 +51,7 @@ serve(async (req) => {
       .single();
 
     if (artworkError || !artwork) {
-      console.error("Artwork search error:", artworkError);
-      throw new Error("Artwork not found in database. Make sure the artwork exists and is not a demo placeholder.");
+      throw new Error("Artwork not found");
     }
 
     if (!artwork.price || artwork.price <= 0) {

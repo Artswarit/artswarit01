@@ -72,11 +72,11 @@ export default function UserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-
+  
   const [profile, setProfile] = useState<ClientProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
-
+  
   const [workHistory, setWorkHistory] = useState<WorkHistoryStats>({
     totalProjects: 0,
     completedProjects: 0,
@@ -85,10 +85,10 @@ export default function UserProfile() {
     avgResponseTime: null,
     lastActive: null,
   });
-
+  
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [averageRating, setAverageRating] = useState(0);
-
+  
   const [trustSignals, setTrustSignals] = useState<TrustSignals>({
     paymentVerified: false,
     onTimePaymentRate: 0,
@@ -96,7 +96,7 @@ export default function UserProfile() {
     escrowUsed: false,
     totalPayments: 0,
   });
-
+  
   const [behaviorMetrics, setBehaviorMetrics] = useState<BehaviorMetrics>({
     rehireRate: 0,
     avgBudget: null,
@@ -118,29 +118,29 @@ export default function UserProfile() {
 
       // Fetch profile from public_profiles view (accessible to all)
       const { data: profileData, error } = await supabase
-        .from("public_profiles")
-        .select("*")
-        .eq("id", id)
+        .from('public_profiles')
+        .select('*')
+        .eq('id', id)
         .maybeSingle();
 
       if (error || !profileData) {
-        console.error("Profile not found:", error);
+        console.error('Profile not found:', error);
         setProfile(null);
         setLoading(false);
         return;
       }
 
       // Redirect artists to artist profile page
-      if (profileData.role === "artist") {
+      if (profileData.role === 'artist') {
         navigate(`/artist/${id}`, { replace: true });
         return;
       }
 
       // Get country name from country_currencies table if we have a country code
-      const countryName: string | null = profileData.location;
+      let countryName: string | null = profileData.location;
 
       setProfile({
-        id: profileData.id || "",
+        id: profileData.id || '',
         full_name: profileData.full_name,
         avatar_url: profileData.avatar_url,
         cover_url: profileData.cover_url,
@@ -154,45 +154,46 @@ export default function UserProfile() {
       });
 
       // Fetch all client statistics in parallel
-      const [projectsResult, clientReviewsResult, conversationsResult] =
-        await Promise.all([
-          // Projects data
-          supabase
-            .from("projects")
-            .select("id, status, budget, created_at, updated_at, artist_id")
-            .eq("client_id", id),
-          // Reviews received BY this client FROM artists
-          supabase
-            .from("client_reviews")
-            .select(
-              `
+      const [
+        projectsResult,
+        clientReviewsResult,
+        conversationsResult,
+      ] = await Promise.all([
+        // Projects data
+        supabase
+          .from('projects')
+          .select('id, status, budget, created_at, updated_at, artist_id')
+          .eq('client_id', id),
+        // Reviews received BY this client FROM artists
+        supabase
+          .from('client_reviews')
+          .select(`
             id,
             rating,
             review_text,
             created_at,
             project_id,
             artist_id
-          `,
-            )
-            .eq("client_id", id)
-            .order("created_at", { ascending: false }),
-          // Get last activity from conversations
-          supabase
-            .from("conversations")
-            .select("updated_at")
-            .or(`client_id.eq.${id},artist_id.eq.${id}`)
-            .order("updated_at", { ascending: false })
-            .limit(1),
-        ]);
+          `)
+          .eq('client_id', id)
+          .order('created_at', { ascending: false }),
+        // Get last activity from conversations
+        supabase
+          .from('conversations')
+          .select('updated_at')
+          .or(`client_id.eq.${id},artist_id.eq.${id}`)
+          .order('updated_at', { ascending: false })
+          .limit(1),
+      ]);
 
       const projects = projectsResult.data || [];
       const clientReviewsData = clientReviewsResult.data || [];
       const lastConversation = conversationsResult.data?.[0];
 
       // Calculate work history stats
-      const completed = projects.filter((p) => p.status === "completed").length;
-      const inProgress = projects.filter((p) => p.status === "accepted").length;
-      const cancelled = projects.filter((p) => p.status === "cancelled").length;
+      const completed = projects.filter(p => p.status === 'completed').length;
+      const inProgress = projects.filter(p => p.status === 'accepted').length;
+      const cancelled = projects.filter(p => p.status === 'cancelled').length;
       const lastActive = lastConversation?.updated_at || profileData.created_at;
 
       setWorkHistory({
@@ -200,7 +201,7 @@ export default function UserProfile() {
         completedProjects: completed,
         inProgressProjects: inProgress,
         cancelledProjects: cancelled,
-        avgResponseTime: completed > 0 ? "< 24h" : null,
+        avgResponseTime: completed > 0 ? '< 24h' : null,
         lastActive,
       });
 
@@ -208,15 +209,15 @@ export default function UserProfile() {
       const reviewsWithArtists: ReviewData[] = [];
       for (const review of clientReviewsData.slice(0, 10)) {
         const { data: artistData } = await supabase
-          .from("public_profiles")
-          .select("full_name, avatar_url")
-          .eq("id", review.artist_id)
+          .from('public_profiles')
+          .select('full_name, avatar_url')
+          .eq('id', review.artist_id)
           .maybeSingle();
 
         const { data: projectData } = await supabase
-          .from("projects")
-          .select("title")
-          .eq("id", review.project_id)
+          .from('projects')
+          .select('title')
+          .eq('id', review.project_id)
           .maybeSingle();
 
         reviewsWithArtists.push({
@@ -230,58 +231,51 @@ export default function UserProfile() {
         });
       }
       setReviews(reviewsWithArtists);
-
+      
       // Calculate average rating (ratings this client has RECEIVED from artists)
-      const avgRating =
-        clientReviewsData.length > 0
-          ? clientReviewsData.reduce((sum, r) => sum + r.rating, 0) /
-            clientReviewsData.length
-          : 0;
+      const avgRating = clientReviewsData.length > 0
+        ? clientReviewsData.reduce((sum, r) => sum + r.rating, 0) / clientReviewsData.length
+        : 0;
       setAverageRating(avgRating);
 
       // Trust signals (simulated based on available data)
-      const completionRate =
-        projects.length > 0 ? (completed / projects.length) * 100 : 0;
+      const completionRate = projects.length > 0 ? (completed / projects.length) * 100 : 0;
       setTrustSignals({
         paymentVerified: completed > 0, // Assume verified if they've completed projects
-        onTimePaymentRate:
-          completed > 0 ? Math.min(100, completionRate + 20) : 0,
+        onTimePaymentRate: completed > 0 ? Math.min(100, completionRate + 20) : 0,
         disputeCount: 0, // No dispute tracking in current schema
         escrowUsed: false, // No escrow tracking in current schema
         totalPayments: completed,
       });
 
       // Behavior metrics
-      const budgets = projects
-        .filter((p) => p.budget)
-        .map((p) => p.budget as number);
-      const avgBudget =
-        budgets.length > 0
-          ? budgets.reduce((a, b) => a + b, 0) / budgets.length
-          : null;
+      const budgets = projects.filter(p => p.budget).map(p => p.budget as number);
+      const avgBudget = budgets.length > 0 
+        ? budgets.reduce((a, b) => a + b, 0) / budgets.length 
+        : null;
       const minBudget = budgets.length > 0 ? Math.min(...budgets) : null;
       const maxBudget = budgets.length > 0 ? Math.max(...budgets) : null;
 
       // Calculate rehire rate (same artist hired multiple times)
-      const artistIds = projects.map((p) => p.artist_id).filter(Boolean);
+      const artistIds = projects.map(p => p.artist_id).filter(Boolean);
       const uniqueArtists = new Set(artistIds);
       const repeatHires = artistIds.length - uniqueArtists.size;
-      const rehireRate =
-        uniqueArtists.size > 0 && artistIds.length > 1
-          ? Math.round((repeatHires / (artistIds.length - 1)) * 100)
-          : 0;
+      const rehireRate = uniqueArtists.size > 0 && artistIds.length > 1
+        ? Math.round((repeatHires / (artistIds.length - 1)) * 100)
+        : 0;
 
       setBehaviorMetrics({
         rehireRate,
         avgBudget,
         minBudget,
         maxBudget,
-        avgProjectDuration: completed > 0 ? "1-2 weeks" : null,
+        avgProjectDuration: completed > 0 ? '1-2 weeks' : null,
         totalHires: artistIds.length,
         repeatHires,
       });
+
     } catch (err) {
-      console.error("Error fetching client profile:", err);
+      console.error('Error fetching client profile:', err);
       setProfile(null);
     } finally {
       setLoading(false);
@@ -300,14 +294,9 @@ export default function UserProfile() {
     const profileChannel = supabase
       .channel(`client-profile-realtime:${id}`)
       .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "profiles",
-          filter: `id=eq.${id}`,
-        },
-        () => fetchAllData(),
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${id}` },
+        () => fetchAllData()
       )
       .subscribe();
 
@@ -315,14 +304,9 @@ export default function UserProfile() {
     const reviewsChannel = supabase
       .channel(`client-reviews-profile:${id}`)
       .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "client_reviews",
-          filter: `client_id=eq.${id}`,
-        },
-        () => fetchAllData(),
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'client_reviews', filter: `client_id=eq.${id}` },
+        () => fetchAllData()
       )
       .subscribe();
 
@@ -330,14 +314,9 @@ export default function UserProfile() {
     const projectsChannel = supabase
       .channel(`client-projects-realtime:${id}`)
       .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "projects",
-          filter: `client_id=eq.${id}`,
-        },
-        () => fetchAllData(),
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'projects', filter: `client_id=eq.${id}` },
+        () => fetchAllData()
       )
       .subscribe();
 
@@ -345,13 +324,13 @@ export default function UserProfile() {
     const conversationsChannel = supabase
       .channel(`client-conversations-realtime:${id}`)
       .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "conversations" },
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'conversations' },
         (payload: any) => {
           if (payload.new?.client_id === id || payload.new?.artist_id === id) {
             fetchAllData();
           }
-        },
+        }
       )
       .subscribe();
 
@@ -383,9 +362,7 @@ export default function UserProfile() {
           <GlassCard className="p-8 text-center max-w-md w-full">
             <User className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h1 className="text-xl font-bold mb-4">Profile Not Found</h1>
-            <p className="text-muted-foreground">
-              The client profile you're looking for doesn't exist.
-            </p>
+            <p className="text-muted-foreground">The client profile you're looking for doesn't exist.</p>
           </GlassCard>
         </div>
         <Footer />
@@ -398,7 +375,7 @@ export default function UserProfile() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-background">
       <Navbar />
-
+      
       <main className="flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 mt-16 pb-8">
         {/* Profile Header with Cover, Avatar, Name, Message Button */}
         <GlassCard className="overflow-hidden mb-6">
@@ -445,7 +422,7 @@ export default function UserProfile() {
           open={messageDialogOpen}
           onOpenChange={setMessageDialogOpen}
           clientId={profile.id}
-          clientName={profile.full_name || "Client"}
+          clientName={profile.full_name || 'Client'}
           clientAvatar={profile.avatar_url || undefined}
           currentUserId={user.id}
         />
@@ -453,8 +430,3 @@ export default function UserProfile() {
     </div>
   );
 }
-
-
-
-
-
