@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface FeaturedArtist {
@@ -16,18 +16,6 @@ export interface FeaturedArtist {
   verified: boolean;
   location: string;
 }
-
-/**
- * Featured Artist Ranking Algorithm
- *
- * Score = (followers × 0.25) + (likes × 0.25) + (views × 0.15) + (rating × 0.20) + (recency × 0.15)
- *
- * - followers: normalized follower count
- * - likes: total artwork likes
- * - views: total artwork views
- * - rating: average project review rating (0-5, scaled to 0-100)
- * - recency: bonus for recently active artists (last 30 days)
- */
 
 const isProfileComplete = (profile: any): boolean => {
   if (!profile) return false;
@@ -51,7 +39,6 @@ export function useFeaturedArtists(limit = 8) {
 
   const fetchFeaturedArtists = useCallback(async () => {
     try {
-      // 1. Fetch approved artist profiles with public visibility
       const { data: profiles, error } = await supabase
         .from("public_profiles")
         .select("*")
@@ -59,27 +46,23 @@ export function useFeaturedArtists(limit = 8) {
         .eq("account_status", "approved");
 
       if (error || !profiles || profiles.length === 0) {
-        setArtists([]);
+        setArtists(getDummyArtists(limit));
         setLoading(false);
         return;
       }
 
-      // Filter to only complete + visible profiles
       const completeProfiles = profiles
         .filter((p) => isProfileComplete(p))
         .filter((p) => p.profile_visibility === true);
 
       if (completeProfiles.length === 0) {
-        setArtists([]);
+        setArtists(getDummyArtists(limit));
         setLoading(false);
         return;
       }
 
-      const artistIds = completeProfiles
-        .map((p) => p.id)
-        .filter(Boolean) as string[];
+      const artistIds = completeProfiles.map((p) => p.id).filter(Boolean) as string[];
 
-      // 2. Fetch follower counts
       const { data: follows } = await supabase
         .from("follows")
         .select("following_id")
@@ -88,14 +71,10 @@ export function useFeaturedArtists(limit = 8) {
       const followerCounts = new Map<string, number>();
       follows?.forEach((f) => {
         if (f.following_id) {
-          followerCounts.set(
-            f.following_id,
-            (followerCounts.get(f.following_id) || 0) + 1
-          );
+          followerCounts.set(f.following_id, (followerCounts.get(f.following_id) || 0) + 1);
         }
       });
 
-      // 3. Fetch artwork IDs per artist
       const { data: artworks } = await supabase
         .from("artworks")
         .select("id, artist_id")
@@ -110,23 +89,12 @@ export function useFeaturedArtists(limit = 8) {
       });
 
       const allArtworkIds = artworks?.map((a) => a.id) || [];
-
-      // 4. Fetch likes
-      const { data: allLikes } =
-        allArtworkIds.length > 0
-          ? await supabase
-              .from("artwork_likes")
-              .select("artwork_id")
-              .in("artwork_id", allArtworkIds)
-          : { data: [] };
-
+      const { data: allLikes } = allArtworkIds.length > 0 ? await supabase.from("artwork_likes").select("artwork_id").in("artwork_id", allArtworkIds) : { data: [] };
+      
       const artworkLikesMap = new Map<string, number>();
       allLikes?.forEach((like) => {
         if (like.artwork_id) {
-          artworkLikesMap.set(
-            like.artwork_id,
-            (artworkLikesMap.get(like.artwork_id) || 0) + 1
-          );
+          artworkLikesMap.set(like.artwork_id, (artworkLikesMap.get(like.artwork_id) || 0) + 1);
         }
       });
 
@@ -137,22 +105,12 @@ export function useFeaturedArtists(limit = 8) {
         artistLikesMap.set(artistId, total);
       });
 
-      // 5. Fetch views
-      const { data: allViews } =
-        allArtworkIds.length > 0
-          ? await supabase
-              .from("artwork_views")
-              .select("artwork_id")
-              .in("artwork_id", allArtworkIds)
-          : { data: [] };
-
+      const { data: allViews } = allArtworkIds.length > 0 ? await supabase.from("artwork_views").select("artwork_id").in("artwork_id", allArtworkIds) : { data: [] };
+      
       const artworkViewsMap = new Map<string, number>();
       allViews?.forEach((view) => {
         if (view.artwork_id) {
-          artworkViewsMap.set(
-            view.artwork_id,
-            (artworkViewsMap.get(view.artwork_id) || 0) + 1
-          );
+          artworkViewsMap.set(view.artwork_id, (artworkViewsMap.get(view.artwork_id) || 0) + 1);
         }
       });
 
@@ -163,29 +121,16 @@ export function useFeaturedArtists(limit = 8) {
         artistViewsMap.set(artistId, total);
       });
 
-      // 6. Fetch ratings
-      const { data: reviews } = await supabase
-        .from("project_reviews")
-        .select("artist_id, rating")
-        .in("artist_id", artistIds);
-
+      const { data: reviews } = await supabase.from("project_reviews").select("artist_id, rating").in("artist_id", artistIds);
       const ratingMap = new Map<string, { total: number; count: number }>();
       reviews?.forEach((r) => {
         const existing = ratingMap.get(r.artist_id) || { total: 0, count: 0 };
-        ratingMap.set(r.artist_id, {
-          total: existing.total + r.rating,
-          count: existing.count + 1,
-        });
+        ratingMap.set(r.artist_id, { total: existing.total + r.rating, count: existing.count + 1 });
       });
 
-      // 7. Build artist data with algorithm scores
       const now = Date.now();
       const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-
-      // Find max values for normalization
-      let maxFollowers = 1,
-        maxLikes = 1,
-        maxViews = 1;
+      let maxFollowers = 1, maxLikes = 1, maxViews = 1;
       artistIds.forEach((id) => {
         maxFollowers = Math.max(maxFollowers, followerCounts.get(id) || 0);
         maxLikes = Math.max(maxLikes, artistLikesMap.get(id) || 0);
@@ -198,64 +143,30 @@ export function useFeaturedArtists(limit = 8) {
         const likes = artistLikesMap.get(id) || 0;
         const views = artistViewsMap.get(id) || 0;
         const ratingData = ratingMap.get(id);
-        const avgRating = ratingData
-          ? Math.round((ratingData.total / ratingData.count) * 10) / 10
-          : 0;
-
-        // Recency bonus — based on last_active_at
-        const lastActive = profile.last_active_at
-          ? new Date(profile.last_active_at).getTime()
-          : 0;
-        const recencyScore =
-          lastActive > 0
-            ? Math.max(0, 1 - (now - lastActive) / thirtyDaysMs)
-            : 0;
-
-        // Normalized scores (0-100)
+        const avgRating = ratingData ? Math.round((ratingData.total / ratingData.count) * 10) / 10 : 0;
+        const lastActive = profile.last_active_at ? new Date(profile.last_active_at).getTime() : 0;
+        const recencyScore = lastActive > 0 ? Math.max(0, 1 - (now - lastActive) / thirtyDaysMs) : 0;
         const normFollowers = (followers / maxFollowers) * 100;
         const normLikes = (likes / maxLikes) * 100;
         const normViews = (views / maxViews) * 100;
         const normRating = (avgRating / 5) * 100;
         const normRecency = recencyScore * 100;
-
-        // Weighted composite score
-        const score =
-          normFollowers * 0.25 +
-          normLikes * 0.25 +
-          normViews * 0.15 +
-          normRating * 0.2 +
-          normRecency * 0.15;
-
-        const primaryCategory =
-          Array.isArray(profile.tags) && profile.tags.length > 0
-            ? profile.tags[0]
-            : "Artist";
-
+        const score = normFollowers * 0.25 + normLikes * 0.25 + normViews * 0.15 + normRating * 0.2 + normRecency * 0.15;
         return {
           id,
           name: profile.full_name || "Unknown Artist",
-          category: primaryCategory,
-          imageUrl:
-            profile.avatar_url ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.full_name || "Artist")}&background=random`,
-          followers,
-          likes,
-          views,
-          rating: avgRating,
-          bio: profile.bio || "",
-          score,
-          tags: profile.tags || [],
-          verified: profile.is_verified || false,
-          location: profile.location || "",
+          category: Array.isArray(profile.tags) && profile.tags.length > 0 ? profile.tags[0] : "Artist",
+          imageUrl: profile.avatar_url || "https://ui-avatars.com/api/?name=" + encodeURIComponent(profile.full_name || "Artist") + "&background=random",
+          followers, likes, views, rating: avgRating, bio: profile.bio || "", score,
+          tags: profile.tags || [], verified: profile.is_verified || false, location: profile.location || "",
         };
       });
 
-      // Sort by score descending and take top N
-      scored.sort((a, b) => b.score - a.score);
-      setArtists(scored.slice(0, limit));
+      const sorted = scored.sort((a, b) => b.score - a.score).slice(0, limit);
+      setArtists(sorted.length > 0 ? sorted : getDummyArtists(limit));
     } catch (err) {
-      // Silent failure – featured section is non-critical
       console.error("Featured artists fetch error:", err);
+      setArtists(getDummyArtists(limit));
     } finally {
       setLoading(false);
     }
@@ -266,4 +177,69 @@ export function useFeaturedArtists(limit = 8) {
   }, [fetchFeaturedArtists]);
 
   return { artists, loading };
+}
+
+function getDummyArtists(limit: number): FeaturedArtist[] {
+  return [
+    {
+      id: "dummy-1",
+      name: "Alex Rivera",
+      category: "Digital Art",
+      imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
+      followers: 1240,
+      likes: 850,
+      views: 5200,
+      rating: 4.8,
+      bio: "Digital illustrator specializing in cyberpunk aesthetics and character design.",
+      score: 95,
+      tags: ["Cyberpunk", "Illustration"],
+      verified: true,
+      location: "Berlin, Germany",
+    },
+    {
+      id: "dummy-2",
+      name: "Sarah Chen",
+      category: "Music Production",
+      imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+      followers: 890,
+      likes: 620,
+      views: 3100,
+      rating: 4.9,
+      bio: "Electronic music producer and sound designer for indie games.",
+      score: 88,
+      tags: ["Electronic", "Game Audio"],
+      verified: true,
+      location: "Vancouver, Canada",
+    },
+    {
+      id: "dummy-3",
+      name: "Marcus Thorne",
+      category: "Photography",
+      imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+      followers: 2100,
+      likes: 1400,
+      views: 12000,
+      rating: 4.7,
+      bio: "Travel photographer capturing the essence of urban life and architecture.",
+      score: 92,
+      tags: ["Urban", "Architecture"],
+      verified: false,
+      location: "London, UK",
+    },
+    {
+      id: "dummy-4",
+      name: "Elena Rossi",
+      category: "Classical Music",
+      imageUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop",
+      followers: 3200,
+      likes: 2100,
+      views: 15000,
+      rating: 5.0,
+      bio: "Concert violinist and composer exploring modern classical fusions.",
+      score: 98,
+      tags: ["Violin", "Classical"],
+      verified: true,
+      location: "Milan, Italy",
+    },
+  ].slice(0, limit);
 }
