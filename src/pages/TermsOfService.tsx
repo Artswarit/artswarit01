@@ -1,4 +1,5 @@
 import React from "react";
+import SEOHead from "@/components/SEOHead";
 // TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
 const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
@@ -21,6 +22,11 @@ const TermsOfService = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
       <Navbar />
+      <SEOHead
+        title="Terms of Service | Artswarit"
+        description="Read the Artswarit Terms of Service. Understand your rights and obligations as an artist or client on our marketplace platform."
+        canonicalPath="/terms-of-service"
+      />
 
       <main className="flex-1 pt-20 sm:pt-24 pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-4xl">

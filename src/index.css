@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  overscroll-behavior: none;
+  overflow-x: hidden;
+}
+
+
 @layer base {
   :root {
     --background: 220 70% 98%;
