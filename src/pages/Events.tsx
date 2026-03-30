@@ -1,5 +1,4 @@
 import Navbar from "@/components/Navbar";
-import SEOHead from "@/components/SEOHead";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -113,12 +112,6 @@ const Events = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
       <Navbar />
-      <SEOHead
-        title="Art Events & Exhibitions Near You | Artswarit"
-        description="Discover art events, exhibitions, workshops, and gallery openings. Find creative events near you and connect with the artist community."
-        canonicalPath="/events"
-        keywords="art events near me, art exhibitions, art workshops, creative events India"
-      />
 
       <main className="container mx-auto px-4 py-8 pt-24">
         <div className="space-y-8">

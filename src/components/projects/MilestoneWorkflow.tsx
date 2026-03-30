@@ -24,7 +24,6 @@ import {
   AlertCircle,
   CreditCard,
   Send,
-  Eye,
 } from "lucide-react";
 import { MilestoneCard } from "./MilestoneCard";
 import { MilestoneSubmissionDialog } from "./MilestoneSubmissionDialog";
@@ -247,11 +246,6 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
         icon: <FileText className="h-3 w-3" />,
         label: "Funded & Active",
       },
-      IN_PROGRESS: {
-        color: "bg-blue-500/20 text-blue-600",
-        icon: <FileText className="h-3 w-3" />,
-        label: "Started & In Progress",
-      },
       REVIEW_PENDING: {
         color: "bg-yellow-500/20 text-yellow-600",
         icon: <Upload className="h-3 w-3" />,
@@ -271,16 +265,6 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
         color: "bg-red-500/20 text-red-600",
         icon: <AlertTriangle className="h-3 w-3" />,
         label: "Disputed",
-      },
-      AWAITING_FINAL_FILES: {
-        color: "bg-purple-500/20 text-purple-600",
-        icon: <Upload className="h-3 w-3" />,
-        label: "Awaiting Final Files",
-      },
-      FINAL_REVIEW_PENDING: {
-        color: "bg-indigo-500/20 text-indigo-600",
-        icon: <Eye className="h-3 w-3" />,
-        label: "Final Review",
       },
     };
 
@@ -346,9 +330,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     try {
       const { error } = await supabase
         .from("project_milestones")
-        .update({ 
-          status: "IN_PROGRESS"
-        })
+        .update({ status: "ACTIVE" })
         .eq("id", milestoneId);
 
       if (error) throw error;

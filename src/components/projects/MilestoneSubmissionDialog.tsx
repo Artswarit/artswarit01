@@ -78,7 +78,8 @@ export function MilestoneSubmissionDialog({
     }
   }, [notes, milestone?.id]);
 
-  const isFinalUpload = milestone.status === "AWAITING_FINAL_FILES" || milestone.status === "REVISION_REQUESTED_FINAL";
+  const isCompleted = milestone.status === "COMPLETED";
+  const isFinalUpload = isCompleted;
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -179,24 +180,20 @@ export function MilestoneSubmissionDialog({
         }).
         eq("id", milestone.id);
       } else {
-        // Final deliverables submitted → mark milestone final review pending
-        const autoApproveAt = new Date();
-        autoApproveAt.setDate(autoApproveAt.getDate() + autoApproveDays);
+        // Final deliverables submitted → mark milestone complete
         await supabase.
         from("project_milestones").
         update({
-          status: "FINAL_REVIEW_PENDING",
-          submitted_at: new Date().toISOString(),
-          auto_approve_at: autoApproveAt.toISOString()
+          status: "COMPLETED",
+          submitted_at: new Date().toISOString()
         }).
         eq("id", milestone.id);
-        
         // Log activity
         await supabase.from("project_activity_logs").insert({
           project_id: projectId,
           milestone_id: milestone.id,
           user_id: user?.id,
-          action: "final_files_submitted",
+          action: "milestone_completed",
           details: { milestoneId: milestone.id }
         });
       }
@@ -226,9 +223,8 @@ export function MilestoneSubmissionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh] p-0 flex flex-col overflow-hidden">
-        <div className="p-6 pb-4 border-b shrink-0 relative">
-        <DialogHeader className="pr-8">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
           <DialogTitle>
             {isFinalUpload ?
             "Upload Final Files" :
@@ -240,9 +236,8 @@ export function MilestoneSubmissionDialog({
             `Submit your work for "${milestone.title}" for client review.`}
           </DialogDescription>
         </DialogHeader>
-        </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="space-y-4">
           {/* File Protection Warning - Only show for preview submissions */}
           {!isFinalUpload &&
           <Alert
@@ -255,7 +250,7 @@ export function MilestoneSubmissionDialog({
               </AlertTitle>
               <AlertDescription className="text-destructive/90 space-y-2">
                 <p>
-                  Funds are secured in escrow, but <strong>not yet released to you</strong>.
+                  This milestone is <strong>not paid yet</strong>.
                 </p>
                 <p>
                   Do <strong>NOT</strong> upload full-quality or final files.
@@ -288,7 +283,7 @@ export function MilestoneSubmissionDialog({
             <Label>Files</Label>
             <div
               className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => {if (e.key === "Enter" || e.key === " ") {e.preventDefault(); fileInputRef.current?.click();}}}>
+              onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => {if (e.key === "Enter" || e.key === " ") {e.preventDefault();(() => fileInputRef.current?.click())(e);}}}>
               
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
@@ -361,7 +356,6 @@ export function MilestoneSubmissionDialog({
           }
         </div>
 
-        <div className="p-6 pt-4 border-t shrink-0 bg-background mt-auto">
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
@@ -379,7 +373,6 @@ export function MilestoneSubmissionDialog({
             "Submit for Review"}
           </Button>
         </DialogFooter>
-        </div>
       </DialogContent>
     </Dialog>);
 

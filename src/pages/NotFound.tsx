@@ -1,6 +1,5 @@
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Search } from "lucide-react";
 
@@ -17,11 +16,6 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
-      <SEOHead
-        title="Page Not Found | Artswarit"
-        description="The page you're looking for doesn't exist. Browse our artist marketplace or return to the homepage."
-        noindex={true}
-      />
       {/* Ambient blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />

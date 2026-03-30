@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import SEOHead from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -499,12 +498,6 @@ const ExploreArtists = () => {
       <main className="flex-1 container mx-auto px-4 py-6 sm:py-8 pt-[calc(5rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))]">
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <SEOHead
-              title="Explore & Hire Freelance Artists Online | Artswarit"
-              description="Discover and hire talented freelance artists — musicians, writers, illustrators, photographers & more. Browse verified portfolios, compare ratings, and commission artwork securely."
-              canonicalPath="/explore-artists"
-              keywords="hire freelance artists online, find artists near me, freelance creative professionals, artist directory India"
-            />
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-1 sm:mb-2">
               Explore Artists
             </h1>

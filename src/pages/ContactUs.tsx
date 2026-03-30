@@ -1,5 +1,4 @@
 import React from "react";
-import SEOHead from "@/components/SEOHead";
 // TEMPORARY HIDE FOR JOB SEARCH — SAFE TO REVERT
 const HIDE_PERSONAL_INFO = true;
 import Navbar from "@/components/Navbar";
@@ -21,12 +20,6 @@ const ContactUs = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
       <Navbar />
-      <SEOHead
-        title="Contact Us — Get Help & Support | Artswarit"
-        description="Need help with Artswarit? Contact our support team for questions about commissions, payments, artist profiles, or any platform issues. We're here to help."
-        canonicalPath="/contact-us"
-        keywords="contact artswarit, artist marketplace support, help with commissions"
-      />
 
       <main className="flex-1 pt-20 sm:pt-24 pb-16">
         <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
