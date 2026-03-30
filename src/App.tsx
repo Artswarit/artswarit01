@@ -136,9 +136,12 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
 
 const AppRoutes = () => {
   const location = useLocation();
+  useScrollAnchor("availability-calendar");
 
   return (
     <ErrorBoundary>
+      <ScrollToTop />
+      <UniversalChatbot />
       <AnimatePresence mode="wait">
         <Routes location={location}>
           <Route
@@ -402,7 +405,6 @@ const AppRoutes = () => {
 };
 
 const App = () => {
-  useScrollAnchor("availability-calendar");
   return (
     <BrowserRouter>
       <AppSplashScreen />
@@ -413,8 +415,6 @@ const App = () => {
             <CurrencyProvider>
               <Toaster />
               <Sonner />
-              <ScrollToTop />
-              <UniversalChatbot />
               <AppRoutes />
             </CurrencyProvider>
           </AuthProvider>
