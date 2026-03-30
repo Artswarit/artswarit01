@@ -162,6 +162,30 @@ export function MilestoneReviewDialog({
   const handleApprove = async () => {
     setProcessing(true);
     try {
+      if (milestone.status === "REVIEW_PENDING") {
+        // Step 1: Client approves watermarked concept
+        const { error } = await supabase
+          .from("project_milestones")
+          .update({ status: "AWAITING_FINAL_FILES" })
+          .eq("id", milestone.id);
+
+        if (error) throw error;
+
+        await supabase.from("project_activity_logs").insert({
+          project_id: projectId,
+          milestone_id: milestone.id,
+          user_id: user?.id,
+          action: "concept_approved",
+          details: { milestoneId: milestone.id },
+        });
+
+        toast.success("Design approved! Artist has been notified to upload the final files.");
+        onSuccess();
+        onOpenChange(false);
+        return; // exit early
+      }
+
+      // Step 2: Client approves final delivery -> release payout
       // Call secure edge function to release escrow payout and complete milestone
       const { data, error } = await supabase.functions.invoke(
         "release-milestone-payout",
@@ -190,16 +214,15 @@ export function MilestoneReviewDialog({
          throw new Error(data.error);
       }
 
-      // Log activity
       await supabase.from("project_activity_logs").insert({
         project_id: projectId,
         milestone_id: milestone.id,
         user_id: user?.id,
-        action: "milestone_approved",
+        action: "final_approved",
         details: { milestoneId: milestone.id },
       });
 
-      toast.success("Milestone approved and payout released from escrow.");
+      toast.success("Final delivery approved! Payout has been released.");
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
@@ -243,7 +266,7 @@ export function MilestoneReviewDialog({
         details: { reason: revisionReason },
       });
 
-      toast.success("Revision requested. The artist will be notified.");
+      toast.success("Revision requested. The artist will be notified to upload changes.");
       onSuccess();
       onOpenChange(false);
       setRevisionReason("");
