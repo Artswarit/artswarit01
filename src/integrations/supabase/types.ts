@@ -287,12 +287,14 @@ export type Database = {
           artist_id: string
           category: string
           created_at: string
+          currency: string | null
           description: string | null
           id: string
           media_type: Database["public"]["Enums"]["media_type_enum"]
           media_url: string
           metadata: Json | null
           price: number | null
+          price_usd: number | null
           sort_order: number | null
           status: Database["public"]["Enums"]["artwork_status"]
           tags: string[] | null
@@ -303,12 +305,14 @@ export type Database = {
           artist_id: string
           category: string
           created_at?: string
+          currency?: string | null
           description?: string | null
           id?: string
           media_type?: Database["public"]["Enums"]["media_type_enum"]
           media_url: string
           metadata?: Json | null
           price?: number | null
+          price_usd?: number | null
           sort_order?: number | null
           status?: Database["public"]["Enums"]["artwork_status"]
           tags?: string[] | null
@@ -319,12 +323,14 @@ export type Database = {
           artist_id?: string
           category?: string
           created_at?: string
+          currency?: string | null
           description?: string | null
           id?: string
           media_type?: Database["public"]["Enums"]["media_type_enum"]
           media_url?: string
           metadata?: Json | null
           price?: number | null
+          price_usd?: number | null
           sort_order?: number | null
           status?: Database["public"]["Enums"]["artwork_status"]
           tags?: string[] | null
@@ -1413,13 +1419,16 @@ export type Database = {
         Row: {
           amount: number
           amount_paid: number | null
+          amount_usd: number | null
           approved_at: string | null
           auto_approve_at: string | null
           created_at: string
           created_by: string
+          currency: string | null
           deliverables: string | null
           description: string | null
           due_date: string | null
+          exchange_rate: number | null
           id: string
           max_revisions: number | null
           paid_at: string | null
@@ -1436,13 +1445,16 @@ export type Database = {
         Insert: {
           amount?: number
           amount_paid?: number | null
+          amount_usd?: number | null
           approved_at?: string | null
           auto_approve_at?: string | null
           created_at?: string
           created_by: string
+          currency?: string | null
           deliverables?: string | null
           description?: string | null
           due_date?: string | null
+          exchange_rate?: number | null
           id?: string
           max_revisions?: number | null
           paid_at?: string | null
@@ -1459,13 +1471,16 @@ export type Database = {
         Update: {
           amount?: number
           amount_paid?: number | null
+          amount_usd?: number | null
           approved_at?: string | null
           auto_approve_at?: string | null
           created_at?: string
           created_by?: string
+          currency?: string | null
           deliverables?: string | null
           description?: string | null
           due_date?: string | null
+          exchange_rate?: number | null
           id?: string
           max_revisions?: number | null
           paid_at?: string | null
@@ -1566,13 +1581,16 @@ export type Database = {
       }
       projects: {
         Row: {
+          amount_usd: number | null
           artist_id: string | null
           auto_approve_days: number | null
           budget: number | null
           client_id: string | null
           created_at: string
+          currency: string | null
           deadline: string | null
           description: string | null
+          exchange_rate: number | null
           id: string
           is_locked: boolean | null
           progress: number | null
@@ -1584,13 +1602,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          amount_usd?: number | null
           artist_id?: string | null
           auto_approve_days?: number | null
           budget?: number | null
           client_id?: string | null
           created_at?: string
+          currency?: string | null
           deadline?: string | null
           description?: string | null
+          exchange_rate?: number | null
           id?: string
           is_locked?: boolean | null
           progress?: number | null
@@ -1602,13 +1623,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          amount_usd?: number | null
           artist_id?: string | null
           auto_approve_days?: number | null
           budget?: number | null
           client_id?: string | null
           created_at?: string
+          currency?: string | null
           deadline?: string | null
           description?: string | null
+          exchange_rate?: number | null
           id?: string
           is_locked?: boolean | null
           progress?: number | null
