@@ -1,6 +1,0 @@
-projectKey=artswarit-local
-serverUrl=http://localhost:9000
-serverVersion=26.3.0.120487
-dashboardUrl=http://localhost:9000/dashboard?id=artswarit-local
-ceTaskId=ddc8b2dd-15df-49bc-a970-03d6f812bfcd
-ceTaskUrl=http://localhost:9000/api/ce/task?id=ddc8b2dd-15df-49bc-a970-03d6f812bfcd

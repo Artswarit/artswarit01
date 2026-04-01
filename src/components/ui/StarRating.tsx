@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+import { useState } from 'react';
+import { Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StarRatingProps {
   count?: number;
@@ -43,12 +44,10 @@ export function StarRating({
         <Star
           key={index}
           className={cn(
-            "w-5 h-5 transition-colors",
-            (hoverRating || rating) >= index
-              ? "text-yellow-400 fill-yellow-400"
-              : "text-gray-300",
-            readOnly ? "cursor-default" : "cursor-pointer",
-            starClassName,
+            'w-5 h-5 transition-colors',
+            (hoverRating || rating) >= index ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300',
+            readOnly ? 'cursor-default' : 'cursor-pointer',
+            starClassName
           )}
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={handleMouseLeave}
@@ -58,8 +57,3 @@ export function StarRating({
     </div>
   );
 }
-
-
-
-
-

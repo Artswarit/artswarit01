@@ -16,10 +16,7 @@ interface AttachmentInputProps {
   disabled?: boolean;
 }
 
-export const AttachmentInput = ({
-  onAttach,
-  disabled,
-}: AttachmentInputProps) => {
+export const AttachmentInput = ({ onAttach, disabled }: AttachmentInputProps) => {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -48,14 +45,14 @@ export const AttachmentInput = ({
       const filePath = `message-attachments/${fileName}`;
 
       const uploadOptions: any = {
-        signal: abortControllerRef.current?.signal,
+        signal: abortControllerRef.current?.signal
       };
 
       const { error: uploadError } = await supabase.storage
         .from("media")
         .upload(filePath, file, uploadOptions);
       if (uploadError) {
-        if (uploadError.name === "AbortError") return;
+        if (uploadError.name === 'AbortError') return;
         throw uploadError;
       }
 
@@ -76,7 +73,7 @@ export const AttachmentInput = ({
         description: `${file.name} is ready to send.`,
       });
     } catch (error: any) {
-      if (error.name === "AbortError") return;
+      if (error.name === 'AbortError') return;
       console.error("Error uploading file:", error);
       toast({
         variant: "destructive",
@@ -137,7 +134,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
   if (!attachment) return null;
   const isImage = attachment.type?.startsWith("image/");
   const formatFileSize = (bytes: number) => {
-    if (typeof bytes !== "number" || Number.isNaN(bytes)) return "0 B";
+    if (typeof bytes !== 'number' || isNaN(bytes)) return '0 B';
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -157,12 +154,8 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium truncate">
-          {attachment.name || "Unnamed file"}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {formatFileSize(attachment.size || 0)}
-        </p>
+        <p className="text-xs font-medium truncate">{attachment.name || "Unnamed file"}</p>
+        <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size || 0)}</p>
       </div>
       <Button
         type="button"
@@ -189,7 +182,7 @@ export const AttachmentDisplay = ({
   if (!attachments || attachments.length === 0) return null;
 
   const formatFileSize = (bytes: number) => {
-    if (typeof bytes !== "number" || Number.isNaN(bytes)) return "0 B";
+    if (typeof bytes !== 'number' || isNaN(bytes)) return '0 B';
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -231,18 +224,12 @@ export const AttachmentDisplay = ({
                 : "bg-background hover:bg-muted"
             }`}
           >
-            <div
-              className={`p-2 rounded-xl ${isOwnMessage ? "bg-primary-foreground/10" : "bg-primary/5 text-primary"}`}
-            >
+            <div className={`p-2 rounded-xl ${isOwnMessage ? 'bg-primary-foreground/10' : 'bg-primary/5 text-primary'}`}>
               <FileText className="h-5 w-5 shrink-0" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold truncate">
-                {attachment.name || "Unnamed file"}
-              </p>
-              <p className="text-[10px] opacity-70 font-medium uppercase tracking-widest">
-                {formatFileSize(attachment.size || 0)}
-              </p>
+              <p className="text-sm font-bold truncate">{attachment.name || "Unnamed file"}</p>
+              <p className="text-[10px] opacity-70 font-medium uppercase tracking-widest">{formatFileSize(attachment.size || 0)}</p>
             </div>
             <Download className="h-4 w-4 shrink-0 opacity-50" />
           </a>
@@ -251,8 +238,3 @@ export const AttachmentDisplay = ({
     </div>
   );
 };
-
-
-
-
-

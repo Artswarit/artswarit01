@@ -1,29 +1,21 @@
-import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { useState, useRef, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle } from
-"@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertTriangle,
-  Upload,
-  X,
-  FileText,
-  Image,
-  Video,
-  Music } from
-"lucide-react";
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, Upload, X, FileText, Image, Video, Music } from 'lucide-react';
 
 interface Milestone {
   id: string;
@@ -37,7 +29,6 @@ interface MilestoneSubmissionDialogProps {
   onOpenChange: (open: boolean) => void;
   milestone: Milestone;
   projectId: string;
-  autoApproveDays?: number;
   onSuccess: () => void;
 }
 
@@ -51,7 +42,6 @@ export function MilestoneSubmissionDialog({
   onOpenChange,
   milestone,
   projectId,
-  autoApproveDays = 3,
   onSuccess
 }: MilestoneSubmissionDialogProps) {
   const { user } = useAuth();
@@ -59,9 +49,9 @@ export function MilestoneSubmissionDialog({
   const [notes, setNotes] = useState(() => {
     try {
       const draft = localStorage.getItem(`milestone_draft_${milestone?.id}`);
-      return draft || "";
+      return draft || '';
     } catch {
-      return "";
+      return '';
     }
   });
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -78,20 +68,20 @@ export function MilestoneSubmissionDialog({
     }
   }, [notes, milestone?.id]);
 
-  const isCompleted = milestone.status === "COMPLETED";
+  const isCompleted = milestone.status === 'COMPLETED';
   const isFinalUpload = isCompleted;
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
-    const newFiles = selectedFiles.map((file) => ({
+    const newFiles = selectedFiles.map(file => ({
       file,
       preview: URL.createObjectURL(file)
     }));
-    setFiles((prev) => [...prev, ...newFiles]);
+    setFiles(prev => [...prev, ...newFiles]);
   };
 
   const removeFile = (index: number) => {
-    setFiles((prev) => {
+    setFiles(prev => {
       const updated = [...prev];
       URL.revokeObjectURL(updated[index].preview);
       updated.splice(index, 1);
@@ -100,9 +90,9 @@ export function MilestoneSubmissionDialog({
   };
 
   const getFileIcon = (type: string) => {
-    if (type.startsWith("image/")) return <Image className="h-4 w-4" />;
-    if (type.startsWith("video/")) return <Video className="h-4 w-4" />;
-    if (type.startsWith("audio/")) return <Music className="h-4 w-4" />;
+    if (type.startsWith('image/')) return <Image className="h-4 w-4" />;
+    if (type.startsWith('video/')) return <Video className="h-4 w-4" />;
+    if (type.startsWith('audio/')) return <Music className="h-4 w-4" />;
     return <FileText className="h-4 w-4" />;
   };
 
@@ -112,14 +102,14 @@ export function MilestoneSubmissionDialog({
       e.preventDefault();
       e.stopPropagation();
     }
-
+    
     if (!isFinalUpload && !agreed) {
-      toast.error("Please acknowledge the file protection warning");
+      toast.error('Please acknowledge the file protection warning');
       return;
     }
 
     if (files.length === 0) {
-      toast.error("Please upload at least one file");
+      toast.error('Please upload at least one file');
       return;
     }
 
@@ -127,37 +117,35 @@ export function MilestoneSubmissionDialog({
 
     try {
       // Create submission record
-      const { data: submission, error: submissionError } = await supabase.
-      from("milestone_submissions").
-      insert({
-        milestone_id: milestone.id,
-        submitted_by: user?.id,
-        notes,
-        is_final: isFinalUpload
-      }).
-      select().
-      single();
+      const { data: submission, error: submissionError } = await supabase
+        .from('milestone_submissions')
+        .insert({
+          milestone_id: milestone.id,
+          submitted_by: user?.id,
+          notes,
+          is_final: isFinalUpload
+        })
+        .select()
+        .single();
 
       if (submissionError) throw submissionError;
 
       // Upload files
       for (const { file } of files) {
         const filePath = `${user?.id}/${milestone.id}/${Date.now()}-${file.name}`;
-
-        const { error: uploadError } = await supabase.storage.
-        from("milestone-submissions").
-        upload(filePath, file);
+        
+        const { error: uploadError } = await supabase.storage
+          .from('milestone-submissions')
+          .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
-        const {
-          data: { publicUrl }
-        } = supabase.storage.
-        from("milestone-submissions").
-        getPublicUrl(filePath);
+        const { data: { publicUrl } } = supabase.storage
+          .from('milestone-submissions')
+          .getPublicUrl(filePath);
 
         // Save file record
-        await supabase.from("submission_files").insert({
+        await supabase.from('submission_files').insert({
           submission_id: submission.id,
           file_name: file.name,
           file_url: publicUrl,
@@ -170,44 +158,40 @@ export function MilestoneSubmissionDialog({
       // Update milestone status based on submission type
       if (!isFinalUpload) {
         const autoApproveAt = new Date();
-        autoApproveAt.setDate(autoApproveAt.getDate() + autoApproveDays);
-        await supabase.
-        from("project_milestones").
-        update({
-          status: "REVIEW_PENDING",
-          submitted_at: new Date().toISOString(),
-          auto_approve_at: autoApproveAt.toISOString()
-        }).
-        eq("id", milestone.id);
+        autoApproveAt.setDate(autoApproveAt.getDate() + 3); // Default 3 days
+        await supabase
+          .from('project_milestones')
+          .update({
+            status: 'REVIEW_PENDING',
+            submitted_at: new Date().toISOString(),
+            auto_approve_at: autoApproveAt.toISOString()
+          })
+          .eq('id', milestone.id);
       } else {
         // Final deliverables submitted → mark milestone complete
-        await supabase.
-        from("project_milestones").
-        update({
-          status: "COMPLETED",
-          submitted_at: new Date().toISOString()
-        }).
-        eq("id", milestone.id);
+        await supabase
+          .from('project_milestones')
+          .update({
+            status: 'COMPLETED',
+            submitted_at: new Date().toISOString()
+          })
+          .eq('id', milestone.id);
         // Log activity
-        await supabase.from("project_activity_logs").insert({
+        await supabase.from('project_activity_logs').insert({
           project_id: projectId,
           milestone_id: milestone.id,
           user_id: user?.id,
-          action: "milestone_completed",
+          action: 'milestone_completed',
           details: { milestoneId: milestone.id }
         });
       }
 
-      toast.success(
-        isFinalUpload ?
-        "Final files uploaded successfully" :
-        "Milestone submitted for review"
-      );
+      toast.success(isFinalUpload ? 'Final files uploaded successfully' : 'Milestone submitted for review');
       onSuccess();
       onOpenChange(false);
       resetForm();
     } catch (error: any) {
-      toast.error(error.message || "Failed to submit milestone");
+      toast.error(error.message || 'Failed to submit milestone');
       console.error(error);
     } finally {
       setSubmitting(false);
@@ -215,7 +199,7 @@ export function MilestoneSubmissionDialog({
   };
 
   const resetForm = () => {
-    setNotes("");
+    setNotes('');
     setFiles([]);
     setAgreed(false);
     localStorage.removeItem(`milestone_draft_${milestone?.id}`);
@@ -226,35 +210,25 @@ export function MilestoneSubmissionDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isFinalUpload ?
-            "Upload Final Files" :
-            "Submit Milestone for Review"}
+            {isFinalUpload ? 'Upload Final Files' : 'Submit Milestone for Review'}
           </DialogTitle>
           <DialogDescription>
-            {isFinalUpload ?
-            "Upload the full-quality final files for this milestone." :
-            `Submit your work for "${milestone.title}" for client review.`}
+            {isFinalUpload 
+              ? 'Upload the full-quality final files for this milestone.'
+              : `Submit your work for "${milestone.title}" for client review.`
+            }
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* File Protection Warning - Only show for preview submissions */}
-          {!isFinalUpload &&
-          <Alert
-            variant="destructive"
-            className="bg-destructive/10 border-destructive/30">
-            
+          {!isFinalUpload && (
+            <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">
               <AlertTriangle className="h-5 w-5" />
-              <AlertTitle className="text-destructive">
-                Important Reminder
-              </AlertTitle>
+              <AlertTitle className="text-destructive">Important Reminder</AlertTitle>
               <AlertDescription className="text-destructive/90 space-y-2">
-                <p>
-                  This milestone is <strong>not paid yet</strong>.
-                </p>
-                <p>
-                  Do <strong>NOT</strong> upload full-quality or final files.
-                </p>
+                <p>This milestone is <strong>not paid yet</strong>.</p>
+                <p>Do <strong>NOT</strong> upload full-quality or final files.</p>
                 <p>Upload only:</p>
                 <ul className="list-disc list-inside ml-2 mt-1">
                   <li>Watermarked versions</li>
@@ -264,7 +238,7 @@ export function MilestoneSubmissionDialog({
                 </ul>
               </AlertDescription>
             </Alert>
-          }
+          )}
 
           {/* Notes */}
           <div className="space-y-2">
@@ -274,8 +248,8 @@ export function MilestoneSubmissionDialog({
               placeholder="Add any notes or comments about this submission..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              rows={3} />
-            
+              rows={3}
+            />
           </div>
 
           {/* File Upload */}
@@ -283,8 +257,8 @@ export function MilestoneSubmissionDialog({
             <Label>Files</Label>
             <div
               className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => fileInputRef.current?.click()} role="button" tabIndex={0} onKeyDown={(e) => {if (e.key === "Enter" || e.key === " ") {e.preventDefault();(() => fileInputRef.current?.click())(e);}}}>
-              
+              onClick={() => fileInputRef.current?.click()}
+            >
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
                 Click to upload files or drag and drop
@@ -299,85 +273,69 @@ export function MilestoneSubmissionDialog({
               multiple
               className="hidden"
               onChange={handleFileSelect}
-              accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.psd,.ai,.zip" />
-            
+              accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.psd,.ai,.zip"
+            />
           </div>
 
           {/* File List */}
-          {files.length > 0 &&
-          <div className="space-y-2">
+          {files.length > 0 && (
+            <div className="space-y-2">
               <Label>Selected Files ({files.length})</Label>
               <div className="space-y-2 max-h-40 overflow-y-auto">
-                {files.map((uploadedFile, index) =>
-              <div
-                key={index}
-                className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                
+                {files.map((uploadedFile, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-lg">
                     <div className="flex items-center gap-2 min-w-0">
                       {getFileIcon(uploadedFile.file.type)}
-                      <span className="text-sm truncate">
-                        {uploadedFile.file.name}
-                      </span>
+                      <span className="text-sm truncate">{uploadedFile.file.name}</span>
                       <span className="text-xs text-muted-foreground">
                         ({(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                     </div>
                     <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => removeFile(index)}>
-                  
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => removeFile(index)}
+                    >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-              )}
+                ))}
               </div>
             </div>
-          }
+          )}
 
           {/* Agreement Checkbox - Only for preview submissions */}
-          {!isFinalUpload &&
-          <div className="flex items-start space-x-2 p-3 bg-muted rounded-lg">
+          {!isFinalUpload && (
+            <div className="flex items-start space-x-2 p-3 bg-muted rounded-lg">
               <Checkbox
-              id="agreement"
-              checked={agreed}
-              onCheckedChange={(checked) => setAgreed(checked === true)} />
-            
+                id="agreement"
+                checked={agreed}
+                onCheckedChange={(checked) => setAgreed(checked === true)}
+              />
               <label
-              htmlFor="agreement"
-              className="text-sm cursor-pointer leading-relaxed">
-              
-                I understand and agree that I am uploading{" "}
-                <strong>preview/watermarked content only</strong>. I will not
-                upload full-quality files until after payment is received.
+                htmlFor="agreement"
+                className="text-sm cursor-pointer leading-relaxed"
+              >
+                I understand and agree that I am uploading <strong>preview/watermarked content only</strong>. 
+                I will not upload full-quality files until after payment is received.
               </label>
             </div>
-          }
+          )}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={
-            submitting || !isFinalUpload && !agreed || files.length === 0
-            }>
-            
-            {submitting ?
-            "Uploading..." :
-            isFinalUpload ?
-            "Upload Files" :
-            "Submit for Review"}
+          <Button 
+            onClick={handleSubmit} 
+            disabled={submitting || (!isFinalUpload && !agreed) || files.length === 0}
+          >
+            {submitting ? 'Uploading...' : isFinalUpload ? 'Upload Files' : 'Submit for Review'}
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>);
-
+    </Dialog>
+  );
 }
-
-
-
-

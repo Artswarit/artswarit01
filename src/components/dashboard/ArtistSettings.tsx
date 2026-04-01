@@ -1,10 +1,8 @@
+
 import { useState, useEffect, useCallback } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+import { 
+  Card, CardContent, CardDescription, 
+  CardHeader, CardTitle 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,17 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Shield,
-  Bell,
-  Eye,
-  Globe,
-  Loader2,
-  Trash2,
-  Mail,
-  Crown,
-  Lock,
-} from "lucide-react";
+import { Shield, Bell, Eye, Globe, Loader2, Trash2, Mail, Crown, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -69,7 +57,7 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: "",
+    confirmPassword: ""
   });
 
   // Fetch profile and settings on mount
@@ -77,43 +65,41 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
     if (!user?.id) return;
 
     const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
       .maybeSingle();
-
+    
     if (error) {
       toast({
         variant: "destructive",
         title: "Error fetching settings",
-        description: error.message,
+        description: error.message
       });
       return;
     }
-
+    
     if (data) {
       setProfile(data);
       // Load settings from profile social_links or metadata
       const savedSettings = (data.social_links as any)?.settings || {};
-      setSettings((prev) => {
+      setSettings(prev => {
         // Only update if values are different to avoid unnecessary re-renders
-        if (
-          JSON.stringify(prev) === JSON.stringify({ ...prev, ...savedSettings })
-        ) {
+        if (JSON.stringify(prev) === JSON.stringify({ ...prev, ...savedSettings })) {
           return prev;
         }
         return {
           ...prev,
-          ...savedSettings,
+          ...savedSettings
         };
       });
     } else {
       // No profile found
     }
   }, [user?.id, toast]);
-
+  
   // Realtime Sync
-  useRealtimeSync("profile", fetchProfile);
+  useRealtimeSync('profile', fetchProfile);
 
   useEffect(() => {
     fetchProfile();
@@ -126,16 +112,16 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
     const channel = supabase
       .channel(`artist-settings-profile-${user.id}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "profiles",
-          filter: `id=eq.${user.id}`,
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
         },
         () => {
           fetchProfile();
-        },
+        }
       )
       .subscribe();
 
@@ -147,92 +133,77 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
   // Cross-tab synchronization via localStorage
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key !== "artswarit:settings") return;
+      if (e.key !== 'artswarit:settings') return;
       try {
-        const payload = JSON.parse(e.newValue || "{}");
+        const payload = JSON.parse(e.newValue || '{}');
         if (payload.userId !== user?.id) return;
-        setSettings((prev) => ({ ...prev, [payload.key]: payload.value }));
-      } catch {
-        void 0;
-      }
+        setSettings(prev => ({ ...prev, [payload.key]: payload.value }));
+      } catch { void 0; }
     };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, [user?.id]);
 
-  const handleSettingChange = async (
-    key: string,
-    value: boolean,
-    e?: React.MouseEvent | React.ChangeEvent,
-  ) => {
+  const handleSettingChange = async (key: string, value: boolean, e?: React.MouseEvent | React.ChangeEvent) => {
     // Prevent default to fix mobile refresh issue
-    if (e && "preventDefault" in e) {
+    if (e && 'preventDefault' in e) {
       e.preventDefault();
       e.stopPropagation?.();
     }
 
     // Restriction: Auto-accept projects is for Pro artists only
-    if (key === "autoAcceptProjects" && !isProArtist && value === true) {
+    if (key === 'autoAcceptProjects' && !isProArtist && value === true) {
       toast({
         title: "Pro Feature",
-        description:
-          "Auto-accepting projects is available for Pro Artists only.",
-        variant: "default",
+        description: "Auto-accepting projects is available for Pro Artists only.",
+        variant: "default"
       });
       return;
     }
-
+    
     const newSettings = {
       ...settings,
-      [key]: value,
+      [key]: value
     };
-
+    
     // Optimistic update
     setSettings(newSettings);
 
     // Auto-save to database
     if (!user?.id) return;
     try {
-      const currentSocialLinks =
-        (profile?.social_links as Record<string, unknown>) || {};
+      const currentSocialLinks = (profile?.social_links as Record<string, unknown>) || {};
       const updatePayload: Record<string, unknown> = {
         social_links: {
           ...currentSocialLinks,
-          settings: newSettings,
+          settings: newSettings
         },
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
       // Mirror only to existing top-level columns
-      if (key === "profileVisibility")
-        updatePayload["profile_visibility"] = value;
-      if (key === "emailNotifications")
-        updatePayload["email_notifications"] = value;
+      if (key === 'profileVisibility') updatePayload['profile_visibility'] = value;
+      if (key === 'emailNotifications') updatePayload['email_notifications'] = value;
 
       const { error } = await supabase
-        .from("profiles")
+        .from('profiles')
         .update(updatePayload)
-        .eq("id", user.id);
+        .eq('id', user.id);
 
       if (error) throw error;
-
+      
       // Broadcast update for realtime sync across tabs
-      broadcastRefresh("profile");
-
+      broadcastRefresh('profile');
+      
       // Broadcast to other tabs immediately
       try {
-        localStorage.setItem(
-          "artswarit:settings",
-          JSON.stringify({ userId: user.id, key, value, ts: Date.now() }),
-        );
-      } catch {
-        void 0;
-      }
+        localStorage.setItem('artswarit:settings', JSON.stringify({ userId: user.id, key, value, ts: Date.now() }));
+      } catch { void 0; }
       // Non-blocking logging
       try {
-        await supabase.from("function_logs").insert({
-          action_type: "settings_change",
-          function_name: "ArtistSettings.handleSettingChange",
-          component_name: "ArtistSettings",
+        await supabase.from('function_logs').insert({
+          action_type: 'settings_change',
+          function_name: 'ArtistSettings.handleSettingChange',
+          component_name: 'ArtistSettings',
           user_id: user.id,
           success: true,
           input_data: { key, value },
@@ -240,27 +211,27 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
       } catch (logErr) {
         // Logging failed silently
       }
-
+      
       toast({
         title: "Setting updated",
-        description: `${key.replaceAll(/([A-Z])/g, " $1").trim()} has been ${value ? "enabled" : "disabled"}.`,
+        description: `${key.replace(/([A-Z])/g, ' $1').trim()} has been ${value ? 'enabled' : 'disabled'}.`
       });
     } catch (error: any) {
       // Revert on error
-      setSettings((prev) => ({ ...prev, [key]: !value }));
+      setSettings(prev => ({ ...prev, [key]: !value }));
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message,
+        description: error.message
       });
     }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setPasswordData((prev) => ({
+    setPasswordData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
@@ -275,33 +246,32 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
     setSaving(true);
     try {
       // Get current social_links and merge with settings
-      const currentSocialLinks =
-        (profile?.social_links as Record<string, unknown>) || {};
-
+      const currentSocialLinks = (profile?.social_links as Record<string, unknown>) || {};
+      
       const { error } = await supabase
-        .from("profiles")
+        .from('profiles')
         .update({
           social_links: {
             ...currentSocialLinks,
-            settings,
+            settings
           },
-          updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
-        .eq("id", user.id);
+        .eq('id', user.id);
 
       if (error) throw error;
 
-      broadcastRefresh("profile");
+      broadcastRefresh('profile');
 
       toast({
         title: "Settings saved",
-        description: "Your settings have been updated successfully.",
+        description: "Your settings have been updated successfully."
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message,
+        description: error.message
       });
     } finally {
       setSaving(false);
@@ -314,12 +284,12 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
       e.preventDefault();
       e.stopPropagation();
     }
-
+    
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
         variant: "destructive",
         title: "Passwords don't match",
-        description: "Please ensure both passwords are the same.",
+        description: "Please ensure both passwords are the same."
       });
       return;
     }
@@ -328,7 +298,7 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
       toast({
         variant: "destructive",
         title: "Password too short",
-        description: "Password must be at least 6 characters.",
+        description: "Password must be at least 6 characters."
       });
       return;
     }
@@ -336,25 +306,25 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
     setSaving(true);
     try {
       const { error } = await supabase.auth.updateUser({
-        password: passwordData.newPassword,
+        password: passwordData.newPassword
       });
 
       if (error) throw error;
 
       toast({
         title: "Password updated",
-        description: "Your password has been changed successfully.",
+        description: "Your password has been changed successfully."
       });
       setPasswordData({
         currentPassword: "",
         newPassword: "",
-        confirmPassword: "",
+        confirmPassword: ""
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message,
+        description: error.message
       });
     } finally {
       setSaving(false);
@@ -368,36 +338,33 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
       e.stopPropagation();
     }
     if (!user?.id) return;
-
+    
     setDeleting(true);
     try {
       // Delete user data from tables
       await Promise.all([
-        supabase.from("artworks").delete().eq("artist_id", user.id),
-        supabase
-          .from("projects")
-          .delete()
-          .or(`artist_id.eq.${user.id},client_id.eq.${user.id}`),
-        supabase.from("notifications").delete().eq("user_id", user.id),
-        supabase.from("profiles").delete().eq("id", user.id),
-        supabase.from("users").delete().eq("id", user.id),
+        supabase.from('artworks').delete().eq('artist_id', user.id),
+        supabase.from('projects').delete().or(`artist_id.eq.${user.id},client_id.eq.${user.id}`),
+        supabase.from('notifications').delete().eq('user_id', user.id),
+        supabase.from('profiles').delete().eq('id', user.id),
+        supabase.from('users').delete().eq('id', user.id)
       ]);
 
       toast({
         title: "Account deleted",
-        description: "Your account and all data have been permanently deleted.",
+        description: "Your account and all data have been permanently deleted."
       });
 
       setShowDeleteDialog(false);
       setTimeout(() => {
         signOut();
-        navigate("/");
+        navigate('/');
       }, 1500);
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Deletion failed",
-        description: error.message,
+        description: error.message
       });
     } finally {
       setDeleting(false);
@@ -418,16 +385,12 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
     <div className="space-y-6 sm:space-y-10 max-w-7xl mx-auto px-2 sm:px-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/40 backdrop-blur-md p-6 rounded-[2rem] border border-primary/5 shadow-sm">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
-            Settings
-          </h2>
-          <p className="text-sm font-medium text-muted-foreground/80 mt-1">
-            Manage your account, privacy and preferences
-          </p>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">Settings</h2>
+          <p className="text-sm font-medium text-muted-foreground/80 mt-1">Manage your account, privacy and preferences</p>
         </div>
         {!isProArtist && !planLoading && (
-          <Button
-            onClick={() => navigate("/artist-dashboard?tab=premium")}
+          <Button 
+            onClick={() => navigate('/artist-dashboard?tab=premium')}
             className="w-full sm:w-auto bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-none shadow-lg shadow-indigo-500/20 rounded-xl h-12 px-6 font-bold transition-all active:scale-95"
           >
             <Crown className="h-4 w-4 mr-2" />
@@ -457,73 +420,44 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
             <CardContent className="space-y-6 sm:space-y-8 pt-6 sm:pt-8">
               <div className="flex items-center justify-between group min-h-[56px] p-4 rounded-2xl hover:bg-primary/5 transition-colors">
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="email-notifications"
-                    className="text-base sm:text-lg font-bold cursor-pointer"
-                  >
-                    Email Notifications
-                  </Label>
-                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">
-                    Receive updates via email
-                  </p>
+                  <Label htmlFor="email-notifications" className="text-base sm:text-lg font-bold cursor-pointer">Email Notifications</Label>
+                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">Receive updates via email</p>
                 </div>
                 <Switch
                   id="email-notifications"
                   checked={settings.emailNotifications}
-                  onCheckedChange={(checked) =>
-                    handleSettingChange("emailNotifications", checked)
-                  }
+                  onCheckedChange={(checked) => handleSettingChange('emailNotifications', checked)}
                   className="data-[state=checked]:bg-primary h-7 w-12"
                 />
               </div>
-
+              
               <div className="flex items-center justify-between group min-h-[56px] p-4 rounded-2xl hover:bg-primary/5 transition-colors">
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="direct-messages"
-                    className="text-base sm:text-lg font-bold cursor-pointer"
-                  >
-                    Direct Messages
-                  </Label>
-                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">
-                    Allow clients to message you directly
-                  </p>
+                  <Label htmlFor="direct-messages" className="text-base sm:text-lg font-bold cursor-pointer">Direct Messages</Label>
+                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">Allow clients to message you directly</p>
                 </div>
                 <Switch
                   id="direct-messages"
                   checked={settings.allowDirectMessages}
-                  onCheckedChange={(checked) =>
-                    handleSettingChange("allowDirectMessages", checked)
-                  }
+                  onCheckedChange={(checked) => handleSettingChange('allowDirectMessages', checked)}
                   className="data-[state=checked]:bg-primary h-7 w-12"
                 />
               </div>
-
+              
               <div className="flex items-center justify-between group min-h-[56px] p-4 rounded-2xl hover:bg-primary/5 transition-colors">
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="auto-accept"
-                    className="flex items-center gap-2 text-base sm:text-lg font-bold cursor-pointer"
-                  >
+                  <Label htmlFor="auto-accept" className="flex items-center gap-2 text-base sm:text-lg font-bold cursor-pointer">
                     Auto-accept Projects
-                    {!isProArtist && (
-                      <Crown className="h-4 w-4 text-yellow-500 shrink-0 animate-pulse" />
-                    )}
+                    {!isProArtist && <Crown className="h-4 w-4 text-yellow-500 shrink-0 animate-pulse" />}
                   </Label>
-                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">
-                    Automatically accept project invitations
-                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">Automatically accept project invitations</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  {!isProArtist && (
-                    <Lock className="h-4 w-4 text-muted-foreground/60 shrink-0" />
-                  )}
+                  {!isProArtist && <Lock className="h-4 w-4 text-muted-foreground/60 shrink-0" />}
                   <Switch
                     id="auto-accept"
                     checked={settings.autoAcceptProjects}
-                    onCheckedChange={(checked) =>
-                      handleSettingChange("autoAcceptProjects", checked)
-                    }
+                    onCheckedChange={(checked) => handleSettingChange('autoAcceptProjects', checked)}
                     disabled={!isProArtist}
                     className="data-[state=checked]:bg-primary h-7 w-12"
                   />
@@ -551,44 +485,28 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
             <CardContent className="space-y-6 sm:space-y-8 pt-6 sm:pt-8">
               <div className="flex items-center justify-between group min-h-[56px] p-4 rounded-2xl hover:bg-primary/5 transition-colors">
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="profile-visibility"
-                    className="text-base sm:text-lg font-bold cursor-pointer"
-                  >
-                    Public Profile
-                  </Label>
-                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">
-                    Make your profile visible to everyone
-                  </p>
+                  <Label htmlFor="profile-visibility" className="text-base sm:text-lg font-bold cursor-pointer">Public Profile</Label>
+                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">Make your profile visible to everyone</p>
                 </div>
                 <Switch
                   id="profile-visibility"
                   checked={settings.profileVisibility}
-                  onCheckedChange={(checked) =>
-                    handleSettingChange("profileVisibility", checked)
-                  }
+                  onCheckedChange={(checked) => handleSettingChange('profileVisibility', checked)}
                   className="data-[state=checked]:bg-primary h-7 w-12"
                 />
               </div>
-
+              
+              
+              
               <div className="flex items-center justify-between group min-h-[56px] p-4 rounded-2xl hover:bg-primary/5 transition-colors">
                 <div className="space-y-1">
-                  <Label
-                    htmlFor="show-earnings"
-                    className="text-base sm:text-lg font-bold cursor-pointer"
-                  >
-                    Show Earnings
-                  </Label>
-                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">
-                    Display your earnings publicly
-                  </p>
+                  <Label htmlFor="show-earnings" className="text-base sm:text-lg font-bold cursor-pointer">Show Earnings</Label>
+                  <p className="text-xs sm:text-sm text-muted-foreground/80 font-medium">Display your earnings publicly</p>
                 </div>
                 <Switch
                   id="show-earnings"
                   checked={settings.showEarnings}
-                  onCheckedChange={(checked) =>
-                    handleSettingChange("showEarnings", checked)
-                  }
+                  onCheckedChange={(checked) => handleSettingChange('showEarnings', checked)}
                   className="data-[state=checked]:bg-primary h-7 w-12"
                 />
               </div>
@@ -625,12 +543,7 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
             </CardHeader>
             <CardContent className="space-y-6 pt-6 sm:pt-8">
               <div className="space-y-2">
-                <Label
-                  htmlFor="new-password"
-                  className="text-sm font-bold ml-1"
-                >
-                  New Password
-                </Label>
+                <Label htmlFor="new-password" className="text-sm font-bold ml-1">New Password</Label>
                 <Input
                   id="new-password"
                   name="newPassword"
@@ -641,14 +554,9 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
                   placeholder="Enter new password"
                 />
               </div>
-
+              
               <div className="space-y-2">
-                <Label
-                  htmlFor="confirm-password"
-                  className="text-sm font-bold ml-1"
-                >
-                  Confirm New Password
-                </Label>
+                <Label htmlFor="confirm-password" className="text-sm font-bold ml-1">Confirm New Password</Label>
                 <Input
                   id="confirm-password"
                   name="confirmPassword"
@@ -659,15 +567,13 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
                   placeholder="Confirm new password"
                 />
               </div>
-
-              <Button
-                onClick={changePassword}
-                disabled={saving || !passwordData.newPassword}
+              
+              <Button 
+                onClick={changePassword} 
+                disabled={saving || !passwordData.newPassword} 
                 className="w-full h-12 sm:h-14 font-black text-lg rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20 min-h-[48px] mt-2"
               >
-                {saving ? (
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                ) : null}
+                {saving ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : null}
                 Update Password
               </Button>
             </CardContent>
@@ -690,8 +596,8 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
               </div>
             </CardHeader>
             <CardContent className="pt-8 pb-8">
-              <Button
-                variant="destructive"
+              <Button 
+                variant="destructive" 
                 className="w-full h-12 sm:h-14 font-black text-lg rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-destructive/20 min-h-[48px]"
                 onClick={() => setShowDeleteDialog(true)}
               >
@@ -709,25 +615,17 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Account Permanently?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. All your artworks, projects,
-              messages, and profile data will be permanently deleted.
+              This action cannot be undone. All your artworks, projects, messages, and profile data will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel
-              disabled={deleting}
-              className="h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md"
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={deleteAccount}
+            <AlertDialogCancel disabled={deleting} className="h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={deleteAccount} 
               disabled={deleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md"
             >
-              {deleting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : null}
+              {deleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Delete Forever
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -738,8 +636,3 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
 };
 
 export default ArtistSettings;
-
-
-
-
-

@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useBlockedUsers } from "@/hooks/useBlockedUsers";
-import { useAuth } from "@/contexts/AuthContext";
+import { useState } from 'react';
+import { useBlockedUsers } from '@/hooks/useBlockedUsers';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,17 +10,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Ban, UserCheck, Loader2 } from "lucide-react";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Ban, UserCheck, Loader2 } from 'lucide-react';
 
 interface BlockUserButtonProps {
   userId: string;
   userName?: string;
-  variant?: "default" | "outline" | "ghost" | "destructive";
-  size?: "default" | "sm" | "lg" | "icon";
+  variant?: 'default' | 'outline' | 'ghost' | 'destructive';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
   showLabel?: boolean;
 }
@@ -28,15 +28,15 @@ interface BlockUserButtonProps {
 const BlockUserButton = ({
   userId,
   userName,
-  variant = "outline",
-  size = "sm",
+  variant = 'outline',
+  size = 'sm',
   className,
   showLabel = true,
 }: BlockUserButtonProps) => {
   const { user } = useAuth();
   const { isUserBlocked, blockUser, unblockUser, loading } = useBlockedUsers();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [reason, setReason] = useState("");
+  const [reason, setReason] = useState('');
   const [processing, setProcessing] = useState(false);
 
   const isBlocked = isUserBlocked(userId);
@@ -46,16 +46,16 @@ const BlockUserButton = ({
 
   const handleAction = async () => {
     setProcessing(true);
-
+    
     if (isBlocked) {
       await unblockUser(userId);
     } else {
       await blockUser(userId, reason.trim() || undefined);
     }
-
+    
     setProcessing(false);
     setShowConfirmDialog(false);
-    setReason("");
+    setReason('');
   };
 
   if (loading) {
@@ -69,7 +69,7 @@ const BlockUserButton = ({
   return (
     <>
       <Button
-        variant={isBlocked ? "outline" : "destructive"}
+        variant={isBlocked ? 'outline' : 'destructive'}
         size={size}
         className={className}
         onClick={() => setShowConfirmDialog(true)}
@@ -91,18 +91,17 @@ const BlockUserButton = ({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {isBlocked ? "Unblock User" : "Block User"}
+              {isBlocked ? 'Unblock User' : 'Block User'}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {isBlocked ? (
                 <>
-                  Are you sure you want to unblock {userName || "this user"}?
-                  You will be able to see their content and receive messages
-                  from them again.
+                  Are you sure you want to unblock {userName || 'this user'}? 
+                  You will be able to see their content and receive messages from them again.
                 </>
               ) : (
                 <>
-                  Are you sure you want to block {userName || "this user"}?
+                  Are you sure you want to block {userName || 'this user'}?
                   <ul className="mt-2 list-disc list-inside text-sm space-y-1">
                     <li>You won't see their artworks in your feed</li>
                     <li>They won't be able to message you</li>
@@ -132,14 +131,10 @@ const BlockUserButton = ({
             <AlertDialogAction
               onClick={handleAction}
               disabled={processing}
-              className={
-                !isBlocked
-                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  : ""
-              }
+              className={!isBlocked ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
             >
               {processing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {isBlocked ? "Unblock" : "Block User"}
+              {isBlocked ? 'Unblock' : 'Block User'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -149,8 +144,3 @@ const BlockUserButton = ({
 };
 
 export default BlockUserButton;
-
-
-
-
-

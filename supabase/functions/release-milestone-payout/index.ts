@@ -178,7 +178,7 @@ serve(async (req) => {
     }
 
     // RazorpayX expects INR; convert from USD using locked rate or fallback
-    const exchangeRate = milestone.project.exchange_rate || 83.5;
+    const exchangeRate = milestone.exchange_rate || 83.5;
     const amountINR = Math.round(payoutAmount * exchangeRate * 100) / 100;
     const amountInPaise = Math.round(amountINR * 100);
 
@@ -225,11 +225,13 @@ serve(async (req) => {
 
     const payout = await payoutResponse.json();
 
-    // Update milestone to COMPLETED
+    // Update milestone to COMPLETED and store payout_id
     const { error: updateMilestoneError } = await supabaseAdmin
       .from('project_milestones')
       .update({
-        status: 'COMPLETED'
+        status: 'COMPLETED',
+        payout_id: payout.id,
+        approved_at: new Date().toISOString(),
       })
       .eq('id', milestoneId);
 

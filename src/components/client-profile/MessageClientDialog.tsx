@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -48,7 +42,7 @@ const parseAttachments = (data: unknown): Attachment[] => {
       "name" in item &&
       "url" in item &&
       "type" in item &&
-      "size" in item,
+      "size" in item
   );
 };
 
@@ -66,9 +60,7 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>(
-    [],
-  );
+  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -156,7 +148,7 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
               .update({ is_read: true })
               .eq("id", parsedMsg.id);
           }
-        },
+        }
       )
       .subscribe();
 
@@ -193,14 +185,9 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
         .insert({
           conversation_id: convId,
           sender_id: currentUserId,
-          content:
-            message.trim() ||
-            (pendingAttachments.length > 0 ? "📎 Attachment" : ""),
+          content: message.trim() || (pendingAttachments.length > 0 ? "📎 Attachment" : ""),
           is_read: false,
-          attachments:
-            pendingAttachments.length > 0
-              ? JSON.parse(JSON.stringify(pendingAttachments))
-              : [],
+          attachments: pendingAttachments.length > 0 ? JSON.parse(JSON.stringify(pendingAttachments)) : [],
         })
         .select()
         .single();
@@ -345,9 +332,7 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
           />
           <Button
             onClick={handleSend}
-            disabled={
-              sending || (!message.trim() && pendingAttachments.length === 0)
-            }
+            disabled={sending || (!message.trim() && pendingAttachments.length === 0)}
             size="icon"
             className="h-[48px] w-[48px] sm:h-[60px] sm:w-[60px] shrink-0 min-h-[48px] min-w-[48px]"
           >
@@ -364,8 +349,3 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
 };
 
 export default MessageClientDialog;
-
-
-
-
-

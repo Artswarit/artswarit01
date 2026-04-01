@@ -1,61 +1,48 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ArtistPaymentStatus } from "@/components/payments/ArtistPaymentStatus";
-import { PayoutHistory } from "@/components/billing/PayoutHistory";
-import { usePremiumSubscription } from "@/hooks/usePremiumSubscription";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, Crown, Calendar, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useCurrency } from "@/contexts/CurrencyContext";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { ArtistPaymentStatus } from '@/components/payments/ArtistPaymentStatus';
+import { PayoutHistory } from '@/components/billing/PayoutHistory';
+import { usePremiumSubscription } from '@/hooks/usePremiumSubscription';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { ExternalLink, Crown, Calendar, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 export function ArtistBilling() {
   const { user } = useAuth();
-  const {
-    isActive: isProSubscriber,
-    renewAt,
-    loading: subLoading,
-  } = usePremiumSubscription(user?.id);
+  const { isActive: isProSubscriber, renewAt, loading: subLoading } = usePremiumSubscription(user?.id);
   const { formatPrice } = useCurrency();
   const [loadingPortal, setLoadingPortal] = useState(false);
 
   const handleSubscribe = async () => {
     if (!user?.id) return;
-
+    
     setLoadingPortal(true);
     try {
-      const { data, error } = await supabase.functions.invoke(
-        "create-razorpay-subscription",
-        {
-          body: { plan: "pro", use_link: true },
-        },
-      );
+      const { data, error } = await supabase.functions.invoke('create-razorpay-subscription', {
+        body: { plan: 'pro', use_link: true },
+      });
 
       if (error) {
-        console.error("Subscription function error:", error);
+        console.error('Subscription function error:', error);
         throw error;
       }
-
+      
       const checkoutUrl = data?.url || data?.short_url;
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else {
         // Fallback: open the hardcoded subscription link directly
-        window.location.href = "https://rzp.io/rzp/JgMbYCOw";
+        window.location.href = 'https://rzp.io/rzp/JgMbYCOw';
       }
     } catch (error: any) {
-      console.error("Subscription error details:", error);
+      console.error('Subscription error details:', error);
       // Fallback: open the direct Razorpay subscription link
-      window.location.href = "https://rzp.io/rzp/JgMbYCOw";
-      toast.info("Opening subscription page directly...");
+      window.location.href = 'https://rzp.io/rzp/JgMbYCOw';
+      toast.info('Opening subscription page directly...');
     } finally {
       setLoadingPortal(false);
     }
@@ -63,20 +50,14 @@ export function ArtistBilling() {
 
   const handleManageSubscription = () => {
     // Razorpay doesn't have a self-service portal like Stripe
-    toast.info(
-      "To manage your subscription, please contact support@artswarit.com",
-    );
+    toast.info('To manage your subscription, please contact support@artswarit.com');
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">
-          Billing & Payments
-        </h2>
-        <p className="text-muted-foreground">
-          Manage your payment account, view payouts, and subscription billing
-        </p>
+        <h2 className="text-2xl font-semibold tracking-tight">Billing & Payments</h2>
+        <p className="text-muted-foreground">Manage your payment account, view payouts, and subscription billing</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -99,8 +80,8 @@ export function ArtistBilling() {
             </div>
             <CardDescription>
               {isProSubscriber
-                ? "You have full access to Premium features including 0% platform fees."
-                : "Upgrade to Premium to unlock premium features and remove platform fees."}
+                ? 'You have full access to Premium features including 0% platform fees.'
+                : 'Upgrade to Premium to unlock premium features and remove platform fees.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -128,9 +109,9 @@ export function ArtistBilling() {
                   <span className="text-emerald-600 font-medium">0%</span>
                 </div>
                 <Separator className="my-3" />
-                <Button
-                  variant="outline"
-                  className="w-full h-12 sm:h-10 min-h-[48px] sm:min-h-[40px]"
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 sm:h-10 min-h-[48px] sm:min-h-[40px]" 
                   onClick={handleManageSubscription}
                   disabled={loadingPortal}
                 >
@@ -153,7 +134,7 @@ export function ArtistBilling() {
                     <li>• Advanced analytics dashboard</li>
                   </ul>
                 </div>
-                <Button
+                <Button 
                   className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 h-12 sm:h-11 min-h-[48px] sm:min-h-[44px]"
                   onClick={handleSubscribe}
                   disabled={loadingPortal}
@@ -176,8 +157,3 @@ export function ArtistBilling() {
     </div>
   );
 }
-
-
-
-
-

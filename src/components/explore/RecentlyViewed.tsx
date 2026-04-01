@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
-import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Clock, X, Eye } from "lucide-react";
+import { Link } from 'react-router-dom';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
+import { Button } from '@/components/ui/button';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Clock, X, Eye } from 'lucide-react';
 
 const RecentlyViewed = () => {
   const { items, loading, clearAll } = useRecentlyViewed();
@@ -34,24 +34,20 @@ const RecentlyViewed = () => {
           {items.map((item) => (
             <Link
               key={item.id}
-              to={
-                item.item_type === "artwork"
-                  ? `/artwork/${item.item_id}`
-                  : `/artist/${item.item_id}`
-              }
+              to={item.item_type === 'artwork' ? `/artwork/${item.item_id}` : `/artist/${item.item_id}`}
               className="flex-shrink-0 group"
             >
               <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-muted">
-                {item.item_type === "artwork" && item.imageUrl ? (
+                {item.item_type === 'artwork' && item.imageUrl ? (
                   <img
                     src={item.imageUrl}
-                    alt={item.title || "Artwork"}
+                    alt={item.title || 'Artwork'}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
-                ) : item.item_type === "artist" && item.avatarUrl ? (
+                ) : item.item_type === 'artist' && item.avatarUrl ? (
                   <img
                     src={item.avatarUrl}
-                    alt={item.name || "Artist"}
+                    alt={item.name || 'Artist'}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
                 ) : (
@@ -59,14 +55,14 @@ const RecentlyViewed = () => {
                     <Eye className="h-8 w-8 text-muted-foreground" />
                   </div>
                 )}
-
+                
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
-
+              
               <div className="mt-2 w-32">
                 <p className="text-sm font-medium truncate">
-                  {item.item_type === "artwork" ? item.title : item.name}
+                  {item.item_type === 'artwork' ? item.title : item.name}
                 </p>
                 <p className="text-xs text-muted-foreground capitalize">
                   {item.item_type}
@@ -82,8 +78,3 @@ const RecentlyViewed = () => {
 };
 
 export default RecentlyViewed;
-
-
-
-
-

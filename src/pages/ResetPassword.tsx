@@ -6,13 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LogoWithName from "@/components/LogoWithName";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2, Lock, CheckCircle } from "lucide-react";
@@ -33,15 +27,11 @@ const ResetPassword = () => {
   useEffect(() => {
     // Check if user has a valid recovery session
     const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
+      const { data: { session } } = await supabase.auth.getSession();
+      
       // Listen for auth state changes (recovery link clicked)
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === "PASSWORD_RECOVERY") {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
           setIsValidSession(true);
         }
       });
@@ -50,7 +40,7 @@ const ResetPassword = () => {
       if (session) {
         setIsValidSession(true);
       }
-
+      
       setIsLoading(false);
 
       return () => subscription.unsubscribe();
@@ -88,7 +78,7 @@ const ResetPassword = () => {
       });
 
       if (error) {
-        console.error("Password update error:", error);
+        console.error('Password update error:', error);
         toast({
           title: "Error",
           description: error.message,
@@ -100,14 +90,14 @@ const ResetPassword = () => {
           title: "Password updated!",
           description: "Your password has been successfully reset.",
         });
-
+        
         // Redirect to login after 3 seconds
         setTimeout(() => {
-          navigate("/login");
+          navigate('/login');
         }, 3000);
       }
     } catch (error: any) {
-      console.error("Password update error:", error);
+      console.error('Password update error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -145,9 +135,10 @@ const ResetPassword = () => {
                 {isSuccess ? "Password Reset!" : "Reset Your Password"}
               </CardTitle>
               <CardDescription className="text-center text-sm sm:text-base">
-                {isSuccess
+                {isSuccess 
                   ? "You can now sign in with your new password"
-                  : "Enter your new password below"}
+                  : "Enter your new password below"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -159,11 +150,11 @@ const ResetPassword = () => {
                     </div>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    Your password has been successfully updated. Redirecting you
-                    to the login page...
+                    Your password has been successfully updated. 
+                    Redirecting you to the login page...
                   </p>
                   <Button
-                    onClick={() => navigate("/login")}
+                    onClick={() => navigate('/login')}
                     className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
                   >
                     Go to Login
@@ -202,10 +193,7 @@ const ResetPassword = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="confirmPassword"
-                      className="text-sm font-medium"
-                    >
+                    <Label htmlFor="confirmPassword" className="text-sm font-medium">
                       Confirm New Password
                     </Label>
                     <div className="relative">
@@ -223,9 +211,7 @@ const ResetPassword = () => {
                       <button
                         type="button"
                         className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() =>
-                          setShowConfirmPassword(!showConfirmPassword)
-                        }
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="h-5 w-5 text-gray-400" />
@@ -262,8 +248,3 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
-
-
-
-
-

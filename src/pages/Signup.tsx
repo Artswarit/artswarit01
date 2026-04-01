@@ -19,38 +19,38 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
-      navigate("/");
+      navigate('/');
     }
   }, [user, loading, navigate]);
-
+  
   const [formData, setFormData] = useState<SignupFormData>({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
     role: "",
-    acceptTerms: false,
+    acceptTerms: false
   });
-
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: value
     });
   };
-
+  
   const handleRoleChange = (value: string) => {
     setFormData({
       ...formData,
-      role: value,
+      role: value
     });
   };
-
+  
   const handleTermsChange = (checked: boolean) => {
     setFormData({
       ...formData,
-      acceptTerms: checked,
+      acceptTerms: checked
     });
   };
 
@@ -60,16 +60,15 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
       if (!formData.role) {
         toast({
           title: "Please select a role",
-          description:
-            "You must choose either Artist or Client before signing up with Google.",
-          variant: "destructive",
+          description: "You must choose either Artist or Client before signing up with Google.",
+          variant: "destructive"
         });
         return;
       }
-
+      
       // Store the selected role in localStorage for use after OAuth completes
-      localStorage.setItem("pendingSignupRole", formData.role);
-
+      localStorage.setItem('pendingSignupRole', formData.role);
+      
       const { error } = await signInWithGoogle();
       if (!error) {
         // Redirect will happen automatically via auth state change
@@ -81,23 +80,23 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
       });
     }
   };
-
+  
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-
+    
     if (formData.password !== formData.confirmPassword) {
       return;
     }
-
+    
     if (!formData.acceptTerms) {
       return;
     }
-
+    
     const { error } = await signUp(formData.email, formData.password, {
       full_name: formData.name,
-      role: formData.role,
+      role: formData.role
     });
-
+    
     if (!error) {
       if (formData.role === "artist") {
         setTimeout(() => navigate("/artist-dashboard"), 1000);
@@ -108,16 +107,11 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
   };
 
   return (
-    <div
-      className={cn(
-        "min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50",
-        isModal && "min-h-0 bg-none",
-      )}
-    >
+    <div className={cn("min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50", isModal && "min-h-0 bg-none")}>
       {!isModal && <Navbar />}
 
       {isModal && (
-        <button
+        <button 
           onClick={() => navigate(-1)}
           className="absolute top-4 right-4 z-50 h-8 w-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
         >
@@ -125,14 +119,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
         </button>
       )}
 
-      <div
-        className={cn(
-          "flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8",
-          isModal
-            ? "py-6"
-            : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+2rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+3rem)] pb-20",
-        )}
-      >
+      <div className={cn("flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8", isModal ? "py-6" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+2rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+3rem)] pb-20")}>
         <div className="w-full max-w-md space-y-4 sm:space-y-5">
           <div className="text-center space-y-1">
             <LogoWithName />
@@ -155,8 +142,3 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
 };
 
 export default Signup;
-
-
-
-
-

@@ -7,25 +7,18 @@ export interface FeatureLimits {
   portfolioLimit: number;
   canUploadPortfolio: boolean;
   portfolioRemaining: number;
-
+  
   serviceCount: number;
   serviceLimit: number;
   canAddService: boolean;
   servicesRemaining: number;
-
+  
   isProArtist: boolean;
   showUpgradePrompt: boolean;
 }
 
 export const useFeatureGating = (userId: string | undefined | null) => {
-  const {
-    plan,
-    isProArtist,
-    portfolioLimit,
-    serviceLimit,
-    loading: planLoading,
-    refetch: refetchPlan,
-  } = useArtistPlan(userId);
+  const { plan, isProArtist, portfolioLimit, serviceLimit, loading: planLoading, refetch: refetchPlan } = useArtistPlan(userId);
   const [portfolioCount, setPortfolioCount] = useState(0);
   const [serviceCount, setServiceCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -37,7 +30,7 @@ export const useFeatureGating = (userId: string | undefined | null) => {
     }
 
     console.log(`[useFeatureGating] Fetching counts for ${userId}...`);
-
+    
     // Fetch portfolio (artworks) count
     const { count: artworkCount, error: artError } = await supabase
       .from("artworks")
@@ -50,14 +43,10 @@ export const useFeatureGating = (userId: string | undefined | null) => {
       .select("*", { count: "exact", head: true })
       .eq("artist_id", userId);
 
-    if (artError)
-      console.error("[useFeatureGating] Artworks count error:", artError);
-    if (svcError)
-      console.error("[useFeatureGating] Services count error:", svcError);
+    if (artError) console.error("[useFeatureGating] Artworks count error:", artError);
+    if (svcError) console.error("[useFeatureGating] Services count error:", svcError);
 
-    console.log(
-      `[useFeatureGating] Counts fetched: artworks=${artworkCount}, services=${servicesCount}`,
-    );
+    console.log(`[useFeatureGating] Counts fetched: artworks=${artworkCount}, services=${servicesCount}`);
 
     setPortfolioCount(artworkCount || 0);
     setServiceCount(servicesCount || 0);
@@ -65,7 +54,10 @@ export const useFeatureGating = (userId: string | undefined | null) => {
   };
 
   const refresh = async () => {
-    await Promise.all([fetchCounts(), refetchPlan()]);
+    await Promise.all([
+      fetchCounts(),
+      refetchPlan()
+    ]);
   };
 
   useEffect(() => {
@@ -82,44 +74,35 @@ export const useFeatureGating = (userId: string | undefined | null) => {
     const channel = supabase
       .channel(`gating-updates-${userId}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "artworks",
-          filter: `artist_id=eq.${userId}`,
+          event: '*',
+          schema: 'public',
+          table: 'artworks',
+          filter: `artist_id=eq.${userId}`
         },
         (payload) => {
-          console.log(
-            "[useFeatureGating] Real-time artwork change:",
-            payload.eventType,
-          );
+          console.log('[useFeatureGating] Real-time artwork change:', payload.eventType);
           // Small delay to ensure DB consistency before re-fetching counts
           setTimeout(fetchCounts, 150);
-        },
+        }
       )
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "artist_services",
-          filter: `artist_id=eq.${userId}`,
+          event: '*',
+          schema: 'public',
+          table: 'artist_services',
+          filter: `artist_id=eq.${userId}`
         },
         (payload) => {
-          console.log(
-            "[useFeatureGating] Real-time service change:",
-            payload.eventType,
-          );
+          console.log('[useFeatureGating] Real-time service change:', payload.eventType);
           // Small delay to ensure DB consistency before re-fetching counts
           setTimeout(fetchCounts, 150);
-        },
+        }
       )
       .subscribe((status) => {
-        console.log(
-          `[useFeatureGating] Subscription status for ${userId}:`,
-          status,
-        );
+        console.log(`[useFeatureGating] Subscription status for ${userId}:`, status);
       });
 
     return () => {
@@ -130,15 +113,9 @@ export const useFeatureGating = (userId: string | undefined | null) => {
 
   const canUploadPortfolio = isProArtist || portfolioCount < portfolioLimit;
   const canAddService = isProArtist || serviceCount < serviceLimit;
-  const portfolioRemaining = isProArtist
-    ? Infinity
-    : Math.max(0, portfolioLimit - portfolioCount);
-  const servicesRemaining = isProArtist
-    ? Infinity
-    : Math.max(0, serviceLimit - serviceCount);
-  const showUpgradePrompt =
-    !isProArtist &&
-    (portfolioCount >= portfolioLimit - 2 || serviceCount >= serviceLimit);
+  const portfolioRemaining = isProArtist ? Infinity : Math.max(0, portfolioLimit - portfolioCount);
+  const servicesRemaining = isProArtist ? Infinity : Math.max(0, serviceLimit - serviceCount);
+  const showUpgradePrompt = !isProArtist && (portfolioCount >= portfolioLimit - 2 || serviceCount >= serviceLimit);
 
   const limits: FeatureLimits = {
     portfolioCount,
@@ -150,18 +127,13 @@ export const useFeatureGating = (userId: string | undefined | null) => {
     canAddService,
     servicesRemaining,
     isProArtist,
-    showUpgradePrompt,
+    showUpgradePrompt
   };
 
   return {
     ...limits,
     loading: loading || planLoading,
     plan,
-    refresh,
+    refresh
   };
 };
-
-
-
-
-

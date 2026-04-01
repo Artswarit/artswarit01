@@ -1,7 +1,3 @@
-html, body {
-  overscroll-behavior: none;
-  overflow-x: hidden;
-}
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap");
 
 @tailwind base;
@@ -97,7 +93,7 @@ html, body {
     @apply w-full;
     margin: 0;
     padding: 0;
-    overflow-y: scroll;
+    overflow-y: scroll; 
     overflow-x: hidden;
     scroll-behavior: smooth;
     height: -webkit-fill-available; /* Fixed viewport height for PWA */
@@ -123,15 +119,15 @@ html, body {
         transparent 80%
       ),
       radial-gradient(
-        circle at 100% 0%,
-        rgba(var(--accent) / 0.08),
-        transparent 80%
-      ),
+      circle at 100% 0%,
+      rgba(var(--accent) / 0.08),
+      transparent 80%
+    ),
       radial-gradient(
-        circle at 50% 100%,
-        rgba(var(--primary) / 0.08),
-        transparent 80%
-      );
+      circle at 50% 100%,
+      rgba(var(--primary) / 0.08),
+      transparent 80%
+    );
     background-attachment: fixed;
   }
 
@@ -141,19 +137,14 @@ html, body {
       /* Status bar compensation in standalone mode */
       --safe-top: env(safe-area-inset-top, 20px);
     }
-
+    
     .chat-window-container {
       top: var(--safe-top);
       padding-top: var(--safe-top);
     }
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     @apply font-heading;
   }
 }
@@ -215,9 +206,7 @@ html, body {
   }
 
   .hover-lift {
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .hover-lift:hover {
@@ -479,9 +468,7 @@ html, body {
   }
 
   /* Ensure touch targets are large enough */
-  button,
-  .btn,
-  [role="button"] {
+  button, .btn, [role="button"] {
     @apply min-h-[44px];
   }
 
@@ -491,26 +478,21 @@ html, body {
     text-size-adjust: 100%;
   }
 
-  input,
-  textarea,
-  select {
+  input, textarea, select {
     font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
   }
 }
 
 /* Fix for horizontal drag problem */
-html,
-body {
+html, body {
   max-width: 100%;
   overflow-x: hidden;
   position: relative;
   touch-action: pan-y; /* Allow vertical pan, prevent horizontal drag */
-  overscroll-behavior-y: none; /* Prevent pull-to-refresh drag bounce */
 }
 
 /* Reset horizontal scroll for all containers */
-.w-screen,
-.w-full {
+.w-screen, .w-full {
   max-width: 100% !important;
 }
 
@@ -561,20 +543,12 @@ body {
   animation: overlay-out 150ms ease-in;
 }
 @keyframes overlay-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 @keyframes overlay-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 
 [data-radix-dialog-content][data-state="open"],
@@ -586,24 +560,12 @@ body {
   animation: dialog-out 150ms ease-in;
 }
 @keyframes dialog-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 @keyframes dialog-out {
-  from {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, -48%) scale(0.96);
-  }
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to   { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
 }
 
 /* ── Dropdown menus: slide-in from above ── */
@@ -616,24 +578,12 @@ body {
   animation: dropdown-out 120ms ease-in;
 }
 @keyframes dropdown-in {
-  from {
-    opacity: 0;
-    transform: translateY(-6px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes dropdown-out {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-4px) scale(0.97);
-  }
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-4px) scale(0.97); }
 }
 
 /* ── Select: slide-in from below ── */
@@ -644,24 +594,12 @@ body {
   animation: select-out 120ms ease-in;
 }
 @keyframes select-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes select-out {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(4px) scale(0.97);
-  }
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(4px) scale(0.97); }
 }
 
 /* ── Global button press tactile feedback ── */
