@@ -113,13 +113,13 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
         </button>
       )}
 
-      <div className={cn("flex-1 flex items-center justify-center px-3 sm:px-6 lg:px-8", isModal ? "py-6" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+2rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+3rem)] pb-20")}>
-        <div className="w-full max-w-sm sm:max-w-md space-y-4">
+      <div className={cn("flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8", isModal ? "py-6" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+2rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+3rem)] pb-20")}>
+        <div className="w-full max-w-[460px] space-y-4">
           <div className="text-center space-y-0">
             <LogoWithName />
           </div>
 
-          <Card className="glass-card border-0 shadow-xl">
+          <Card className="glass-card border border-border/50 shadow-xl rounded-2xl">
             <CardHeader className="space-y-3 pb-4">
               <CardTitle className="text-xl sm:text-2xl text-center font-heading">
                 Welcome Back
