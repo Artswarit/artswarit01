@@ -120,7 +120,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
       )}
 
       <div className={cn("flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8", isModal ? "py-6" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+2rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+3rem)] pb-20")}>
-        <div className="w-full max-w-md mx-auto space-y-4 sm:space-y-5">
+        <div className="w-full mx-auto space-y-4 sm:space-y-5" style={{ maxWidth: '28rem' }}>
           <div className="text-center space-y-1">
             <LogoWithName />
           </div>
