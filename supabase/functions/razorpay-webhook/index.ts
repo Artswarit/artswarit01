@@ -123,16 +123,11 @@ serve(async (req) => {
       }).eq('id', paymentRecord.id);
 
       // Update milestone status to ACTIVE (funds secured in escrow)
-      const { error: milestoneUpdateError } = await supabaseAdmin.from('project_milestones').update({
+      await supabaseAdmin.from('project_milestones').update({
         status: 'ACTIVE',
         paid_at: new Date().toISOString(),
         payment_id: paymentId,
       }).eq('id', paymentRecord.milestone_id);
-
-      if (milestoneUpdateError) {
-        console.error('Milestone update error in webhook:', milestoneUpdateError);
-        // Do not abort, let it log to activity logs but record the error 
-      }
 
       // Log activity
       await supabaseAdmin.from('project_activity_logs').insert({

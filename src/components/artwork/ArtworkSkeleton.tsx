@@ -1,3 +1,4 @@
+
 import { Skeleton } from "@/components/ui/skeleton";
 import GlassCard from "@/components/ui/glass-card";
 
@@ -18,8 +19,3 @@ export const ArtworkSkeleton = () => {
     </GlassCard>
   );
 };
-
-
-
-
-

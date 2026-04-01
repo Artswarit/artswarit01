@@ -2,13 +2,13 @@ import { useProfile } from "@/hooks/useProfile";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 export const USER_ROLES = {
-  ARTIST: "artist",
-  PREMIUM: "premium",
-  CLIENT: "client",
-  ADMIN: "admin",
+  ARTIST: 'artist',
+  PREMIUM: 'premium',
+  CLIENT: 'client',
+  ADMIN: 'admin'
 } as const;
 
-export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
+export type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
 
 /**
  * Centralized hook for role checking across the platform.
@@ -42,8 +42,3 @@ export function useUserRole() {
 export function isValidRole(role: string): role is UserRole {
   return Object.values(USER_ROLES).includes(role as UserRole);
 }
-
-
-
-
-

@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Crown, Sparkles, CheckCircle, ArrowRight, Shield } from "lucide-react";
@@ -28,10 +21,10 @@ export function ProUpgradePrompt({
   milestoneAmount,
   onUpgrade,
   onContinueStarter,
-  loading = false,
+  loading = false
 }: ProUpgradePromptProps) {
   const { format: formatCurrency } = useCurrencyFormat();
-
+  
   const starterEarnings = calculateEarnings(milestoneAmount, false);
   const proEarnings = calculateEarnings(milestoneAmount, true);
   const savings = starterEarnings.platformFee;
@@ -50,9 +43,7 @@ export function ProUpgradePrompt({
             🎉 You're about to earn {formatCurrency(milestoneAmount)}!
           </DialogTitle>
           <DialogDescription className="text-base mt-2">
-            As a Starter artist, a {PLANS.starter.platformFee * 100}% service
-            fee ({formatCurrency(starterEarnings.platformFee)}) will be deducted
-            from this payment.
+            As a Starter artist, a {PLANS.starter.platformFee * 100}% service fee ({formatCurrency(starterEarnings.platformFee)}) will be deducted from this payment.
           </DialogDescription>
         </DialogHeader>
 
@@ -66,9 +57,7 @@ export function ProUpgradePrompt({
               </div>
               <CardContent className="p-4 pt-8">
                 <div className="text-center space-y-2">
-                  <div className="font-bold text-lg text-yellow-700">
-                    Pro Artist
-                  </div>
+                  <div className="font-bold text-lg text-yellow-700">Pro Artist</div>
                   <div className="text-3xl font-extrabold text-yellow-600">
                     {formatCurrency(proEarnings.artistPayout)}
                   </div>
@@ -83,9 +72,7 @@ export function ProUpgradePrompt({
             <Card className="border border-muted">
               <CardContent className="p-4 pt-8">
                 <div className="text-center space-y-2">
-                  <div className="font-medium text-muted-foreground">
-                    Starter
-                  </div>
+                  <div className="font-medium text-muted-foreground">Starter</div>
                   <div className="text-3xl font-bold text-muted-foreground">
                     {formatCurrency(starterEarnings.artistPayout)}
                   </div>
@@ -100,9 +87,7 @@ export function ProUpgradePrompt({
           {/* Value Proposition */}
           <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200">
             <p className="text-sm text-center font-medium text-yellow-800">
-              💡 <strong>Save {formatCurrency(savings)}</strong> on this project
-              alone by upgrading to Pro for just{" "}
-              {formatCurrency(PLANS.pro.price / 83)}/month
+              💡 <strong>Save {formatCurrency(savings)}</strong> on this project alone by upgrading to Pro for just {formatCurrency(PLANS.pro.price / 83)}/month
             </p>
           </div>
 
@@ -153,8 +138,3 @@ export function ProUpgradePrompt({
     </Dialog>
   );
 }
-
-
-
-
-

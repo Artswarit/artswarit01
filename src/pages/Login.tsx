@@ -1,5 +1,5 @@
+
 import { useState, useEffect } from "react";
-import SEOHead from "@/components/SEOHead";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,13 +8,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LogoWithName from "@/components/LogoWithName";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -41,47 +35,41 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
   const redirectBasedOnRole = async () => {
     if (!user) return;
     setIsRedirecting(true);
-
+    
     try {
-      // Check both profile role AND user_roles table for admin status
       const [profileResult, adminResult] = await Promise.all([
         supabase
-          .from("profiles")
-          .select("role, full_name, bio, avatar_url, tags")
-          .eq("id", user.id)
+          .from('profiles')
+          .select('role, full_name, bio, avatar_url, tags')
+          .eq('id', user.id)
           .single(),
         supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
           .maybeSingle(),
       ]);
 
       if (profileResult.error) {
-        console.error(
-          "Error fetching profile for redirect:",
-          profileResult.error,
-        );
-        navigate("/");
+        console.error('Error fetching profile for redirect:', profileResult.error);
+        navigate('/');
         return;
       }
 
       const profile = profileResult.data;
-      const isAdmin =
-        profile?.role === "admin" || adminResult.data?.role === "admin";
+      const isAdmin = profile?.role === 'admin' || adminResult.data?.role === 'admin';
 
-      // Admin users always go to admin dashboard
       if (isAdmin) {
-        navigate("/admin-dashboard");
-      } else if (profile?.role === "artist" || profile?.role === "premium") {
-        navigate("/artist-dashboard");
+        navigate('/admin-dashboard');
+      } else if (profile?.role === 'artist' || profile?.role === 'premium') {
+        navigate('/artist-dashboard');
       } else {
-        navigate("/client-dashboard");
+        navigate('/client-dashboard');
       }
     } catch (error) {
-      console.error("Error in redirectBasedOnRole:", error);
-      navigate("/");
+      console.error('Error in redirectBasedOnRole:', error);
+      navigate('/');
     } finally {
       setIsRedirecting(false);
     }
@@ -90,42 +78,31 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
-
+    
     const { error } = await signIn(email, password);
-
+    
     if (!error) {
       // Role-based redirect will happen via useEffect when user state updates
     }
-
+    
     setIsSubmitting(false);
   };
 
   const handleGoogleSignIn = async () => {
-    // Google OAuth works for both existing and new users.
-    // Existing users: Supabase auto-links to their account by email.
-    // New users: If no pendingSignupRole, they'll get assigned 'client' default.
-    // New users who want a specific role should sign up via the Signup page.
     setIsSubmitting(true);
     await signInWithGoogle();
     setIsSubmitting(false);
   };
 
   return (
-    <div
-      className={cn(
-        "min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50",
-        isModal && "min-h-0 bg-none",
-      )}
-    >
+    <div className={cn(
+      "min-h-screen flex flex-col bg-gradient-to-br from-primary/5 via-background to-primary/10",
+      isModal && "min-h-0 bg-none"
+    )}>
       {!isModal && <Navbar />}
-      <SEOHead
-        title="Sign In to Artswarit | Artist & Client Login"
-        description="Sign in to your Artswarit account. Access your artist dashboard, manage commissions, and connect with clients worldwide."
-        canonicalPath="/login"
-      />
-
+      
       {isModal && (
-        <button
+        <button 
           onClick={() => navigate(-1)}
           className="absolute top-4 right-4 z-50 h-8 w-8 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
         >
@@ -133,29 +110,25 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
         </button>
       )}
 
-      <div
-        className={cn(
-          "flex-1 flex items-center justify-center px-3 sm:px-6 lg:px-8",
-          isModal
-            ? "py-6"
-            : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+2rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+3rem)] pb-20",
-        )}
-      >
-        <div className="w-full max-w-sm sm:max-w-md space-y-4">
-          <div className="text-center space-y-0">
+      <div className={cn(
+        "flex-1 flex items-center justify-center px-4 sm:px-6",
+        isModal ? "py-6" : "pt-24 sm:pt-28 pb-16"
+      )}>
+        <div className="w-full" style={{ maxWidth: 448 }}>
+          <div className="text-center mb-6">
             <LogoWithName />
           </div>
 
-          <Card className="glass-card border-0 shadow-xl">
-            <CardHeader className="space-y-3 pb-4">
+          <Card className="border border-border/60 shadow-lg rounded-2xl bg-card/80 backdrop-blur-sm">
+            <CardHeader className="space-y-1 pb-4 pt-6 px-6 sm:px-8">
               <CardTitle className="text-xl sm:text-2xl text-center font-heading">
                 Welcome Back
               </CardTitle>
-              <CardDescription className="text-center text-sm sm:text-base">
+              <CardDescription className="text-center text-sm">
                 Sign in to your account
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-6 sm:px-8 pb-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm font-medium">
@@ -192,9 +165,9 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-5 w-5 text-gray-400" />
+                        <EyeOff className="h-5 w-5 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-5 w-5 text-gray-400" />
+                        <Eye className="h-5 w-5 text-muted-foreground" />
                       )}
                     </button>
                   </div>
@@ -202,7 +175,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 
                 <Button
                   type="submit"
-                  className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
+                  className="w-full h-11 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium"
                   disabled={loading || isSubmitting}
                 >
                   {isSubmitting ? (
@@ -218,10 +191,10 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
+                  <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
+                  <span className="bg-card px-2 text-muted-foreground">
                     Or continue with
                   </span>
                 </div>
@@ -231,7 +204,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                 variant="outline"
                 onClick={handleGoogleSignIn}
                 disabled={loading || isSubmitting}
-                className="w-full h-11 border-gray-300 hover:bg-gray-50"
+                className="w-full h-11 border-border hover:bg-muted/50"
               >
                 <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
                   <path
@@ -254,18 +227,18 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                 Continue with Google
               </Button>
 
-              <div className="flex flex-col gap-2 text-center text-sm">
+              <div className="flex flex-col gap-2 text-center text-sm pt-2">
                 <Link
                   to="/forgot-password"
-                  className="font-medium text-muted-foreground hover:text-artswarit-purple transition-colors"
+                  className="font-medium text-muted-foreground hover:text-primary transition-colors"
                 >
                   Forgot your password?
                 </Link>
                 <div>
-                  <span className="text-gray-600">Don't have an account? </span>
+                  <span className="text-muted-foreground">Don't have an account? </span>
                   <Link
                     to="/signup"
-                    className="font-medium text-artswarit-purple hover:text-artswarit-purple-dark"
+                    className="font-medium text-primary hover:text-primary/80"
                   >
                     Sign up
                   </Link>
@@ -281,8 +254,3 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 };
 
 export default Login;
-
-
-
-
-

@@ -33,7 +33,7 @@ const StarRating = ({ value }: { value: number }) => {
         }`}
         strokeWidth={1.5}
         fill={value >= i ? "#facc15" : "none"}
-      />,
+      />
     );
   }
   return <div className="flex">{stars}</div>;
@@ -98,7 +98,7 @@ const ArtistHeader: React.FC<Props> = ({
         />
         <div className="absolute inset-0 bg-black/70" />
       </div>
-
+      
       <div className="relative w-full flex flex-col z-10 gap-4 p-3 sm:p-6 lg:p-10 pb-3 sm:pb-4">
         {/* Mobile-first layout: Stack everything vertically on small screens */}
         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-7 w-full">
@@ -115,7 +115,7 @@ const ArtistHeader: React.FC<Props> = ({
                 }}
               />
             </div>
-
+            
             {/* Info - Centered on mobile, left-aligned on desktop */}
             <div className="flex flex-col gap-2 sm:gap-3 text-white text-center sm:text-left min-w-0 flex-1">
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
@@ -145,14 +145,14 @@ const ArtistHeader: React.FC<Props> = ({
                   </span>
                 )}
               </div>
-
+              
               {/* Bio with solid, non-glass background */}
               <div className="text-sm sm:text-base text-white font-normal leading-relaxed">
                 <div className="w-fit mx-auto sm:mx-0 bg-gray-900 bg-opacity-80 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl shadow">
                   <span>{artist.tagline || artist.category}</span>
                 </div>
               </div>
-
+              
               {/* Tags with solid pill style */}
               <div className="flex flex-wrap gap-1.5 sm:gap-2 items-center justify-center sm:justify-start mt-1">
                 {artist.tags &&
@@ -165,7 +165,7 @@ const ArtistHeader: React.FC<Props> = ({
                     </span>
                   ))}
               </div>
-
+              
               {/* Dopamine trigger stats: NO glass, high contrast */}
               <div className="flex gap-2 sm:gap-4 mt-2 sm:mt-3 px-2 py-1.5 sm:px-2 sm:py-2 bg-black/80 rounded-xl sm:rounded-2xl shadow-lg max-w-full overflow-x-auto">
                 {stats.map((stat) => (
@@ -179,7 +179,7 @@ const ArtistHeader: React.FC<Props> = ({
               </div>
             </div>
           </div>
-
+          
           {/* Actions - Full width on mobile, fixed width on desktop */}
           <div className="w-full sm:w-auto sm:min-w-[200px] lg:min-w-[230px]">
             <ArtistActionsBar
@@ -196,43 +196,30 @@ const ArtistHeader: React.FC<Props> = ({
           </div>
         </div>
       </div>
-
+      
       {/* Artist summary section - Responsive positioning */}
       <div className="relative w-full px-3 sm:px-5 lg:px-10 pt-2 sm:pt-3 z-10">
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border p-3 sm:p-5 w-full sm:max-w-2xl sm:ml-0 lg:ml-48 mt-1 sm:mt-2">
-          <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">
-            Artist Overview
-          </h3>
+          <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">Artist Overview</h3>
           <div className="flex flex-wrap gap-4 sm:gap-7 items-center mb-2">
             <div className="text-center sm:text-left">
-              <span className="block text-xl sm:text-2xl font-bold text-blue-900">
-                {artistAllDetails.totalProjects}
-              </span>
+              <span className="block text-xl sm:text-2xl font-bold text-blue-900">{artistAllDetails.totalProjects}</span>
               <span className="text-xs text-gray-500">Projects Completed</span>
             </div>
             <div className="text-center sm:text-left">
-              <span className="block text-xl sm:text-2xl font-bold text-yellow-500">
-                {artistAllDetails.avgRating.toFixed(1)}
-              </span>
+              <span className="block text-xl sm:text-2xl font-bold text-yellow-500">{artistAllDetails.avgRating.toFixed(1)}</span>
               <span className="text-xs text-gray-500 flex items-center justify-center sm:justify-start gap-1">
                 Avg. Rating <StarRating value={artistAllDetails.avgRating} />
               </span>
             </div>
             <div className="text-center sm:text-left">
-              <span className="block text-xl sm:text-2xl font-bold text-pink-600">
-                {artistAllDetails.reviewCount}
-              </span>
+              <span className="block text-xl sm:text-2xl font-bold text-pink-600">{artistAllDetails.reviewCount}</span>
               <span className="text-xs text-gray-500">Client Reviews</span>
             </div>
           </div>
           <div className="mt-3 text-xs sm:text-sm text-gray-700 text-center sm:text-left">
-            This area gives clients a quick overview of the artist's performance
-            and reputation on the platform.
-            <br />
-            <span className="font-semibold text-gray-900">
-              Want more detail?
-            </span>{" "}
-            Use the "All" tab in the portfolio to explore everything!
+            This area gives clients a quick overview of the artist's performance and reputation on the platform.<br />
+            <span className="font-semibold text-gray-900">Want more detail?</span> Use the "All" tab in the portfolio to explore everything!
           </div>
         </div>
       </div>
@@ -241,8 +228,3 @@ const ArtistHeader: React.FC<Props> = ({
 };
 
 export default ArtistHeader;
-
-
-
-
-

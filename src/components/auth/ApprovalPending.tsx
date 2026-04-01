@@ -1,55 +1,43 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Clock, Mail, CheckCircle, AlertCircle } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useProfile } from "@/hooks/useProfile";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Clock, Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 
 const ApprovalPending = () => {
   const { signOut } = useAuth();
   const { profile: baseProfile } = useProfile();
-  const profile = baseProfile as typeof baseProfile & {
-    account_status?: string;
-  };
+  const profile = baseProfile as typeof baseProfile & { account_status?: string };
 
   const getStatusInfo = () => {
     switch (profile?.account_status || "pending") {
-      case "pending":
+      case 'pending':
         return {
           icon: <Clock className="h-12 w-12 text-yellow-500" />,
-          title: "Profile Under Review",
-          description:
-            "Your artist profile is being reviewed by our team. This usually takes 24-48 hours.",
-          color: "border-yellow-200 bg-yellow-50",
+          title: 'Profile Under Review',
+          description: 'Your artist profile is being reviewed by our team. This usually takes 24-48 hours.',
+          color: 'border-yellow-200 bg-yellow-50'
         };
-      case "needs_update":
+      case 'needs_update':
         return {
           icon: <AlertCircle className="h-12 w-12 text-orange-500" />,
-          title: "Profile Needs Updates",
-          description:
-            "Please update your profile based on the feedback and resubmit for review.",
-          color: "border-orange-200 bg-orange-50",
+          title: 'Profile Needs Updates',
+          description: 'Please update your profile based on the feedback and resubmit for review.',
+          color: 'border-orange-200 bg-orange-50'
         };
-      case "rejected":
+      case 'rejected':
         return {
           icon: <AlertCircle className="h-12 w-12 text-red-500" />,
-          title: "Profile Not Approved",
-          description:
-            "Your profile did not meet our requirements. Please review our guidelines and try again.",
-          color: "border-red-200 bg-red-50",
+          title: 'Profile Not Approved',
+          description: 'Your profile did not meet our requirements. Please review our guidelines and try again.',
+          color: 'border-red-200 bg-red-50'
         };
       default:
         return {
           icon: <CheckCircle className="h-12 w-12 text-green-500" />,
-          title: "Profile Approved",
-          description:
-            "Your profile has been approved! You can now access all features.",
-          color: "border-green-200 bg-green-50",
+          title: 'Profile Approved',
+          description: 'Your profile has been approved! You can now access all features.',
+          color: 'border-green-200 bg-green-50'
         };
     }
   };
@@ -60,7 +48,9 @@ const ApprovalPending = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className={`w-full max-w-md ${statusInfo.color}`}>
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">{statusInfo.icon}</div>
+          <div className="flex justify-center mb-4">
+            {statusInfo.icon}
+          </div>
           <CardTitle className="text-xl">{statusInfo.title}</CardTitle>
           <CardDescription className="text-center">
             {statusInfo.description}
@@ -133,8 +123,3 @@ const ApprovalPending = () => {
 };
 
 export default ApprovalPending;
-
-
-
-
-

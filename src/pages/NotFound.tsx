@@ -1,6 +1,5 @@
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, Search } from "lucide-react";
 
@@ -9,19 +8,11 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname,
-    );
+    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
-      <SEOHead
-        title="Page Not Found | Artswarit"
-        description="The page you're looking for doesn't exist. Browse our artist marketplace or return to the homepage."
-        noindex={true}
-      />
       {/* Ambient blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -40,9 +31,7 @@ const NotFound = () => {
         </div>
 
         <div className="space-y-3">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Page Not Found
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Page Not Found</h1>
           <p className="text-muted-foreground leading-relaxed">
             The page at{" "}
             <code className="bg-muted px-2 py-0.5 rounded text-sm font-mono text-primary break-all">
@@ -61,20 +50,13 @@ const NotFound = () => {
             <ArrowLeft className="h-4 w-4" />
             Go Back
           </Button>
-          <Button
-            asChild
-            className="gap-2 rounded-xl h-12 px-6 font-bold shadow-lg shadow-primary/20"
-          >
+          <Button asChild className="gap-2 rounded-xl h-12 px-6 font-bold shadow-lg shadow-primary/20">
             <Link to="/">
               <Home className="h-4 w-4" />
               Return Home
             </Link>
           </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="gap-2 rounded-xl h-12 px-6 font-bold"
-          >
+          <Button asChild variant="outline" className="gap-2 rounded-xl h-12 px-6 font-bold">
             <Link to="/explore">
               <Search className="h-4 w-4" />
               Explore Art
@@ -87,8 +69,3 @@ const NotFound = () => {
 };
 
 export default NotFound;
-
-
-
-
-

@@ -14,13 +14,6 @@
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
     "@hookform/resolvers": "^3.9.0",
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.69.0",
-    "@opentelemetry/core": "^2.5.1",
-    "@opentelemetry/sdk-metrics": "^2.5.1",
-    "@opentelemetry/sdk-node": "^0.212.0",
-    "@opentelemetry/sdk-trace-node": "^2.5.1",
-    "@opentelemetry/winston-transport": "^0.21.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -57,7 +50,6 @@
     "embla-carousel-autoplay": "^8.3.0",
     "embla-carousel-react": "^8.3.0",
     "emoji-picker-react": "^4.18.0",
-    "express": "^5.2.1",
     "framer-motion": "^12.34.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
@@ -74,7 +66,6 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.3",
-    "ws": "^8.19.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -95,7 +86,6 @@
     "globals": "^15.9.0",
     "lovable-tagger": "^1.1.7",
     "postcss": "^8.4.47",
-    "react-snap": "^1.23.0",
     "supabase": "^2.76.9",
     "tailwindcss": "^3.4.11",
     "ts-jest": "^29.4.6",

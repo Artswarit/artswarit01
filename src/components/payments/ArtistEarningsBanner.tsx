@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Crown, DollarSign, TrendingUp, Sparkles } from "lucide-react";
-import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
-import { useAuth } from "@/contexts/AuthContext";
-import { useArtistPlan, PLANS, calculateEarnings } from "@/hooks/useArtistPlan";
-import { ProUpgradePrompt } from "@/components/premium/ProUpgradePrompt";
-import { ProSuccessAnimation } from "@/components/premium/ProSuccessAnimation";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Crown, DollarSign, TrendingUp, Sparkles } from 'lucide-react';
+import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
+import { useAuth } from '@/contexts/AuthContext';
+import { useArtistPlan, PLANS, calculateEarnings } from '@/hooks/useArtistPlan';
+import { ProUpgradePrompt } from '@/components/premium/ProUpgradePrompt';
+import { ProSuccessAnimation } from '@/components/premium/ProSuccessAnimation';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ArtistEarningsBannerProps {
   milestoneAmount: number;
@@ -17,11 +17,7 @@ interface ArtistEarningsBannerProps {
   artistId: string;
 }
 
-export function ArtistEarningsBanner({
-  milestoneAmount,
-  milestoneStatus,
-  artistId,
-}: ArtistEarningsBannerProps) {
+export function ArtistEarningsBanner({ milestoneAmount, milestoneStatus, artistId }: ArtistEarningsBannerProps) {
   const { user } = useAuth();
   const { format: formatCurrency } = useCurrencyFormat();
   const { isProArtist, loading } = useArtistPlan(artistId);
@@ -31,10 +27,9 @@ export function ArtistEarningsBanner({
 
   // Only show for the artist viewing their own milestone
   const isOwnMilestone = user?.id === artistId;
-
+  
   // Only show for milestones that are about to be paid (approved status)
-  const showEarnings =
-    ["submitted", "approved"].includes(milestoneStatus) && isOwnMilestone;
+  const showEarnings = ['submitted', 'approved'].includes(milestoneStatus) && isOwnMilestone;
 
   if (loading || !showEarnings) return null;
 
@@ -45,25 +40,22 @@ export function ArtistEarningsBanner({
   const handleUpgrade = async () => {
     try {
       setUpgradeLoading(true);
-      const { data, error } = await supabase.functions.invoke(
-        "create-razorpay-subscription",
-        {
-          body: { plan: "pro" },
-        },
-      );
+      const { data, error } = await supabase.functions.invoke('create-razorpay-subscription', {
+        body: { plan: 'pro' }
+      });
 
       if (error) throw error;
 
       // Handle subscription link
       const checkoutUrl = data?.url || data?.short_url;
       if (checkoutUrl) {
-        window.open(checkoutUrl, "_blank");
+        window.open(checkoutUrl, '_blank');
       } else if (data?.error) {
         toast.error(data.error);
       }
     } catch (error: any) {
-      console.error("Error creating checkout:", error);
-      toast.error(error.message || "Failed to start upgrade process");
+      console.error('Error creating checkout:', error);
+      toast.error(error.message || 'Failed to start upgrade process');
     } finally {
       setUpgradeLoading(false);
       setUpgradePromptOpen(false);
@@ -72,7 +64,7 @@ export function ArtistEarningsBanner({
 
   const handleContinueStarter = () => {
     setUpgradePromptOpen(false);
-    toast.info("Continuing with Starter plan");
+    toast.info('Continuing with Starter plan');
   };
 
   // Pro Artist view - simple confirmation
@@ -87,20 +79,14 @@ export function ArtistEarningsBanner({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-green-700">
-                    You'll receive
-                  </span>
+                  <span className="font-semibold text-green-700">You'll receive</span>
                   <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900">
                     <Crown className="h-3 w-3 mr-1" />
                     Pro
                   </Badge>
                 </div>
-                <span className="text-2xl font-bold text-green-800">
-                  {formatCurrency(milestoneAmount)}
-                </span>
-                <span className="text-sm text-green-600 ml-2">
-                  100% of payment
-                </span>
+                <span className="text-2xl font-bold text-green-800">{formatCurrency(milestoneAmount)}</span>
+                <span className="text-sm text-green-600 ml-2">100% of payment</span>
               </div>
             </div>
             <div className="flex items-center gap-2 text-green-600">
@@ -124,24 +110,17 @@ export function ArtistEarningsBanner({
                 <DollarSign className="h-5 w-5 text-yellow-600" />
               </div>
               <div>
-                <span className="text-sm text-yellow-700 block">
-                  When client pays, you'll receive
-                </span>
+                <span className="text-sm text-yellow-700 block">When client pays, you'll receive</span>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-yellow-800">
-                    {formatCurrency(earnings.artistPayout)}
-                  </span>
-                  <span className="text-sm text-yellow-600 line-through">
-                    {formatCurrency(milestoneAmount)}
-                  </span>
+                  <span className="text-2xl font-bold text-yellow-800">{formatCurrency(earnings.artistPayout)}</span>
+                  <span className="text-sm text-yellow-600 line-through">{formatCurrency(milestoneAmount)}</span>
                 </div>
                 <span className="text-xs text-yellow-600">
-                  After {PLANS.starter.platformFee * 100}% platform fee (
-                  {formatCurrency(earnings.platformFee)})
+                  After {PLANS.starter.platformFee * 100}% platform fee ({formatCurrency(earnings.platformFee)})
                 </span>
               </div>
             </div>
-
+            
             <div className="flex flex-col items-end gap-2">
               <Button
                 size="sm"
@@ -179,8 +158,3 @@ export function ArtistEarningsBanner({
 }
 
 export default ArtistEarningsBanner;
-
-
-
-
-

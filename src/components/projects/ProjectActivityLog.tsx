@@ -1,20 +1,20 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { format } from "date-fns";
-import {
-  Play,
-  Upload,
-  CheckCircle,
-  RotateCcw,
-  DollarSign,
-  AlertTriangle,
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { format } from 'date-fns';
+import { 
+  Play, 
+  Upload, 
+  CheckCircle, 
+  RotateCcw, 
+  DollarSign, 
+  AlertTriangle, 
   MessageSquare,
   FileText,
-  User,
-} from "lucide-react";
-import LogoLoader from "@/components/ui/LogoLoader";
+  User
+} from 'lucide-react';
+import LogoLoader from '@/components/ui/LogoLoader';
 
 interface ActivityLog {
   id: string;
@@ -38,16 +38,12 @@ export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
 
     const channel = supabase
       .channel(`activity-${projectId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "project_activity_logs",
-          filter: `project_id=eq.${projectId}`,
-        },
-        () => fetchLogs(),
-      )
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'project_activity_logs',
+        filter: `project_id=eq.${projectId}`
+      }, () => fetchLogs())
       .subscribe();
 
     return () => {
@@ -58,16 +54,16 @@ export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
   const fetchLogs = async () => {
     try {
       const { data, error } = await supabase
-        .from("project_activity_logs")
-        .select("*")
-        .eq("project_id", projectId)
-        .order("created_at", { ascending: false })
+        .from('project_activity_logs')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
       setLogs(data || []);
     } catch (error) {
-      console.error("Failed to fetch activity logs:", error);
+      console.error('Failed to fetch activity logs:', error);
     } finally {
       setLoading(false);
     }
@@ -83,24 +79,24 @@ export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
       dispute_raised: <AlertTriangle className="h-4 w-4 text-red-500" />,
       dispute_resolved: <CheckCircle className="h-4 w-4 text-green-500" />,
       message_sent: <MessageSquare className="h-4 w-4 text-blue-500" />,
-      file_uploaded: <FileText className="h-4 w-4 text-purple-500" />,
+      file_uploaded: <FileText className="h-4 w-4 text-purple-500" />
     };
     return icons[action] || <User className="h-4 w-4 text-muted-foreground" />;
   };
 
   const getActionText = (action: string) => {
     const texts: Record<string, string> = {
-      milestone_started: "started a milestone",
-      submission_created: "submitted work for review",
-      milestone_approved: "approved the milestone",
-      revision_requested: "requested a revision",
-      payment_completed: "completed payment",
-      dispute_raised: "raised a dispute",
-      dispute_resolved: "resolved a dispute",
-      message_sent: "sent a message",
-      file_uploaded: "uploaded a file",
+      milestone_started: 'started a milestone',
+      submission_created: 'submitted work for review',
+      milestone_approved: 'approved the milestone',
+      revision_requested: 'requested a revision',
+      payment_completed: 'completed payment',
+      dispute_raised: 'raised a dispute',
+      dispute_resolved: 'resolved a dispute',
+      message_sent: 'sent a message',
+      file_uploaded: 'uploaded a file'
     };
-    return texts[action] || action.replaceAll(/_/g, " ");
+    return texts[action] || action.replace(/_/g, ' ');
   };
 
   if (loading) {
@@ -129,17 +125,12 @@ export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
         <ScrollArea className="h-[400px]">
           <div className="divide-y">
             {logs.map((log) => (
-              <div
-                key={log.id}
-                className="flex items-start gap-3 p-4 hover:bg-muted/50 transition-colors"
-              >
+              <div key={log.id} className="flex items-start gap-3 p-4 hover:bg-muted/50 transition-colors">
                 <div className="mt-0.5">{getActionIcon(log.action)}</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm">
-                    <span className="font-medium">User</span>{" "}
-                    <span className="text-muted-foreground">
-                      {getActionText(log.action)}
-                    </span>
+                    <span className="font-medium">User</span>{' '}
+                    <span className="text-muted-foreground">{getActionText(log.action)}</span>
                   </p>
                   {log.details?.reason && (
                     <p className="text-xs text-muted-foreground mt-1">
@@ -147,7 +138,7 @@ export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">
-                    {format(new Date(log.created_at), "MMM d, yyyy h:mm a")}
+                    {format(new Date(log.created_at), 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
               </div>
@@ -158,8 +149,3 @@ export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
     </Card>
   );
 }
-
-
-
-
-

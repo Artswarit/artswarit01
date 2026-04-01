@@ -18,8 +18,6 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  build: {
-    target: "es2015",
+    dedupe: ['react', 'react-dom'],
   },
 }));

@@ -1,13 +1,9 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import ScrollToTop from "./components/ScrollToTop";
@@ -69,20 +65,13 @@ class ErrorBoundary extends React.Component<
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false, errorMessage: "" };
+    this.state = { hasError: false, errorMessage: '' };
   }
   static getDerivedStateFromError(error: unknown) {
-    return {
-      hasError: true,
-      errorMessage: error instanceof Error ? error.message : "Unknown error",
-    };
+    return { hasError: true, errorMessage: error instanceof Error ? error.message : 'Unknown error' };
   }
   componentDidCatch(error: unknown, info: React.ErrorInfo) {
-    console.error(
-      "🚨 ErrorBoundary caught an error:",
-      error,
-      info.componentStack,
-    );
+    console.error('🚨 ErrorBoundary caught an error:', error, info.componentStack);
   }
   render() {
     if (this.state.hasError) {
@@ -91,25 +80,20 @@ class ErrorBoundary extends React.Component<
           <div className="max-w-md w-full text-center space-y-6">
             <div className="text-6xl">⚠️</div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-black tracking-tight">
-                Something went wrong
-              </h1>
+              <h1 className="text-2xl font-black tracking-tight">Something went wrong</h1>
               <p className="text-sm text-muted-foreground">
-                {this.state.errorMessage ||
-                  "An unexpected error occurred in this part of the application."}
+                {this.state.errorMessage || 'An unexpected error occurred in this part of the application.'}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
-                onClick={() =>
-                  this.setState({ hasError: false, errorMessage: "" })
-                }
+                onClick={() => this.setState({ hasError: false, errorMessage: '' })}
                 className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors"
               >
                 Try Again
               </button>
               <button
-                onClick={() => (window.location.href = "/")}
+                onClick={() => window.location.href = '/'}
                 className="px-6 py-2.5 rounded-xl border border-border font-bold text-sm hover:bg-muted transition-colors"
               >
                 Go Home
@@ -144,260 +128,37 @@ const AppRoutes = () => {
       <UniversalChatbot />
       <AnimatePresence mode="wait">
         <Routes location={location}>
-          <Route
-            path="/"
-            element={
-              <PageTransition>
-                <Index />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <PageTransition>
-                <Login />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <PageTransition>
-                <Signup />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/forgot-password"
-            element={
-              <PageTransition>
-                <ForgotPassword />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <PageTransition>
-                <ResetPassword />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/verify-email"
-            element={
-              <PageTransition>
-                <EmailVerification />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/explore"
-            element={
-              <PageTransition>
-                <Explore />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/explore-artists"
-            element={
-              <PageTransition>
-                <ExploreArtists />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/categories"
-            element={
-              <PageTransition>
-                <Categories />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/artist/:id"
-            element={
-              <PageTransition key="artist-public">
-                <ArtistProfile />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/profile/:id"
-            element={
-              <PageTransition key="user-public">
-                <UserProfile />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/review/:id"
-            element={
-              <PageTransition key="review">
-                <ReviewRedirect />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/artwork/:id"
-            element={
-              <PageTransition key="artwork">
-                <ArtworkDetails />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/artist-dashboard"
-            element={
-              <ProtectedRoute>
-                <PageTransition key="artist-dashboard">
-                  <ArtistDashboard />
-                </PageTransition>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/client-dashboard"
-            element={
-              <ProtectedRoute>
-                <PageTransition key="client-dashboard">
-                  <ClientDashboard />
-                </PageTransition>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin-dashboard"
-            element={
-              <ProtectedRoute adminOnly>
-                <PageTransition>
-                  <AdminDashboard />
-                </PageTransition>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/about-us"
-            element={
-              <PageTransition>
-                <AboutUs />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/terms-of-service"
-            element={
-              <PageTransition>
-                <TermsOfService />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/privacy-policy"
-            element={
-              <PageTransition>
-                <PrivacyPolicy />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/refund-policy"
-            element={
-              <PageTransition>
-                <RefundPolicy />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/contact-us"
-            element={
-              <PageTransition>
-                <ContactUs />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/ai-detection"
-            element={
-              <PageTransition>
-                <AIDetection />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/feature-audit"
-            element={
-              <PageTransition>
-                <FeatureAudit />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/live-streaming"
-            element={
-              <PageTransition>
-                <LiveStreaming />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/collections"
-            element={
-              <PageTransition>
-                <Collections />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/trending"
-            element={
-              <PageTransition>
-                <Trending />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/recommendations"
-            element={
-              <PageTransition>
-                <Recommendations />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/commissions"
-            element={
-              <PageTransition>
-                <Commissions />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/events"
-            element={
-              <PageTransition>
-                <Events />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/merchandise"
-            element={
-              <PageTransition>
-                <Merchandise />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <PageTransition>
-                <NotFound />
-              </PageTransition>
-            }
-          />
+          <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+          <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
+          <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+          <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+          <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+          <Route path="/verify-email" element={<PageTransition><EmailVerification /></PageTransition>} />
+          <Route path="/explore" element={<PageTransition><Explore /></PageTransition>} />
+          <Route path="/explore-artists" element={<PageTransition><ExploreArtists /></PageTransition>} />
+          <Route path="/categories" element={<PageTransition><Categories /></PageTransition>} />
+          <Route path="/artist/:id" element={<PageTransition key="artist-public"><ArtistProfile /></PageTransition>} />
+          <Route path="/profile/:id" element={<PageTransition key="user-public"><UserProfile /></PageTransition>} />
+          <Route path="/review/:id" element={<PageTransition key="review"><ReviewRedirect /></PageTransition>} />
+          <Route path="/artwork/:id" element={<PageTransition key="artwork"><ArtworkDetails /></PageTransition>} />
+          <Route path="/artist-dashboard" element={<ProtectedRoute><PageTransition key="artist-dashboard"><ArtistDashboard /></PageTransition></ProtectedRoute>} />
+          <Route path="/client-dashboard" element={<ProtectedRoute><PageTransition key="client-dashboard"><ClientDashboard /></PageTransition></ProtectedRoute>} />
+          <Route path="/admin-dashboard" element={<ProtectedRoute adminOnly><PageTransition><AdminDashboard /></PageTransition></ProtectedRoute>} />
+          <Route path="/about-us" element={<PageTransition><AboutUs /></PageTransition>} />
+          <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
+          <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+          <Route path="/refund-policy" element={<PageTransition><RefundPolicy /></PageTransition>} />
+          <Route path="/contact-us" element={<PageTransition><ContactUs /></PageTransition>} />
+          <Route path="/ai-detection" element={<PageTransition><AIDetection /></PageTransition>} />
+          <Route path="/feature-audit" element={<PageTransition><FeatureAudit /></PageTransition>} />
+          <Route path="/live-streaming" element={<PageTransition><LiveStreaming /></PageTransition>} />
+          <Route path="/collections" element={<PageTransition><Collections /></PageTransition>} />
+          <Route path="/trending" element={<PageTransition><Trending /></PageTransition>} />
+          <Route path="/recommendations" element={<PageTransition><Recommendations /></PageTransition>} />
+          <Route path="/commissions" element={<PageTransition><Commissions /></PageTransition>} />
+          <Route path="/events" element={<PageTransition><Events /></PageTransition>} />
+          <Route path="/merchandise" element={<PageTransition><Merchandise /></PageTransition>} />
+          <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </AnimatePresence>
     </ErrorBoundary>
@@ -425,8 +186,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
-
-

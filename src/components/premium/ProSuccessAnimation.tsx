@@ -1,20 +1,7 @@
 import { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogHeader,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Crown,
-  Sparkles,
-  CheckCircle,
-  Star,
-  Zap,
-  PartyPopper,
-} from "lucide-react";
+import { Crown, Sparkles, CheckCircle, Star, Zap, PartyPopper } from "lucide-react";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
@@ -29,7 +16,7 @@ export function ProSuccessAnimation({
   open,
   onOpenChange,
   milestoneAmount,
-  onAcceptPayment,
+  onAcceptPayment
 }: ProSuccessAnimationProps) {
   const [showConfetti, setShowConfetti] = useState(false);
   const { format: formatCurrency } = useCurrencyFormat();
@@ -45,14 +32,8 @@ export function ProSuccessAnimation({
   const features = [
     { icon: <Star className="h-4 w-4" />, text: "Priority ranking activated" },
     { icon: <Zap className="h-4 w-4" />, text: "Unlimited portfolio unlocked" },
-    {
-      icon: <CheckCircle className="h-4 w-4" />,
-      text: "0% platform fee applied",
-    },
-    {
-      icon: <Sparkles className="h-4 w-4" />,
-      text: "Featured rotation enabled",
-    },
+    { icon: <CheckCircle className="h-4 w-4" />, text: "0% platform fee applied" },
+    { icon: <Sparkles className="h-4 w-4" />, text: "Featured rotation enabled" }
   ];
 
   return (
@@ -61,9 +42,7 @@ export function ProSuccessAnimation({
         <DialogHeader>
           <VisuallyHidden>
             <DialogTitle>Pro Success Animation</DialogTitle>
-            <DialogDescription>
-              Animation showing pro success status
-            </DialogDescription>
+            <DialogDescription>Animation showing pro success status</DialogDescription>
           </VisuallyHidden>
         </DialogHeader>
         {/* Confetti Animation */}
@@ -75,15 +54,9 @@ export function ProSuccessAnimation({
                 className="absolute animate-confetti"
                 style={{
                   left: `${Math.random() * 100}%`,
-                  top: "-10px",
+                  top: '-10px',
                   animationDelay: `${Math.random() * 2}s`,
-                  backgroundColor: [
-                    "#FFD700",
-                    "#FF6B00",
-                    "#10B981",
-                    "#3B82F6",
-                    "#EC4899",
-                  ][Math.floor(Math.random() * 5)],
+                  backgroundColor: ['#FFD700', '#FF6B00', '#10B981', '#3B82F6', '#EC4899'][Math.floor(Math.random() * 5)]
                 }}
               />
             ))}
@@ -98,10 +71,7 @@ export function ProSuccessAnimation({
               <Crown className="h-10 w-10 text-white" />
             </div>
             <Sparkles className="h-6 w-6 text-yellow-400 absolute -top-1 -right-1 animate-bounce" />
-            <PartyPopper
-              className="h-5 w-5 text-orange-400 absolute -bottom-1 -left-1 animate-bounce"
-              style={{ animationDelay: "0.5s" }}
-            />
+            <PartyPopper className="h-5 w-5 text-orange-400 absolute -bottom-1 -left-1 animate-bounce" style={{ animationDelay: '0.5s' }} />
           </div>
 
           {/* Title */}
@@ -118,12 +88,10 @@ export function ProSuccessAnimation({
 
           {/* Unlocked Features */}
           <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 space-y-3">
-            <p className="text-sm font-medium text-yellow-800">
-              Pro features unlocked ✨
-            </p>
+            <p className="text-sm font-medium text-yellow-800">Pro features unlocked ✨</p>
             <div className="grid grid-cols-2 gap-2">
               {features.map((feature, index) => (
-                <div
+                <div 
                   key={index}
                   className="flex items-center gap-2 text-sm text-yellow-700 bg-white/60 rounded-lg p-2"
                   style={{ animationDelay: `${index * 0.1}s` }}
@@ -176,8 +144,3 @@ export function ProSuccessAnimation({
     </Dialog>
   );
 }
-
-
-
-
-

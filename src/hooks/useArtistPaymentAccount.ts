@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
-import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { broadcastRefresh, useRealtimeSync } from '@/lib/realtime-sync';
 
 interface RazorpayAccount {
   id: string;
@@ -44,25 +44,25 @@ export function useArtistPaymentAccount() {
 
     try {
       const { data, error } = await supabase
-        .from("razorpay_accounts")
-        .select("*")
-        .eq("user_id", user.id)
+        .from('razorpay_accounts')
+        .select('*')
+        .eq('user_id', user.id)
         .single();
 
-      if (error && error.code !== "PGRST116") {
-        console.error("Error fetching account:", error);
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching account:', error);
       }
 
       setAccount(data as RazorpayAccount | null);
     } catch (error) {
-      console.error("Error fetching account:", error);
+      console.error('Error fetching account:', error);
     } finally {
       setLoading(false);
     }
   }, [user?.id]);
 
   // Realtime Sync
-  useRealtimeSync("payments", fetchAccount);
+  useRealtimeSync('payments', fetchAccount);
 
   useEffect(() => {
     fetchAccount();
@@ -71,21 +71,17 @@ export function useArtistPaymentAccount() {
     if (user?.id) {
       const channel = supabase
         .channel(`razorpay-account-${user.id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "razorpay_accounts",
-            filter: `user_id=eq.${user.id}`,
-          },
-          (payload) => {
-            console.log("Account update:", payload);
-            if (payload.new) {
-              setAccount(payload.new as RazorpayAccount);
-            }
-          },
-        )
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'razorpay_accounts',
+          filter: `user_id=eq.${user.id}`,
+        }, (payload) => {
+          console.log('Account update:', payload);
+          if (payload.new) {
+            setAccount(payload.new as RazorpayAccount);
+          }
+        })
         .subscribe();
 
       return () => {
@@ -94,40 +90,34 @@ export function useArtistPaymentAccount() {
     }
   }, [user?.id, fetchAccount]);
 
-  const createAccount = useCallback(
-    async (data: CreateAccountData) => {
-      setCreating(true);
+  const createAccount = useCallback(async (data: CreateAccountData) => {
+    setCreating(true);
 
-      try {
-        const { data: result, error } = await supabase.functions.invoke(
-          "create-artist-razorpay-account",
-          {
-            body: data,
-          },
-        );
+    try {
+      const { data: result, error } = await supabase.functions.invoke('create-artist-razorpay-account', {
+        body: data,
+      });
 
-        if (error) {
-          throw new Error(error.message || "Failed to create payment account");
-        }
-
-        if (!result?.success) {
-          throw new Error(result?.error || "Failed to create payment account");
-        }
-
-        toast.success("Payment account created successfully!");
-        broadcastRefresh("payments");
-        await fetchAccount();
-        return true;
-      } catch (error: any) {
-        console.error("Error creating account:", error);
-        toast.error(error.message || "Failed to create payment account");
-        return false;
-      } finally {
-        setCreating(false);
+      if (error) {
+        throw new Error(error.message || 'Failed to create payment account');
       }
-    },
-    [fetchAccount],
-  );
+
+      if (!result?.success) {
+        throw new Error(result?.error || 'Failed to create payment account');
+      }
+
+      toast.success('Payment account created successfully!');
+      broadcastRefresh('payments');
+      await fetchAccount();
+      return true;
+    } catch (error: any) {
+      console.error('Error creating account:', error);
+      toast.error(error.message || 'Failed to create payment account');
+      return false;
+    } finally {
+      setCreating(false);
+    }
+  }, [fetchAccount]);
 
   return {
     account,
@@ -135,12 +125,7 @@ export function useArtistPaymentAccount() {
     creating,
     createAccount,
     isPayoutsEnabled: account?.payouts_enabled ?? false,
-    kycStatus: account?.kyc_status ?? "not_started",
+    kycStatus: account?.kyc_status ?? 'not_started',
     refetch: fetchAccount,
   };
 }
-
-
-
-
-

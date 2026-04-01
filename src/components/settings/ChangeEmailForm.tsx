@@ -1,24 +1,18 @@
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Mail, Loader2, CheckCircle } from "lucide-react";
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Mail, Loader2, CheckCircle } from 'lucide-react';
 
 const ChangeEmailForm = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [newEmail, setNewEmail] = useState("");
-  const [confirmEmail, setConfirmEmail] = useState("");
+  const [newEmail, setNewEmail] = useState('');
+  const [confirmEmail, setConfirmEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
@@ -70,9 +64,9 @@ const ChangeEmailForm = () => {
     try {
       // Uniqueness check against profiles
       const { data: existing } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", newEmail)
+        .from('profiles')
+        .select('id')
+        .eq('email', newEmail)
         .limit(1);
       if (existing && existing.length > 0) {
         toast({
@@ -92,26 +86,25 @@ const ChangeEmailForm = () => {
 
       if (user?.id) {
         await supabase
-          .from("profiles")
+          .from('profiles')
           .update({ email: newEmail, updated_at: new Date().toISOString() })
-          .eq("id", user.id);
-        await supabase.from("project_activity_logs").insert({
+          .eq('id', user.id);
+        await supabase.from('project_activity_logs').insert({
           project_id: null,
           milestone_id: null,
           user_id: user.id,
-          action: "email_changed",
+          action: 'email_changed',
           details: { newEmail },
         });
       }
-
+      
       setEmailSent(true);
       toast({
         title: "Verification email sent",
-        description:
-          "Please check your new email inbox and click the confirmation link.",
+        description: "Please check your new email inbox and click the confirmation link.",
       });
     } catch (err: any) {
-      console.error("Error updating email:", err);
+      console.error('Error updating email:', err);
       toast({
         title: "Failed to update email",
         description: err.message || "Please try again later.",
@@ -137,15 +130,14 @@ const ChangeEmailForm = () => {
             Please click the link in that email to complete the change.
           </p>
           <p className="text-sm text-muted-foreground">
-            Your current email ({user?.email}) will remain active until you
-            confirm the new one.
+            Your current email ({user?.email}) will remain active until you confirm the new one.
           </p>
           <Button
             variant="outline"
             onClick={() => {
               setEmailSent(false);
-              setNewEmail("");
-              setConfirmEmail("");
+              setNewEmail('');
+              setConfirmEmail('');
             }}
           >
             Change to a different email
@@ -163,16 +155,13 @@ const ChangeEmailForm = () => {
           Change Email Address
         </CardTitle>
         <CardDescription>
-          Update your account email address. A verification link will be sent to
-          your new email.
+          Update your account email address. A verification link will be sent to your new email.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label className="text-xs text-muted-foreground">
-              Current Email
-            </Label>
+            <Label className="text-xs text-muted-foreground">Current Email</Label>
             <p className="text-sm font-medium">{user?.email}</p>
           </div>
 
@@ -200,10 +189,7 @@ const ChangeEmailForm = () => {
             />
           </div>
 
-          <Button
-            type="submit"
-            disabled={loading || !newEmail || !confirmEmail}
-          >
+          <Button type="submit" disabled={loading || !newEmail || !confirmEmail}>
             {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Send Verification Email
           </Button>
@@ -214,8 +200,3 @@ const ChangeEmailForm = () => {
 };
 
 export default ChangeEmailForm;
-
-
-
-
-

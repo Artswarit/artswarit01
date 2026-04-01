@@ -6,13 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LogoWithName from "@/components/LogoWithName";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Loader2, Mail, CheckCircle } from "lucide-react";
@@ -33,7 +27,7 @@ const ForgotPassword = () => {
       });
 
       if (error) {
-        console.error("Password reset error:", error);
+        console.error('Password reset error:', error);
         toast({
           title: "Error",
           description: error.message,
@@ -47,7 +41,7 @@ const ForgotPassword = () => {
         });
       }
     } catch (error: any) {
-      console.error("Password reset error:", error);
+      console.error('Password reset error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -73,9 +67,10 @@ const ForgotPassword = () => {
                 {isEmailSent ? "Check Your Email" : "Forgot Password"}
               </CardTitle>
               <CardDescription className="text-center text-sm sm:text-base">
-                {isEmailSent
+                {isEmailSent 
                   ? "We've sent you a password reset link"
-                  : "Enter your email and we'll send you a reset link"}
+                  : "Enter your email and we'll send you a reset link"
+                }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -87,12 +82,12 @@ const ForgotPassword = () => {
                     </div>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    We've sent a password reset link to <strong>{email}</strong>
-                    . Please check your inbox and follow the instructions.
+                    We've sent a password reset link to <strong>{email}</strong>. 
+                    Please check your inbox and follow the instructions.
                   </p>
                   <p className="text-muted-foreground text-xs">
                     Didn't receive the email? Check your spam folder or{" "}
-                    <button
+                    <button 
                       onClick={() => setIsEmailSent(false)}
                       className="text-artswarit-purple hover:underline"
                     >
@@ -156,8 +151,3 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
-
-
-
-
-
