@@ -144,40 +144,14 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Fetch exchange rates - using a free API
   const fetchExchangeRates = useCallback(async () => {
     try {
-      // First try to get from DB to see if we have fresh rates (less than 1 hour old)
-      const { data: dbRates, error: dbError } = await supabase
-        .from('exchange_rates')
-        .select('*')
-        .eq('base_currency', 'USD')
-        .maybeSingle();
-
-      const oneHourAgo = new Date();
-      oneHourAgo.setMinutes(oneHourAgo.getMinutes() - 15);
-
-      if (dbRates && new Date(dbRates.updated_at) > oneHourAgo) {
-        setExchangeRates(dbRates.rates);
-        setLoading(false);
-        return;
-      }
-
-      // If no fresh DB rates, fetch from API
+      // Fetch from API
       const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
       if (response.ok) {
         const data = await response.json();
         if (data.rates) {
           const newRates = { ...FALLBACK_RATES, ...data.rates };
           setExchangeRates(newRates);
-          
-          // Update DB
-          await supabase.from('exchange_rates').upsert({
-            base_currency: 'USD',
-            rates: newRates,
-            updated_at: new Date().toISOString()
-          });
         }
-      } else if (dbRates) {
-        // Use stale DB rates as secondary fallback
-        setExchangeRates(dbRates.rates);
       }
     } catch (error) {
       console.warn('Failed to fetch exchange rates, using fallback rates:', error);
