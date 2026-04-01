@@ -42,16 +42,22 @@ const UniversalChatbot: React.FC = () => {
     location.pathname.includes("artist-dashboard") || role === "artist"
       ? "artist"
       : location.pathname.includes("client-dashboard") || role === "client"
-      ? "client"
-      : location.pathname.includes("admin-dashboard") || role === "admin"
-      ? "admin"
-      : "general";
+        ? "client"
+        : location.pathname.includes("admin-dashboard") || role === "admin"
+          ? "admin"
+          : "general";
 
   useEffect(() => {
     if (open && messages.length === 0) {
       setMessages([
-        { sender: "bot", text: onboardingTips[panel]?.[0] || onboardingTips.general[0] },
-        { sender: "bot", text: onboardingTips[panel]?.[1] || onboardingTips.general[1] },
+        {
+          sender: "bot",
+          text: onboardingTips[panel]?.[0] || onboardingTips.general[0],
+        },
+        {
+          sender: "bot",
+          text: onboardingTips[panel]?.[1] || onboardingTips.general[1],
+        },
       ]);
     }
   }, [open]);
@@ -59,12 +65,13 @@ const UniversalChatbot: React.FC = () => {
   const chatRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     setTimeout(() => {
-      if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+      if (chatRef.current)
+        chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }, 50);
   }, [messages, open]);
 
   const callChatGpt = async (
-    userMessages: { role: string; content: string }[]
+    userMessages: { role: string; content: string }[],
   ) => {
     setIsLoading(true);
     try {
@@ -76,7 +83,7 @@ const UniversalChatbot: React.FC = () => {
             userRole: panel,
             location: location.pathname + location.search,
           },
-        }
+        },
       );
       if (error) throw error;
       if (out.answer) {
@@ -126,22 +133,46 @@ const UniversalChatbot: React.FC = () => {
   const quickActions =
     panel === "artist"
       ? [
-          { label: "Upload Artwork", onClick: () => navigate("/artist-dashboard?tab=artworks") },
-          { label: "View Earnings", onClick: () => navigate("/artist-dashboard?tab=earnings") },
-          { label: "Edit Profile", onClick: () => navigate("/artist-dashboard?tab=profile") },
+          {
+            label: "Upload Artwork",
+            onClick: () => navigate("/artist-dashboard?tab=artworks"),
+          },
+          {
+            label: "View Earnings",
+            onClick: () => navigate("/artist-dashboard?tab=earnings"),
+          },
+          {
+            label: "Edit Profile",
+            onClick: () => navigate("/artist-dashboard?tab=profile"),
+          },
         ]
       : panel === "client"
-      ? [
-          { label: "Browse Artists", onClick: () => navigate("/explore-artists") },
-          { label: "My Projects", onClick: () => navigate("/client-dashboard?tab=projects") },
-          { label: "Saved Artists", onClick: () => navigate("/client-dashboard?tab=artists") },
-        ]
-      : panel === "admin"
-      ? [
-          { label: "Pending Artists", onClick: () => navigate("/admin-dashboard") },
-          { label: "All Artworks", onClick: () => navigate("/admin-dashboard?tab=artworks") },
-        ]
-      : [{ label: "Explore", onClick: () => navigate("/explore") }];
+        ? [
+            {
+              label: "Browse Artists",
+              onClick: () => navigate("/explore-artists"),
+            },
+            {
+              label: "My Projects",
+              onClick: () => navigate("/client-dashboard?tab=projects"),
+            },
+            {
+              label: "Saved Artists",
+              onClick: () => navigate("/client-dashboard?tab=artists"),
+            },
+          ]
+        : panel === "admin"
+          ? [
+              {
+                label: "Pending Artists",
+                onClick: () => navigate("/admin-dashboard"),
+              },
+              {
+                label: "All Artworks",
+                onClick: () => navigate("/admin-dashboard?tab=artworks"),
+              },
+            ]
+          : [{ label: "Explore", onClick: () => navigate("/explore") }];
 
   return (
     <>
@@ -178,7 +209,9 @@ const UniversalChatbot: React.FC = () => {
                 </div>
                 <div className="leading-tight">
                   <p className="font-semibold text-sm">Artswarit Assistant</p>
-                  <p className="text-[11px] opacity-75">Online • Ready to help</p>
+                  <p className="text-[11px] opacity-75">
+                    Online • Ready to help
+                  </p>
                 </div>
               </div>
               <button
@@ -291,3 +324,8 @@ const UniversalChatbot: React.FC = () => {
 };
 
 export default UniversalChatbot;
+
+
+
+
+

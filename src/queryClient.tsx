@@ -1,6 +1,8 @@
-
-import React from 'react';
-import { QueryClient as TanstackQueryClient, QueryClientProvider as TanstackQueryClientProvider } from '@tanstack/react-query';
+import React from "react";
+import {
+  QueryClient as TanstackQueryClient,
+  QueryClientProvider as TanstackQueryClientProvider,
+} from "@tanstack/react-query";
 
 const queryClient = new TanstackQueryClient({
   defaultOptions: {
@@ -15,10 +17,17 @@ interface QueryClientProviderProps {
   children: React.ReactNode;
 }
 
-export const QueryClientProvider: React.FC<QueryClientProviderProps> = ({ children }) => {
+export const QueryClientProvider: React.FC<QueryClientProviderProps> = ({
+  children,
+}) => {
   return (
     <TanstackQueryClientProvider client={queryClient}>
       {children}
     </TanstackQueryClientProvider>
   );
 };
+
+
+
+
+

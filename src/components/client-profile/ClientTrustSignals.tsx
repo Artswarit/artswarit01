@@ -1,8 +1,13 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Shield, CreditCard, Clock, AlertTriangle, 
-  Lock, CheckCircle, XCircle
+import {
+  Shield,
+  CreditCard,
+  Clock,
+  AlertTriangle,
+  Lock,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 
 interface ClientTrustSignalsProps {
@@ -19,32 +24,46 @@ const TrustItem: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: string | number;
-  status: 'good' | 'warning' | 'neutral';
+  status: "good" | "warning" | "neutral";
 }> = ({ icon, label, value, status }) => {
   const statusColors = {
-    good: 'text-green-600 bg-green-500/10',
-    warning: 'text-amber-600 bg-amber-500/10',
-    neutral: 'text-muted-foreground bg-muted/50',
+    good: "text-green-600 bg-green-500/10",
+    warning: "text-amber-600 bg-amber-500/10",
+    neutral: "text-muted-foreground bg-muted/50",
   };
 
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20">
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${statusColors[status]}`}>
+      <div
+        className={`w-10 h-10 rounded-full flex items-center justify-center ${statusColors[status]}`}
+      >
         {icon}
       </div>
       <div className="flex-1">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="text-sm font-medium text-foreground">{value}</p>
       </div>
-      {status === 'good' && <CheckCircle className="w-4 h-4 text-green-500" />}
-      {status === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-500" />}
+      {status === "good" && <CheckCircle className="w-4 h-4 text-green-500" />}
+      {status === "warning" && (
+        <AlertTriangle className="w-4 h-4 text-amber-500" />
+      )}
     </div>
   );
 };
 
 const ClientTrustSignals: React.FC<ClientTrustSignalsProps> = ({ signals }) => {
-  const paymentRateStatus = signals.onTimePaymentRate >= 90 ? 'good' : signals.onTimePaymentRate >= 70 ? 'warning' : 'neutral';
-  const disputeStatus = signals.disputeCount === 0 ? 'good' : signals.disputeCount <= 2 ? 'warning' : 'neutral';
+  const paymentRateStatus =
+    signals.onTimePaymentRate >= 90
+      ? "good"
+      : signals.onTimePaymentRate >= 70
+        ? "warning"
+        : "neutral";
+  const disputeStatus =
+    signals.disputeCount === 0
+      ? "good"
+      : signals.disputeCount <= 2
+        ? "warning"
+        : "neutral";
 
   return (
     <Card className="bg-card/80 backdrop-blur-sm border-border/50">
@@ -60,28 +79,36 @@ const ClientTrustSignals: React.FC<ClientTrustSignalsProps> = ({ signals }) => {
             icon={<CreditCard className="w-5 h-5" />}
             label="Payment Method"
             value={signals.paymentVerified ? "Verified" : "Not Verified"}
-            status={signals.paymentVerified ? 'good' : 'neutral'}
+            status={signals.paymentVerified ? "good" : "neutral"}
           />
-          
+
           <TrustItem
             icon={<Clock className="w-5 h-5" />}
             label="On-Time Payment Rate"
-            value={signals.totalPayments > 0 ? `${signals.onTimePaymentRate.toFixed(1)}%` : "No history"}
-            status={signals.totalPayments > 0 ? paymentRateStatus : 'neutral'}
+            value={
+              signals.totalPayments > 0
+                ? `${signals.onTimePaymentRate.toFixed(1)}%`
+                : "No history"
+            }
+            status={signals.totalPayments > 0 ? paymentRateStatus : "neutral"}
           />
-          
+
           <TrustItem
             icon={<AlertTriangle className="w-5 h-5" />}
             label="Dispute History"
-            value={signals.disputeCount === 0 ? "No disputes" : `${signals.disputeCount} dispute(s)`}
+            value={
+              signals.disputeCount === 0
+                ? "No disputes"
+                : `${signals.disputeCount} dispute(s)`
+            }
             status={disputeStatus}
           />
-          
+
           <TrustItem
             icon={<Lock className="w-5 h-5" />}
             label="Escrow Preference"
             value={signals.escrowUsed ? "Uses Escrow" : "Not specified"}
-            status={signals.escrowUsed ? 'good' : 'neutral'}
+            status={signals.escrowUsed ? "good" : "neutral"}
           />
         </div>
 
@@ -90,7 +117,9 @@ const ClientTrustSignals: React.FC<ClientTrustSignalsProps> = ({ signals }) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium text-foreground">Trust Score</span>
+              <span className="text-sm font-medium text-foreground">
+                Trust Score
+              </span>
             </div>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((level) => {
@@ -99,7 +128,7 @@ const ClientTrustSignals: React.FC<ClientTrustSignalsProps> = ({ signals }) => {
                 return (
                   <div
                     key={level}
-                    className={`w-4 h-4 rounded-full ${filled ? 'bg-primary' : 'bg-muted'}`}
+                    className={`w-4 h-4 rounded-full ${filled ? "bg-primary" : "bg-muted"}`}
                   />
                 );
               })}
@@ -114,7 +143,9 @@ const ClientTrustSignals: React.FC<ClientTrustSignalsProps> = ({ signals }) => {
   );
 };
 
-function calculateTrustScore(signals: ClientTrustSignalsProps['signals']): number {
+function calculateTrustScore(
+  signals: ClientTrustSignalsProps["signals"],
+): number {
   let score = 1; // Base score
   if (signals.paymentVerified) score += 1;
   if (signals.onTimePaymentRate >= 90) score += 1;
@@ -124,3 +155,8 @@ function calculateTrustScore(signals: ClientTrustSignalsProps['signals']): numbe
 }
 
 export default ClientTrustSignals;
+
+
+
+
+

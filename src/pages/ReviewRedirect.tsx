@@ -29,7 +29,9 @@ export default function ReviewRedirect() {
         return;
       }
 
-      navigate(`/artist/${data.artist_id}?tab=about&review=${data.id}`, { replace: true });
+      navigate(`/artist/${data.artist_id}?tab=about&review=${data.id}`, {
+        replace: true,
+      });
     }
 
     run();
@@ -50,3 +52,8 @@ export default function ReviewRedirect() {
     </main>
   );
 }
+
+
+
+
+

@@ -1,4 +1,3 @@
-
 import React from "react";
 
 type Message = {
@@ -16,7 +15,7 @@ function renderTextWithSimpleMarkdown(text: string) {
   const boldRegex = /\*\*([^*]+)\*\*/g;
 
   // Replace links
-  let parts: (string | JSX.Element)[] = [];
+  const parts: (string | JSX.Element)[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
 
@@ -26,9 +25,15 @@ function renderTextWithSimpleMarkdown(text: string) {
       parts.push(text.substring(lastIndex, match.index));
     }
     parts.push(
-      <a key={`${match[2]}-${match.index}`} href={match[2]} className="text-blue-700 underline hover:text-blue-900" target="_blank" rel="noopener noreferrer">
+      <a
+        key={`${match[2]}-${match.index}`}
+        href={match[2]}
+        className="text-blue-700 underline hover:text-blue-900"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         {match[1]}
-      </a>
+      </a>,
     );
     lastIndex = match.index + match[0].length;
   }
@@ -47,7 +52,9 @@ function renderTextWithSimpleMarkdown(text: string) {
           subParts.push(p.substring(subLast, m.index));
         }
         subParts.push(
-          <strong key={`bold-${i}-${m.index}`} className="font-semibold">{m[1]}</strong>
+          <strong key={`bold-${i}-${m.index}`} className="font-semibold">
+            {m[1]}
+          </strong>,
         );
         subLast = m.index + m[0].length;
       }
@@ -63,17 +70,28 @@ function renderTextWithSimpleMarkdown(text: string) {
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => (
   <div className="flex flex-col gap-3 px-2 py-2 overflow-y-auto max-h-60">
-    {messages.map((msg, i) =>
-      <div key={i} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-        <div className={`rounded-lg px-4 py-2 text-sm max-w-[70%] whitespace-pre-line ${msg.sender === "user"
-          ? "bg-blue-100 text-blue-900"
-          : "bg-white border text-gray-900"
-        }`}>
+    {messages.map((msg, i) => (
+      <div
+        key={i}
+        className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+      >
+        <div
+          className={`rounded-lg px-4 py-2 text-sm max-w-[70%] whitespace-pre-line ${
+            msg.sender === "user"
+              ? "bg-blue-100 text-blue-900"
+              : "bg-white border text-gray-900"
+          }`}
+        >
           {renderTextWithSimpleMarkdown(msg.text)}
         </div>
       </div>
-    )}
+    ))}
   </div>
 );
 
 export default ChatMessages;
+
+
+
+
+

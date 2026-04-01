@@ -1,4 +1,3 @@
-
 import React from "react";
 
 interface TagDisplayProps {
@@ -10,17 +9,21 @@ const TagDisplay: React.FC<TagDisplayProps> = ({ tags, onTagClick }) => {
   if (!tags?.length) return null;
   return (
     <div className="flex flex-wrap gap-2 my-2">
-      {tags.map((tag) => (
-        <span
-          className="bg-gradient-to-r from-purple-200 to-blue-100 text-purple-800 px-3 py-1 rounded-full text-xs shadow"
-          key={tag}
-          onClick={() => onTagClick?.(tag)}
-        >
+      {tags.map((tag) =>
+      <span
+        className="bg-gradient-to-r from-purple-200 to-blue-100 text-purple-800 px-3 py-1 rounded-full text-xs shadow"
+        key={tag}
+        onClick={() => onTagClick?.(tag)} role="button" tabIndex={0} onKeyDown={(e) => {if (e.key === "Enter" || e.key === " ") {e.preventDefault();(() => onTagClick?.(tag))(e);}}}>
+        
           {tag}
         </span>
-      ))}
-    </div>
-  );
+      )}
+    </div>);
+
 };
 
 export default TagDisplay;
+
+
+
+

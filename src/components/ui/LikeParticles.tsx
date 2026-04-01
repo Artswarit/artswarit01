@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface Particle {
   id: number;
@@ -23,18 +23,18 @@ const LikeParticles = ({ trigger, onComplete }: LikeParticlesProps) => {
         id: Date.now() + i,
         x: 0,
         y: 0,
-        angle: (i * 45) + (Math.random() * 20 - 10),
+        angle: i * 45 + (Math.random() * 20 - 10),
         scale: 0.5 + Math.random() * 0.5,
         opacity: 1,
       }));
-      
+
       setParticles(newParticles);
-      
+
       const timeout = setTimeout(() => {
         setParticles([]);
         onComplete?.();
       }, 600);
-      
+
       return () => clearTimeout(timeout);
     }
   }, [trigger, onComplete]);
@@ -48,17 +48,19 @@ const LikeParticles = ({ trigger, onComplete }: LikeParticlesProps) => {
         const distance = 30 + Math.random() * 20;
         const translateX = Math.cos(radians) * distance;
         const translateY = Math.sin(radians) * distance;
-        
+
         return (
           <div
             key={particle.id}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{
-              animation: 'particle-burst 0.6s ease-out forwards',
-              '--tx': `${translateX}px`,
-              '--ty': `${translateY}px`,
-              '--scale': particle.scale,
-            } as React.CSSProperties}
+            style={
+              {
+                animation: "particle-burst 0.6s ease-out forwards",
+                "--tx": `${translateX}px`,
+                "--ty": `${translateY}px`,
+                "--scale": particle.scale,
+              } as React.CSSProperties
+            }
           >
             <svg
               width="12"
@@ -77,3 +79,8 @@ const LikeParticles = ({ trigger, onComplete }: LikeParticlesProps) => {
 };
 
 export default LikeParticles;
+
+
+
+
+

@@ -43,9 +43,17 @@ interface Service {
 const ServicesManagement: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { canAddService, serviceCount, serviceLimit, isProArtist, loading: gatingLoading, refresh: refreshGating } = useFeatureGating(user?.id);
+  const {
+    canAddService,
+    serviceCount,
+    serviceLimit,
+    isProArtist,
+    loading: gatingLoading,
+    refresh: refreshGating,
+  } = useFeatureGating(user?.id);
   const { toast } = useToast();
-  const { formatPlus, userCurrencySymbol, userCurrency, convert } = useCurrencyFormat();
+  const { formatPlus, userCurrencySymbol, userCurrency, convert } =
+    useCurrencyFormat();
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +88,7 @@ const ServicesManagement: React.FC = () => {
         .order("created_at", { ascending: false });
 
       if (error) {
-        console.error('[ServicesManagement] Error fetching services:', error);
+        console.error("[ServicesManagement] Error fetching services:", error);
         throw error;
       }
 
@@ -91,7 +99,7 @@ const ServicesManagement: React.FC = () => {
       toast({
         variant: "destructive",
         title: "Error loading services",
-        description: err.message
+        description: err.message,
       });
     } finally {
       setLoading(false);
@@ -110,16 +118,16 @@ const ServicesManagement: React.FC = () => {
     const channel = supabase
       .channel(`services-realtime:${user.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'artist_services',
-          filter: `artist_id=eq.${user.id}`
+          event: "*",
+          schema: "public",
+          table: "artist_services",
+          filter: `artist_id=eq.${user.id}`,
         },
         () => {
           fetchServices();
-        }
+        },
       )
       .subscribe();
 
@@ -168,7 +176,7 @@ const ServicesManagement: React.FC = () => {
       toast({
         title: "Service limit reached",
         description: `You've reached your limit of ${serviceLimit} services. Upgrade to Pro for unlimited services!`,
-        variant: "destructive"
+        variant: "destructive",
       });
       setIsDialogOpen(false);
       return;
@@ -176,7 +184,9 @@ const ServicesManagement: React.FC = () => {
 
     setSaving(true);
 
-    const priceVal = form.starting_price ? parseFloat(form.starting_price) : null;
+    const priceVal = form.starting_price
+      ? Number.parseFloat(form.starting_price)
+      : null;
     const priceUSD = priceVal !== null ? convert(priceVal) : null;
 
     const payload = {
@@ -234,7 +244,7 @@ const ServicesManagement: React.FC = () => {
 
     setLoading(true); // Show loading state during deletion
     console.log(`[ServicesManagement] Deleting service ${serviceToDelete}...`);
-    
+
     const { error } = await supabase
       .from("artist_services")
       .delete()
@@ -247,17 +257,17 @@ const ServicesManagement: React.FC = () => {
     } else {
       console.log("[ServicesManagement] Service deleted successfully from DB");
       toast({ title: "Service deleted" });
-      
+
       // Update UI immediately by removing from local state
-      setServices(prev => prev.filter(s => s.id !== serviceToDelete));
-      
+      setServices((prev) => prev.filter((s) => s.id !== serviceToDelete));
+
       // Call refresh first to update limits immediately
       console.log("[ServicesManagement] Triggering manual gating refresh...");
       await refreshGating();
-      
+
       // Fetch fresh list to be absolutely sure
       await fetchServices();
-      
+
       setIsDeleteAlertOpen(false);
       setServiceToDelete(null);
     }
@@ -274,7 +284,7 @@ const ServicesManagement: React.FC = () => {
       e.stopPropagation();
     }
     // Navigate to premium page using the correct route format
-    navigate('/artist-dashboard?tab=premium');
+    navigate("/artist-dashboard?tab=premium");
   };
 
   const handleAddClick = (e?: React.MouseEvent) => {
@@ -286,7 +296,7 @@ const ServicesManagement: React.FC = () => {
       toast({
         title: "Service limit reached",
         description: `You've reached your limit of ${serviceLimit} services. Upgrade to Pro for unlimited services!`,
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -299,28 +309,35 @@ const ServicesManagement: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-3">
-              <CardTitle className="text-2xl sm:text-3xl font-black tracking-tight text-foreground/90">Your Services</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl font-black tracking-tight text-foreground/90">
+                Your Services
+              </CardTitle>
               {!isProArtist && (
-                <Badge variant="outline" className="shrink-0 bg-primary/5 text-primary border-primary/20 px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-wider">
+                <Badge
+                  variant="outline"
+                  className="shrink-0 bg-primary/5 text-primary border-primary/20 px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-wider"
+                >
                   {serviceCount}/{serviceLimit}
                 </Badge>
               )}
             </div>
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed">Showcase your expertise and manage your offerings</p>
+            <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+              Showcase your expertise and manage your offerings
+            </p>
           </div>
-          <Button 
-            onClick={handleAddClick} 
+          <Button
+            onClick={handleAddClick}
             className="h-14 w-full sm:w-auto gap-3 px-8 font-black text-[10px] uppercase tracking-widest bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all rounded-2xl shrink-0"
             disabled={!canAddService}
           >
             {canAddService ? (
               <>
-                <Plus className="h-4 w-4" /> 
+                <Plus className="h-4 w-4" />
                 Add New Service
               </>
             ) : (
               <>
-                <Lock className="h-4 w-4" /> 
+                <Lock className="h-4 w-4" />
                 Limit Reached
               </>
             )}
@@ -337,7 +354,9 @@ const ServicesManagement: React.FC = () => {
               <Loader2 className="h-12 w-12 animate-spin text-primary/40" />
               <div className="absolute inset-0 blur-xl bg-primary/10 rounded-full animate-pulse" />
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60 animate-pulse">Loading Services</p>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60 animate-pulse">
+              Loading Services
+            </p>
           </div>
         ) : services.length === 0 ? (
           <div className="text-center py-24 px-6 space-y-6 bg-muted/10 rounded-[2.5rem] border-2 border-dashed border-border/20">
@@ -345,9 +364,12 @@ const ServicesManagement: React.FC = () => {
               <Plus className="h-10 w-10 text-muted-foreground/30" />
             </div>
             <div className="space-y-3">
-              <h4 className="text-lg font-black text-foreground/90">No services yet</h4>
+              <h4 className="text-lg font-black text-foreground/90">
+                No services yet
+              </h4>
               <p className="text-sm font-medium text-muted-foreground/60 max-w-[320px] mx-auto leading-relaxed">
-                Create your first service to showcase your talent and start receiving inquiries.
+                Create your first service to showcase your talent and start
+                receiving inquiries.
               </p>
             </div>
           </div>
@@ -360,9 +382,11 @@ const ServicesManagement: React.FC = () => {
               >
                 {/* Visual Accent */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
-                
+
                 <div className="flex justify-between items-start gap-4 relative z-10">
-                  <h3 className="font-black text-xl text-foreground/90 leading-tight group-hover:text-primary transition-colors truncate">{s.title}</h3>
+                  <h3 className="font-black text-xl text-foreground/90 leading-tight group-hover:text-primary transition-colors truncate">
+                    {s.title}
+                  </h3>
                   <div className="flex gap-2 shrink-0">
                     <Button
                       variant="ghost"
@@ -389,7 +413,9 @@ const ServicesManagement: React.FC = () => {
                 )}
                 {s.starting_price !== null && (
                   <div className="mt-auto pt-6 flex items-center justify-between border-t border-border/10 relative z-10">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Starting At</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+                      Starting At
+                    </span>
                     <p className="text-xl font-black text-primary tracking-tight">
                       {formatPlus(s.starting_price)}
                     </p>
@@ -412,7 +438,9 @@ const ServicesManagement: React.FC = () => {
             </DialogHeader>
             <div className="space-y-5 py-2">
               <div className="space-y-2">
-                <Label htmlFor="svc-title" className="text-sm font-bold ml-1">Service Title *</Label>
+                <Label htmlFor="svc-title" className="text-sm font-bold ml-1">
+                  Service Title *
+                </Label>
                 <Input
                   id="svc-title"
                   value={form.title}
@@ -422,7 +450,9 @@ const ServicesManagement: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="svc-desc" className="text-sm font-bold ml-1">Description</Label>
+                <Label htmlFor="svc-desc" className="text-sm font-bold ml-1">
+                  Description
+                </Label>
                 <Textarea
                   id="svc-desc"
                   rows={4}
@@ -435,7 +465,9 @@ const ServicesManagement: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="svc-price" className="text-sm font-bold ml-1">Starting Price ({userCurrencySymbol})</Label>
+                <Label htmlFor="svc-price" className="text-sm font-bold ml-1">
+                  Starting Price ({userCurrencySymbol})
+                </Label>
                 <div className="relative">
                   <Input
                     id="svc-price"
@@ -448,7 +480,9 @@ const ServicesManagement: React.FC = () => {
                     placeholder="e.g., 50"
                     className="h-12 bg-muted/40 border-border/40 focus-visible:ring-primary/20 rounded-2xl font-bold px-4 pl-9"
                   />
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">{userCurrencySymbol}</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">
+                    {userCurrencySymbol}
+                  </span>
                 </div>
                 <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed italic ml-1 font-medium">
                   Clients will see this converted to their local currency.
@@ -464,7 +498,11 @@ const ServicesManagement: React.FC = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={saving} className="h-14 flex-1 font-black text-[10px] uppercase tracking-widest rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="h-14 flex-1 font-black text-[10px] uppercase tracking-widest rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
                 {saving ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : editingService ? (
@@ -478,17 +516,31 @@ const ServicesManagement: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialog
+          open={isDeleteAlertOpen}
+          onOpenChange={setIsDeleteAlertOpen}
+        >
           <AlertDialogContent className="w-[92vw] max-w-md p-6 sm:p-8 rounded-[2rem] border-none shadow-2xl bg-background/95 backdrop-blur-xl">
             <AlertDialogHeader className="mb-6 space-y-2">
-              <AlertDialogTitle className="text-2xl font-black tracking-tight">Delete Service?</AlertDialogTitle>
+              <AlertDialogTitle className="text-2xl font-black tracking-tight">
+                Delete Service?
+              </AlertDialogTitle>
               <AlertDialogDescription className="text-sm sm:text-base font-medium text-muted-foreground/80 leading-relaxed">
-                This will permanently remove the service from your profile. Are you sure you want to proceed?
+                This will permanently remove the service from your profile. Are
+                you sure you want to proceed?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-col sm:flex-row gap-3">
-              <AlertDialogCancel onClick={() => setServiceToDelete(null)} className="h-12 flex-1 font-bold rounded-2xl border-border/60 hover:bg-muted/50">Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="h-12 flex-1 font-black rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/20">
+              <AlertDialogCancel
+                onClick={() => setServiceToDelete(null)}
+                className="h-12 flex-1 font-bold rounded-2xl border-border/60 hover:bg-muted/50"
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="h-12 flex-1 font-black rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/20"
+              >
                 Delete Service
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -500,3 +552,8 @@ const ServicesManagement: React.FC = () => {
 };
 
 export default ServicesManagement;
+
+
+
+
+

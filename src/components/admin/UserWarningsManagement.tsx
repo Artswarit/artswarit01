@@ -1,13 +1,19 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -15,18 +21,32 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { AlertTriangle, Plus, Ban, ShieldAlert, Clock, CheckCircle } from 'lucide-react';
-import { format } from 'date-fns';
-import LogoLoader from '@/components/ui/LogoLoader';
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AlertTriangle,
+  Plus,
+  Ban,
+  ShieldAlert,
+  Clock,
+  CheckCircle,
+} from "lucide-react";
+import { format } from "date-fns";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 interface Warning {
   id: string;
@@ -40,9 +60,19 @@ interface Warning {
 }
 
 const WARNING_TYPES = [
-  { value: 'warning', label: 'Warning', icon: AlertTriangle, color: 'text-yellow-500' },
-  { value: 'suspension', label: 'Temporary Suspension', icon: Clock, color: 'text-orange-500' },
-  { value: 'ban', label: 'Permanent Ban', icon: Ban, color: 'text-red-500' }
+  {
+    value: "warning",
+    label: "Warning",
+    icon: AlertTriangle,
+    color: "text-yellow-500",
+  },
+  {
+    value: "suspension",
+    label: "Temporary Suspension",
+    icon: Clock,
+    color: "text-orange-500",
+  },
+  { value: "ban", label: "Permanent Ban", icon: Ban, color: "text-red-500" },
 ];
 
 export function UserWarningsManagement() {
@@ -53,10 +83,10 @@ export function UserWarningsManagement() {
   const [processing, setProcessing] = useState(false);
 
   // Form state
-  const [userId, setUserId] = useState('');
-  const [warningType, setWarningType] = useState('');
-  const [reason, setReason] = useState('');
-  const [expiresIn, setExpiresIn] = useState('');
+  const [userId, setUserId] = useState("");
+  const [warningType, setWarningType] = useState("");
+  const [reason, setReason] = useState("");
+  const [expiresIn, setExpiresIn] = useState("");
 
   useEffect(() => {
     fetchWarnings();
@@ -65,14 +95,14 @@ export function UserWarningsManagement() {
   const fetchWarnings = async () => {
     try {
       const { data, error } = await supabase
-        .from('user_warnings')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("user_warnings")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setWarnings(data || []);
     } catch (error: any) {
-      toast.error('Failed to load warnings');
+      toast.error("Failed to load warnings");
       console.error(error);
     } finally {
       setLoading(false);
@@ -81,48 +111,46 @@ export function UserWarningsManagement() {
 
   const handleIssueWarning = async () => {
     if (!userId || !warningType || !reason) {
-      toast.error('Please fill in all required fields');
+      toast.error("Please fill in all required fields");
       return;
     }
 
     setProcessing(true);
     try {
       let expiresAt = null;
-      if (expiresIn && warningType === 'suspension') {
-        const days = parseInt(expiresIn);
+      if (expiresIn && warningType === "suspension") {
+        const days = Number.parseInt(expiresIn);
         const date = new Date();
         date.setDate(date.getDate() + days);
         expiresAt = date.toISOString();
       }
 
-      const { error } = await supabase
-        .from('user_warnings')
-        .insert({
-          user_id: userId,
-          type: warningType,
-          reason,
-          issued_by: user?.id,
-          expires_at: expiresAt,
-          is_active: true
-        });
+      const { error } = await supabase.from("user_warnings").insert({
+        user_id: userId,
+        type: warningType,
+        reason,
+        issued_by: user?.id,
+        expires_at: expiresAt,
+        is_active: true,
+      });
 
       if (error) throw error;
 
       // Send notification to user
-      await supabase.from('notifications').insert({
+      await supabase.from("notifications").insert({
         user_id: userId,
-        title: warningType === 'ban' ? 'Account Banned' : 'Account Warning',
+        title: warningType === "ban" ? "Account Banned" : "Account Warning",
         message: reason,
-        type: 'warning',
-        metadata: { warningType }
+        type: "warning",
+        metadata: { warningType },
       });
 
-      toast.success('Warning issued successfully');
+      toast.success("Warning issued successfully");
       fetchWarnings();
       setDialogOpen(false);
       resetForm();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to issue warning');
+      toast.error(error.message || "Failed to issue warning");
       console.error(error);
     } finally {
       setProcessing(false);
@@ -132,39 +160,44 @@ export function UserWarningsManagement() {
   const handleDeactivateWarning = async (warningId: string) => {
     try {
       const { error } = await supabase
-        .from('user_warnings')
+        .from("user_warnings")
         .update({ is_active: false })
-        .eq('id', warningId);
+        .eq("id", warningId);
 
       if (error) throw error;
 
-      toast.success('Warning deactivated');
+      toast.success("Warning deactivated");
       fetchWarnings();
     } catch (error: any) {
-      toast.error('Failed to deactivate warning');
+      toast.error("Failed to deactivate warning");
     }
   };
 
   const resetForm = () => {
-    setUserId('');
-    setWarningType('');
-    setReason('');
-    setExpiresIn('');
+    setUserId("");
+    setWarningType("");
+    setReason("");
+    setExpiresIn("");
   };
 
   const getTypeBadge = (type: string, isActive: boolean) => {
-    const config = WARNING_TYPES.find(t => t.value === type) || WARNING_TYPES[0];
+    const config =
+      WARNING_TYPES.find((t) => t.value === type) || WARNING_TYPES[0];
     const Icon = config.icon;
-    
+
     return (
-      <Badge className={`gap-1 ${!isActive ? 'opacity-50' : ''} ${
-        type === 'ban' ? 'bg-red-500/20 text-red-600' :
-        type === 'suspension' ? 'bg-orange-500/20 text-orange-600' :
-        'bg-yellow-500/20 text-yellow-600'
-      }`}>
+      <Badge
+        className={`gap-1 ${!isActive ? "opacity-50" : ""} ${
+          type === "ban"
+            ? "bg-red-500/20 text-red-600"
+            : type === "suspension"
+              ? "bg-orange-500/20 text-orange-600"
+              : "bg-yellow-500/20 text-yellow-600"
+        }`}
+      >
         <Icon className="h-3 w-3" />
         {config.label}
-        {!isActive && ' (Inactive)'}
+        {!isActive && " (Inactive)"}
       </Badge>
     );
   };
@@ -177,8 +210,8 @@ export function UserWarningsManagement() {
     );
   }
 
-  const activeWarnings = warnings.filter(w => w.is_active);
-  const inactiveWarnings = warnings.filter(w => !w.is_active);
+  const activeWarnings = warnings.filter((w) => w.is_active);
+  const inactiveWarnings = warnings.filter((w) => !w.is_active);
 
   return (
     <>
@@ -202,7 +235,9 @@ export function UserWarningsManagement() {
         </CardHeader>
         <CardContent>
           {warnings.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No warnings issued yet</p>
+            <p className="text-center text-muted-foreground py-8">
+              No warnings issued yet
+            </p>
           ) : (
             <Table>
               <TableHeader>
@@ -217,25 +252,33 @@ export function UserWarningsManagement() {
               </TableHeader>
               <TableBody>
                 {warnings.map((warning) => (
-                  <TableRow key={warning.id} className={!warning.is_active ? 'opacity-60' : ''}>
+                  <TableRow
+                    key={warning.id}
+                    className={!warning.is_active ? "opacity-60" : ""}
+                  >
                     <TableCell className="font-mono text-xs">
                       {warning.user_id.substring(0, 8)}...
                     </TableCell>
-                    <TableCell>{getTypeBadge(warning.type, warning.is_active)}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{warning.reason}</TableCell>
                     <TableCell>
-                      {warning.expires_at 
-                        ? format(new Date(warning.expires_at), 'MMM d, yyyy')
-                        : warning.type === 'ban' ? 'Never' : '-'
-                      }
+                      {getTypeBadge(warning.type, warning.is_active)}
+                    </TableCell>
+                    <TableCell className="max-w-[200px] truncate">
+                      {warning.reason}
                     </TableCell>
                     <TableCell>
-                      {format(new Date(warning.created_at), 'MMM d, yyyy')}
+                      {warning.expires_at
+                        ? format(new Date(warning.expires_at), "MMM d, yyyy")
+                        : warning.type === "ban"
+                          ? "Never"
+                          : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(warning.created_at), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell>
                       {warning.is_active && (
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleDeactivateWarning(warning.id)}
                         >
@@ -292,7 +335,7 @@ export function UserWarningsManagement() {
               </Select>
             </div>
 
-            {warningType === 'suspension' && (
+            {warningType === "suspension" && (
               <div className="space-y-2">
                 <Label htmlFor="expiresIn">Suspension Duration (days)</Label>
                 <Input
@@ -322,12 +365,12 @@ export function UserWarningsManagement() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              variant={warningType === 'ban' ? 'destructive' : 'default'}
+            <Button
+              variant={warningType === "ban" ? "destructive" : "default"}
               onClick={handleIssueWarning}
               disabled={processing || !userId || !warningType || !reason}
             >
-              {processing ? 'Issuing...' : 'Issue Warning'}
+              {processing ? "Issuing..." : "Issue Warning"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -335,3 +378,8 @@ export function UserWarningsManagement() {
     </>
   );
 }
+
+
+
+
+

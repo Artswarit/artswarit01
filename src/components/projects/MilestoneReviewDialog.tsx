@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -9,15 +9,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle, RotateCcw, Clock, FileText, Image, Video, Music, Download, ExternalLink } from 'lucide-react';
-import { format } from 'date-fns';
-import LogoLoader from '@/components/ui/LogoLoader';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  CheckCircle,
+  RotateCcw,
+  Clock,
+  FileText,
+  Image,
+  Video,
+  Music,
+  Download,
+  ExternalLink,
+} from "lucide-react";
+import { format } from "date-fns";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 interface Milestone {
   id: string;
@@ -59,12 +70,12 @@ export function MilestoneReviewDialog({
   milestone,
   projectId,
   autoApproveDays,
-  onSuccess
+  onSuccess,
 }: MilestoneReviewDialogProps) {
   const { user } = useAuth();
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [revisionReason, setRevisionReason] = useState('');
+  const [revisionReason, setRevisionReason] = useState("");
   const [processing, setProcessing] = useState(false);
 
   const canRequestRevision = milestone.revision_count < milestone.max_revisions;
@@ -85,13 +96,13 @@ export function MilestoneReviewDialog({
   const getSignedUrl = async (fileUrl: string): Promise<string> => {
     const path = extractStoragePath(fileUrl);
     if (!path) return fileUrl;
-    
+
     const { data, error } = await supabase.storage
-      .from('milestone-submissions')
+      .from("milestone-submissions")
       .createSignedUrl(path, 3600); // 1 hour expiry
-    
+
     if (error || !data?.signedUrl) {
-      console.error('Failed to create signed URL:', error);
+      console.error("Failed to create signed URL:", error);
       return fileUrl;
     }
     return data.signedUrl;
@@ -101,10 +112,10 @@ export function MilestoneReviewDialog({
     setLoading(true);
     try {
       const { data: submissionsData, error: submissionsError } = await supabase
-        .from('milestone_submissions')
-        .select('*')
-        .eq('milestone_id', milestone.id)
-        .order('created_at', { ascending: false });
+        .from("milestone_submissions")
+        .select("*")
+        .eq("milestone_id", milestone.id)
+        .order("created_at", { ascending: false });
 
       if (submissionsError) throw submissionsError;
 
@@ -112,28 +123,28 @@ export function MilestoneReviewDialog({
       const submissionsWithFiles = await Promise.all(
         (submissionsData || []).map(async (submission) => {
           const { data: files } = await supabase
-            .from('submission_files')
-            .select('*')
-            .eq('submission_id', submission.id);
-          
+            .from("submission_files")
+            .select("*")
+            .eq("submission_id", submission.id);
+
           // Generate signed URLs for each file
           const filesWithSignedUrls = await Promise.all(
             (files || []).map(async (file) => ({
               ...file,
-              file_url: await getSignedUrl(file.file_url)
-            }))
+              file_url: await getSignedUrl(file.file_url),
+            })),
           );
-          
+
           return {
             ...submission,
-            files: filesWithSignedUrls
+            files: filesWithSignedUrls,
           };
-        })
+        }),
       );
 
       setSubmissions(submissionsWithFiles as Submission[]);
     } catch (error: any) {
-      toast.error('Failed to load submissions');
+      toast.error("Failed to load submissions");
       console.error(error);
     } finally {
       setLoading(false);
@@ -142,9 +153,9 @@ export function MilestoneReviewDialog({
 
   const getFileIcon = (type: string | null) => {
     if (!type) return <FileText className="h-4 w-4" />;
-    if (type.startsWith('image/')) return <Image className="h-4 w-4" />;
-    if (type.startsWith('video/')) return <Video className="h-4 w-4" />;
-    if (type.startsWith('audio/')) return <Music className="h-4 w-4" />;
+    if (type.startsWith("image/")) return <Image className="h-4 w-4" />;
+    if (type.startsWith("video/")) return <Video className="h-4 w-4" />;
+    if (type.startsWith("audio/")) return <Music className="h-4 w-4" />;
     return <FileText className="h-4 w-4" />;
   };
 
@@ -152,28 +163,47 @@ export function MilestoneReviewDialog({
     setProcessing(true);
     try {
       // Call secure edge function to release escrow payout and complete milestone
-      const { data, error } = await supabase.functions.invoke('release-milestone-payout', {
-        body: { milestoneId: milestone.id },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "release-milestone-payout",
+        {
+          body: { milestoneId: milestone.id },
+        },
+      );
 
-      if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || 'Failed to release payout');
+      let errorMessage = "Failed to release payout";
+      
+      if (error) {
+        if (error.context && typeof error.context.text === 'function') {
+          try {
+            const textResponse = await error.context.json();
+            errorMessage = textResponse?.error || textResponse?.message || error.message;
+          } catch {
+             errorMessage = error.message;
+          }
+        } else {
+          errorMessage = data?.error || error.message || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (!data?.success && data?.error) {
+         throw new Error(data.error);
       }
 
       // Log activity
-      await supabase.from('project_activity_logs').insert({
+      await supabase.from("project_activity_logs").insert({
         project_id: projectId,
         milestone_id: milestone.id,
         user_id: user?.id,
-        action: 'milestone_approved',
-        details: { milestoneId: milestone.id }
+        action: "milestone_approved",
+        details: { milestoneId: milestone.id },
       });
 
-      toast.success('Milestone approved and payout released from escrow.');
+      toast.success("Milestone approved and payout released from escrow.");
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      toast.error('Failed to approve milestone');
+      toast.error(error.message || "Failed to approve milestone");
       console.error(error);
     } finally {
       setProcessing(false);
@@ -182,52 +212,43 @@ export function MilestoneReviewDialog({
 
   const handleRequestRevision = async () => {
     if (!revisionReason.trim()) {
-      toast.error('Please provide a reason for the revision request');
+      toast.error("Please provide a reason for the revision request");
       return;
     }
 
     setProcessing(true);
     try {
-      // Create revision record
-      const { error: revisionError } = await supabase
-        .from('milestone_revisions')
-        .insert({
-          milestone_id: milestone.id,
-          requested_by: user?.id,
-          reason: revisionReason
-        });
+      // Removed milestone_revisions insert because table doesn't exist.
+      // The revision reason is securely stored in project_activity_logs below.
 
-      if (revisionError) throw revisionError;
-
-      // Update milestone status and store latest rejection reason
+      // Update milestone status
       const newRevisionCount = milestone.revision_count + 1;
       const { error: updateError } = await supabase
-        .from('project_milestones')
+        .from("project_milestones")
         .update({
-          status: 'REVISION_REQUESTED',
+          status: "REVISION_REQUESTED",
           revision_count: newRevisionCount,
           auto_approve_at: null,
-          rejection_reason: revisionReason
         })
-        .eq('id', milestone.id);
+        .eq("id", milestone.id);
 
       if (updateError) throw updateError;
 
       // Log activity
-      await supabase.from('project_activity_logs').insert({
+      await supabase.from("project_activity_logs").insert({
         project_id: projectId,
         milestone_id: milestone.id,
         user_id: user?.id,
-        action: 'revision_requested',
-        details: { reason: revisionReason }
+        action: "revision_requested",
+        details: { reason: revisionReason },
       });
 
-      toast.success('Revision requested. The artist will be notified.');
+      toast.success("Revision requested. The artist will be notified.");
       onSuccess();
       onOpenChange(false);
-      setRevisionReason('');
+      setRevisionReason("");
     } catch (error: any) {
-      toast.error('Failed to request revision');
+      toast.error(error.message || "Failed to request revision");
       console.error(error);
     } finally {
       setProcessing(false);
@@ -236,152 +257,209 @@ export function MilestoneReviewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Review Submission: {milestone.title}</DialogTitle>
-          <DialogDescription>
-            Review the artist's submission and approve or request revisions.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-3xl w-[95vw] sm:w-full max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <div className="flex-1 w-full min-h-0 overflow-y-auto p-4 sm:p-6 pb-0">
+          <DialogHeader>
+            <DialogTitle>Review Submission: {milestone.title}</DialogTitle>
+            <DialogDescription>
+              Review the artist's submission and approve or request revisions.
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Auto-approve Warning */}
-        {milestone.auto_approve_at && (
-          <Alert>
-            <Clock className="h-4 w-4" />
-            <AlertDescription>
-              This milestone will be auto-approved on{' '}
-              <strong>{format(new Date(milestone.auto_approve_at), 'MMM d, yyyy')}</strong>{' '}
-              if no action is taken.
-            </AlertDescription>
-          </Alert>
-        )}
+          {/* Auto-approve Warning */}
+          {milestone.auto_approve_at && (
+            <Alert className="mt-4">
+              <Clock className="h-4 w-4" />
+              <AlertDescription>
+                This milestone will be auto-approved on{" "}
+                <strong>
+                  {format(new Date(milestone.auto_approve_at), "MMM d, yyyy")}
+                </strong>{" "}
+                if no action is taken.
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {loading ? (
-          <div className="flex items-center justify-center p-8">
-            <LogoLoader text="Loading submissions…" />
-          </div>
-        ) : (
-          <>
-            {milestone.status === 'DISPUTED' && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  A dispute is active for this milestone. Approval and payout are blocked until admin resolves it.
-                </AlertDescription>
-              </Alert>
-            )}
-            <Tabs defaultValue="latest">
-            <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-              <TabsList className="w-full h-auto min-h-[48px] sm:min-h-0 p-1 bg-muted/50 rounded-lg flex items-stretch gap-1">
-                <TabsTrigger value="latest" className="flex-1 min-w-[120px] py-2 sm:py-2.5 px-3 rounded-md transition-all">Latest Submission</TabsTrigger>
-                {submissions.length > 1 && (
-                  <TabsTrigger value="history" className="flex-1 min-w-[120px] py-2 sm:py-2.5 px-3 rounded-md transition-all">History ({submissions.length})</TabsTrigger>
-                )}
-              </TabsList>
+          {loading ? (
+            <div className="flex items-center justify-center p-8">
+              <LogoLoader text="Loading submissions…" />
             </div>
+          ) : (
+            <div className="mt-4">
+              {milestone.status === "DISPUTED" && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>
+                    A dispute is active for this milestone. Approval and payout
+                    are blocked until admin resolves it.
+                  </AlertDescription>
+                </Alert>
+              )}
+              <Tabs defaultValue="latest">
+                <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                  <TabsList className="w-full h-auto min-h-[48px] sm:min-h-0 p-1 bg-muted/50 rounded-lg flex items-stretch gap-1">
+                    <TabsTrigger
+                      value="latest"
+                      className="flex-1 min-w-[120px] py-2 sm:py-2.5 px-3 rounded-md transition-all"
+                    >
+                      Latest Submission
+                    </TabsTrigger>
+                    {submissions.length > 1 && (
+                      <TabsTrigger
+                        value="history"
+                        className="flex-1 min-w-[120px] py-2 sm:py-2.5 px-3 rounded-md transition-all"
+                      >
+                        History ({submissions.length})
+                      </TabsTrigger>
+                    )}
+                  </TabsList>
+                </div>
 
-            <TabsContent value="latest" className="space-y-4 mt-4">
-              {submissions.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  No submissions yet
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {/* Latest Submission */}
-                  <div className="border rounded-lg p-4 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">
-                        Submitted on {format(new Date(submissions[0].created_at), 'MMM d, yyyy h:mm a')}
+                <TabsContent value="latest" className="space-y-4 mt-4">
+                  {submissions.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      No submissions yet
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {/* Latest Submission */}
+                      <div className="border rounded-lg p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-muted-foreground">
+                            Submitted on{" "}
+                            {format(
+                              new Date(submissions[0].created_at),
+                              "MMM d, yyyy h:mm a",
+                            )}
+                          </p>
+                        </div>
+
+                        {submissions[0].notes && (
+                          <div>
+                            <Label className="text-xs text-muted-foreground">
+                              Artist Notes
+                            </Label>
+                            <p className="text-sm mt-1">{submissions[0].notes}</p>
+                          </div>
+                        )}
+
+                        {/* Files */}
+                        <div className="space-y-2">
+                          <Label className="text-xs text-muted-foreground">
+                            Files ({submissions[0].files.length})
+                          </Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {submissions[0].files.map((file) => (
+                              <div
+                                key={file.id}
+                                className="flex items-center justify-between p-2 bg-muted rounded-lg"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  {getFileIcon(file.file_type)}
+                                  <span className="text-sm truncate">
+                                    {file.file_name}
+                                  </span>
+                                </div>
+                                <div className="flex gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    asChild
+                                  >
+                                    <a
+                                      href={file.file_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <ExternalLink className="h-4 w-4" />
+                                    </a>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    asChild
+                                  >
+                                    <a href={file.file_url} download>
+                                      <Download className="h-4 w-4" />
+                                    </a>
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Revision Request */}
+                      {canRequestRevision && (
+                        <div className="space-y-2 pb-6">
+                          <Label>
+                            Request Revision (
+                            {milestone.max_revisions - milestone.revision_count}{" "}
+                            remaining)
+                          </Label>
+                          <Textarea
+                            placeholder="Explain what changes you'd like the artist to make..."
+                            value={revisionReason}
+                            onChange={(e) => setRevisionReason(e.target.value)}
+                            rows={3}
+                          />
+                        </div>
+                      )}
+
+                      {!canRequestRevision && (
+                        <Alert
+                          variant="destructive"
+                          className="bg-destructive/10 mb-6"
+                        >
+                          <AlertDescription>
+                            Maximum revisions reached ({milestone.max_revisions}).
+                            You can only approve or raise a dispute.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="history" className="space-y-4 mt-4 pb-6">
+                  {submissions.map((submission, index) => (
+                    <div key={submission.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-medium">
+                          Submission #{submissions.length - index}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(
+                            new Date(submission.created_at),
+                            "MMM d, yyyy h:mm a",
+                          )}
+                        </p>
+                      </div>
+                      {submission.notes && (
+                        <p className="text-sm text-muted-foreground">
+                          {submission.notes}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {submission.files.length} file(s) attached
                       </p>
                     </div>
+                  ))}
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </div>
 
-                    {submissions[0].notes && (
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Artist Notes</Label>
-                        <p className="text-sm mt-1">{submissions[0].notes}</p>
-                      </div>
-                    )}
-
-                    {/* Files */}
-                    <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Files ({submissions[0].files.length})</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {submissions[0].files.map((file) => (
-                          <div key={file.id} className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                            <div className="flex items-center gap-2 min-w-0">
-                              {getFileIcon(file.file_type)}
-                              <span className="text-sm truncate">{file.file_name}</span>
-                            </div>
-                            <div className="flex gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                                <a href={file.file_url} target="_blank" rel="noopener noreferrer">
-                                  <ExternalLink className="h-4 w-4" />
-                                </a>
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                                <a href={file.file_url} download>
-                                  <Download className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Revision Request */}
-                  {canRequestRevision && (
-                    <div className="space-y-2">
-                      <Label>Request Revision ({milestone.max_revisions - milestone.revision_count} remaining)</Label>
-                      <Textarea
-                        placeholder="Explain what changes you'd like the artist to make..."
-                        value={revisionReason}
-                        onChange={(e) => setRevisionReason(e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                  )}
-
-                  {!canRequestRevision && (
-                    <Alert variant="destructive" className="bg-destructive/10">
-                      <AlertDescription>
-                        Maximum revisions reached ({milestone.max_revisions}). You can only approve or raise a dispute.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="history" className="space-y-4 mt-4">
-              {submissions.map((submission, index) => (
-                <div key={submission.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-medium">Submission #{submissions.length - index}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(submission.created_at), 'MMM d, yyyy h:mm a')}
-                    </p>
-                  </div>
-                  {submission.notes && (
-                    <p className="text-sm text-muted-foreground">{submission.notes}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    {submission.files.length} file(s) attached
-                  </p>
-                </div>
-              ))}
-            </TabsContent>
-            </Tabs>
-          </>
-        )}
-
-        <DialogFooter className="gap-2">
+        <DialogFooter className="gap-2 p-4 sm:p-6 pt-0 border-t bg-background shrink-0 mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           {canRequestRevision && revisionReason.trim() && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleRequestRevision}
               disabled={processing}
             >
@@ -389,9 +467,13 @@ export function MilestoneReviewDialog({
               Request Revision
             </Button>
           )}
-          <Button 
+          <Button
             onClick={handleApprove}
-            disabled={processing || submissions.length === 0 || milestone.status === 'DISPUTED'}
+            disabled={
+              processing ||
+              submissions.length === 0 ||
+              milestone.status === "DISPUTED"
+            }
             className="bg-emerald-600 hover:bg-emerald-700"
           >
             <CheckCircle className="h-4 w-4 mr-1" />
@@ -402,3 +484,8 @@ export function MilestoneReviewDialog({
     </Dialog>
   );
 }
+
+
+
+
+

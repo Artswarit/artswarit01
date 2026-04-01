@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { DollarSign, Loader2, AlertCircle } from 'lucide-react';
-import { useRazorpay } from '@/hooks/useRazorpay';
-import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
-import { useArtistPlan, calculateEarnings } from '@/hooks/useArtistPlan';
-import { usePaymentGateway } from '@/hooks/usePaymentGateway';
-import { PaymentMethodBadge } from '@/components/payments/PaymentMethodBadge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { DollarSign, Loader2, AlertCircle } from "lucide-react";
+import { useRazorpay } from "@/hooks/useRazorpay";
+import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
+import { useArtistPlan, calculateEarnings } from "@/hooks/useArtistPlan";
+import { usePaymentGateway } from "@/hooks/usePaymentGateway";
+import { PaymentMethodBadge } from "@/components/payments/PaymentMethodBadge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 interface PayMilestoneButtonProps {
   milestoneId: string;
@@ -42,7 +42,8 @@ export function PayMilestoneButton({
   const { initiatePayment, loading } = useRazorpay();
   const { format: formatCurrency } = useCurrencyFormat();
   const { isProArtist } = useArtistPlan(artistId);
-  const { formatGatewayAmount, gatewayCurrency, isIndian, provider } = usePaymentGateway(exchangeRate);
+  const { formatGatewayAmount, gatewayCurrency, isIndian, provider } =
+    usePaymentGateway(exchangeRate);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Calculate earnings based on artist plan (in USD base)
@@ -56,26 +57,31 @@ export function PayMilestoneButton({
   const handlePayment = async () => {
     // Close confirm dialog FIRST so its backdrop doesn't block Razorpay overlay
     setConfirmOpen(false);
-    
-    if (provider === 'stripe') {
+
+    if (provider === "stripe") {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const response = await fetch(`${(supabase as any).supabaseUrl}/functions/v1/create-checkout-session`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session?.access_token}`,
-            'Content-Type': 'application/json',
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const response = await fetch(
+          `${(supabase as any).supabaseUrl}/functions/v1/create-checkout-session`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${session?.access_token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ milestoneId }),
           },
-          body: JSON.stringify({ milestoneId }),
-        });
+        );
         const data = await response.json();
         if (data.url) {
           window.location.href = data.url;
         } else {
-          throw new Error(data.error || 'Failed to create checkout session');
+          throw new Error(data.error || "Failed to create checkout session");
         }
       } catch (err: any) {
-        toast.error(err.message || 'Failed to initiate Stripe payment');
+        toast.error(err.message || "Failed to initiate Stripe payment");
       }
       return;
     }
@@ -125,28 +131,32 @@ export function PayMilestoneButton({
 
             {/* Amount you pay */}
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground font-medium">You Pay ({gatewayCurrency})</span>
-              <span className="font-bold text-lg text-primary">{gatewayDisplayAmount}</span>
+              <span className="text-muted-foreground font-medium">
+                You Pay ({gatewayCurrency})
+              </span>
+              <span className="font-bold text-lg text-primary">
+                {gatewayDisplayAmount}
+              </span>
             </div>
-            
+
             <div className="border-t border-border/40 my-1" />
 
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">
-                Artist Payout ({isProArtist ? '100%' : '85%'})
+                Artist Payout ({isProArtist ? "100%" : "85%"})
               </span>
-              <span className={isProArtist ? 'text-primary font-semibold' : ''}>
+              <span className={isProArtist ? "text-primary font-semibold" : ""}>
                 {artistPayoutDisplay}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">
                 Platform Fee ({earnings.feePercentage}%)
               </span>
               <span>{platformFeeDisplay}</span>
             </div>
-            
+
             {isProArtist && (
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-2 text-center">
                 <span className="text-primary text-sm font-medium">
@@ -158,7 +168,9 @@ export function PayMilestoneButton({
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Funding is held in escrow. The artist can only start work after funds are secured, and payout is released only when you approve the milestone.
+                Funding is held in escrow. The artist can only start work after
+                funds are secured, and payout is released only when you approve
+                the milestone.
               </AlertDescription>
             </Alert>
           </div>
@@ -167,7 +179,7 @@ export function PayMilestoneButton({
             <Button variant="outline" onClick={() => setConfirmOpen(false)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               className="bg-primary hover:bg-primary/90"
               onClick={handlePayment}
               disabled={loading}
@@ -181,3 +193,8 @@ export function PayMilestoneButton({
     </>
   );
 }
+
+
+
+
+

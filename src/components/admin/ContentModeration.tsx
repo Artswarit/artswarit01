@@ -1,21 +1,30 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from '@/components/ui/dialog';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
-  AlertTriangle, Trash2, Clock, Eye, Shield
-} from 'lucide-react';
-import { writeAuditLog } from './auditHelpers';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
-import LogoLoader from '@/components/ui/LogoLoader';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { AlertTriangle, Trash2, Clock, Eye, Shield } from "lucide-react";
+import { writeAuditLog } from "./auditHelpers";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import LogoLoader from "@/components/ui/LogoLoader";
 
 /* ── Types (from Supabase `reports` + `artworks` tables) ── */
 interface ReportedItem {
@@ -58,12 +67,19 @@ function CountdownTimer({ flaggedAt }: { flaggedAt: string }) {
   const isUrgent = remaining < 3600000;
 
   if (isExpired) {
-    return <Badge className="bg-red-600 text-white border-red-700 animate-pulse font-mono text-xs">⚠ OVERDUE — REMOVE NOW</Badge>;
+    return (
+      <Badge className="bg-red-600 text-white border-red-700 animate-pulse font-mono text-xs">
+        ⚠ OVERDUE — REMOVE NOW
+      </Badge>
+    );
   }
   return (
-    <Badge className={`font-mono text-xs border ${isUrgent ? 'bg-red-500/20 text-red-600 border-red-500/40 animate-pulse' : 'bg-amber-500/20 text-amber-600 border-amber-500/40'}`}>
+    <Badge
+      className={`font-mono text-xs border ${isUrgent ? "bg-red-500/20 text-red-600 border-red-500/40 animate-pulse" : "bg-amber-500/20 text-amber-600 border-amber-500/40"}`}
+    >
       <Clock className="h-3 w-3 mr-1" />
-      {String(hours).padStart(2, '0')}:{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+      {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:
+      {String(seconds).padStart(2, "0")}
     </Badge>
   );
 }
@@ -73,18 +89,20 @@ export default function ContentModeration() {
   const { user } = useAuth();
   const [reports, setReports] = useState<ReportedItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedReport, setSelectedReport] = useState<ReportedItem | null>(null);
+  const [selectedReport, setSelectedReport] = useState<ReportedItem | null>(
+    null,
+  );
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [reason, setReason] = useState('');
+  const [reason, setReason] = useState("");
   const [processing, setProcessing] = useState(false);
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
     try {
       const { data: rawReports, error } = await supabase
-        .from('reports')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("reports")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
@@ -97,72 +115,171 @@ export default function ContentModeration() {
       });
 
       // Fetch artworks
-      let artworkMap: Record<string, { title: string; media_url: string; artist_id: string; status: string }> = {};
+      const artworkMap: Record<
+        string,
+        { title: string; media_url: string; artist_id: string; status: string }
+      > = {};
       if (artworkIds.size > 0) {
         const { data: artworks } = await supabase
-          .from('artworks')
-          .select('id, title, media_url, artist_id, status')
-          .in('id', Array.from(artworkIds));
+          .from("artworks")
+          .select("id, title, media_url, artist_id, status")
+          .in("id", Array.from(artworkIds));
         (artworks || []).forEach((a: any) => {
-          artworkMap[a.id] = { title: a.title, media_url: a.media_url, artist_id: a.artist_id, status: a.status };
+          artworkMap[a.id] = {
+            title: a.title,
+            media_url: a.media_url,
+            artist_id: a.artist_id,
+            status: a.status,
+          };
           if (a.artist_id) userIds.add(a.artist_id);
         });
       }
 
       // Fetch user names
-      let nameMap: Record<string, string> = {};
+      const nameMap: Record<string, string> = {};
       if (userIds.size > 0) {
         const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .in('id', Array.from(userIds));
-        (profiles || []).forEach((p: any) => { nameMap[p.id] = p.full_name || p.id.slice(0, 8); });
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", Array.from(userIds));
+        (profiles || []).forEach((p: any) => {
+          nameMap[p.id] = p.full_name || p.id.slice(0, 8);
+        });
       }
 
       const mapped: ReportedItem[] = (rawReports || []).map((r: any) => {
         const artwork = r.artwork_id ? artworkMap[r.artwork_id] : null;
         return {
           ...r,
-          artwork_title: artwork?.title || 'Unknown Artwork',
-          artwork_image: artwork?.media_url || '',
+          artwork_title: artwork?.title || "Unknown Artwork",
+          artwork_image: artwork?.media_url || "",
           artwork_artist_id: artwork?.artist_id,
           artwork_status: artwork?.status,
-          artist_name: artwork?.artist_id ? nameMap[artwork.artist_id] || artwork.artist_id.slice(0, 8) : 'Unknown',
+          artist_name: artwork?.artist_id
+            ? nameMap[artwork.artist_id] || artwork.artist_id.slice(0, 8)
+            : "Unknown",
           reporter_name: nameMap[r.reporter_id] || r.reporter_id.slice(0, 8),
         };
       });
 
       setReports(mapped);
     } catch (err) {
-      console.error('Failed to load reports:', err);
-      toast.error('Failed to load reports');
-    } finally { setLoading(false); }
+      console.error("Failed to load reports:", err);
+      toast.error("Failed to load reports");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
     fetchReports();
     const channel = supabase
-      .channel('admin-reports')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => { fetchReports(); })
+      .channel("admin-reports")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "reports" },
+        () => {
+          fetchReports();
+        },
+      )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchReports]);
 
-  const pendingReports = reports.filter(r => r.status === 'pending');
-  const resolvedReports = reports.filter(r => r.status !== 'pending');
+  const pendingReports = reports.filter((r) => r.status === "pending");
+  const resolvedReports = reports.filter((r) => r.status !== "pending");
 
   // Determine urgency based on time remaining
   const getUrgency = (r: ReportedItem) => {
     const elapsed = Date.now() - new Date(r.created_at).getTime();
-    return elapsed > 2 * 3600000 ? 'high' : 'normal'; // > 2hrs = high priority
+    return elapsed > 2 * 3600000 ? "high" : "normal"; // > 2hrs = high priority
   };
 
-  const highPriority = pendingReports.filter(r => getUrgency(r) === 'high');
+  const highPriority = pendingReports.filter((r) => getUrgency(r) === "high");
 
   const openDetails = (r: ReportedItem) => {
     setSelectedReport(r);
-    setReason('');
+    setReason("");
     setDialogOpen(true);
+  };
+
+ /* ── Helper: Resolve Reports ── */
+  const resolveReports = async () => {
+    if (selectedReport?.artwork_id) {
+      await supabase
+        .from("reports")
+        .update({ status: "resolved" })
+        .eq("artwork_id", selectedReport.artwork_id)
+        .eq("status", "pending");
+    } else if (selectedReport?.user_id) {
+      await supabase
+        .from("reports")
+        .update({ status: "resolved" })
+        .eq("user_id", selectedReport.user_id)
+        .eq("status", "pending");
+    }
+  };
+
+  /* ── Helper: Delete Artwork ── */
+  const deleteArtwork = async () => {
+    if (!selectedReport?.artwork_id) return;
+    try {
+      const { data, error: deleteError } = await supabase.functions.invoke(
+        "delete-artwork-and-media",
+        { body: { artworkId: selectedReport.artwork_id } },
+      );
+      if (deleteError) {
+        let errorMsg = "Unknown error";
+        if (typeof deleteError === "string") {
+          errorMsg = deleteError;
+        } else if (deleteError instanceof Error) {
+          errorMsg = deleteError.message;
+        } else if (deleteError.context?.json) {
+          try {
+            const body = await deleteError.context.json();
+            errorMsg = body.error || body.message || JSON.stringify(body);
+          } catch (_e) {
+            errorMsg = deleteError.message || "Server error";
+          }
+        } else if (data?.error) {
+          errorMsg = data.error;
+        }
+        throw new Error(errorMsg);
+      }
+      toast.success("Artwork and media permanently deleted");
+    } catch (edgeErr: any) {
+      const { error: archiveError } = await supabase
+        .from("artworks")
+        .update({
+          status: "archived",
+          metadata: { admin_banned: true, ban_reason: reason },
+        })
+        .eq("id", selectedReport.artwork_id);
+      if (archiveError) {
+        throw new Error(`Deletion and Archive both failed: ${archiveError.message}`);
+      }
+      toast.warning(`Permanent deletion failed, but artwork was hidden: ${edgeErr.message}`);
+    }
+  };
+
+  /* ── Helper: Notify Artist ── */
+  const notifyArtist = async () => {
+    if (!selectedReport?.artwork_artist_id) return;
+    await supabase.from("user_warnings").insert({
+      user_id: selectedReport.artwork_artist_id,
+      type: "warning",
+      reason: `Automatic Strike: Takedown of artwork "${selectedReport.artwork_title}" due to: ${reason}`,
+      issued_by: user?.id || "system",
+      is_active: true,
+    });
+    await supabase.from("notifications").insert({
+      user_id: selectedReport.artwork_artist_id,
+      title: "Content Removed & Strike Issued",
+      message: `Your artwork "${selectedReport.artwork_title}" was removed. Reason: ${reason}. A moderation strike has been applied to your account. Contact grievance@artswarit.com for appeals.`,
+      type: "error",
+    });
   };
 
   /* ── Remove Content ── */
@@ -170,158 +287,85 @@ export default function ContentModeration() {
     if (!selectedReport || !reason.trim()) return;
     setProcessing(true);
     try {
-      // Resolve ALL pending reports for this artwork/user
-      if (selectedReport.artwork_id) {
-        await supabase.from('reports')
-          .update({ status: 'resolved' })
-          .eq('artwork_id', selectedReport.artwork_id)
-          .eq('status', 'pending');
-      } else if (selectedReport.user_id) {
-        await supabase.from('reports')
-          .update({ status: 'resolved' })
-          .eq('user_id', selectedReport.user_id)
-          .eq('status', 'pending');
-      }
-
-      // Actually delete the artwork and its media via Edge Function
-      if (selectedReport.artwork_id) {
-        setProcessing(true);
-        console.log('Invoking delete function for artwork:', selectedReport.artwork_id);
-        
-        try {
-          const { data, error: deleteError } = await supabase.functions.invoke('delete-artwork-and-media', {
-            body: { artworkId: selectedReport.artwork_id }
-          });
-          
-          if (deleteError) {
-            console.error('Edge function error object:', deleteError);
-            
-            // Try to extract a human-readable error from the error object or response
-            let errorMsg = 'Unknown error';
-            
-            if (typeof deleteError === 'string') {
-              errorMsg = deleteError;
-            } else if (deleteError instanceof Error) {
-              errorMsg = deleteError.message;
-            } else if (deleteError.context?.json) {
-              // Try to get JSON from the response body if it exists
-              try {
-                const body = await deleteError.context.json();
-                errorMsg = body.error || body.message || JSON.stringify(body);
-              } catch (e) {
-                errorMsg = deleteError.message || 'Server error';
-              }
-            } else if (data?.error) {
-              errorMsg = data.error;
-            }
-
-            throw new Error(errorMsg);
-          }
-          
-          toast.success('Artwork and media permanently deleted');
-        } catch (edgeErr: any) {
-          console.error('Moderation cleanup error:', edgeErr);
-          
-          // If the function fails, fallback to archiving immediately
-          const { error: archiveError } = await supabase.from('artworks').update({ 
-            status: 'archived',
-            metadata: { admin_banned: true, ban_reason: reason }
-          }).eq('id', selectedReport.artwork_id);
-          
-          if (archiveError) {
-            console.error('Archive fallback failed:', archiveError);
-            throw new Error(`Deletion and Archive both failed: ${archiveError.message}`);
-          }
-          
-          toast.warning(`Permanant deletion failed, but artwork was hidden: ${edgeErr.message}`);
-        }
-      }
-
-      // Notify artist and Issue Automatic Strike
-      if (selectedReport.artwork_artist_id) {
-        // Automatic Strike in DB
-        await supabase.from('user_warnings').insert({
-          user_id: selectedReport.artwork_artist_id,
-          type: 'warning',
-          reason: `Automatic Strike: Takedown of artwork "${selectedReport.artwork_title}" due to: ${reason}`,
-          issued_by: user?.id || 'system',
-          is_active: true
-        });
-
-        // Notify
-        await supabase.from('notifications').insert({
-          user_id: selectedReport.artwork_artist_id,
-          title: 'Content Removed & Strike Issued',
-          message: `Your artwork "${selectedReport.artwork_title}" was removed. Reason: ${reason}. A moderation strike has been applied to your account. Contact grievance@artswarit.com for appeals.`,
-          type: 'error',
-        });
-      }
-
-      const withinDeadline = Date.now() - new Date(selectedReport.created_at).getTime() < 3 * 3600000;
-
-      await writeAuditLog(user?.id || 'system', 'CONTENT_REMOVED', selectedReport.artwork_id || selectedReport.id, reason, {
-        artwork_title: selectedReport.artwork_title,
-        artist_name: selectedReport.artist_name,
-        report_reason: selectedReport.reason,
-        reporter: selectedReport.reporter_name,
-        takedown_within_3hrs: withinDeadline,
-      });
-
-      toast.success('Content removed and report resolved');
+      await resolveReports();
+      await deleteArtwork();
+      await notifyArtist();
+      const withinDeadline =
+        Date.now() - new Date(selectedReport.created_at).getTime() < 3 * 3600000;
+      await writeAuditLog(
+        user?.id || "system",
+        "CONTENT_REMOVED",
+        selectedReport.artwork_id || selectedReport.id,
+        reason,
+        {
+          artwork_title: selectedReport.artwork_title,
+          artist_name: selectedReport.artist_name,
+          report_reason: selectedReport.reason,
+          reporter: selectedReport.reporter_name,
+          takedown_within_3hrs: withinDeadline,
+        },
+      );
+      toast.success("Content removed and report resolved");
       fetchReports();
       setDialogOpen(false);
       setSelectedReport(null);
     } catch (err: any) {
-      console.error('Full moderation error:', err);
-      toast.error(err.message || 'Failed to moderate content');
-    } finally { setProcessing(false); }
+      toast.error(err.message || "Failed to moderate content");
+    } finally {
+      setProcessing(false);
+    }
   };
 
-  /* ── Dismiss Report ── */
-  const handleDismiss = async () => {
-    if (!selectedReport || !reason.trim()) return;
-    setProcessing(true);
-    try {
-      await supabase.from('reports').update({ status: 'dismissed' }).eq('id', selectedReport.id);
-      await writeAuditLog(user?.id || 'system', 'REPORT_DISMISSED', selectedReport.id, reason, {
-        artwork_title: selectedReport.artwork_title,
-        report_reason: selectedReport.reason,
-      });
-      toast.success('Report dismissed');
-      fetchReports();
-      setDialogOpen(false);
-    } catch (err: any) {
-      toast.error(err.message || 'Failed');
-    } finally { setProcessing(false); }
-  };
-
-  if (loading) return <div className="flex items-center justify-center p-12"><LogoLoader text="Loading reports…" /></div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center p-12">
+        <LogoLoader text="Loading reports…" />
+      </div>
+    );
 
   return (
     <>
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-red-100 dark:bg-red-900/30"><AlertTriangle className="h-5 w-5 text-red-600" /></div>
+            <div className="p-2 rounded-xl bg-red-100 dark:bg-red-900/30">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+            </div>
             <div>
-              <CardTitle className="text-xl font-bold">Priority Moderation Queue</CardTitle>
-              <CardDescription className="text-xs">Review and resolve reported user content across the platform.</CardDescription>
+              <CardTitle className="text-xl font-bold">
+                Priority Moderation Queue
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Review and resolve reported user content across the platform.
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-3 mb-6">
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 text-center space-y-1">
-              <p className="text-xl font-black text-red-600">{highPriority.length}</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-red-600">Urgent (&gt;2h)</p>
+              <p className="text-xl font-black text-red-600">
+                {highPriority.length}
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-red-600">
+                Urgent (&gt;2h)
+              </p>
             </div>
             <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 text-center space-y-1">
-              <p className="text-xl font-black text-amber-600">{pendingReports.length}</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">Pending</p>
+              <p className="text-xl font-black text-amber-600">
+                {pendingReports.length}
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-amber-600">
+                Pending
+              </p>
             </div>
             <div className="p-3 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800/30 text-center space-y-1">
-              <p className="text-xl font-black text-green-600">{resolvedReports.length}</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-green-600">Actioned</p>
+              <p className="text-xl font-black text-green-600">
+                {resolvedReports.length}
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-green-600">
+                Actioned
+              </p>
             </div>
           </div>
 
@@ -330,25 +374,57 @@ export default function ContentModeration() {
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <Shield className="h-4 w-4 text-red-600" />
-                <h3 className="font-black text-sm text-red-600 uppercase tracking-wider">Urgent Queue</h3>
+                <h3 className="font-black text-sm text-red-600 uppercase tracking-wider">
+                  Urgent Queue
+                </h3>
               </div>
               <div className="space-y-3">
-                {highPriority.map(r => (
-                  <Card key={r.id} className="border-l-4 border-l-red-500 border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/10">
+                {highPriority.map((r) => (
+                  <Card
+                    key={r.id}
+                    className="border-l-4 border-l-red-500 border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/10"
+                  >
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row gap-4">
-                        {r.artwork_image && <img src={r.artwork_image} alt="" className="w-20 h-20 rounded-lg object-cover border shrink-0" />}
+                        {r.artwork_image && (
+                          <img
+                            src={r.artwork_image}
+                            alt=""
+                            className="w-20 h-20 rounded-lg object-cover border shrink-0"
+                          />
+                        )}
                         <div className="flex-1 min-w-0 space-y-1.5">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-sm truncate">{r.artwork_title}</h4>
-                            {r.artwork_status === 'archived' && <Badge variant="outline" className="text-[10px] h-4 bg-red-100 text-red-600 border-red-200">ALREADY REMOVED</Badge>}
-                            <Badge className="bg-red-600 text-white border-0 text-[9px]">URGENT</Badge>
+                            <h4 className="font-bold text-sm truncate">
+                              {r.artwork_title}
+                            </h4>
+                            {r.artwork_status === "archived" && (
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] h-4 bg-red-100 text-red-600 border-red-200"
+                              >
+                                ALREADY REMOVED
+                              </Badge>
+                            )}
+                            <Badge className="bg-red-600 text-white border-0 text-[9px]">
+                              URGENT
+                            </Badge>
                             <CountdownTimer flaggedAt={r.created_at} />
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-2">{r.reason}</p>
-                          <p className="text-[10px] text-muted-foreground">By <b>{r.artist_name}</b> · Reported by <b>{r.reporter_name}</b></p>
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {r.reason}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            By <b>{r.artist_name}</b> · Reported by{" "}
+                            <b>{r.reporter_name}</b>
+                          </p>
                         </div>
-                        <Button size="sm" variant="destructive" onClick={() => openDetails(r)} className="shrink-0">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => openDetails(r)}
+                          className="shrink-0"
+                        >
                           <Trash2 className="h-4 w-4 mr-1" /> Review & Remove
                         </Button>
                       </div>
@@ -360,31 +436,60 @@ export default function ContentModeration() {
           )}
 
           {/* Normal pending */}
-          {pendingReports.filter(r => getUrgency(r) !== 'high').length > 0 && (
+          {pendingReports.filter((r) => getUrgency(r) !== "high").length >
+            0 && (
             <div className="mb-4">
-              <h3 className="font-bold text-sm text-muted-foreground mb-3">Pending Reports</h3>
+              <h3 className="font-bold text-sm text-muted-foreground mb-3">
+                Pending Reports
+              </h3>
               <div className="space-y-3">
-                {pendingReports.filter(r => getUrgency(r) !== 'high').map(r => (
-                  <Card key={r.id} className="border-l-4 border-l-amber-400">
-                    <CardContent className="p-4">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        {r.artwork_image && <img src={r.artwork_image} alt="" className="w-16 h-16 rounded-lg object-cover border shrink-0" />}
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-sm truncate">{r.artwork_title}</h4>
-                            {r.artwork_status === 'archived' && <Badge variant="outline" className="text-[10px] h-4 bg-red-100 text-red-600 border-red-200">ALREADY REMOVED</Badge>}
-                            <CountdownTimer flaggedAt={r.created_at} />
+                {pendingReports
+                  .filter((r) => getUrgency(r) !== "high")
+                  .map((r) => (
+                    <Card key={r.id} className="border-l-4 border-l-amber-400">
+                      <CardContent className="p-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          {r.artwork_image && (
+                            <img
+                              src={r.artwork_image}
+                              alt=""
+                              className="w-16 h-16 rounded-lg object-cover border shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-bold text-sm truncate">
+                                {r.artwork_title}
+                              </h4>
+                              {r.artwork_status === "archived" && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] h-4 bg-red-100 text-red-600 border-red-200"
+                                >
+                                  ALREADY REMOVED
+                                </Badge>
+                              )}
+                              <CountdownTimer flaggedAt={r.created_at} />
+                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-1">
+                              {r.reason}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              By <b>{r.artist_name}</b>
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground line-clamp-1">{r.reason}</p>
-                          <p className="text-[10px] text-muted-foreground">By <b>{r.artist_name}</b></p>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openDetails(r)}
+                            className="shrink-0"
+                          >
+                            <Eye className="h-4 w-4 mr-1" /> Review
+                          </Button>
                         </div>
-                        <Button size="sm" variant="outline" onClick={() => openDetails(r)} className="shrink-0">
-                          <Eye className="h-4 w-4 mr-1" /> Review
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))}
               </div>
             </div>
           )}
@@ -398,19 +503,43 @@ export default function ContentModeration() {
 
           {resolvedReports.length > 0 && (
             <div className="mt-6 pt-4 border-t">
-              <h3 className="font-bold text-sm text-muted-foreground mb-3">Recently Actioned</h3>
+              <h3 className="font-bold text-sm text-muted-foreground mb-3">
+                Recently Actioned
+              </h3>
               <div className="space-y-2">
-                {resolvedReports.slice(0, 10).map(r => (
-                  <div key={r.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 opacity-60">
-                    {r.artwork_image && <img src={r.artwork_image} alt="" className="w-10 h-10 rounded object-cover" />}
+                {resolvedReports.slice(0, 10).map((r) => (
+                  <div
+                    key={r.id}
+                    className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 opacity-60"
+                  >
+                    {r.artwork_image && (
+                      <img
+                        src={r.artwork_image}
+                        alt=""
+                        className="w-10 h-10 rounded object-cover"
+                      />
+                    )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold truncate">{r.artwork_title}</p>
-                      {r.artwork_status === 'archived' && (
-                        <Badge variant="outline" className="text-[10px] h-4 bg-red-100 text-red-600 border-red-200">Already Removed</Badge>
+                      <p className="text-xs font-bold truncate">
+                        {r.artwork_title}
+                      </p>
+                      {r.artwork_status === "archived" && (
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] h-4 bg-red-100 text-red-600 border-red-200"
+                        >
+                          Already Removed
+                        </Badge>
                       )}
                     </div>
-                    <Badge className={r.status === 'resolved' ? 'bg-red-500/20 text-red-600' : 'bg-slate-500/20 text-slate-600'}>
-                      {r.status === 'resolved' ? 'Removed' : 'Dismissed'}
+                    <Badge
+                      className={
+                        r.status === "resolved"
+                          ? "bg-red-500/20 text-red-600"
+                          : "bg-slate-500/20 text-slate-600"
+                      }
+                    >
+                      {r.status === "resolved" ? "Removed" : "Dismissed"}
                     </Badge>
                   </div>
                 ))}
@@ -424,43 +553,105 @@ export default function ContentModeration() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-2xl font-bold"><AlertTriangle className="h-6 w-6 text-red-600" /> Content Review</DialogTitle>
-            <DialogDescription className="text-base">Review flagged content. Removal hides artwork and notifies artist.</DialogDescription>
+            <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
+              <AlertTriangle className="h-6 w-6 text-red-600" /> Content Review
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Review flagged content. Removal hides artwork and notifies artist.
+            </DialogDescription>
           </DialogHeader>
           {selectedReport && (
             <div className="space-y-6">
               {selectedReport.artwork_image && (
                 <div className="w-full bg-slate-950 rounded-2xl overflow-hidden border-2 border-slate-800 flex items-center justify-center min-h-[400px] max-h-[600px] shadow-2xl">
-                  <img 
-                    src={selectedReport.artwork_image} 
-                    alt="" 
-                    className="max-w-full max-h-[600px] object-contain transition-all duration-500 hover:scale-105" 
+                  <img
+                    src={selectedReport.artwork_image}
+                    alt=""
+                    className="max-w-full max-h-[600px] object-contain transition-all duration-500 hover:scale-105"
                   />
                 </div>
               )}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-muted/30 border">
-                <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Artwork</Label><p className="font-bold text-sm truncate">{selectedReport.artwork_title}</p></div>
-                <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Artist</Label><p className="font-bold text-sm truncate">{selectedReport.artist_name}</p></div>
-                <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Reported By</Label><p className="font-bold text-sm truncate">{selectedReport.reporter_name}</p></div>
-                <div><Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Timer</Label><div className="mt-1"><CountdownTimer flaggedAt={selectedReport.created_at} /></div></div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
+                    Artwork
+                  </Label>
+                  <p className="font-bold text-sm truncate">
+                    {selectedReport.artwork_title}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
+                    Artist
+                  </Label>
+                  <p className="font-bold text-sm truncate">
+                    {selectedReport.artist_name}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
+                    Reported By
+                  </Label>
+                  <p className="font-bold text-sm truncate">
+                    {selectedReport.reporter_name}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">
+                    Timer
+                  </Label>
+                  <div className="mt-1">
+                    <CountdownTimer flaggedAt={selectedReport.created_at} />
+                  </div>
+                </div>
               </div>
               <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30">
-                <Label className="text-[10px] text-red-600 uppercase tracking-widest font-bold">Report Reason</Label>
-                <p className="text-sm mt-1 font-medium">{selectedReport.reason}</p>
-                {selectedReport.description && <p className="text-xs text-muted-foreground mt-1">{selectedReport.description}</p>}
+                <Label className="text-[10px] text-red-600 uppercase tracking-widest font-bold">
+                  Report Reason
+                </Label>
+                <p className="text-sm mt-1 font-medium">
+                  {selectedReport.reason}
+                </p>
+                {selectedReport.description && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {selectedReport.description}
+                  </p>
+                )}
               </div>
-              {selectedReport.status === 'pending' && (
+              {selectedReport.status === "pending" && (
                 <div className="space-y-3 pt-3 border-t">
                   <div className="space-y-1.5">
-                    <Label className="font-bold text-xs">Admin Notes <span className="text-red-500">*</span></Label>
-                    <Textarea placeholder="Mandatory reason (audit log)..." value={reason} onChange={e => setReason(e.target.value)} rows={3} className="text-sm" />
-                    {!reason.trim() && <p className="text-[10px] text-red-500">Required for audit compliance.</p>}
+                    <Label className="font-bold text-xs">
+                      Admin Notes <span className="text-red-500">*</span>
+                    </Label>
+                    <Textarea
+                      placeholder="Mandatory reason (audit log)..."
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      rows={3}
+                      className="text-sm"
+                    />
+                    {!reason.trim() && (
+                      <p className="text-[10px] text-red-500">
+                        Required for audit compliance.
+                      </p>
+                    )}
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="destructive" className="flex-1" onClick={handleRemove} disabled={processing || !reason.trim()}>
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={handleRemove}
+                      disabled={processing || !reason.trim()}
+                    >
                       <Trash2 className="h-4 w-4 mr-1.5" /> Confirm Removal
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={handleDismiss} disabled={processing || !reason.trim()}>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={handleDismiss}
+                      disabled={processing || !reason.trim()}
+                    >
                       Dismiss Report
                     </Button>
                   </div>
@@ -468,9 +659,18 @@ export default function ContentModeration() {
               )}
             </div>
           )}
-          <DialogFooter><Button variant="outline" onClick={() => setDialogOpen(false)}>Close</Button></DialogFooter>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
   );
 }
+
+
+
+
+

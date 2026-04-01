@@ -1,23 +1,40 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, CheckCircle, Clock, DollarSign, FileText, Lock, Upload, AlertCircle, CreditCard } from 'lucide-react';
-import { MilestoneCard } from './MilestoneCard';
-import { MilestoneSubmissionDialog } from './MilestoneSubmissionDialog';
-import { MilestoneReviewDialog } from './MilestoneReviewDialog';
-import { DisputeDialog } from './DisputeDialog';
-import { ProjectActivityLog } from './ProjectActivityLog';
-import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
-import { EnablePaymentsDialog } from '@/components/payments/EnablePaymentsDialog';
-import { useArtistPaymentAccount } from '@/hooks/useArtistPaymentAccount';
-import LogoLoader from '@/components/ui/LogoLoader';
-import { broadcastRefresh, useRealtimeSync } from '@/lib/realtime-sync';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  FileText,
+  Lock,
+  Upload,
+  AlertCircle,
+  CreditCard,
+  Send,
+} from "lucide-react";
+import { MilestoneCard } from "./MilestoneCard";
+import { MilestoneSubmissionDialog } from "./MilestoneSubmissionDialog";
+import { MilestoneReviewDialog } from "./MilestoneReviewDialog";
+import { DisputeDialog } from "./DisputeDialog";
+import { ProjectActivityLog } from "./ProjectActivityLog";
+import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
+import { EnablePaymentsDialog } from "@/components/payments/EnablePaymentsDialog";
+import { useArtistPaymentAccount } from "@/hooks/useArtistPaymentAccount";
+import LogoLoader from "@/components/ui/LogoLoader";
+import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
 
 interface Milestone {
   id: string;
@@ -62,14 +79,17 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   const [project, setProject] = useState<Project | null>(null);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
+  const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(
+    null,
+  );
   const [submissionDialogOpen, setSubmissionDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
   const [enablePaymentsOpen, setEnablePaymentsOpen] = useState(false);
   const [artistKycEnabled, setArtistKycEnabled] = useState(false);
 
-  const { account: myPaymentAccount, isPayoutsEnabled } = useArtistPaymentAccount();
+  const { account: myPaymentAccount, isPayoutsEnabled } =
+    useArtistPaymentAccount();
 
   const isClient = user?.id === project?.client_id;
   const isArtist = user?.id === project?.artist_id;
@@ -78,11 +98,11 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   useEffect(() => {
     const fetchArtistKyc = async () => {
       if (!project?.artist_id || isArtist) return;
-      
+
       const { data } = await supabase
-        .from('razorpay_accounts')
-        .select('payouts_enabled')
-        .eq('user_id', project.artist_id)
+        .from("razorpay_accounts")
+        .select("payouts_enabled")
+        .eq("user_id", project.artist_id)
         .single();
 
       setArtistKycEnabled(data?.payouts_enabled ?? false);
@@ -94,16 +114,22 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     if (project?.artist_id) {
       const channel = supabase
         .channel(`artist-kyc-${project.artist_id}`)
-        .on('postgres_changes', {
-          event: '*',
-          schema: 'public',
-          table: 'razorpay_accounts',
-          filter: `user_id=eq.${project.artist_id}`,
-        }, (payload) => {
-          if (payload.new) {
-            setArtistKycEnabled((payload.new as any).payouts_enabled ?? false);
-          }
-        })
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "razorpay_accounts",
+            filter: `user_id=eq.${project.artist_id}`,
+          },
+          (payload) => {
+            if (payload.new) {
+              setArtistKycEnabled(
+                (payload.new as any).payouts_enabled ?? false,
+              );
+            }
+          },
+        )
         .subscribe();
 
       return () => {
@@ -114,36 +140,44 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
 
   useEffect(() => {
     fetchProjectData();
-    
+
     // Subscribe to milestone updates
     const milestoneChannel = supabase
       .channel(`project-milestones-${projectId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'project_milestones',
-        filter: `project_id=eq.${projectId}`
-      }, (payload) => {
-        console.log('Milestone update:', payload);
-        fetchMilestones();
-      })
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "project_milestones",
+          filter: `project_id=eq.${projectId}`,
+        },
+        (payload) => {
+          console.log("Milestone update:", payload);
+          fetchMilestones();
+        },
+      )
       .subscribe();
 
     // Subscribe to payment updates
     const paymentChannel = supabase
       .channel(`project-payments-${projectId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'payments',
-        filter: `project_id=eq.${projectId}`
-      }, (payload) => {
-        console.log('Payment update:', payload);
-        if ((payload.new as any)?.status === 'success') {
-          toast.success('Payment confirmed!');
-          fetchMilestones();
-        }
-      })
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "payments",
+          filter: `project_id=eq.${projectId}`,
+        },
+        (payload) => {
+          console.log("Payment update:", payload);
+          if ((payload.new as any)?.status === "success") {
+            toast.success("Payment confirmed!");
+            fetchMilestones();
+          }
+        },
+      )
       .subscribe();
 
     return () => {
@@ -155,8 +189,12 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   const fetchProjectData = async () => {
     try {
       const [projectRes, milestonesRes] = await Promise.all([
-        supabase.from('projects').select('*').eq('id', projectId).single(),
-        supabase.from('project_milestones').select('*').eq('project_id', projectId).order('sort_order')
+        supabase.from("projects").select("*").eq("id", projectId).single(),
+        supabase
+          .from("project_milestones")
+          .select("*")
+          .eq("project_id", projectId)
+          .order("sort_order"),
       ]);
 
       if (projectRes.error) throw projectRes.error;
@@ -165,7 +203,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
       setProject(projectRes.data as unknown as Project);
       setMilestones(milestonesRes.data as unknown as Milestone[]);
     } catch (error: any) {
-      toast.error('Failed to load project data');
+      toast.error("Failed to load project data");
       console.error(error);
     } finally {
       setLoading(false);
@@ -174,10 +212,10 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
 
   const fetchMilestones = async () => {
     const { data, error } = await supabase
-      .from('project_milestones')
-      .select('*')
-      .eq('project_id', projectId)
-      .order('sort_order');
+      .from("project_milestones")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("sort_order");
 
     if (!error && data) {
       setMilestones(data as unknown as Milestone[]);
@@ -185,32 +223,65 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   };
 
   // Realtime Sync for project/milestones
-  useRealtimeSync('projects', fetchProjectData);
-  useRealtimeSync('milestones', fetchMilestones);
+  useRealtimeSync("projects", fetchProjectData);
+  useRealtimeSync("milestones", fetchMilestones);
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
-      LOCKED: { color: 'bg-muted text-muted-foreground', icon: <Lock className="h-3 w-3" /> },
-      WAITING_FUNDS: { color: 'bg-amber-500/20 text-amber-600', icon: <Clock className="h-3 w-3" /> },
-      ACTIVE: { color: 'bg-blue-500/20 text-blue-600', icon: <FileText className="h-3 w-3" /> },
-      REVIEW_PENDING: { color: 'bg-yellow-500/20 text-yellow-600', icon: <Upload className="h-3 w-3" /> },
-      REVISION_REQUESTED: { color: 'bg-orange-500/20 text-orange-600', icon: <AlertCircle className="h-3 w-3" /> },
-      COMPLETED: { color: 'bg-emerald-500/20 text-emerald-600', icon: <DollarSign className="h-3 w-3" /> },
-      DISPUTED: { color: 'bg-red-500/20 text-red-600', icon: <AlertTriangle className="h-3 w-3" /> }
+  const getStatusBadge = (status: string, hasBeenPaid?: boolean) => {
+    // If it says WAITING_FUNDS but was paid due to sync lag or bug, treat as ACTIVE
+    const actualStatus = (status === "WAITING_FUNDS" && hasBeenPaid) ? "ACTIVE" : status;
+
+    const statusConfig: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
+      LOCKED: {
+        color: "bg-muted text-muted-foreground",
+        icon: <Lock className="h-3 w-3" />,
+        label: "Locked",
+      },
+      WAITING_FUNDS: {
+        color: "bg-amber-500/20 text-amber-600",
+        icon: <Clock className="h-3 w-3" />,
+        label: "Pending Funding",
+      },
+      ACTIVE: {
+        color: "bg-blue-500/20 text-blue-600",
+        icon: <FileText className="h-3 w-3" />,
+        label: "Funded & Active",
+      },
+      REVIEW_PENDING: {
+        color: "bg-yellow-500/20 text-yellow-600",
+        icon: <Upload className="h-3 w-3" />,
+        label: "Submitted",
+      },
+      REVISION_REQUESTED: {
+        color: "bg-orange-500/20 text-orange-600",
+        icon: <AlertCircle className="h-3 w-3" />,
+        label: "Revision Requested",
+      },
+      COMPLETED: {
+        color: "bg-emerald-500/20 text-emerald-600",
+        icon: <DollarSign className="h-3 w-3" />,
+        label: "Approved & Released",
+      },
+      DISPUTED: {
+        color: "bg-red-500/20 text-red-600",
+        icon: <AlertTriangle className="h-3 w-3" />,
+        label: "Disputed",
+      },
     };
 
-    const config = statusConfig[status] || statusConfig.LOCKED;
+    const config = statusConfig[actualStatus] || statusConfig.LOCKED;
     return (
       <Badge className={`${config.color} gap-1`}>
         {config.icon}
-        {status.replace('_', ' ')}
+        {config.label}
       </Badge>
     );
   };
 
   const calculateProgress = () => {
     if (milestones.length === 0) return 0;
-    const completedMilestones = milestones.filter(m => m.status === 'COMPLETED').length;
+    const completedMilestones = milestones.filter(
+      (m) => m.status === "COMPLETED",
+    ).length;
     return (completedMilestones / milestones.length) * 100;
   };
 
@@ -219,29 +290,37 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   };
 
   const getPaidAmount = () => {
-    return milestones.filter(m => m.status === 'COMPLETED').reduce((sum, m) => sum + (m.amount || 0), 0);
+    return milestones
+      .filter((m) => m.status === "COMPLETED")
+      .reduce((sum, m) => sum + (m.amount || 0), 0);
   };
 
   const canStartMilestone = (milestone: Milestone, index: number) => {
     // Artists must have payment enabled AND project must be accepted
-    if (isArtist && (!isPayoutsEnabled || project?.status !== 'accepted')) {
+    if (isArtist && (!isPayoutsEnabled || project?.status !== "accepted")) {
       return false;
     }
     // In escrow model, artist can only start when the milestone is ACTIVE (funded)
     // and previous milestone (if any) has been COMPLETED.
-    if (index === 0) return milestone.status === 'ACTIVE' || milestone.status === 'REVISION_REQUESTED';
+    if (index === 0)
+      return (
+        milestone.status === "ACTIVE" ||
+        milestone.status === "REVISION_REQUESTED"
+      );
     const previousMilestone = milestones[index - 1];
-    const currentReady = milestone.status === 'ACTIVE' || milestone.status === 'REVISION_REQUESTED';
-    return previousMilestone.status === 'COMPLETED' && currentReady;
+    const currentReady =
+      milestone.status === "ACTIVE" ||
+      milestone.status === "REVISION_REQUESTED";
+    return previousMilestone.status === "COMPLETED" && currentReady;
   };
 
   const getStartBlockedReason = () => {
     if (isArtist) {
-      if (project?.status !== 'accepted') {
-        return 'project_not_accepted';
+      if (project?.status !== "accepted") {
+        return "project_not_accepted";
       }
       if (!isPayoutsEnabled) {
-        return 'payment_not_enabled';
+        return "payment_not_enabled";
       }
     }
     return null;
@@ -250,32 +329,79 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   const handleStartMilestone = async (milestoneId: string) => {
     try {
       const { error } = await supabase
-        .from('project_milestones')
-        .update({ status: 'ACTIVE' })
-        .eq('id', milestoneId);
+        .from("project_milestones")
+        .update({ status: "ACTIVE" })
+        .eq("id", milestoneId);
 
       if (error) throw error;
 
-      await logActivity(milestoneId, 'milestone_started', { milestoneId });
-      toast.success('Milestone started');
-      broadcastRefresh('milestones');
+      await logActivity(milestoneId, "milestone_started", { milestoneId });
+      toast.success("Milestone started");
+      broadcastRefresh("milestones");
       fetchMilestones();
     } catch (error: any) {
-      toast.error('Failed to start milestone');
+      toast.error("Failed to start milestone");
     }
   };
 
-  const logActivity = async (milestoneId: string | null, action: string, details: any) => {
+  const handleClaimPayout = async (milestoneId: string) => {
     try {
-      await supabase.from('project_activity_logs').insert({
+      const { data, error } = await supabase.functions.invoke(
+        "release-milestone-payout",
+        {
+          body: { milestoneId },
+        },
+      );
+
+      if (error || !data?.success) {
+        throw new Error(
+          data?.error || error?.message || "Failed to release payout",
+        );
+      }
+
+      await logActivity(milestoneId, "milestone_auto_approved", { milestoneId });
+      toast.success("Payout claimed successfully via auto-approval.");
+      broadcastRefresh("milestones");
+      fetchMilestones();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to claim payout");
+    }
+  };
+
+  const handleNudgeClient = async (milestoneTitle: string) => {
+    try {
+      if (!project?.client_id) return;
+      
+      const { error } = await supabase.from("notifications").insert({
+        user_id: project.client_id,
+        title: "Action Required: Project Paused",
+        message: `Artist is waiting for funds to start: ${milestoneTitle}`,
+        type: "milestone_update",
+        link: `/dashboard/client/projects/${projectId}`,
+      });
+
+      if (error) throw error;
+      toast.success("Nudge sent to client!");
+    } catch (error) {
+      toast.error("Failed to send nudge");
+    }
+  };
+
+  const logActivity = async (
+    milestoneId: string | null,
+    action: string,
+    details: any,
+  ) => {
+    try {
+      await supabase.from("project_activity_logs").insert({
         project_id: projectId,
         milestone_id: milestoneId,
         user_id: user?.id,
         action,
-        details
+        details,
       });
     } catch (error) {
-      console.error('Failed to log activity:', error);
+      console.error("Failed to log activity:", error);
     }
   };
 
@@ -298,8 +424,10 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     );
   }
 
-  const budgetMatch = Math.abs(getTotalBudget() - (project.amount_usd || project.budget || 0)) < 0.05;
-  const hasApprovedMilestones = milestones.some(m => m.status === 'approved');
+  const budgetMatch =
+    Math.abs(getTotalBudget() - (project.amount_usd || project.budget || 0)) <
+    0.05;
+  const hasApprovedMilestones = milestones.some((m) => m.status === "approved");
 
   return (
     <div className="space-y-6">
@@ -311,9 +439,12 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
               <div className="flex items-center gap-3">
                 <CreditCard className="h-5 w-5 text-yellow-600" />
                 <div>
-                  <p className="font-medium text-yellow-600">Enable Payments to Receive Payouts</p>
+                  <p className="font-medium text-yellow-600">
+                    Enable Payments to Receive Payouts
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    Complete your payment setup to receive payouts when milestones are paid.
+                    Complete your payment setup to receive payouts when
+                    milestones are paid.
                   </p>
                 </div>
               </div>
@@ -332,12 +463,20 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
             <div>
               <CardTitle className="flex items-center gap-2">
                 {project.title}
-                {project.is_locked && <Lock className="h-4 w-4 text-muted-foreground" />}
+                {project.is_locked && (
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                )}
               </CardTitle>
               <CardDescription>{project.description}</CardDescription>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold">{formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}</p>
+              <p className="text-2xl font-bold">
+                {formatCurrency(
+                  project.amount_usd || project.budget || 0,
+                  "USD",
+                  project.exchange_rate || undefined,
+                )}
+              </p>
               <p className="text-sm text-muted-foreground">Total Budget</p>
             </div>
           </div>
@@ -349,8 +488,19 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
               <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
                 <p className="text-sm text-destructive">
-                  Milestone total ({formatCurrency(getTotalBudget(), 'USD', project.exchange_rate || undefined)}) doesn't match project budget ({formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}). 
-                  Please adjust milestones before proceeding.
+                  Milestone total (
+                  {formatCurrency(
+                    getTotalBudget(),
+                    "USD",
+                    project.exchange_rate || undefined,
+                  )}
+                  ) doesn't match project budget (
+                  {formatCurrency(
+                    project.amount_usd || project.budget || 0,
+                    "USD",
+                    project.exchange_rate || undefined,
+                  )}
+                  ). Please adjust milestones before proceeding.
                 </p>
               </div>
             )}
@@ -363,8 +513,22 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
               </div>
               <Progress value={calculateProgress()} className="h-2" />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{formatCurrency(getPaidAmount(), 'USD', project.exchange_rate || undefined)} paid</span>
-                <span>{formatCurrency(getTotalBudget() - getPaidAmount(), 'USD', project.exchange_rate || undefined)} remaining</span>
+                <span>
+                  {formatCurrency(
+                    getPaidAmount(),
+                    "USD",
+                    project.exchange_rate || undefined,
+                  )}{" "}
+                  paid
+                </span>
+                <span>
+                  {formatCurrency(
+                    getTotalBudget() - getPaidAmount(),
+                    "USD",
+                    project.exchange_rate || undefined,
+                  )}{" "}
+                  remaining
+                </span>
               </div>
             </div>
           </div>
@@ -375,8 +539,18 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
       <Tabs defaultValue="milestones">
         <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
           <TabsList className="w-full h-auto min-h-[48px] sm:min-h-0 p-1 bg-muted/50 rounded-lg flex items-stretch gap-1">
-            <TabsTrigger value="milestones" className="flex-1 min-w-[140px] py-2 sm:py-2.5 px-3 rounded-md transition-all">Milestones ({milestones.length})</TabsTrigger>
-            <TabsTrigger value="activity" className="flex-1 min-w-[140px] py-2 sm:py-2.5 px-3 rounded-md transition-all">Activity Log</TabsTrigger>
+            <TabsTrigger
+              value="milestones"
+              className="flex-1 min-w-[140px] py-2 sm:py-2.5 px-3 rounded-md transition-all"
+            >
+              Milestones ({milestones.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="activity"
+              className="flex-1 min-w-[140px] py-2 sm:py-2.5 px-3 rounded-md transition-all"
+            >
+              Activity Log
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -385,7 +559,9 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
             <Card>
               <CardContent className="p-8 text-center">
                 <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No milestones defined yet</p>
+                <p className="text-muted-foreground">
+                  No milestones defined yet
+                </p>
               </CardContent>
             </Card>
           ) : (
@@ -399,9 +575,11 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
                 isLocked={project.is_locked}
                 canStart={canStartMilestone(milestone, index)}
                 startBlockedReason={getStartBlockedReason()}
-                artistKycEnabled={isArtist ? isPayoutsEnabled : artistKycEnabled}
+                artistKycEnabled={
+                  isArtist ? isPayoutsEnabled : artistKycEnabled
+                }
                 artistId={project.artist_id || undefined}
-                projectStatus={project.status || 'pending'}
+                projectStatus={project.status || "pending"}
                 onStart={() => handleStartMilestone(milestone.id)}
                 onSubmit={() => {
                   setSelectedMilestone(milestone);
@@ -416,12 +594,16 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
                   setDisputeDialogOpen(true);
                 }}
                 onPaymentSuccess={() => {
-                  broadcastRefresh('milestones');
+                  broadcastRefresh("milestones");
                   fetchMilestones();
-                  logActivity(milestone.id, 'payment_initiated', { milestoneId: milestone.id });
+                  logActivity(milestone.id, "payment_initiated", {
+                    milestoneId: milestone.id,
+                  });
                 }}
-                getStatusBadge={getStatusBadge}
+                getStatusBadge={(status) => getStatusBadge(status, !!milestone.paid_at)}
                 onEnablePayments={() => setEnablePaymentsOpen(true)}
+                onClaimPayout={handleClaimPayout}
+                onNudge={() => handleNudgeClient(milestone.title)}
                 exchangeRate={project.exchange_rate || undefined}
               />
             ))
@@ -441,10 +623,13 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
             onOpenChange={setSubmissionDialogOpen}
             milestone={selectedMilestone}
             projectId={projectId}
+            autoApproveDays={project.auto_approve_days}
             onSuccess={() => {
-              broadcastRefresh('milestones');
+              broadcastRefresh("milestones");
               fetchMilestones();
-              logActivity(selectedMilestone.id, 'submission_created', { milestoneId: selectedMilestone.id });
+              logActivity(selectedMilestone.id, "submission_created", {
+                milestoneId: selectedMilestone.id,
+              });
             }}
           />
 
@@ -455,7 +640,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
             projectId={projectId}
             autoApproveDays={project.auto_approve_days}
             onSuccess={() => {
-              broadcastRefresh('milestones');
+              broadcastRefresh("milestones");
               fetchMilestones();
             }}
           />
@@ -466,9 +651,11 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
             milestone={selectedMilestone}
             projectId={projectId}
             onSuccess={() => {
-              broadcastRefresh('milestones');
+              broadcastRefresh("milestones");
               fetchMilestones();
-              logActivity(selectedMilestone.id, 'dispute_raised', { milestoneId: selectedMilestone.id });
+              logActivity(selectedMilestone.id, "dispute_raised", {
+                milestoneId: selectedMilestone.id,
+              });
             }}
           />
         </>
@@ -481,3 +668,8 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     </div>
   );
 }
+
+
+
+
+
