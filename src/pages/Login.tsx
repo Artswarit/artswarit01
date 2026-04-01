@@ -119,7 +119,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
             <LogoWithName />
           </div>
 
-          <Card className="glass-card border-0 shadow-xl">
+          <Card className="glass-card border border-border/50 shadow-xl rounded-2xl">
             <CardHeader className="space-y-3 pb-4">
               <CardTitle className="text-xl sm:text-2xl text-center font-heading">
                 Welcome Back
