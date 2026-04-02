@@ -1,7 +1,6 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const SignupHeader = () => {
-  const location = useLocation();
   return (
     <div className="space-y-2 text-center">
       <div className="mx-auto inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">

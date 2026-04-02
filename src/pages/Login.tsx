@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import AuthShell from "@/components/auth/AuthShell";
 
 const loginHighlights = [
@@ -29,7 +28,6 @@ const loginHighlights = [
 const Login = ({ isModal = false }: { isModal?: boolean }) => {
   const navigate = useNavigate();
   const { signIn, signInWithGoogle, loading, user } = useAuth();
-  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
