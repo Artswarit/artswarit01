@@ -367,6 +367,10 @@ const ProjectDetailModal = ({
       const { data: milestoneCheck } = await supabase.from('project_milestones').select('*').limit(1);
       const existingMilestoneCols = milestoneCheck && milestoneCheck.length > 0 ? Object.keys(milestoneCheck[0]) : [];
 
+      // Determine initial status: First milestone should be 'WAITING_FUNDS' (ready for payment)
+      // while subsequent milestones should be 'LOCKED'.
+      const initialStatus = milestones.length === 0 ? 'WAITING_FUNDS' : 'LOCKED';
+
       const milestoneInsert: any = {
         project_id: projectId,
         title: newMilestone.title,
@@ -374,7 +378,8 @@ const ProjectDetailModal = ({
         due_date: newMilestone.due_date || null,
         amount: amountUSD, // Store USD as primary truth
         created_by: user.id,
-        sort_order: milestones.length
+        sort_order: milestones.length,
+        status: initialStatus
       };
 
       // Add extra currency columns only if they exist in DB

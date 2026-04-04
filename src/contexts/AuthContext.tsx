@@ -90,87 +90,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         authListenerFired = true;
-        // Only synchronous state updates here
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
         
         if (session?.user) {
           fetchSubscription(session.user.id);
           refreshProfile(session.user.id);
+          
+          if (event === 'SIGNED_IN') {
+            // Check for pending signup role (Google OAuth)
+            const pendingRole = localStorage.getItem('pendingSignupRole');
+            if (pendingRole) {
+              handleGoogleSignupProfile(session.user, pendingRole);
+            }
+          }
         } else {
+          setLoading(false);
           setSubscription(null);
           setProfile(null);
-        }
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Check if there's a pending signup role (from Google OAuth signup)
-          const pendingRole = localStorage.getItem('pendingSignupRole');
-          if (pendingRole) {
-            // Clear the pending role immediately
-            localStorage.removeItem('pendingSignupRole');
-            
-            // Defer Supabase calls with setTimeout to avoid deadlock
-            setTimeout(() => {
-              handleGoogleSignupProfile(session.user, pendingRole);
-            }, 0);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          // Clean up any stale pending signup role on sign out
           localStorage.removeItem('pendingSignupRole');
         }
       }
     );
 
-    // Fallback: check for existing session only if onAuthStateChange hasn't fired yet
-    // This handles the edge case where the page loads with an existing session
-    const sessionTimeout = setTimeout(() => {
+    // Fallback if listener doesn't fire immediately
+    const sessionCheck = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
       if (!authListenerFired) {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-          if (!authListenerFired) {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-            if (session?.user) {
-              fetchSubscription(session.user.id);
-              refreshProfile(session.user.id);
-            }
-          }
-        });
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setLoading(false);
+        if (currentSession?.user) {
+          fetchSubscription(currentSession.user.id);
+          refreshProfile(currentSession.user.id);
+        }
       }
-    }, 100);
+    };
+    sessionCheck();
 
     return () => {
-      clearTimeout(sessionTimeout);
       authSubscription.unsubscribe();
     };
   }, []);
 
-  // Real-time subscription for subscription changes
+  // Real-time subscription for profile sync
   useEffect(() => {
     if (!user) return;
 
-    const subChannel = supabase
-      .channel(`user-subscription-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'subscribers',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          if (payload.new && (payload.new as any).is_active) {
-            setSubscription(payload.new);
-          } else {
-            setSubscription(null);
-          }
-        }
-      )
-      .subscribe();
-
-    // Real-time profile sync: avatar/bio/name updated in Settings propagates everywhere
     const profileChannel = supabase
       .channel(`user-profile-sync-${user.id}`)
       .on(
@@ -181,50 +147,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .subscribe();
 
     return () => {
-      supabase.removeChannel(subChannel);
       supabase.removeChannel(profileChannel);
     };
   }, [user, refreshProfile]);
 
-  // Handle Google signup profile creation - extracted to avoid async in callback
-  const handleGoogleSignupProfile = async (user: User, pendingRole: string) => {
+  // Handle Google signup profile creation
+  const handleGoogleSignupProfile = async (u: User, pendingRole: string) => {
     try {
+      // Small delay to ensure DB role-based triggers (if any) or existing processes have settled
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const { data: existingProfile } = await supabase
         .from('profiles')
         .select('id, role')
-        .eq('id', user.id)
-        .single();
+        .eq('id', u.id)
+        .maybeSingle();
       
-      if (existingProfile) {
-        // Profile already exists — this is a returning Google user.
-        // Don't overwrite their existing role with the pending role.
+      if (existingProfile?.role) {
+        localStorage.removeItem('pendingSignupRole');
+        setLoading(false);
         return;
       }
 
-      // No profile exists — this is a new Google OAuth signup. Create profile with selected role.
-      const { error: profileError } = await supabase
+      // No profile exists or no role — Create/Update profile with selected role.
+      const profileData = {
+        id: u.id,
+        email: u.email || '',
+        full_name: u.user_metadata?.full_name || u.user_metadata?.name || '',
+        role: pendingRole,
+        avatar_url: u.user_metadata?.avatar_url || u.user_metadata?.picture || '',
+        updated_at: new Date().toISOString()
+      };
+
+      const { error: upsertError } = await supabase
         .from('profiles')
-        .insert({
-          id: user.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
-          role: pendingRole,
-          avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || ''
-        });
+        .upsert(profileData);
         
-      if (profileError) {
-        console.error('Failed to create Google OAuth profile:', profileError);
+      if (upsertError) {
+        console.error('Failed to create/upsert Google OAuth profile:', upsertError);
         toast({
           title: "Profile Setup Issue",
-          description: "Your account was created but we couldn't set up your profile. Please update your profile in settings.",
+          description: "Your account was created but we couldn't set up your profile properly.",
           variant: "destructive"
         });
       } else {
-        // Refresh profile after creation
-        refreshProfile(user.id);
+        localStorage.removeItem('pendingSignupRole');
+        refreshProfile(u.id);
       }
     } catch (error) {
       console.error('Error in handleGoogleSignupProfile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 

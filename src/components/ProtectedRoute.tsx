@@ -20,16 +20,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
     if (loading || (adminOnly && adminLoading)) return;
 
     if (!user) {
+      if (!loading) navigate('/login');
+      return;
+    }
+
+    // Force email verification if needed
+    if (!user.email_confirmed_at && !loading) {
+      navigate('/verify-email');
+      return;
+    }
+
+    if (adminOnly && !isAdmin && !adminLoading) {
       navigate('/login');
       return;
     }
 
-    if (adminOnly && !isAdmin) {
-      navigate('/login');
-      return;
-    }
-
-    if (requiredRole && profile?.role) {
+    if (requiredRole && profile?.role && !loading) {
       if (requiredRole === 'admin' && !isAdmin) {
         navigate('/');
         return;
@@ -37,12 +43,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
       
       if (requiredRole !== profile.role) {
         // Redirect to appropriate dashboard based on their actual role
-        if (profile.role === 'artist') {
-          navigate('/artist-dashboard');
-        } else if (profile.role === 'client') {
-          navigate('/client-dashboard');
-        } else {
-          navigate('/');
+        const targetPath = profile.role === 'artist' 
+          ? '/artist-dashboard' 
+          : profile.role === 'client' 
+            ? '/client-dashboard' 
+            : '/';
+        
+        if (window.location.pathname !== targetPath) {
+          navigate(targetPath);
+          return;
         }
       }
     }

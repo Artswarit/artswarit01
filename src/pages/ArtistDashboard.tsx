@@ -15,7 +15,8 @@ import ArtistSettings from '@/components/dashboard/ArtistSettings';
 import PremiumMembership from '@/components/premium/PremiumMembership';
 import { ArtistBilling } from '@/components/dashboard/ArtistBilling';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, User, DollarSign, MessageSquare, Settings, Crown, Bell, Briefcase, Wrench, Lock, Wallet, Users } from 'lucide-react';
+import { Palette, User, DollarSign, MessageSquare, Settings, Crown, Bell, Briefcase, Wrench, Lock, Wallet, Users, LayoutDashboard } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import ProjectManagement from '@/components/dashboard/projects/ProjectManagement';
 import ArtistNotifications from '@/components/dashboard/ArtistNotifications';
 import ServicesManagement from '@/components/dashboard/services/ServicesManagement';
@@ -141,19 +142,14 @@ const ArtistDashboard = () => {
     );
   }
 
-  // Tab configuration with disabled state
+  // Tab configuration with consolidated categories
   const tabs = [
-    { value: 'artworks', label: 'Artworks', shortLabel: 'Art', icon: Palette },
+    { value: 'overview', label: 'Overview', shortLabel: 'Dash', icon: LayoutDashboard },
     { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
-    { value: 'services', label: 'Services', shortLabel: 'Svc', icon: Wrench },
-    { value: 'profile', label: 'Profile', shortLabel: 'Prof', icon: User },
-    { value: 'premium', label: 'Premium', shortLabel: 'Prem', icon: Crown },
-    { value: 'earnings', label: 'Earnings', shortLabel: 'Earn', icon: DollarSign },
-    { value: 'billing', label: 'Billing', shortLabel: 'Bill', icon: Wallet },
+    { value: 'portfolio', label: 'Portfolio', shortLabel: 'Port', icon: Palette },
+    { value: 'finances', label: 'Finances', shortLabel: 'Fin', icon: Wallet },
     { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
-    { value: 'notifications', label: 'Notifications', shortLabel: 'Notif', icon: Bell },
-    { value: 'settings', label: 'Settings', shortLabel: 'Set', icon: Settings },
-    { value: 'exclusive', label: 'Exclusive Circle', shortLabel: 'Excl', icon: Users },
+    { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
   ];
 
   return (
@@ -164,7 +160,7 @@ const ArtistDashboard = () => {
             user={user}
             profile={profile}
             title="Artist Dashboard"
-            subtitle="Manage your artworks, projects, profile, and earnings"
+            subtitle="Manage your projects, portfolio, and earnings in one place"
           />
 
           {/* Mandatory Profile Completion Alert */}
@@ -179,11 +175,11 @@ const ArtistDashboard = () => {
                 </div>
                 
                 <div className="flex-1 text-center md:text-left space-y-3">
-                  <h3 className="font-black text-foreground text-xl sm:text-2xl tracking-tight">Complete Your Creative Profile</h3>
+                  <h3 className="font-black text-foreground text-xl sm:text-2xl tracking-tight">Complete Your Profile</h3>
                   <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">
-                    Unlock the full potential of Artswarit. Your professional presence is currently 
+                    Unlock full dashboard access. Your profile is currently 
                     <span className="mx-1.5 px-2 py-0.5 rounded-lg bg-red-500 text-white font-black">{completionPercentage}%</span> 
-                    ready.
+                    complete.
                   </p>
                   
                   <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-1">
@@ -196,7 +192,7 @@ const ArtistDashboard = () => {
 
                   <div className="mt-6 w-full max-w-md mx-auto md:mx-0">
                     <div className="flex justify-between items-end mb-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Progress to Launch</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Progress</span>
                       <span className="text-xs font-black text-red-600">{completionPercentage}%</span>
                     </div>
                     <div className="bg-muted/30 rounded-full h-3 overflow-hidden border border-border/20 p-0.5">
@@ -214,10 +210,10 @@ const ArtistDashboard = () => {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="relative mb-6 sm:mb-8 lg:mb-12">
               <div className="overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-max xl:w-full xl:flex-wrap xl:grid xl:grid-cols-6 2xl:grid-cols-11">
+                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-full grid grid-cols-3 sm:grid-cols-6">
                   {tabs.map((tabItem) => {
                     const Icon = tabItem.icon;
-                    const isDisabled = profileIncomplete && tabItem.value !== 'profile' && tabItem.value !== 'premium';
+                    const isDisabled = profileIncomplete && tabItem.value !== 'account';
                     
                     return (
                       <TabsTrigger
@@ -225,8 +221,8 @@ const ArtistDashboard = () => {
                         value={tabItem.value}
                         disabled={isDisabled}
                         className={cn(
-                          "flex flex-col items-center gap-1.5 text-[10px] px-3.5 py-3 rounded-xl transition-all duration-300 snap-center min-w-[90px]",
-                          "sm:flex-row sm:gap-2 sm:text-xs sm:px-4 sm:py-2.5 sm:rounded-2xl sm:min-w-[100px]",
+                          "flex flex-col items-center gap-1.5 text-[10px] px-3.5 py-3 rounded-xl transition-all duration-300 snap-center",
+                          "sm:flex-row sm:gap-2 sm:text-xs sm:px-4 sm:py-2.5 sm:rounded-2xl",
                           "lg:text-sm lg:px-5 lg:py-3",
                           "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:shadow-primary/30", 
                           "hover:bg-primary/5 hover:text-primary", 
@@ -246,66 +242,85 @@ const ArtistDashboard = () => {
             </div>
 
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
-              <TabsContent value="artworks" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'artworks' && "hidden")}>
-                  {visitedTabs.has('artworks') && <ArtworkManagement />}
+              <TabsContent value="overview" className="outline-none focus-visible:ring-0" forceMount>
+                <div className={cn(activeTab !== 'overview' && "hidden")}>
+                  {visitedTabs.has('overview') && (
+                    <div className="space-y-12">
+                      <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
+                      <ArtistEarnings isLoading={profileLoading} />
+                    </div>
+                  )}
                 </div>
               </TabsContent>
+
               <TabsContent value="projects" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'projects' && "hidden")}>
                   {visitedTabs.has('projects') && <ProjectManagement />}
                 </div>
               </TabsContent>
-              <TabsContent value="services" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'services' && "hidden")}>
-                  {visitedTabs.has('services') && <ServicesManagement />}
-                </div>
-              </TabsContent>
-              <TabsContent value="profile" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'profile' && "hidden")}>
-                  {visitedTabs.has('profile') && (
-                    <ArtistProfile
-                      isLoading={profileLoading}
-                      profile={profile}
-                      updateProfile={updateProfile}
-                      uploadImage={uploadImage}
-                    />
+
+              <TabsContent value="portfolio" className="outline-none focus-visible:ring-0" forceMount>
+                <div className={cn(activeTab !== 'portfolio' && "hidden")}>
+                  {visitedTabs.has('portfolio') && (
+                    <div className="space-y-12">
+                      <ArtworkManagement />
+                      <Separator className="opacity-20" />
+                      <ServicesManagement />
+                    </div>
                   )}
                 </div>
               </TabsContent>
-              <TabsContent value="premium" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'premium' && "hidden")}>
-                  {visitedTabs.has('premium') && <PremiumMembership />}
+
+              <TabsContent value="finances" className="outline-none focus-visible:ring-0" forceMount>
+                <div className={cn(activeTab !== 'finances' && "hidden")}>
+                  {visitedTabs.has('finances') && (
+                    <div className="space-y-12">
+                      <ArtistBilling />
+                      {/* Sub-group or individual components here as needed */}
+                    </div>
+                  )}
                 </div>
               </TabsContent>
-              <TabsContent value="earnings" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'earnings' && "hidden")}>
-                  {visitedTabs.has('earnings') && <ArtistEarnings isLoading={profileLoading} />}
-                </div>
-              </TabsContent>
-              <TabsContent value="billing" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'billing' && "hidden")}>
-                  {visitedTabs.has('billing') && <ArtistBilling />}
-                </div>
-              </TabsContent>
+
               <TabsContent value="messages" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'messages' && "hidden")}>
                   {visitedTabs.has('messages') && <MessagingModule onChatActiveChange={setIsChatActive} />}
                 </div>
               </TabsContent>
-              <TabsContent value="notifications" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'notifications' && "hidden")}>
-                  {visitedTabs.has('notifications') && <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />}
-                </div>
-              </TabsContent>
-              <TabsContent value="settings" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'settings' && "hidden")}>
-                  {visitedTabs.has('settings') && <ArtistSettings isLoading={profileLoading} />}
-                </div>
-              </TabsContent>
-              <TabsContent value="exclusive" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'exclusive' && "hidden")}>
-                  {visitedTabs.has('exclusive') && <ExclusiveMembers />}
+
+              <TabsContent value="account" className="outline-none focus-visible:ring-0" forceMount>
+                <div className={cn(activeTab !== 'account' && "hidden")}>
+                  {visitedTabs.has('account') && (
+                    <Tabs defaultValue="profile_settings" className="w-full">
+                      <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl">
+                        <TabsTrigger value="profile_settings" className="rounded-lg">Profile Details</TabsTrigger>
+                        <TabsTrigger value="membership" className="rounded-lg">Membership</TabsTrigger>
+                        <TabsTrigger value="settings" className="rounded-lg">Privacy & Security</TabsTrigger>
+                        <TabsTrigger value="exclusive" className="rounded-lg">Exclusive Circle</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="profile_settings">
+                        <ArtistProfile
+                          isLoading={profileLoading}
+                          profile={profile}
+                          updateProfile={updateProfile}
+                          uploadImage={uploadImage}
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="membership">
+                         <PremiumMembership />
+                      </TabsContent>
+
+                      <TabsContent value="settings">
+                        <ArtistSettings isLoading={profileLoading} />
+                      </TabsContent>
+
+                      <TabsContent value="exclusive">
+                        <ExclusiveMembers />
+                      </TabsContent>
+                    </Tabs>
+                  )}
                 </div>
               </TabsContent>
             </div>
