@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { getOptimizedImageUrl, ImagePresets } from '@/lib/image-optimization';
 
 interface ArtworkCardProps {
   id: string;
@@ -100,9 +101,12 @@ const ArtworkCard = ({
     
     fetchCounts();
 
+    let isCancelled = false;
+    const instanceId = Math.random().toString(36).substring(7);
+
     // Subscribe to real-time like updates (skip updates from other users only)
     const likesChannel = supabase
-      .channel(`artwork-likes-${id}`)
+      .channel(`artwork-likes-${id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -112,6 +116,8 @@ const ArtworkCard = ({
           filter: `artwork_id=eq.${id}`
         },
         async (payload) => {
+          if (isCancelled) return;
+          
           // Skip if the change was made by current user (we handle this optimistically)
           const newRecord = payload.new as { user_id?: string } | null;
           const oldRecord = payload.old as { user_id?: string } | null;
@@ -125,14 +131,17 @@ const ArtworkCard = ({
             .from('artwork_likes')
             .select('id')
             .eq('artwork_id', id);
-          setCurrentLikes(data?.length || 0);
+          
+          if (!isCancelled) {
+            setCurrentLikes(data?.length || 0);
+          }
         }
       )
       .subscribe();
 
     // Subscribe to real-time view updates
     const viewsChannel = supabase
-      .channel(`artwork-views-${id}`)
+      .channel(`artwork-views-${id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -142,12 +151,15 @@ const ArtworkCard = ({
           filter: `artwork_id=eq.${id}`
         },
         () => {
-          setCurrentViews(prev => prev + 1);
+          if (!isCancelled) {
+            setCurrentViews(prev => prev + 1);
+          }
         }
       )
       .subscribe();
 
     return () => {
+      isCancelled = true;
       supabase.removeChannel(likesChannel);
       supabase.removeChannel(viewsChannel);
     };
@@ -272,9 +284,10 @@ const ArtworkCard = ({
               />
             ) : (
               <img
-                src={imageUrl}
+                src={getOptimizedImageUrl(imageUrl, ImagePresets.THUMBNAIL)}
                 alt={title}
                 loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
             )}

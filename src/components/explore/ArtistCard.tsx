@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { cn } from '@/lib/utils';
+import { getOptimizedImageUrl, ImagePresets } from '@/lib/image-optimization';
 interface Artist {
   id: string;
   name: string;
@@ -111,7 +112,7 @@ const ArtistCard = ({
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               <div className="relative self-center sm:self-auto">
                 <Avatar className="w-20 h-20 sm:w-24 sm:h-24 ring-4 ring-background shadow-lg transition-transform duration-300 group-hover:scale-105">
-                  <AvatarImage src={artist.imageUrl} alt={artist.name} className="object-cover" />
+                  <AvatarImage src={getOptimizedImageUrl(artist.imageUrl, ImagePresets.AVATAR)} alt={artist.name} className="object-cover" />
                   <AvatarFallback className="text-xl font-bold bg-primary/10 text-primary">
                     {artist.name.charAt(0)}
                   </AvatarFallback>
@@ -207,7 +208,7 @@ const ArtistCard = ({
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 h-full border-primary/5 hover:border-primary/20 bg-card/50 backdrop-blur-sm group/card">
         <div className="relative aspect-[4/5] overflow-hidden">
           <img 
-            src={artist.imageUrl} 
+            src={getOptimizedImageUrl(artist.imageUrl, ImagePresets.THUMBNAIL)} 
             alt={artist.name} 
             className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110" 
           />

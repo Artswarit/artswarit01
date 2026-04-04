@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, Check, Info, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import LogoLoader from '@/components/ui/LogoLoader';
+import { cn } from '@/lib/utils';
 
 interface Notification {
   id: string;
@@ -70,6 +71,20 @@ const NotificationCenter = () => {
       supabase.removeChannel(channel);
     };
   }, [user?.id, fetchNotifications]);
+
+  const getNotificationLink = (notification: any) => {
+    if (notification.type === 'like' && notification.metadata?.artwork_id) {
+      return `/artwork/${notification.metadata.artwork_id}`;
+    }
+    if (notification.type === 'follow' && notification.metadata?.follower_id) {
+      return `/artist/${notification.metadata.follower_id}`;
+    }
+    const targetDashboard = user?.user_metadata?.role === 'artist' ? '/artist-dashboard' : '/client-dashboard';
+    if (notification.metadata?.project_id) {
+      return `${targetDashboard}?tab=projects&project=${notification.metadata.project_id}`;
+    }
+    return '#';
+  };
 
   const displayedNotifications = notifications.slice(0, displayCount);
   const hasMore = notifications.length > displayCount;
@@ -198,59 +213,81 @@ const NotificationCenter = () => {
           {displayedNotifications.map((notification) => (
             <Card
               key={notification.id}
-              className={`transition-all ${
+              className={`transition-all hover:shadow-md ${
                 !notification.is_read
                   ? 'border-l-4 border-l-primary bg-primary/5'
                   : 'border-l-4 border-l-muted'
               }`}
             >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3">
-                    {getNotificationIcon(notification.type)}
-                    <div>
-                      <CardTitle className="text-base">{notification.title}</CardTitle>
-                      <CardDescription className="mt-1">
-                        {notification.message}
-                      </CardDescription>
+              <div 
+                className="cursor-pointer"
+                onClick={() => {
+                  if (!notification.is_read) markAsRead(notification.id);
+                  const link = getNotificationLink(notification);
+                  if (link !== '#') window.location.href = link;
+                }}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      {getNotificationIcon(notification.type)}
+                      <div>
+                        <CardTitle className="text-base">{notification.title}</CardTitle>
+                        <CardDescription className="mt-1">
+                          {notification.message}
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Badge
+                        variant="outline"
+                        className={getNotificationBadgeColor(notification.type)}
+                      >
+                        {notification.type}
+                      </Badge>
+                      {!notification.is_read && (
+                        <Button
+                          onClick={() => markAsRead(notification.id)}
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className={getNotificationBadgeColor(notification.type)}
-                    >
-                      {notification.type}
-                    </Badge>
-                    {!notification.is_read && (
-                      <Button
-                        onClick={() => markAsRead(notification.id)}
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-xs text-muted-foreground">
-                  {new Date(notification.created_at).toLocaleString()}
-                </p>
-              </CardContent>
+                </CardHeader>
+                <CardContent className="pt-0 pb-4">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                    {new Date(notification.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                  </p>
+                </CardContent>
+              </div>
             </Card>
           ))}
           
           {hasMore && (
-            <div className="flex justify-center pt-4">
+            <div className="flex flex-col items-center gap-3 pt-8 pb-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+                Showing {displayedNotifications.length} of {notifications.length} notifications
+              </p>
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 onClick={handleLoadMore}
                 disabled={loadingMore}
+                className="group relative h-12 px-10 rounded-2xl bg-primary/5 hover:bg-primary/10 text-primary transition-all duration-300"
               >
-                {loadingMore ? "Loading..." : "Load More"}
+                {loadingMore ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                    <span className="text-xs font-black uppercase tracking-widest">Loading...</span>
+                  </div>
+                ) : (
+                  <span className="text-xs font-black uppercase tracking-widest group-hover:tracking-[0.2em] transition-all duration-500">
+                    Load More History
+                  </span>
+                )}
               </Button>
             </div>
           )}

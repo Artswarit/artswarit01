@@ -5,8 +5,9 @@
 @tailwind utilities;
 
 html, body {
-  overscroll-behavior: none;
-  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 
@@ -99,11 +100,10 @@ html, body {
     @apply w-full;
     margin: 0;
     padding: 0;
-    overflow-y: scroll; 
+    overflow-y: auto; 
     overflow-x: hidden;
     scroll-behavior: smooth;
-    height: -webkit-fill-available; /* Fixed viewport height for PWA */
-    width: 100vw;
+    width: 100%;
     position: relative;
     -webkit-overflow-scrolling: touch;
   }
@@ -111,7 +111,6 @@ html, body {
   body {
     @apply bg-background text-foreground font-sans w-full;
     min-height: 100vh;
-    min-height: -webkit-fill-available;
     margin: 0;
     padding: 0;
     overflow-x: hidden !important; /* Prevent horizontal scroll */
@@ -473,9 +472,11 @@ html, body {
     @apply px-4;
   }
 
-  /* Ensure touch targets are large enough */
-  button, .btn, [role="button"] {
-    @apply min-h-[44px];
+  /* Ensure touch targets are large enough — excluding icon-only buttons */
+  button:not([class*="h-6"]):not([class*="h-5"]):not([class*="h-4"]):not([class*="w-6"]):not([class*="w-5"]),
+  .btn,
+  [role="button"]:not([class*="h-6"]):not([class*="h-5"]) {
+    min-height: 44px;
   }
 
   /* Improve mobile text readability and prevent auto-zoom */
@@ -486,6 +487,45 @@ html, body {
 
   input, textarea, select {
     font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
+  }
+
+  /* Ensure images don't overflow */
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Better scroll padding for anchor navigation behind fixed navbar */
+  html {
+    scroll-padding-top: calc(4rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+/* Extra small screens (320px phones) */
+@media (max-width: 360px) {
+  .container {
+    @apply px-3;
+  }
+
+  /* Tighter section spacing */
+  section {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Tablet-specific optimizations (768-1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  html {
+    scroll-padding-top: calc(5rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+/* Landscape phones — constrain height */
+@media (max-height: 500px) and (orientation: landscape) {
+  section {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 }
 

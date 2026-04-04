@@ -10,6 +10,7 @@ import { Home, Users, Search as SearchIcon, TrendingUp, X } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import NotificationBell from "@/components/NotificationBell";
 import MessageBadge from "@/components/MessageBadge";
+import { getOptimizedImageUrl, ImagePresets } from "@/lib/image-optimization";
 
 const menuItems = [{
   name: "Home",
@@ -44,10 +45,6 @@ const Navbar = () => {
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
 
-  const linkBaseClass = "relative flex items-center gap-1 px-3 py-1.5 font-medium text-sm rounded transition-all before:absolute before:inset-x-2 before:bottom-0 before:h-0.5 before:bg-purple-600 before:scale-x-0 hover:before:scale-x-100 before:transition-transform before:duration-300";
-  const linkActiveClass = "text-purple-600 before:scale-x-100";
-  const linkInactiveClass = "text-gray-700 before:bg-gray-300 hover:text-purple-600";
-
   const handleLogoClick = (e: React.MouseEvent) => {
     window.scrollTo({
       top: 0,
@@ -60,7 +57,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white/80 dark:bg-card/80 backdrop-blur-xl border-b border-muted/20 fixed w-full top-0 z-50 transition-all duration-300 pt-[var(--safe-top)]">
-      <div className="max-w-[1400px] mx-auto h-16 sm:h-20 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="w-full h-16 sm:h-20 px-4 sm:px-4 lg:px-6 flex items-center justify-between">
         {/* Left: logo + desktop menu */}
         <div className="flex items-center gap-4 lg:gap-8">
           {/* Logo */}
@@ -114,7 +111,7 @@ const Navbar = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 sm:h-12 sm:w-12 p-0 rounded-2xl hover:bg-primary/5 transition-all duration-300 group">
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl border-2 border-background shadow-sm transition-transform group-hover:scale-105 group-active:scale-95">
-                      <AvatarImage src={profile?.avatar_url || user?.user_metadata?.avatar_url || ''} />
+                      <AvatarImage src={getOptimizedImageUrl(profile?.avatar_url || user?.user_metadata?.avatar_url || '', ImagePresets.AVATAR)} />
                       <AvatarFallback className="bg-primary/5 text-primary text-xs font-black">
                         {(profile?.full_name || user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                       </AvatarFallback>
@@ -143,10 +140,10 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="hidden sm:flex items-center gap-3">
-              <Button variant="ghost" asChild className="font-bold text-sm px-6 rounded-xl hover:bg-primary/5 hover:text-primary transition-all">
+              <Button variant="ghost" asChild className="font-bold text-sm px-6 rounded-md text-blue-600 hover:bg-blue-50 transition-all">
                 <Link to="/login">Login</Link>
               </Button>
-              <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground font-black text-sm px-6 rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+              <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 rounded-md shadow-sm transition-all">
                 <Link to="/signup">Sign Up</Link>
               </Button>
             </div>
@@ -223,10 +220,10 @@ const Navbar = () => {
               
               {!user && (
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t border-muted/20 mt-4">
-                  <Button variant="outline" asChild className="rounded-2xl h-14 font-bold border-muted/30 hover:bg-primary/5 hover:text-primary transition-all" onClick={closeMenu}>
+                  <Button variant="outline" asChild className="rounded-xl h-11 font-bold border-muted/30 hover:bg-primary/5 hover:text-primary transition-all" onClick={closeMenu}>
                     <Link to="/login" state={{ backgroundLocation: location }}>Login</Link>
                   </Button>
-                  <Button asChild className="rounded-2xl h-14 font-black bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all" onClick={closeMenu}>
+                  <Button asChild className="rounded-xl h-11 font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all" onClick={closeMenu}>
                     <Link to="/signup" state={{ backgroundLocation: location }}>Sign Up</Link>
                   </Button>
                 </div>

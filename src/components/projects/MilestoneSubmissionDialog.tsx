@@ -29,6 +29,7 @@ interface MilestoneSubmissionDialogProps {
   onOpenChange: (open: boolean) => void;
   milestone: Milestone;
   projectId: string;
+  autoApproveDays?: number;
   onSuccess: () => void;
 }
 
@@ -42,6 +43,7 @@ export function MilestoneSubmissionDialog({
   onOpenChange,
   milestone,
   projectId,
+  autoApproveDays = 3,
   onSuccess
 }: MilestoneSubmissionDialogProps) {
   const { user } = useAuth();
@@ -71,8 +73,15 @@ export function MilestoneSubmissionDialog({
   const isCompleted = milestone.status === 'COMPLETED';
   const isFinalUpload = isCompleted;
 
+  const MAX_FILE_SIZE_MB = 50;
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
+    const oversized = selectedFiles.filter(f => f.size > MAX_FILE_SIZE_MB * 1024 * 1024);
+    if (oversized.length > 0) {
+      toast.error(`Files over ${MAX_FILE_SIZE_MB}MB are not allowed: ${oversized.map(f => f.name).join(', ')}`);
+      return;
+    }
     const newFiles = selectedFiles.map(file => ({
       file,
       preview: URL.createObjectURL(file)
@@ -158,7 +167,7 @@ export function MilestoneSubmissionDialog({
       // Update milestone status based on submission type
       if (!isFinalUpload) {
         const autoApproveAt = new Date();
-        autoApproveAt.setDate(autoApproveAt.getDate() + 3); // Default 3 days
+        autoApproveAt.setDate(autoApproveAt.getDate() + autoApproveDays);
         await supabase
           .from('project_milestones')
           .update({

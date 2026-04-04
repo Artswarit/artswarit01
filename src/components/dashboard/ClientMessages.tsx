@@ -898,11 +898,6 @@ const ClientMessages = () => {
                         <User className="h-4 w-4" />
                         <span>View Profile</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-2 cursor-pointer" onSelect={handleMuteNotifications}>
-                        <BellOff className="h-4 w-4" />
-                        <span>Mute Notifications</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         className="gap-2 cursor-pointer text-destructive focus:text-destructive" 
                         onSelect={(e) => {

@@ -42,11 +42,20 @@ export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
   }, [refetch]);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const debouncedRefetch = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        latestRefetch.current();
+      }, 1000); // 1s cooldown between refetches for the same type
+    };
+
     const handleMessage = (event: MessageEvent) => {
       const { type: eventType } = event.data;
       if (eventType === type || type === 'all' || eventType === 'all') {
         console.log(`[RealtimeSync] Received refresh trigger for: ${eventType}`);
-        latestRefetch.current();
+        debouncedRefetch();
       }
     };
 
@@ -56,7 +65,7 @@ export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log(`[RealtimeSync] Page visible, triggering refresh for: ${type}`);
-        latestRefetch.current();
+        debouncedRefetch();
       }
     };
 
@@ -66,6 +75,7 @@ export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
     window.addEventListener('focus', handleVisibilityChange);
 
     return () => {
+      clearTimeout(timeoutId);
       syncChannel.removeEventListener('message', handleMessage);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);

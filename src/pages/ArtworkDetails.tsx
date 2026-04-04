@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import {
   ArrowLeft, Eye, Heart, Maximize2, Bookmark,
   Crown, Lock, Music, Send, MessageCircle, Share2, X
@@ -18,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import LogoLoader from "@/components/ui/LogoLoader";
+import { getOptimizedImageUrl, ImagePresets } from "@/lib/image-optimization";
 
 export default function ArtworkDetails({ isModal = false }: { isModal?: boolean }) {
   const { id } = useParams();
@@ -135,8 +137,12 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
       });
       setLoading(false);
 
-      const likesChannel = supabase
-        .channel(`details-likes-${id}`)
+      if (isCancelled) return;
+
+      const uniqueId = Math.random().toString(36).substring(7);
+      
+      likesChannel = supabase
+        .channel(`details-likes-${id}-${uniqueId}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "artwork_likes", filter: `artwork_id=eq.${id}` },
           async (payload) => {
             const n = payload.new as any;
@@ -147,19 +153,24 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
           })
         .subscribe();
 
-      const viewsChannel = supabase
-        .channel(`details-views-${id}`)
+      viewsChannel = supabase
+        .channel(`details-views-${id}-${uniqueId}`)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "artwork_views", filter: `artwork_id=eq.${id}` },
           () => setViewCount((p) => p + 1))
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(likesChannel);
-        supabase.removeChannel(viewsChannel);
-      };
     }
-    const cleanup = init();
-    return () => { cleanup.then((fn) => fn?.()).catch(() => {}); };
+
+    let isCancelled = false;
+    let likesChannel: any = null;
+    let viewsChannel: any = null;
+
+    init();
+    
+    return () => {
+      isCancelled = true;
+      if (likesChannel) supabase.removeChannel(likesChannel);
+      if (viewsChannel) supabase.removeChannel(viewsChannel);
+    };
   }, [id, user?.id]);
 
   const handleLike = async () => {
@@ -308,7 +319,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
       {isModal && (
         <button 
           onClick={() => navigate(-1)}
-          className="fixed top-[calc(1rem+var(--safe-top))] right-4 z-[110] h-10 w-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 transition-all shadow-xl"
+          className="fixed top-[calc(1rem+var(--safe-top))] right-4 z-[110] h-10 w-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/30 active:scale-90 transition-all shadow-xl"
         >
           <X className="h-5 w-5" />
         </button>
@@ -371,7 +382,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
               <>
                 <div className="bg-muted/30 flex items-center justify-center">
                   <img
-                    src={artwork.imageUrl}
+                    src={getOptimizedImageUrl(artwork.imageUrl, ImagePresets.ARTWORK_DETAIL)}
                     alt={artwork.title}
                     className="w-full h-auto max-h-[90vh] object-contain block mx-auto"
                     draggable={false}
@@ -543,7 +554,8 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
           {/* ── COMMENT BOTTOM SHEET ───────────────────────────────── */}
           {id && <ArtworkFeedback artworkId={id} isOpen={commentsOpen} onClose={() => setCommentsOpen(false)} />}
       </div>
-    </main>
-  </div>
-);
+      </main>
+      {!isModal && <Footer />}
+    </div>
+  );
 }

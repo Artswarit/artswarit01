@@ -402,25 +402,62 @@ const ProjectDetailModal = ({
     }
   };
   const handleToggleMilestoneStatus = async (milestone: Milestone) => {
-    const newStatus = milestone.status === 'COMPLETED' ? 'ACTIVE' : 'COMPLETED';
+    // P1 Fix: Only clients should be able to mark a milestone as COMPLETED manually,
+    // and only if it was already ACTIVE. Artists should use the submission workflow.
+    if (!isClient) {
+      toast.error("Only the client can manually approve milestones.");
+      return;
+    }
+
+    if (milestone.status === 'LOCKED' || milestone.status === 'WAITING_FUNDS') {
+      toast.error("Milestone must be funded and active before it can be completed.");
+      return;
+    }
+
+    const nextStatus = milestone.status === 'COMPLETED' ? 'ACTIVE' : 'COMPLETED';
+    const confirmed = window.confirm(`Are you sure you want to mark this milestone as ${nextStatus}? This bypasses the normal review workflow.`);
+    if (!confirmed) return;
+
     try {
       const {
         error
       } = await supabase.from('project_milestones').update({
-        status: newStatus as any
+        status: nextStatus as any,
+        approved_at: nextStatus === 'COMPLETED' ? new Date().toISOString() : null
       }).eq('id', milestone.id);
+      
       if (error) throw error;
+      
+      // Log activity
+      await supabase.from('project_activity_logs').insert({
+        project_id: project!.id,
+        milestone_id: milestone.id,
+        user_id: user?.id,
+        action: nextStatus === 'COMPLETED' ? 'milestone_approved' : 'milestone_started',
+        details: { note: "Manually toggled status in detail modal" }
+      });
+
       broadcastRefresh('milestones');
       fetchProjectData(undefined, true);
+      toast.success(`Milestone marked as ${nextStatus}`);
     } catch (err: any) {
       toast.error("Failed to update milestone");
     }
   };
-  const handleDeleteMilestone = async (milestoneId: string) => {
+  const handleDeleteMilestone = async (milestone: Milestone) => {
+    // P2 Fix: Add confirmation and state checks
+    if (milestone.status !== 'LOCKED' && milestone.status !== 'WAITING_FUNDS') {
+      toast.error("Cannot delete a milestone that is active, in review, or completed.");
+      return;
+    }
+
+    const confirmed = window.confirm(`Are you sure you want to delete the milestone "${milestone.title}"?`);
+    if (!confirmed) return;
+
     try {
       const {
         error
-      } = await supabase.from('project_milestones').delete().eq('id', milestoneId);
+      } = await supabase.from('project_milestones').delete().eq('id', milestone.id);
       if (error) throw error;
       toast.success("Milestone deleted");
       fetchProjectData(undefined, true);
@@ -889,12 +926,12 @@ const ProjectDetailModal = ({
                               </div>
 
                               <div className="flex items-center gap-2">
-                                {isArtist && (milestone.status === 'ACTIVE' || milestone.status === 'COMPLETED') && (
+                                {isClient && (milestone.status === 'ACTIVE' || milestone.status === 'COMPLETED') && (
                                   <Button 
                                     onClick={() => handleToggleMilestoneStatus(milestone)}
                                     size="sm"
                                     variant="outline"
-                                    className="rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/5"
+                                    className="rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/5 h-10 px-4"
                                   >
                                     {milestone.status === 'COMPLETED' ? 'Mark Active' : 'Mark Done'}
                                   </Button>
@@ -908,14 +945,16 @@ const ProjectDetailModal = ({
                                     Pay in Workflow
                                   </Button>
                                 )}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteMilestone(milestone.id)}
-                                  className="text-muted-foreground hover:text-destructive transition-colors"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                                {isClient && (milestone.status === 'LOCKED' || milestone.status === 'WAITING_FUNDS') && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDeleteMilestone(milestone)}
+                                    className="text-muted-foreground hover:text-destructive transition-colors h-10 w-10"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           </div>

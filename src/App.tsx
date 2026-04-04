@@ -35,7 +35,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
-import AIDetection from "./pages/AIDetection";
+import Notifications from "./pages/Notifications";
+
 import FeatureAudit from "./pages/FeatureAudit";
 import LiveStreaming from "./pages/LiveStreaming";
 import Collections from "./pages/Collections";
@@ -141,15 +142,15 @@ const AppRoutes = () => {
           <Route path="/profile/:id" element={<PageTransition key="user-public"><UserProfile /></PageTransition>} />
           <Route path="/review/:id" element={<PageTransition key="review"><ReviewRedirect /></PageTransition>} />
           <Route path="/artwork/:id" element={<PageTransition key="artwork"><ArtworkDetails /></PageTransition>} />
-          <Route path="/artist-dashboard" element={<ProtectedRoute><PageTransition key="artist-dashboard"><ArtistDashboard /></PageTransition></ProtectedRoute>} />
-          <Route path="/client-dashboard" element={<ProtectedRoute><PageTransition key="client-dashboard"><ClientDashboard /></PageTransition></ProtectedRoute>} />
-          <Route path="/admin-dashboard" element={<ProtectedRoute adminOnly><PageTransition><AdminDashboard /></PageTransition></ProtectedRoute>} />
+          <Route path="/artist-dashboard" element={<ProtectedRoute requiredRole="artist"><PageTransition key="artist-dashboard"><ArtistDashboard /></PageTransition></ProtectedRoute>} />
+          <Route path="/client-dashboard" element={<ProtectedRoute requiredRole="client"><PageTransition key="client-dashboard"><ClientDashboard /></PageTransition></ProtectedRoute>} />
+          <Route path="/admin-dashboard" element={<ProtectedRoute adminOnly requiredRole="admin"><PageTransition><AdminDashboard /></PageTransition></ProtectedRoute>} />
           <Route path="/about-us" element={<PageTransition><AboutUs /></PageTransition>} />
           <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
           <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
           <Route path="/refund-policy" element={<PageTransition><RefundPolicy /></PageTransition>} />
           <Route path="/contact-us" element={<PageTransition><ContactUs /></PageTransition>} />
-          <Route path="/ai-detection" element={<PageTransition><AIDetection /></PageTransition>} />
+
           <Route path="/feature-audit" element={<PageTransition><FeatureAudit /></PageTransition>} />
           <Route path="/live-streaming" element={<PageTransition><LiveStreaming /></PageTransition>} />
           <Route path="/collections" element={<PageTransition><Collections /></PageTransition>} />
@@ -158,6 +159,7 @@ const AppRoutes = () => {
           <Route path="/commissions" element={<PageTransition><Commissions /></PageTransition>} />
           <Route path="/events" element={<PageTransition><Events /></PageTransition>} />
           <Route path="/merchandise" element={<PageTransition><Merchandise /></PageTransition>} />
+          <Route path="/notifications" element={<ProtectedRoute><PageTransition><Notifications /></PageTransition></ProtectedRoute>} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
       </AnimatePresence>

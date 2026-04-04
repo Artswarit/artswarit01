@@ -50,12 +50,12 @@ export const AppSplashScreen = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.5 }}
-            className="mt-8 flex flex-col items-center"
+            className="mt-4 flex flex-col items-center"
           >
-            <h1 className="text-2xl font-black tracking-tighter bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-black tracking-tighter bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent -mt-6 sm:-mt-8">
               ARTSWARIT
             </h1>
-            <div className="mt-4 w-48 h-1 bg-muted rounded-full overflow-hidden">
+            <div className="mt-8 w-48 h-1 bg-muted rounded-full overflow-hidden">
               <motion.div 
                 className="h-full bg-primary"
                 initial={{ width: "0%" }}

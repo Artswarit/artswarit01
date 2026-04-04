@@ -199,7 +199,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         client_id: user?.id,
         artist_id: artistId || null,
         status: 'pending',
-        is_locked: false,
+        is_locked: artistId ? true : false,
         reference_files: []
       };
 

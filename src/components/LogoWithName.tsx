@@ -14,7 +14,7 @@ const LogoWithName = ({
   };
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-0.5 ${className}`}
+      className={`flex flex-col items-center justify-center gap-0 ${className}`}
       data-testid="logo-with-name"
     >
       <img
@@ -22,7 +22,7 @@ const LogoWithName = ({
         alt="Artswarit Logo"
         className={`object-contain ${sizeMap[size]}`}
       />
-      <span className="font-semibold text-base sm:text-lg text-primary tracking-tight font-heading leading-tight">
+      <span className="font-semibold text-base sm:text-lg text-primary tracking-tight font-heading leading-none -mt-3.5 sm:-mt-4">
         Artswarit
       </span>
     </div>

@@ -25,6 +25,7 @@ import {
 import { writeAuditLog } from './auditHelpers';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
 
 /* ── Types ── */
@@ -199,7 +200,6 @@ export default function UserGovernance() {
     } finally { setProcessing(false); }
   };
 
-  // Helper Badges
   const getStatusBadge = (s: string) => {
     if (s === 'banned') return <Badge variant="destructive" className="font-semibold text-[10px] uppercase tracking-wide">Banned</Badge>;
     if (s === 'suspended') return <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 font-semibold text-[10px] uppercase tracking-wide">Suspended</Badge>;
@@ -207,140 +207,219 @@ export default function UserGovernance() {
     return <Badge variant="secondary" className="bg-green-500/10 text-green-600 hover:bg-green-500/20 font-semibold text-[10px] uppercase tracking-wide">Active</Badge>;
   };
 
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center p-20 space-y-4">
-      <LogoLoader text="Aggregating platform data…" />
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 space-y-4">
+        <LogoLoader text="Aggregating platform data…" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Dynamic Header Section */}
-      <Card className="border shadow-sm bg-card overflow-hidden">
-        <CardHeader className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-black tracking-tight flex items-center gap-2">
-                <Users className="h-6 w-6 text-primary" />
-                Platform User Governance
-              </h2>
-              <p className="text-sm text-muted-foreground">Monitor accounts, enforce compliance, and maintain platform security.</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-2xl font-black text-foreground">{users.length}</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total Users</p>
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500">
+      {/* UI Refresh Verification Badge - Mobile Only */}
+      <div className="sm:hidden flex justify-center py-2">
+         <Badge variant="outline" className="bg-primary/5 text-primary/60 border-primary/10 text-[9px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full">
+            Governance Core v2.2.0-Synced
+         </Badge>
+      </div>
+
+      {/* Ultra-Dense Registry Header */}
+      <div className="flex flex-col gap-3 px-1">
+        <div className="flex items-center justify-between">
+           <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                 <Users className="h-4 w-4" />
               </div>
-            </div>
-          </div>
+              <div className="flex flex-col">
+                 <h2 className="text-sm font-black tracking-tight text-foreground/90 uppercase pr-2">Registry Control</h2>
+                 <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest -mt-0.5 opacity-60">System Protocol Active</p>
+              </div>
+           </div>
+           <div className="bg-foreground text-background px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-sm">
+              <span className="text-xs font-black leading-none">{users.length}</span>
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-80">Users</span>
+           </div>
+        </div>
 
-          <div className="flex flex-col md:flex-row gap-4 pt-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search user ID, Email or Name..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-10 bg-background" />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 shrink-0">
-              <Select value={filterRole} onValueChange={setFilterRole}>
-                <SelectTrigger className="w-full sm:w-36 h-10 bg-background text-sm font-medium">
-                  <Filter className="h-4 w-4 mr-2 text-primary" />
-                  <SelectValue placeholder="Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="artist">Artists</SelectItem>
-                  <SelectItem value="client">Clients</SelectItem>
-                  <SelectItem value="admin">Admins</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-36 h-10 bg-background text-sm font-medium">
-                  <ShieldAlert className="h-4 w-4 mr-2 text-primary" />
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All States</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="warned">Warned</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                  <SelectItem value="banned">Banned</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="grid grid-cols-1 gap-2 mt-1">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 transition-colors group-focus-within:text-primary" />
+            <Input 
+              placeholder="Filter identity or ID..." 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+              className="pl-9 h-11 bg-card rounded-2xl border-muted/30 focus-visible:ring-primary/20 text-xs font-bold shadow-none" 
+            />
           </div>
-        </CardHeader>
-      </Card>
-
-      {/* Modern Table Layout */}
-      <Card className="border shadow-sm overflow-hidden bg-card">
-        <div className="overflow-x-auto w-full pb-4">
-          <div className="min-w-[800px]">
-            <Table>
-              <TableHeader className="bg-muted/30">
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[50px] pl-4">
-                    <Checkbox checked={selectedIds.size === filteredUsers.length && filteredUsers.length > 0} onCheckedChange={toggleSelectAll} aria-label="Select all" />
-                  </TableHead>
-                  <TableHead>User / Identity</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>KYC Status</TableHead>
-                  <TableHead>Health</TableHead>
-                  <TableHead className="text-right pr-4">Governance</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-              {filteredUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground font-medium">
-                    No users found matching this filter.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredUsers.map(u => (
-                  <TableRow key={u.id} className={selectedIds.has(u.id) ? "bg-primary/5" : ""}>
-                    <TableCell className="pl-4">
-                      <Checkbox checked={selectedIds.has(u.id)} onCheckedChange={() => toggleSelect(u.id)} aria-label={`Select ${u.email}`} />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full overflow-hidden bg-primary/10 border-2 border-background flex items-center justify-center shrink-0">
-                          {u.avatar_url ? <img src={u.avatar_url} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-bold text-primary">{(u.full_name || u.email).substring(0,2).toUpperCase()}</span>}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="font-semibold text-sm text-foreground truncate">{u.full_name || 'Anonymous User'}</span>
-                          <span className="text-xs text-muted-foreground truncate">{u.email}</span>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {u.is_admin ? (
-                         <Badge variant="default" className="font-bold text-[10px] tracking-wide uppercase shadow-sm">Admin</Badge>
-                      ) : (
-                         <Badge variant="outline" className="font-medium text-[10px] tracking-wide uppercase">{u.role}</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {u.payout_kyc === 'activated' ? (
-                        <div className="flex items-center gap-1.5 text-xs font-semibold text-green-600"><CheckCircle className="h-3.5 w-3.5" /> Verified</div>
-                      ) : (
-                        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><Clock className="h-3.5 w-3.5" /> Pending</div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(getStatus(u))}
-                    </TableCell>
-                    <TableCell className="text-right pr-4">
-                      <Button variant="secondary" size="sm" onClick={() => openAction(u)} className="h-8 shadow-sm font-semibold transition-all">
-                        Manage
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <div className="grid grid-cols-2 gap-2">
+            <Select value={filterRole} onValueChange={setFilterRole}>
+              <SelectTrigger className="h-10 bg-card text-[10px] font-black uppercase tracking-widest rounded-2xl border-muted/30 hover:bg-muted/10 transition-all">
+                <Filter className="h-3.5 w-3.5 mr-2 text-primary/50" />
+                <SelectValue placeholder="Access" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-muted/20">
+                <SelectItem value="all">Role: All</SelectItem>
+                <SelectItem value="artist">Artists</SelectItem>
+                <SelectItem value="client">Clients</SelectItem>
+                <SelectItem value="admin">System Admin</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="h-10 bg-card text-[10px] font-black uppercase tracking-widest rounded-2xl border-muted/30 hover:bg-muted/10 transition-all">
+                <ShieldAlert className="h-3.5 w-3.5 mr-2 text-primary/50" />
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-muted/20">
+                <SelectItem value="all">State: All</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="warned">Warned</SelectItem>
+                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="banned">Banned</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
-      </Card>
+      </div>
+
+      {/* Modern Responsive Table/Card Layout */}
+      <div className="space-y-3">
+        {/* Desktop View: High Density Table */}
+        <Card className="hidden sm:block border shadow-sm overflow-hidden bg-card rounded-[2rem]">
+          <div className="overflow-x-auto w-full pb-4">
+            <div className="min-w-[800px]">
+              <Table>
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[50px] pl-6">
+                      <Checkbox checked={selectedIds.size === filteredUsers.length && filteredUsers.length > 0} onCheckedChange={toggleSelectAll} aria-label="Select all" />
+                    </TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">User / Identity</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Role</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">KYC Status</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">HealthStatus</TableHead>
+                    <TableHead className="text-right pr-6 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Governance</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                {filteredUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-48 text-center text-muted-foreground font-medium">
+                      No users found matching this filter.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map(u => (
+                    <TableRow key={u.id} className={cn("transition-colors", selectedIds.has(u.id) ? "bg-primary/5" : "hover:bg-muted/5")}>
+                      <TableCell className="pl-6">
+                        <Checkbox checked={selectedIds.has(u.id)} onCheckedChange={() => toggleSelect(u.id)} aria-label={`Select ${u.email}`} />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full overflow-hidden bg-primary/10 border-2 border-background flex items-center justify-center shrink-0 shadow-sm">
+                            {u.avatar_url ? <img src={u.avatar_url} alt="" className="h-full w-full object-cover" /> : <span className="text-[10px] font-black text-primary">{(u.full_name || u.email).substring(0,2).toUpperCase()}</span>}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-bold text-sm text-foreground truncate">{u.full_name || 'Anonymous User'}</span>
+                            <span className="text-[10px] text-muted-foreground truncate font-medium">{u.email}</span>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {u.is_admin ? (
+                           <Badge variant="default" className="font-black text-[9px] tracking-widest uppercase shadow-sm px-2 py-0.5">Admin</Badge>
+                        ) : (
+                           <Badge variant="outline" className="font-bold text-[9px] tracking-widest uppercase px-2 py-0.5 lowercase capitalize">{u.role}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {u.payout_kyc === 'activated' ? (
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 uppercase tracking-tight"><CheckCircle className="h-3 w-3" /> Verified</div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-tight"><Clock className="h-3 w-3" /> Pending</div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(getStatus(u))}
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <Button variant="secondary" size="sm" onClick={() => openAction(u)} className="h-8 shadow-sm font-bold text-[11px] uppercase tracking-wider transition-all hover:bg-primary/10 hover:text-primary rounded-lg px-4">
+                          Protocol
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+              </Table>
+            </div>
+          </div>
+        </Card>
+
+        {/* Mobile View: High Density Responsive Cards */}
+        <div className="block sm:hidden space-y-3">
+           {filteredUsers.length === 0 ? (
+              <Card className="p-12 text-center text-muted-foreground font-medium rounded-[1.5rem] border-dashed">
+                 No platform users found.
+              </Card>
+           ) : (
+              filteredUsers.map(u => (
+                <Card key={u.id} className={cn(
+                  "p-4 rounded-[1.5rem] border shadow-sm transition-all duration-300", 
+                  selectedIds.has(u.id) ? "bg-primary/5 border-primary/20 ring-1 ring-primary/20" : "bg-card border-muted/40"
+                )}>
+                   <div className="flex items-start gap-3">
+                      <div className="pt-1">
+                        <Checkbox checked={selectedIds.has(u.id)} onCheckedChange={() => toggleSelect(u.id)} className="rounded-md h-5 w-5" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0 space-y-4">
+                         <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                               <div className="h-10 w-10 rounded-xl overflow-hidden bg-primary/5 border border-muted/20 flex items-center justify-center shrink-0">
+                                  {u.avatar_url ? <img src={u.avatar_url} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black text-primary">{(u.full_name || u.email).substring(0,2).toUpperCase()}</span>}
+                               </div>
+                               <div className="flex flex-col min-w-0">
+                                 <span className="font-black text-sm text-foreground truncate tracking-tight">{u.full_name || 'Anonymous User'}</span>
+                                 <span className="text-[10px] text-muted-foreground truncate font-medium">{u.email}</span>
+                               </div>
+                            </div>
+                            <div className="shrink-0 pt-0.5">
+                               {getStatusBadge(getStatus(u))}
+                            </div>
+                         </div>
+                         
+                         <div className="flex items-center gap-2 w-full">
+                            <div className="flex-1 bg-muted/30 p-2.5 rounded-xl border border-muted/40 space-y-0.5">
+                               <p className="text-[8px] font-black uppercase tracking-[0.1em] text-muted-foreground/60">Access Role</p>
+                               {u.is_admin ? (
+                                  <span className="text-[10px] font-black text-primary uppercase">Admin</span>
+                               ) : (
+                                  <span className="text-[10px] font-black text-foreground/80 uppercase">{u.role}</span>
+                               )}
+                            </div>
+                            <div className="flex-1 bg-muted/30 p-2.5 rounded-xl border border-muted/40 space-y-0.5">
+                               <p className="text-[8px] font-black uppercase tracking-[0.1em] text-muted-foreground/60">KYC Status</p>
+                               <span className={cn("text-[10px] font-black uppercase", u.payout_kyc === 'activated' ? "text-green-600" : "text-amber-600")}>
+                                  {u.payout_kyc === 'activated' ? "Verified" : "Pending"}
+                               </span>
+                            </div>
+                         </div>
+
+                         <Button 
+                            variant="secondary" 
+                            className="w-full h-10 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-primary/10 hover:text-primary transition-all border border-muted/40" 
+                            onClick={() => openAction(u)}
+                         >
+                            Governance Action
+                         </Button>
+                      </div>
+                   </div>
+                </Card>
+              ))
+           )}
+        </div>
+      </div>
 
       {/* Floating Base Action Intelligence Bar */}
       {selectedIds.size > 0 && (
@@ -353,11 +432,9 @@ export default function UserGovernance() {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              {/* Note: The button text says "Action", matching instructions. */}
               <Button size="sm" onClick={() => { setActionType('notify'); setDialogOpen(true); setSelectedUser(null); }} className="h-9 px-4 rounded-xl bg-background text-foreground hover:bg-muted font-bold tracking-tight border shadow-sm">
                 <Gavel className="h-4 w-4 mr-2" /> Action
               </Button>
-              {/* Note: Clear 'X' icon instead of text for Deselect */}
               <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())} className="h-9 w-9 p-0 rounded-xl text-muted hover:text-background hover:bg-background/20" title="Deselect All">
                 <X className="h-4 w-4" />
               </Button>

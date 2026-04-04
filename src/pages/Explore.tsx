@@ -315,7 +315,7 @@ const Explore = () => {
             Discover the Future of Art
           </div>
           
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1000">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter leading-none sm:leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1000">
             EXPLORE THE <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">COLLECTION</span>
           </h1>

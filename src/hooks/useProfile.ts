@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { broadcastRefresh, useRealtimeSync } from '@/lib/realtime-sync';
+import { getOptimizedImageUrl, ImagePresets } from '@/lib/image-optimization';
 
 interface SocialLinks {
   instagram?: string;
@@ -148,17 +149,74 @@ export const useProfile = () => {
     }
   };
 
+  const optimizeImage = (file: File, maxDimension = 1200): Promise<File> => {
+    return new Promise((resolve) => {
+      if (!file.type.startsWith('image/')) {
+        resolve(file);
+        return;
+      }
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+      image.onload = () => {
+        let width = image.width;
+        let height = image.height;
+        if (width > height && width > maxDimension) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else if (height >= width && height > maxDimension) {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          URL.revokeObjectURL(url);
+          resolve(file);
+          return;
+        }
+        ctx.drawImage(image, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            URL.revokeObjectURL(url);
+            if (!blob) {
+              resolve(file);
+              return;
+            }
+            const optimizedFile = new File([blob], file.name, {
+              type: blob.type || file.type,
+              lastModified: Date.now()
+            });
+            resolve(optimizedFile);
+          },
+          'image/jpeg',
+          0.85
+        );
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(file);
+      };
+      image.src = url;
+    });
+  };
+
   const uploadImage = async (file: File, type: 'avatar' | 'cover'): Promise<string | null> => {
     if (!user) return null;
 
     try {
-      const fileExt = file.name.split('.').pop();
+      // Step 1: Optimize the file based on type
+      const maxDim = type === 'avatar' ? 400 : 1600;
+      const optimizedFile = await optimizeImage(file, maxDim);
+      
+      const fileExt = optimizedFile.name.split('.').pop() || 'jpg';
       const fileName = `${user.id}/${type}-${Date.now()}.${fileExt}`;
       const filePath = fileName;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, optimizedFile, { upsert: true });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);

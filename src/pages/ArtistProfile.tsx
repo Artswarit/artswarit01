@@ -845,7 +845,6 @@ export default function ArtistProfile() {
         <div className="flex-1 flex items-center justify-center p-4">
           <LogoLoader text="Loading artist profile..." />
         </div>
-        <Footer />
       </div>
     );
   }
@@ -863,7 +862,6 @@ export default function ArtistProfile() {
             </GlassButton>
           </GlassCard>
         </div>
-        <Footer />
       </div>
     );
   }

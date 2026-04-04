@@ -305,6 +305,16 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
 
     setSaving(true);
     try {
+      // P0: Verify current password first for security
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: passwordData.currentPassword
+      });
+      
+      if (authError) {
+        throw new Error("Incorrect current password. Please try again.");
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: passwordData.newPassword
       });
@@ -341,30 +351,65 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
     
     setDeleting(true);
     try {
-      // Delete user data from tables
+      // Delete user data from all related tables to avoid orphaned records
+      const userId = user.id;
+      
+      // We execute these in a logical order to satisfy potential foreign key constraints if they aren't ON DELETE CASCADE
       await Promise.all([
-        supabase.from('artworks').delete().eq('artist_id', user.id),
-        supabase.from('projects').delete().or(`artist_id.eq.${user.id},client_id.eq.${user.id}`),
-        supabase.from('notifications').delete().eq('user_id', user.id),
-        supabase.from('profiles').delete().eq('id', user.id),
-        supabase.from('users').delete().eq('id', user.id)
+        // Social/Engagement
+        supabase.from('notifications').delete().eq('user_id', userId),
+        supabase.from('user_blocks').delete().or(`blocker_id.eq.${userId},blocked_id.eq.${userId}`),
+        supabase.from('client_reviews').delete().or(`artist_id.eq.${userId},client_id.eq.${userId}`),
+        
+        // Work/Projects
+        supabase.from('artworks').delete().eq('artist_id', userId),
+        supabase.from('project_files').delete().eq('uploader_id', userId),
+        supabase.from('messages').delete().eq('sender_id', userId),
+        
+        // Conversations (delete where user is either client or artist)
+        supabase.from('conversations').delete().or(`client_id.eq.${userId},artist_id.eq.${userId}`),
+        
+        // Finances
+        supabase.from('subscribers').delete().eq('user_id', userId),
+        supabase.from('transactions').delete().eq('user_id', userId),
+        
+        // Core Account (Profiles/Users)
+        supabase.from('profiles').delete().eq('id', userId),
       ]);
 
-      toast({
-        title: "Account deleted",
-        description: "Your account and all data have been permanently deleted."
-      });
+      // Note: projects and project_milestones usually have complex relationships.
+      // We attempt to delete projects last.
+      await supabase.from('projects').delete().or(`artist_id.eq.${userId},client_id.eq.${userId}`);
+      
+      // 4. File Cleanup from Storage
+      const storageBuckets = ['avatars', 'project-files', 'milestone-submissions', 'messaging-attachments', 'artwork_media'];
+      for (const bucket of storageBuckets) {
+        try {
+          // List files in the user's directory (naming convention: userId/...)
+          const { data: files } = await supabase.storage.from(bucket).list(userId);
+          if (files && files.length > 0) {
+            const filesToRemove = files.map(f => `${userId}/${f.name}`);
+            await supabase.storage.from(bucket).remove(filesToRemove);
+          }
+        } catch (err) {
+          console.warn(`Could not clean storage bucket ${bucket}:`, err);
+        }
+      }
 
-      setShowDeleteDialog(false);
-      setTimeout(() => {
-        signOut();
-        navigate('/');
-      }, 1500);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Deletion failed",
-        description: error.message
+      // 5. Finally delete profile and auth account
+      await supabase.from('profiles').delete().eq('id', userId);
+      const { error: deleteError } = await supabase.rpc('delete_user_account');
+      if (deleteError) throw deleteError;
+
+      toast({ title: "Account deleted successfully" });
+      await signOut();
+      navigate('/');
+    } catch (err: any) {
+      console.error('Account deletion error:', err);
+      toast({ 
+        variant: "destructive", 
+        title: "Deletion failed", 
+        description: err.message || "An error occurred during account deletion. Some data may have been partially removed."
       });
     } finally {
       setDeleting(false);

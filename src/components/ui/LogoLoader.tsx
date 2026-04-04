@@ -19,9 +19,9 @@ interface LogoLoaderProps {
 
 const LogoLoader = ({ text = 'Loading…', fullPage = false, className }: LogoLoaderProps) => {
   const loader = (
-    <div className={cn('flex flex-col items-center justify-center gap-4', className)}>
+    <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
       {/* Logo with animated rings */}
-      <div className="relative flex items-center justify-center">
+      <div className="relative flex items-center justify-center w-20 h-20">
         {/* Outer ring – slow spin */}
         <span
           className="absolute h-20 w-20 rounded-full border-2 border-primary/20 border-t-primary animate-spin"
@@ -40,7 +40,7 @@ const LogoLoader = ({ text = 'Loading…', fullPage = false, className }: LogoLo
 
       {/* Text */}
       {text && (
-        <p className="text-sm font-semibold text-muted-foreground/80 tracking-wide animate-pulse" style={{ animationDuration: '2s' }}>
+        <p className="text-[11px] font-black tracking-[0.1em] text-muted-foreground/60 uppercase animate-pulse" style={{ animationDuration: '2s' }}>
           {text}
         </p>
       )}

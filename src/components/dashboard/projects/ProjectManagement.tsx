@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,7 +58,7 @@ const ProjectManagement = () => {
   const [selectedProjectForReview, setSelectedProjectForReview] = useState<Project | null>(null);
   const [clientReviews, setClientReviews] = useState<Record<string, ClientReview>>({});
   const [readyMap, setReadyMap] = useState<Record<string, boolean>>({});
-  const [autoCompleting, setAutoCompleting] = useState<Record<string, boolean>>({});
+  const autoCompletingRef = useRef<Record<string, boolean>>({});
   const fetchProjects = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -185,10 +185,10 @@ const ProjectManagement = () => {
   const autoCompleteIfReady = useCallback(async (projectId: string, isReady: boolean) => {
     if (!isReady) return;
     
-    // Prevent concurrent executions for the same project
-    if (autoCompleting[projectId]) return;
+    // Prevent concurrent executions for the same project using ref (avoids stale closure)
+    if (autoCompletingRef.current[projectId]) return;
     
-    setAutoCompleting(prev => ({ ...prev, [projectId]: true }));
+    autoCompletingRef.current[projectId] = true;
     try {
       // Fetch fresh project state instead of relying on stale closure array
       const { data: project } = await supabase
@@ -227,9 +227,9 @@ const ProjectManagement = () => {
     } catch (err) {
       console.error('Auto-complete failed:', err);
     } finally {
-      setAutoCompleting(prev => ({ ...prev, [projectId]: false }));
+      autoCompletingRef.current[projectId] = false;
     }
-  }, [user?.id, fetchProjects, autoCompleting]);
+  }, [user?.id, fetchProjects]);
 
   const handleAcceptProject = async (project: Project, e?: React.MouseEvent) => {
     if (e) {
@@ -278,6 +278,11 @@ const ProjectManagement = () => {
       e.stopPropagation();
     }
     if (!project.client_id) return;
+
+    // Confirmation before irreversible rejection
+    const confirmed = window.confirm(`Are you sure you want to decline "${project.title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
     setActionLoading(project.id);
     try {
       const {
@@ -415,7 +420,7 @@ const ProjectManagement = () => {
   };
   const getProjectReview = (projectId: string) => clientReviews[projectId] || null;
   const activeProjects = projects.filter(p => p.status === "accepted");
-  const pendingProjects = projects.filter(p => p.status === "pending" && p.is_locked);
+  const pendingProjects = projects.filter(p => p.status === "pending");
   const completedProjects = projects.filter(p => p.status === "completed");
   if (loading) {
     return (
@@ -511,8 +516,8 @@ const ProjectManagement = () => {
                       </SelectContent>
                     </Select>
                     {readyMap[project.id] && project.status !== 'completed' && (
-                      <Button size="sm" className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={() => handleCompleteProject(project)} disabled={actionLoading === project.id || autoCompleting[project.id]}>
-                        {actionLoading === project.id || autoCompleting[project.id] ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trophy className="h-4 w-4 mr-2" />}
+                      <Button size="sm" className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={() => handleCompleteProject(project)} disabled={actionLoading === project.id || autoCompletingRef.current[project.id]}>
+                        {actionLoading === project.id || autoCompletingRef.current[project.id] ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trophy className="h-4 w-4 mr-2" />}
                         Completed
                       </Button>
                     )}

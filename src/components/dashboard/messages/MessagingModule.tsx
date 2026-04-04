@@ -186,12 +186,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     }
   };
 
-  const handleMuteNotifications = () => {
-    toast({
-      title: "Notifications Muted",
-      description: `You will no longer receive notifications for this chat.`,
-    });
-  };
+
 
   const handleClearChat = async () => {
     if (!activeConversationId || isClearing || !user?.id) return;
@@ -488,10 +483,6 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                       <DropdownMenuItem className="gap-4 cursor-pointer text-sm rounded-xl py-3" onSelect={handleViewProfile}>
                         <div className="p-2 bg-primary/10 text-primary rounded-xl"><User className="h-4 w-4 sm:h-5 sm:w-5" /></div>
                         <span className="font-black">View Profile</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="gap-4 cursor-pointer text-sm rounded-xl py-3" onSelect={handleMuteNotifications}>
-                        <div className="p-2 bg-muted rounded-xl"><BellOff className="h-4 w-4 sm:h-5 sm:w-5" /></div>
-                        <span className="font-black">Mute Chat</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="my-2.5" />
                       <DropdownMenuItem 

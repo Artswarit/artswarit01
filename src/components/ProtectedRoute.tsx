@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole, adminOnly = false }) => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const { isAdmin, loading: adminLoading } = useIsAdmin();
   const navigate = useNavigate();
 
@@ -28,7 +28,25 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
       navigate('/login');
       return;
     }
-  }, [user, loading, isAdmin, adminLoading, navigate, adminOnly]);
+
+    if (requiredRole && profile?.role) {
+      if (requiredRole === 'admin' && !isAdmin) {
+        navigate('/');
+        return;
+      }
+      
+      if (requiredRole !== profile.role) {
+        // Redirect to appropriate dashboard based on their actual role
+        if (profile.role === 'artist') {
+          navigate('/artist-dashboard');
+        } else if (profile.role === 'client') {
+          navigate('/client-dashboard');
+        } else {
+          navigate('/');
+        }
+      }
+    }
+  }, [user, profile, loading, isAdmin, adminLoading, navigate, adminOnly, requiredRole]);
 
   if (loading || (adminOnly && adminLoading)) {
     return (

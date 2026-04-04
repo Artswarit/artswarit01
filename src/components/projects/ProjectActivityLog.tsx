@@ -31,6 +31,7 @@ interface ProjectActivityLogProps {
 
 export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,7 +62,23 @@ export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
         .limit(50);
 
       if (error) throw error;
-      setLogs(data || []);
+      const activityLogs = data || [];
+      setLogs(activityLogs);
+
+      // Fetch profile names for these users
+      const userIds = [...new Set(activityLogs.map(log => log.user_id))];
+      if (userIds.length > 0) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
+        
+        const profileMap: Record<string, string> = {};
+        profileData?.forEach(p => {
+          profileMap[p.id] = p.full_name || 'System User';
+        });
+        setProfiles(profileMap);
+      }
     } catch (error) {
       console.error('Failed to fetch activity logs:', error);
     } finally {
@@ -129,7 +146,7 @@ export function ProjectActivityLog({ projectId }: ProjectActivityLogProps) {
                 <div className="mt-0.5">{getActionIcon(log.action)}</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm">
-                    <span className="font-medium">User</span>{' '}
+                    <span className="font-bold text-primary">{profiles[log.user_id] || 'Loading...'}</span>{' '}
                     <span className="text-muted-foreground">{getActionText(log.action)}</span>
                   </p>
                   {log.details?.reason && (
