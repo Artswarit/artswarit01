@@ -9,7 +9,8 @@ declare global {
 }
 
 interface PaymentOptions {
-  milestoneId: string;
+  milestoneId?: string;
+  artworkId?: string;
   onSuccess?: (paymentId: string) => void;
   onFailure?: (error: string) => void;
 }
@@ -40,7 +41,12 @@ export function useRazorpay() {
     });
   }, [scriptLoaded]);
 
-  const initiatePayment = useCallback(async ({ milestoneId, onSuccess, onFailure }: PaymentOptions) => {
+  const initiatePayment = useCallback(async ({ milestoneId, artworkId, onSuccess, onFailure }: PaymentOptions) => {
+    if (!milestoneId && !artworkId) {
+      toast.error('Payment target missing');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -56,15 +62,17 @@ export function useRazorpay() {
         throw new Error('You must be logged in to make a payment');
       }
 
+      const functionName = artworkId ? 'create-artwork-order' : 'create-milestone-order';
+
       // Create order via edge function
-      const orderResp = await fetch(`${SUPABASE_URL}/functions/v1/create-milestone-order`, {
+      const orderResp = await fetch(`${SUPABASE_URL}/functions/v1/${functionName}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`,
           'apikey': SUPABASE_PUBLISHABLE_KEY,
         },
-        body: JSON.stringify({ milestoneId }),
+        body: JSON.stringify({ milestoneId, artworkId }),
       });
 
       const orderData = await orderResp.json().catch(() => ({}));
@@ -75,6 +83,7 @@ export function useRazorpay() {
       }
 
       const data = orderData;
+      const verifyFunction = artworkId ? 'verify-artwork-payment' : 'verify-razorpay-payment';
 
       // Configure Razorpay options
       const options = {
@@ -83,13 +92,13 @@ export function useRazorpay() {
         currency: data.currency,
         order_id: data.orderId,
         name: 'Artswarit',
-        description: `Milestone Payment`,
+        description: artworkId ? `Artwork Purchase: ${data.artworkTitle}` : `Milestone Payment`,
         handler: async (response: any) => {
           console.log('Payment response:', response);
           
           try {
             // Verify payment
-            const verifyResp = await fetch(`${SUPABASE_URL}/functions/v1/verify-razorpay-payment`, {
+            const verifyResp = await fetch(`${SUPABASE_URL}/functions/v1/${verifyFunction}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -101,6 +110,7 @@ export function useRazorpay() {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
                 milestoneId,
+                artworkId,
               }),
             });
 
@@ -111,7 +121,7 @@ export function useRazorpay() {
               throw new Error(verifyData?.error || 'Payment verification failed');
             }
 
-            toast.success('Payment successful!');
+            toast.success(artworkId ? 'Artwork unlocked!' : 'Payment successful!');
             onSuccess?.(response.razorpay_payment_id);
           } catch (err: any) {
             console.error('Verification error:', err);

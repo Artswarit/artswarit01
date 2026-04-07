@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, Calendar, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -158,7 +158,33 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+        {profile && (
+          <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
+            <CardContent className="flex items-center p-5 sm:p-6">
+              <div className="mr-4 sm:mr-5 bg-indigo-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <div className="h-6 w-6 sm:h-6 sm:w-6 text-indigo-600 flex items-center justify-center font-black text-xs">
+                  {(() => {
+                    const fields = ['full_name', 'avatar_url', 'bio', 'location', 'skills', 'experience_level'];
+                    const filled = fields.filter(f => profile[f] && (Array.isArray(profile[f]) ? profile[f].length > 0 : true)).length;
+                    return Math.round((filled / fields.length) * 100);
+                  })()}%
+                </div>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Profile</p>
+                <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">
+                  {(() => {
+                    const fields = ['full_name', 'avatar_url', 'bio', 'location', 'skills', 'experience_level'];
+                    const filled = fields.filter(f => profile[f] && (Array.isArray(profile[f]) ? profile[f].length > 0 : true)).length;
+                    return filled === fields.length ? 'Verified' : 'Incomplete';
+                  })()}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
           <CardContent className="flex items-center p-5 sm:p-6">
             <div className="mr-4 sm:mr-5 bg-purple-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">

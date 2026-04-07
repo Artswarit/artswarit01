@@ -296,7 +296,7 @@ const TrendingAlgorithm = () => {
     <TooltipProvider>
       <div className="space-y-8 w-full max-w-full">
         {/* Modern Header Section */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5 border border-white/20 p-6 sm:p-10">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5 border border-white/20 p-5 sm:p-10">
           <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 text-xs font-bold tracking-wider uppercase">
@@ -312,22 +312,22 @@ const TrendingAlgorithm = () => {
             </div>
             
             <div className="flex flex-col items-end gap-3">
-              <div className="flex items-center gap-3 bg-white/50 backdrop-blur-sm border border-white/40 p-1.5 rounded-2xl shadow-sm">
-                {(['1h', '24h', '7d', '30d'] as const).map((timeframe) => (
-                  <button
-                    key={timeframe}
-                    onClick={() => setSelectedTimeframe(timeframe)}
-                    className={cn(
-                      "px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 min-h-[44px] min-w-[44px]",
-                      selectedTimeframe === timeframe 
-                        ? "bg-white text-blue-600 shadow-sm scale-105" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {timeframe === '1h' ? 'Hourly' : timeframe === '24h' ? 'Today' : timeframe === '7d' ? 'Weekly' : 'Monthly'}
-                  </button>
-                ))}
-              </div>
+            <div className="grid grid-cols-4 md:flex items-center gap-1 sm:gap-3 bg-white/50 backdrop-blur-sm border border-white/40 p-1 rounded-2xl shadow-sm w-full md:w-auto">
+              {(['1h', '24h', '7d', '30d'] as const).map((timeframe) => (
+                <button
+                  key={timeframe}
+                  onClick={() => setSelectedTimeframe(timeframe)}
+                  className={cn(
+                    "px-1 sm:px-4 py-2 rounded-xl text-[9px] min-[375px]:text-[10px] sm:text-xs font-bold transition-all duration-300 min-h-[40px] flex items-center justify-center",
+                    selectedTimeframe === timeframe 
+                      ? "bg-white text-blue-600 shadow-sm scale-105" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <span className="truncate">{timeframe === '1h' ? 'Hourly' : timeframe === '24h' ? 'Today' : timeframe === '7d' ? 'Weekly' : 'Monthly'}</span>
+                </button>
+              ))}
+            </div>
               <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 <RefreshCw className={cn("h-3 w-3", loading && "animate-spin")} />
                 Syncing {lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -342,13 +342,13 @@ const TrendingAlgorithm = () => {
 
         {/* Category Filter & Advanced Filters */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:max-w-[60%] no-scrollbar">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:max-w-[60%] no-scrollbar snap-x snap-proximity scroll-px-4">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={cn(
-                  "px-5 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border",
+                  "px-5 py-2.5 rounded-2xl text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all border snap-start",
                   selectedCategory === category 
                     ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/10" 
                     : "bg-white text-slate-600 border-slate-100 hover:border-slate-300 hover:bg-slate-50"
@@ -387,7 +387,7 @@ const TrendingAlgorithm = () => {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-100 h-10">
+                <button className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-100 h-10 ml-auto sm:ml-0">
                   <Info className="h-4 w-4" />
                   Algorithm
                 </button>

@@ -21,6 +21,7 @@ import { useCurrency } from "@/contexts/CurrencyContext";
 import { MilestoneWorkflow } from "@/components/projects";
 import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
 import { RefreshCw } from "lucide-react";
+import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 interface ProjectDetailModalProps {
   projectId: string | null;
   open: boolean;
@@ -47,9 +48,11 @@ interface ProjectFile {
 }
 interface Message {
   id: string;
-  content: string;
-  sender_id: string;
-  created_at: string;
+  senderId: string;
+  text: string;
+  timestamp: Date;
+  read: boolean;
+  status?: string;
   sender_name?: string;
   sender_avatar?: string;
 }
@@ -88,7 +91,14 @@ const ProjectDetailModal = ({
   const [project, setProject] = useState<ProjectData | null>(null);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [files, setFiles] = useState<ProjectFile[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  
+  const { 
+    messages: rtMessages, 
+    sendMessage: rtSendMessage, 
+    setActiveConversationId,
+    activeConversationId 
+  } = useRealtimeMessages();
+  
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
@@ -111,43 +121,11 @@ const ProjectDetailModal = ({
     }
   };
 
-  const fetchMessages = useCallback(async (convId: string) => {
-    try {
-      const { data: messagesData } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('conversation_id', convId)
-        .order('created_at', { ascending: true });
-      
-      const senderIds = [...new Set((messagesData || []).map(m => m.sender_id).filter(Boolean))];
-      let senderProfiles: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
-      
-      if (senderIds.length > 0) {
-        const { data: senderProfilesData } = await supabase
-          .from('public_profiles')
-          .select('id, full_name, avatar_url')
-          .in('id', senderIds as string[]);
-        
-        (senderProfilesData || []).forEach(p => {
-          if (p.id) senderProfiles[p.id] = {
-            full_name: p.full_name,
-            avatar_url: p.avatar_url
-          };
-        });
-      }
-
-      setMessages((messagesData || []).map(m => ({
-        id: m.id,
-        content: m.content,
-        sender_id: m.sender_id || '',
-        created_at: m.created_at,
-        sender_name: m.sender_id ? senderProfiles[m.sender_id]?.full_name || 'Unknown' : 'Unknown',
-        sender_avatar: m.sender_id ? senderProfiles[m.sender_id]?.avatar_url || undefined : undefined
-      })));
-    } catch (err) {
-      console.error('Error fetching messages:', err);
+  useEffect(() => {
+    if (conversationId && conversationId !== activeConversationId) {
+      setActiveConversationId(conversationId);
     }
-  }, []);
+  }, [conversationId, activeConversationId, setActiveConversationId]);
 
   useEffect(() => {
     if (initialTab && open) {
@@ -239,7 +217,6 @@ const ProjectDetailModal = ({
         } = await supabase.from('conversations').select('id').eq('artist_id', projectData.artist_id).eq('client_id', projectData.client_id).maybeSingle();
         if (existingConv) {
           setConversationId(existingConv.id);
-          await fetchMessages(existingConv.id);
         }
       }
     } catch (err: any) {
@@ -288,18 +265,6 @@ const ProjectDetailModal = ({
     }, () => {
       fetchProjectData(undefined, false);
     }).subscribe();
-    // Subscribe to messages
-    let messagesChannel: any;
-    if (conversationId) {
-      messagesChannel = supabase.channel(`messages-${conversationId}`).on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `conversation_id=eq.${conversationId}`
-      }, () => {
-        fetchMessages(conversationId);
-      }).subscribe();
-    }
 
     // Subscribe to payments
     const paymentsChannel = supabase.channel(`project-payments-${projectId}`).on('postgres_changes', {
@@ -322,9 +287,8 @@ const ProjectDetailModal = ({
       supabase.removeChannel(filesChannel);
       supabase.removeChannel(projectChannel);
       supabase.removeChannel(paymentsChannel);
-      if (messagesChannel) supabase.removeChannel(messagesChannel);
     };
-  }, [open, projectId, conversationId, fetchProjectData, fetchMessages]);
+  }, [open, projectId, fetchProjectData]);
 
   useEffect(() => {
     if (initialTab && open) {
@@ -334,7 +298,7 @@ const ProjectDetailModal = ({
 
   // Handle chat auto-scroll
   useEffect(() => {
-    if (activeTab === 'communication' && messages.length > 0) {
+    if (activeTab === 'communication' && rtMessages.length > 0) {
       setTimeout(() => {
         const scrollArea = document.getElementById('chat-scroll-area');
         if (scrollArea) {
@@ -345,14 +309,13 @@ const ProjectDetailModal = ({
         }
       }, 50);
     }
-  }, [messages, activeTab]);
+  }, [rtMessages, activeTab]);
 
   const { userCurrency, userCurrencySymbol, exchangeRates } = useCurrency();
 
   // Cross-tab and visibility sync
   useRealtimeSync('projects', () => fetchProjectData(undefined, true));
   useRealtimeSync('milestones', () => fetchProjectData(undefined, true));
-  useRealtimeSync('messages', () => conversationId && fetchMessages(conversationId));
   useRealtimeSync('payments', () => fetchProjectData(undefined, true));
 
   const handleAddMilestone = async () => {
@@ -367,6 +330,10 @@ const ProjectDetailModal = ({
       const { data: milestoneCheck } = await supabase.from('project_milestones').select('*').limit(1);
       const existingMilestoneCols = milestoneCheck && milestoneCheck.length > 0 ? Object.keys(milestoneCheck[0]) : [];
 
+      // Determine initial status: First milestone should be 'WAITING_FUNDS' (ready for payment)
+      // while subsequent milestones should be 'LOCKED'.
+      const initialStatus = milestones.length === 0 ? 'WAITING_FUNDS' : 'LOCKED';
+
       const milestoneInsert: any = {
         project_id: projectId,
         title: newMilestone.title,
@@ -374,7 +341,8 @@ const ProjectDetailModal = ({
         due_date: newMilestone.due_date || null,
         amount: amountUSD, // Store USD as primary truth
         created_by: user.id,
-        sort_order: milestones.length
+        sort_order: milestones.length,
+        status: initialStatus
       };
 
       // Add extra currency columns only if they exist in DB
@@ -402,25 +370,62 @@ const ProjectDetailModal = ({
     }
   };
   const handleToggleMilestoneStatus = async (milestone: Milestone) => {
-    const newStatus = milestone.status === 'COMPLETED' ? 'ACTIVE' : 'COMPLETED';
+    // P1 Fix: Only clients should be able to mark a milestone as COMPLETED manually,
+    // and only if it was already ACTIVE. Artists should use the submission workflow.
+    if (!isClient) {
+      toast.error("Only the client can manually approve milestones.");
+      return;
+    }
+
+    if (milestone.status === 'LOCKED' || milestone.status === 'WAITING_FUNDS') {
+      toast.error("Milestone must be funded and active before it can be completed.");
+      return;
+    }
+
+    const nextStatus = milestone.status === 'COMPLETED' ? 'ACTIVE' : 'COMPLETED';
+    const confirmed = window.confirm(`Are you sure you want to mark this milestone as ${nextStatus}? This bypasses the normal review workflow.`);
+    if (!confirmed) return;
+
     try {
       const {
         error
       } = await supabase.from('project_milestones').update({
-        status: newStatus as any
+        status: nextStatus as any,
+        approved_at: nextStatus === 'COMPLETED' ? new Date().toISOString() : null
       }).eq('id', milestone.id);
+      
       if (error) throw error;
+      
+      // Log activity
+      await supabase.from('project_activity_logs').insert({
+        project_id: project!.id,
+        milestone_id: milestone.id,
+        user_id: user?.id,
+        action: nextStatus === 'COMPLETED' ? 'milestone_approved' : 'milestone_started',
+        details: { note: "Manually toggled status in detail modal" }
+      });
+
       broadcastRefresh('milestones');
       fetchProjectData(undefined, true);
+      toast.success(`Milestone marked as ${nextStatus}`);
     } catch (err: any) {
       toast.error("Failed to update milestone");
     }
   };
-  const handleDeleteMilestone = async (milestoneId: string) => {
+  const handleDeleteMilestone = async (milestone: Milestone) => {
+    // P2 Fix: Add confirmation and state checks
+    if (milestone.status !== 'LOCKED' && milestone.status !== 'WAITING_FUNDS') {
+      toast.error("Cannot delete a milestone that is active, in review, or completed.");
+      return;
+    }
+
+    const confirmed = window.confirm(`Are you sure you want to delete the milestone "${milestone.title}"?`);
+    if (!confirmed) return;
+
     try {
       const {
         error
-      } = await supabase.from('project_milestones').delete().eq('id', milestoneId);
+      } = await supabase.from('project_milestones').delete().eq('id', milestone.id);
       if (error) throw error;
       toast.success("Milestone deleted");
       fetchProjectData(undefined, true);
@@ -474,19 +479,6 @@ const ProjectDetailModal = ({
       toast.error("Download failed");
     }
   };
-  const handleDeleteFile = async (fileId: string, storagePath: string) => {
-    try {
-      await supabase.storage.from('project-files').remove([storagePath]);
-      const {
-        error
-      } = await supabase.from('project_files').delete().eq('id', fileId);
-      if (error) throw error;
-      toast.success("File deleted");
-      fetchProjectData(undefined, true);
-    } catch (err: any) {
-      toast.error("Failed to delete file");
-    }
-  };
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user?.id || !project) return;
     setSendingMessage(true);
@@ -508,17 +500,9 @@ const ProjectDetailModal = ({
         setConversationId(convId);
       }
       if (!convId) throw new Error("Could not create conversation");
-      const {
-        error
-      } = await supabase.from('messages').insert({
-        conversation_id: convId,
-        sender_id: user.id,
-        content: newMessage.trim()
-      });
-      if (error) throw error;
+      
+      await rtSendMessage(convId, newMessage.trim());
       setNewMessage("");
-      broadcastRefresh('messages');
-      fetchMessages(convId);
     } catch (err: any) {
       toast.error(err.message || "Failed to send message");
     } finally {
@@ -796,7 +780,7 @@ const ProjectDetailModal = ({
                     >
                       <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
                       <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px] whitespace-nowrap">Chat</span>
-                      {messages.length > 0 && (
+                      {rtMessages.length > 0 && (
                         <div className="h-1 w-1 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
                       )}
                     </TabsTrigger>
@@ -889,12 +873,12 @@ const ProjectDetailModal = ({
                               </div>
 
                               <div className="flex items-center gap-2">
-                                {isArtist && (milestone.status === 'ACTIVE' || milestone.status === 'COMPLETED') && (
+                                {isClient && (milestone.status === 'ACTIVE' || milestone.status === 'COMPLETED') && (
                                   <Button 
                                     onClick={() => handleToggleMilestoneStatus(milestone)}
                                     size="sm"
                                     variant="outline"
-                                    className="rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/5"
+                                    className="rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/5 h-10 px-4"
                                   >
                                     {milestone.status === 'COMPLETED' ? 'Mark Active' : 'Mark Done'}
                                   </Button>
@@ -908,14 +892,16 @@ const ProjectDetailModal = ({
                                     Pay in Workflow
                                   </Button>
                                 )}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteMilestone(milestone.id)}
-                                  className="text-muted-foreground hover:text-destructive transition-colors"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                                {isClient && (milestone.status === 'LOCKED' || milestone.status === 'WAITING_FUNDS') && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleDeleteMilestone(milestone)}
+                                    className="text-muted-foreground hover:text-destructive transition-colors h-10 w-10"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1038,7 +1024,7 @@ const ProjectDetailModal = ({
 
                     <ScrollArea className="flex-1 p-4 sm:p-5 h-full" id="chat-scroll-area">
                       <div className="space-y-6 pb-4">
-                        {messages.length === 0 ? (
+                        {rtMessages.length === 0 ? (
                           <div className="py-20 text-center space-y-4">
                             <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto">
                               <MessageSquare className="h-8 w-8 text-muted-foreground/30" />
@@ -1046,26 +1032,36 @@ const ProjectDetailModal = ({
                             <p className="text-muted-foreground font-medium max-w-[200px] mx-auto">No messages yet. Send a quick update to get started!</p>
                           </div>
                         ) : (
-                          messages.map(msg => {
-                            const isMe = msg.sender_id === user?.id;
+                          rtMessages.map(msg => {
+                            const isMe = msg.senderId === user?.id;
+                            const isArtistMsg = msg.senderId === project?.artist_id;
+                            
+                            const senderName = isArtistMsg ? project?.artist_name : project?.client_name;
+                            const senderAvatar = isArtistMsg ? project?.artist_avatar : project?.client_avatar;
+                            
                             return (
                               <div key={msg.id} className={`flex gap-4 group ${isMe ? 'flex-row-reverse' : ''}`}>
                                 <Avatar className="h-10 w-10 ring-2 ring-background shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform">
-                                  <AvatarImage src={msg.sender_avatar || ''} />
-                                  <AvatarFallback className="bg-primary/10 text-primary font-bold">{msg.sender_name?.charAt(0) || 'U'}</AvatarFallback>
+                                  <AvatarImage src={senderAvatar || ''} />
+                                  <AvatarFallback className="bg-primary/10 text-primary font-bold">{senderName?.charAt(0) || 'U'}</AvatarFallback>
                                 </Avatar>
-                                <div className={`max-w-[80%] space-y-1.5 ${isMe ? 'items-end' : 'items-start'}`}>
-                                  <div className={`p-4 rounded-3xl text-sm leading-relaxed shadow-sm transition-all duration-300 hover:shadow-md ${isMe ? 'bg-primary text-primary-foreground rounded-tr-none' : 'bg-white dark:bg-card border border-border/50 rounded-tl-none'}`}>
-                                    {msg.content}
+                                
+                                <div className={`flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
+                                  <div className="flex items-baseline gap-2 mb-1.5 px-1">
+                                    <span className="text-[11px] font-bold tracking-tight text-foreground/80">{senderName}</span>
+                                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
+                                      {formatDate(msg.timestamp, 'MMM d, h:mm a')}
+                                    </span>
                                   </div>
-                                  <p className={`text-[10px] font-bold uppercase tracking-widest px-2 ${isMe ? 'text-primary/60' : 'text-muted-foreground/60'}`}>
-                                    {formatDate(new Date(msg.created_at), 'h:mm a')}
-                                  </p>
+                                  <div className={`px-5 py-3 rounded-[1.5rem] text-sm shadow-sm font-medium ${isMe ? 'bg-primary text-primary-foreground rounded-tr-none shadow-primary/20' : 'bg-white dark:bg-card border border-border/50 rounded-tl-none'} transition-all group-hover:shadow-md`}>
+                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                                  </div>
                                 </div>
                               </div>
                             );
                           })
                         )}
+                        <div className="h-2" />
                       </div>
                     </ScrollArea>
 

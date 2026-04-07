@@ -39,14 +39,16 @@ const StatCard: React.FC<StatCardProps> = ({ type, value, label }) => {
   };
 
   return (
-    <div className="flex flex-col items-center text-center min-w-0 flex-1 px-1 sm:px-2">
-      <div className="flex items-center gap-1 sm:gap-1.5 mb-0.5">
+    <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-white/5 border border-white/5 min-w-0 transition-transform active:scale-95">
+      <div className="flex items-center gap-1.5 mb-1">
         {getIcon()}
-        <span className="text-white font-bold text-xs sm:text-sm md:text-base leading-tight">
+        <span className="text-white font-black text-xs sm:text-sm lg:text-base tracking-tight truncate">
           {formatValue(value)}
         </span>
       </div>
-      <span className="text-white/80 text-[10px] sm:text-xs leading-tight">{label}</span>
+      <span className="text-white/40 text-[9px] sm:text-[10px] lg:text-xs font-bold uppercase tracking-wider truncate w-full text-center">
+        {label}
+      </span>
     </div>
   );
 };

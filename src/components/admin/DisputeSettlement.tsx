@@ -18,6 +18,7 @@ import {
 import { format } from 'date-fns';
 import { writeAuditLog } from './auditHelpers';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
 import { useCurrency } from '@/contexts/CurrencyContext';
 
@@ -269,30 +270,65 @@ export default function DisputeSettlement() {
               <TabsTrigger value="resolved" className="flex-1 py-3 text-sm font-bold">Resolved Ledger ({resolvedDisputes.length})</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active" className="space-y-4">
-              {activeDisputes.length === 0 ? (
-                <div className="text-center py-12 rounded-2xl border-2 border-dashed border-muted bg-muted/10"><Shield className="h-10 w-10 mx-auto mb-3 text-emerald-500 opacity-60" /><p className="font-bold text-muted-foreground">All escrow balances are stable</p></div>
-              ) : activeDisputes.map(d => (
-                <div key={d.id} className={`group bg-card border rounded-2xl p-5 hover:border-primary/40 transition-all ${d.status === 'under_review' ? 'border-l-4 border-l-purple-500' : 'border-l-4 border-l-yellow-500'}`}>
-                  <div className="flex flex-col sm:flex-row justify-between gap-4">
-                    <div className="space-y-2 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-bold text-base truncate">{d.project_title || 'Project'}</h4>
-                        {statusBadge(d.status)}
-                      </div>
-                      <p className="text-sm">Escrow Locked: <span className="font-black text-primary">{fmt(d.milestone_amount || 0)}</span> <span className="text-muted-foreground">({d.milestone_title || 'General'})</span></p>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg inline-flex">
-                        <span>Plaintiff: <b className="text-foreground">{d.raised_by_name}</b></span>
-                        <span className="hidden sm:inline text-border">•</span>
-                        <span>Client: <b className="text-foreground">{d.client_name}</b></span>
-                        <span className="hidden sm:inline text-border">•</span>
-                        <span>Artist: <b className="text-foreground">{d.artist_name}</b></span>
-                      </div>
-                    </div>
-                    <Button onClick={() => openDetails(d)} className="shrink-0 rounded-xl" size="lg">Review Case</Button>
-                  </div>
-                </div>
-              ))}
+            <TabsContent value="active" className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-500">
+               {activeDisputes.length === 0 ? (
+                 <div className="text-center py-20 rounded-[2.5rem] border-2 border-dashed border-muted bg-muted/5">
+                   <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4 border-4 border-emerald-500/5">
+                      <Shield className="h-8 w-8 text-emerald-500 opacity-60" />
+                   </div>
+                   <p className="font-bold text-muted-foreground">All escrow balances are stable</p>
+                 </div>
+               ) : activeDisputes.map(d => (
+                 <div key={d.id} className={cn(
+                    "group relative bg-card border rounded-[2rem] p-6 sm:p-8 transition-all hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20",
+                    d.status === 'under_review' ? 'border-l-8 border-l-purple-500' : 'border-l-8 border-l-amber-500'
+                 )}>
+                   <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                     <div className="space-y-4 flex-1">
+                       <div className="flex items-center gap-3 flex-wrap">
+                         <h4 className="font-black text-lg sm:text-xl tracking-tight leading-none">{d.project_title || 'Project'}</h4>
+                         {statusBadge(d.status)}
+                       </div>
+                       
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Locked Escrow</p>
+                             <p className="text-lg font-black text-primary">{fmt(d.milestone_amount || 0)} <span className="text-[10px] font-bold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded ml-1 uppercase">{d.milestone_title || 'Deposit'}</span></p>
+                          </div>
+                          <div className="space-y-1">
+                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Incident Timeline</p>
+                             <p className="text-xs font-bold text-foreground/80 flex items-center gap-2 pt-1">
+                                <Clock className="h-3 w-3" />
+                                Raised {format(new Date(d.created_at), 'MMM d, h:mm a')}
+                             </p>
+                          </div>
+                       </div>
+
+                       <div className="flex flex-wrap items-center gap-3 p-3 rounded-2xl bg-muted/30 border border-muted/50">
+                          <div className="flex items-center gap-2 pr-3 border-r border-muted/50 last:border-0 truncate">
+                             <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center text-[8px] font-black text-blue-600">CL</div>
+                             <span className="text-[11px] font-bold text-foreground">Client: {d.client_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 pr-3 border-r border-muted/50 last:border-0 truncate">
+                             <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center text-[8px] font-black text-emerald-600">AR</div>
+                             <span className="text-[11px] font-bold text-foreground">Artist: {d.artist_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2 truncate">
+                             <div className="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center text-[8px] font-black text-amber-600">PL</div>
+                             <span className="text-[11px] font-bold text-foreground">Plaintiff: {d.raised_by_name}</span>
+                          </div>
+                       </div>
+                     </div>
+
+                     <div className="w-full lg:w-auto flex flex-col gap-2 pt-2 lg:pt-0">
+                        <Button onClick={() => openDetails(d)} className="h-12 px-8 rounded-xl sm:rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-sm shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all" size="lg">
+                           Execute Arbitration
+                        </Button>
+                        <p className="text-center text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Protocol Level 2 Resolution</p>
+                     </div>
+                   </div>
+                 </div>
+               ))}
             </TabsContent>
 
             <TabsContent value="resolved" className="space-y-4">

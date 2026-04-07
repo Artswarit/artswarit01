@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import {
   ArrowLeft, Eye, Heart, Maximize2, Bookmark,
   Crown, Lock, Music, Send, MessageCircle, Share2, X
@@ -18,6 +19,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import LogoLoader from "@/components/ui/LogoLoader";
+import { getOptimizedImageUrl, ImagePresets } from "@/lib/image-optimization";
+import { PayArtworkButton } from "@/components/payments/PayArtworkButton";
 
 export default function ArtworkDetails({ isModal = false }: { isModal?: boolean }) {
   const { id } = useParams();
@@ -135,31 +138,42 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
       });
       setLoading(false);
 
-      const likesChannel = supabase
-        .channel(`details-likes-${id}`)
+      if (isCancelled) return;
+
+      const uniqueId = Math.random().toString(36).substring(7);
+      
+      likesChannel = supabase
+        .channel(`details-likes-${id}-${uniqueId}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "artwork_likes", filter: `artwork_id=eq.${id}` },
-          async (payload) => {
-            const n = payload.new as any;
-            const o = payload.old as any;
-            if ((n?.user_id || o?.user_id) === user?.id) return;
+          async () => {
             const { data: l } = await supabase.from("artwork_likes").select("id").eq("artwork_id", id);
-            setLikeCount(l?.length || 0);
+            if (!isCancelled) setLikeCount(l?.length || 0);
+
+            if (user?.id) {
+              const { data: userLike } = await supabase.from("artwork_likes").select("id").eq("artwork_id", id).eq("user_id", user.id).maybeSingle();
+              if (!isCancelled) setIsLiked(!!userLike);
+            }
           })
         .subscribe();
 
-      const viewsChannel = supabase
-        .channel(`details-views-${id}`)
+      viewsChannel = supabase
+        .channel(`details-views-${id}-${uniqueId}`)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "artwork_views", filter: `artwork_id=eq.${id}` },
           () => setViewCount((p) => p + 1))
         .subscribe();
-
-      return () => {
-        supabase.removeChannel(likesChannel);
-        supabase.removeChannel(viewsChannel);
-      };
     }
-    const cleanup = init();
-    return () => { cleanup.then((fn) => fn?.()).catch(() => {}); };
+
+    let isCancelled = false;
+    let likesChannel: any = null;
+    let viewsChannel: any = null;
+
+    init();
+    
+    return () => {
+      isCancelled = true;
+      if (likesChannel) supabase.removeChannel(likesChannel);
+      if (viewsChannel) supabase.removeChannel(viewsChannel);
+    };
   }, [id, user?.id]);
 
   const handleLike = async () => {
@@ -269,9 +283,13 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
                   <Link to="/login">Sign in to Purchase</Link>
                 </Button>
               ) : (
-                <Button className="h-12 rounded-xl font-semibold bg-gradient-to-r from-amber-400 to-orange-500 text-white border-none shadow-lg">
-                  <Lock className="h-4 w-4 mr-2" /> Unlock Artwork
-                </Button>
+                <PayArtworkButton 
+                  artworkId={id!} 
+                  amount={artwork?.price || 0} 
+                  artworkTitle={artwork?.title || "Artwork"} 
+                  className="h-12 rounded-xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white border-none shadow-lg"
+                  onSuccess={() => window.location.reload()}
+                />
               )}
               <Button variant="ghost" className="rounded-xl font-medium" onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-4 w-4 mr-2" /> Go Back
@@ -308,7 +326,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
       {isModal && (
         <button 
           onClick={() => navigate(-1)}
-          className="fixed top-[calc(1rem+var(--safe-top))] right-4 z-[110] h-10 w-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 transition-all shadow-xl"
+          className="fixed top-[calc(1rem+var(--safe-top))] right-4 z-[110] h-10 w-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/30 active:scale-90 transition-all shadow-xl"
         >
           <X className="h-5 w-5" />
         </button>
@@ -371,7 +389,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
               <>
                 <div className="bg-muted/30 flex items-center justify-center">
                   <img
-                    src={artwork.imageUrl}
+                    src={getOptimizedImageUrl(artwork.imageUrl, ImagePresets.ARTWORK_DETAIL)}
                     alt={artwork.title}
                     className="w-full h-auto max-h-[90vh] object-contain block mx-auto"
                     draggable={false}
@@ -531,10 +549,13 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
           {/* ── PRICE / PURCHASE CTA ────────────────────────────────── */}
           {artwork.price > 0 && (artwork.accessType === "premium" || artwork.accessType === "exclusive") && (
             <div className="px-3 sm:px-4 pb-3">
-              <Button className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-md">
-                <Crown className="h-4 w-4 mr-2" />
-                Purchase for {format(artwork.price, artwork.currency)}
-              </Button>
+              <PayArtworkButton 
+                artworkId={id!} 
+                amount={artwork.price} 
+                artworkTitle={artwork.title}
+                className="w-full h-11 rounded-xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-md transition-all active:scale-95"
+                onSuccess={() => window.location.reload()}
+              />
             </div>
           )}
 
@@ -543,7 +564,8 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
           {/* ── COMMENT BOTTOM SHEET ───────────────────────────────── */}
           {id && <ArtworkFeedback artworkId={id} isOpen={commentsOpen} onClose={() => setCommentsOpen(false)} />}
       </div>
-    </main>
-  </div>
-);
+      </main>
+      {!isModal && <Footer />}
+    </div>
+  );
 }

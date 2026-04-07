@@ -18,6 +18,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { getOptimizedImageUrl, ImagePresets } from '@/lib/image-optimization';
+import { PayArtworkButton } from '@/components/payments/PayArtworkButton';
 
 interface ArtworkCardProps {
   id: string;
@@ -100,9 +102,12 @@ const ArtworkCard = ({
     
     fetchCounts();
 
+    let isCancelled = false;
+    const instanceId = Math.random().toString(36).substring(7);
+
     // Subscribe to real-time like updates (skip updates from other users only)
     const likesChannel = supabase
-      .channel(`artwork-likes-${id}`)
+      .channel(`artwork-likes-${id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -112,27 +117,38 @@ const ArtworkCard = ({
           filter: `artwork_id=eq.${id}`
         },
         async (payload) => {
-          // Skip if the change was made by current user (we handle this optimistically)
-          const newRecord = payload.new as { user_id?: string } | null;
-          const oldRecord = payload.old as { user_id?: string } | null;
-          const changedUserId = newRecord?.user_id || oldRecord?.user_id;
-          if (changedUserId === user?.id) {
-            return;
-          }
+          if (isCancelled) return;
           
-          // Refetch like count on changes from other users
+          // Refetch to sync cross-component AND cross-tab state perfectly
           const { data } = await supabase
             .from('artwork_likes')
             .select('id')
             .eq('artwork_id', id);
-          setCurrentLikes(data?.length || 0);
+          
+          if (!isCancelled) {
+            setCurrentLikes(data?.length || 0);
+          }
+
+          // If the interaction might be ours (cross-tab sync), refetch isLiked
+          if (user?.id) {
+            const { data: userLike } = await supabase
+              .from('artwork_likes')
+              .select('id')
+              .eq('artwork_id', id)
+              .eq('user_id', user.id)
+              .maybeSingle();
+
+            if (!isCancelled) {
+              setIsLiked(!!userLike);
+            }
+          }
         }
       )
       .subscribe();
 
     // Subscribe to real-time view updates
     const viewsChannel = supabase
-      .channel(`artwork-views-${id}`)
+      .channel(`artwork-views-${id}-${instanceId}`)
       .on(
         'postgres_changes',
         {
@@ -142,12 +158,15 @@ const ArtworkCard = ({
           filter: `artwork_id=eq.${id}`
         },
         () => {
-          setCurrentViews(prev => prev + 1);
+          if (!isCancelled) {
+            setCurrentViews(prev => prev + 1);
+          }
         }
       )
       .subscribe();
 
     return () => {
+      isCancelled = true;
       supabase.removeChannel(likesChannel);
       supabase.removeChannel(viewsChannel);
     };
@@ -272,9 +291,10 @@ const ArtworkCard = ({
               />
             ) : (
               <img
-                src={imageUrl}
+                src={getOptimizedImageUrl(imageUrl, ImagePresets.THUMBNAIL)}
                 alt={title}
                 loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
             )}
@@ -287,7 +307,19 @@ const ArtworkCard = ({
             </div>
           
           {/* Subtle gradient on hover only */}
-          <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'}`} />
+          <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent transition-opacity duration-500 flex items-center justify-center ${isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'}`}>
+            {price && price > 0 && (
+              <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                <PayArtworkButton 
+                  artworkId={id}
+                  amount={price}
+                  artworkTitle={title}
+                  className="rounded-full px-6 font-black bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20 scale-110"
+                  size="default"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Content */}

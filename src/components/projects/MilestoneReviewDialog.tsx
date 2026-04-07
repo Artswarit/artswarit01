@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, RotateCcw, Clock, FileText, Image, Video, Music, Download, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import LogoLoader from '@/components/ui/LogoLoader';
+import { ProjectReviewDialog } from './ProjectReviewDialog';
 
 interface Milestone {
   id: string;
@@ -66,14 +67,26 @@ export function MilestoneReviewDialog({
   const [loading, setLoading] = useState(true);
   const [revisionReason, setRevisionReason] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [projectData, setProjectData] = useState<any>(null);
 
   const canRequestRevision = milestone.revision_count < milestone.max_revisions;
 
   useEffect(() => {
     if (open) {
       fetchSubmissions();
+      fetchProjectDetails();
     }
   }, [open, milestone.id]);
+
+  const fetchProjectDetails = async () => {
+    const { data } = await supabase
+      .from('projects')
+      .select('id, description, artist_id')
+      .eq('id', projectId)
+      .single();
+    setProjectData(data);
+  };
 
   // Helper to extract storage path from full URL
   const extractStoragePath = (url: string): string | null => {
@@ -160,6 +173,42 @@ export function MilestoneReviewDialog({
         throw new Error(data?.error || error?.message || 'Failed to release payout');
       }
 
+      // P0 FIX: Unlock the next sequential milestone (LOCKED → WAITING_FUNDS)
+      // This is critical for multi-milestone project progression.
+      try {
+        // Get all milestones for this project to find the next one
+        const { data: allMilestones } = await supabase
+          .from('project_milestones')
+          .select('id, sort_order, status')
+          .eq('project_id', projectId)
+          .order('sort_order');
+
+        if (allMilestones) {
+          // Find the current milestone's position
+          const currentIndex = allMilestones.findIndex(m => m.id === milestone.id);
+          const nextMilestone = currentIndex >= 0 ? allMilestones[currentIndex + 1] : null;
+
+          if (nextMilestone && nextMilestone.status === 'LOCKED') {
+            await supabase
+              .from('project_milestones')
+              .update({ status: 'WAITING_FUNDS' })
+              .eq('id', nextMilestone.id);
+
+            // Log the unlock
+            await supabase.from('project_activity_logs').insert({
+              project_id: projectId,
+              milestone_id: nextMilestone.id,
+              user_id: user?.id,
+              action: 'milestone_unlocked',
+              details: { previousMilestoneId: milestone.id }
+            });
+          }
+        }
+      } catch (unlockErr) {
+        // Non-fatal: log but don't block the approval success
+        console.error('Failed to unlock next milestone:', unlockErr);
+      }
+
       // Log activity
       await supabase.from('project_activity_logs').insert({
         project_id: projectId,
@@ -169,9 +218,31 @@ export function MilestoneReviewDialog({
         details: { milestoneId: milestone.id }
       });
 
+      const isLastMilestone = await (async () => {
+        try {
+          const { data: allMilestones } = await supabase
+            .from('project_milestones')
+            .select('id, sort_order')
+            .eq('project_id', projectId)
+            .order('sort_order');
+          
+          if (allMilestones) {
+            const index = allMilestones.findIndex(m => m.id === milestone.id);
+            return index === allMilestones.length - 1;
+          }
+        } catch (e) { console.error(e); }
+        return false;
+      })();
+
       toast.success('Milestone approved and payout released from escrow.');
       onSuccess();
-      onOpenChange(false);
+      
+      if (isLastMilestone) {
+        setShowReviewDialog(true);
+        // Important: close the current dialog but wait if we need its data, actually we just need simple flags
+      } else {
+        onOpenChange(false);
+      }
     } catch (error: any) {
       toast.error('Failed to approve milestone');
       console.error(error);
@@ -399,6 +470,22 @@ export function MilestoneReviewDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+      
+      {projectData && (
+        <ProjectReviewDialog
+          open={showReviewDialog}
+          onOpenChange={(open) => {
+            setShowReviewDialog(open);
+            if (!open) onOpenChange(false); // Close parent when review is done
+          }}
+          projectId={projectId}
+          artistId={projectData.artist_id}
+          projectName={projectData.description || 'Art Project'}
+          onSuccess={() => {
+            onOpenChange(false);
+          }}
+        />
+      )}
     </Dialog>
   );
 }

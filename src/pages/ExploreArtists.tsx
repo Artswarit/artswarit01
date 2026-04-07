@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -407,55 +407,20 @@ const ExploreArtists = () => {
     setFilteredArtists(filtered);
   };
 
-  const handleFollowToggle = async (artistId: string) => {
-    if (!user) {
-      console.log('User must be logged in to follow');
-      return;
-    }
-
-    try {
-      // Check if already following
-      const { data: existing } = await supabase
-        .from('follows')
-        .select('id')
-        .eq('follower_id', user.id)
-        .eq('following_id', artistId)
-        .maybeSingle();
-
-      if (existing) {
-        // Unfollow
-        await supabase
-          .from('follows')
-          .delete()
-          .eq('follower_id', user.id)
-          .eq('following_id', artistId);
-      } else {
-        // Follow
-        await supabase
-          .from('follows')
-          .insert({
-            follower_id: user.id,
-            following_id: artistId
-          });
-      }
-    } catch (error) {
-      console.error('Error toggling follow:', error);
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
       <main className="flex-1 container mx-auto px-4 py-6 sm:py-8 pt-[calc(5rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))]">
-        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-1 sm:mb-2">Explore Artists</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">Discover talented artists from around the world</p>
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="max-w-full overflow-hidden">
+            <h1 className="text-2xl xs:text-3xl sm:text-4xl font-black text-foreground mb-1 sm:mb-2 leading-tight uppercase tracking-tighter">Explore Artists</h1>
+            <p className="text-xs sm:text-base text-muted-foreground font-medium">Discover talented creators worldwide</p>
           </div>
-          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground self-end sm:self-auto">
-            <RefreshCw className="h-3 w-3 animate-spin" style={{ animationDuration: '3s' }} />
-            <span>Live updates</span>
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground self-end sm:self-auto bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
+            <RefreshCw className="h-3 w-3 animate-spin text-primary" style={{ animationDuration: '3s' }} />
+            <span className="font-bold uppercase tracking-widest">Live updates</span>
           </div>
         </div>
 
@@ -470,24 +435,24 @@ const ExploreArtists = () => {
           {/* Main Content */}
           <div className="flex-1">
             {/* Mobile Filter Toggle and View Mode */}
-            <div className="flex items-center justify-between mb-6 gap-2">
-              <div className="flex items-center gap-2 sm:gap-4 flex-1">
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center justify-between mb-6 gap-3">
+              <div className="flex items-center gap-2 flex-1">
                 {isMobile && (
                   <Button
                     variant="outline"
                     onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-2 h-11 px-4 rounded-xl border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-all duration-300"
+                    className="flex items-center justify-center gap-2 h-10 px-3 rounded-xl border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 transition-all duration-300 active:scale-95 flex-1 xs:flex-none"
                   >
                     <Filter className="h-4 w-4" />
-                    <span className="font-semibold">Filters</span>
+                    <span className="font-bold text-xs uppercase tracking-widest">Filters</span>
                   </Button>
                 )}
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium">
-                  <span className="text-foreground font-bold">{filteredArtists.length}</span> artist{filteredArtists.length !== 1 ? 's' : ''}
+                <p className="text-[10px] sm:text-sm text-muted-foreground font-black uppercase tracking-widest bg-muted/20 px-3 py-2 rounded-xl border border-border/5">
+                  <span className="text-foreground">{filteredArtists.length}</span> artist{filteredArtists.length !== 1 ? 's' : ''}
                 </p>
               </div>
               
-              <div className="flex items-center bg-muted/50 p-1 rounded-xl">
+              <div className="flex items-center bg-muted/40 p-1 rounded-xl border border-border/5 self-end xs:self-auto">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
@@ -548,7 +513,6 @@ const ExploreArtists = () => {
                     key={artist.id}
                     artist={artist}
                     viewMode={viewMode}
-                    onFollow={handleFollowToggle}
                   />
                 ))}
               </div>

@@ -2,6 +2,7 @@
 import React from "react";
 import { MessageCircle, Save, FilePlus, UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ArtistActionsBarProps {
   isFollowing: boolean;
@@ -27,64 +28,73 @@ const ArtistActionsBar: React.FC<ArtistActionsBarProps> = ({
   canMessage = true,
 }) => {
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="grid grid-cols-1 gap-3 w-full">
       {/* Primary Follow Button - Full width responsive */}
       <Button
         onClick={onFollow}
         disabled={loadingFollow}
         variant={isFollowing ? "secondary" : "default"}
-        className={`w-full relative font-semibold transition-all text-sm min-h-[44px] ${
+        className={cn(
+          "w-full relative h-14 rounded-2xl font-black text-sm sm:text-base tracking-tight transition-all duration-300 shadow-xl",
           isFollowing
-            ? "bg-green-200 text-green-900"
-            : "bg-gradient-to-r from-violet-600 to-indigo-500 text-white shadow-xl"
-        } hover:scale-105`}
+            ? "bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/20"
+            : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/20 hover:scale-105 active:scale-95"
+        )}
       >
         {loadingFollow ? (
-          <Loader2 className="mr-2 animate-spin" size={16} />
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
         ) : (
-          <UserPlus className="mr-2" size={16} />
+          <UserPlus className="mr-2 h-5 w-5" />
         )}
-        {isFollowing ? "Unfollow" : "Follow"}
+        {isFollowing ? "Following" : "Follow Artist"}
       </Button>
 
-      {/* Message Button - Full width responsive */}
+      {/* Message Button - High Contrast Glass Style */}
       <Button
         onClick={onMessage}
         disabled={!canMessage}
-        variant="outline"
-        className={`w-full text-sm min-h-[44px] ${!canMessage ? 'border-gray-300 text-gray-500 cursor-not-allowed' : 'border-blue-400 text-blue-700 hover:bg-blue-200/60 hover:text-blue-900'}`}
-        title={!canMessage ? 'Direct messages are disabled by this artist' : undefined}
+        variant="ghost"
+        className={cn(
+          "w-full h-14 rounded-2xl font-black text-sm transition-all duration-300 relative isolate overflow-hidden shadow-lg",
+          !canMessage 
+            ? "opacity-50 cursor-not-allowed bg-muted" 
+            : "bg-white/10 dark:bg-white/5 border border-white/20 text-white hover:bg-white/20 active:scale-95"
+        )}
       >
-        <MessageCircle size={16} className="mr-2" />
-        <span className="hidden xs:inline">{canMessage ? 'Message Artist' : 'Messages Disabled'}</span>
-        <span className="xs:hidden">{canMessage ? 'Message' : 'Disabled'}</span>
+        {!canMessage && <div className="absolute inset-0 bg-black/5 z-[-1]" />}
+        <MessageCircle className="mr-2 h-5 w-5 drop-shadow-md" />
+        <span className="drop-shadow-md">
+          {canMessage ? 'Message Artist' : 'Messaging Unavailable'}
+        </span>
+        {canMessage && (
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        )}
       </Button>
 
-      {/* Action Buttons Row - Always stacked on mobile for better touch targets */}
-      <div className="flex flex-col gap-2 sm:flex-row">
+      {/* Secondary Actions - 2 column grid on small screens, expands later */}
+      <div className="grid grid-cols-1 min-[390px]:grid-cols-2 gap-3">
         <Button
           onClick={onSave}
           variant="outline"
           disabled={loadingSave}
-          className={`flex-1 border-pink-400 hover:text-pink-900 text-sm min-h-[44px] ${
+          className={cn(
+            "h-14 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-300",
             isSaved 
-              ? 'bg-pink-100 text-pink-800 hover:bg-pink-200/60' 
-              : 'text-pink-700 hover:bg-pink-200/50'
-          }`}
+              ? "bg-pink-50 border-pink-500 text-pink-600 shadow-md" 
+              : "border-pink-200 text-pink-600 hover:bg-pink-50 shadow-sm"
+          )}
         >
-          <Save size={16} className="mr-2" />
-          <span className="hidden sm:inline">{isSaved ? "Saved" : "Save Artist"}</span>
-          <span className="sm:hidden">{isSaved ? "Saved" : "Save"}</span>
+          <Save className={cn("mr-2 h-4 w-4 sm:h-5 sm:w-5", isSaved && "fill-current")} />
+          {isSaved ? "Saved" : "Save"}
         </Button>
 
         <Button
           onClick={onRequest}
           variant="outline"
-          className="flex-1 border-yellow-400 text-amber-800 hover:bg-amber-100/70 hover:text-amber-900 text-sm min-h-[44px]"
+          className="h-14 rounded-2xl font-bold text-xs sm:text-sm border-amber-200 text-amber-600 hover:bg-amber-50 shadow-sm transition-all duration-300"
         >
-          <FilePlus size={16} className="mr-2" />
-          <span className="hidden sm:inline">Request Project</span>
-          <span className="sm:hidden">Request</span>
+          <FilePlus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          Request
         </Button>
       </div>
     </div>

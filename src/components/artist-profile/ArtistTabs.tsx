@@ -3,11 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import ArtworkCard from "@/components/artwork/ArtworkCard";
 import ArtworkCardModern from "@/components/artist-profile/ArtworkCardModern";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Star, MapPin, Mail } from "lucide-react";
+import { Star, MapPin, Mail, Lock, Crown, Image, Layers, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import ReviewCard from "@/components/reviews/ReviewCard";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
@@ -76,8 +77,8 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
   exclusiveArt,
   pinnedIds = [],
   aboutDetails,
-  services = [],
-  reviews = [],
+  services: initialServices = [],
+  reviews: initialReviews = [],
   onArtworkClick,
   isArtistOwner = false,
   onRefreshReviews,
@@ -95,6 +96,58 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
   const [unlockedArtworkIds, setUnlockedArtworkIds] = useState<Set<string>>(new Set());
   const [exclusiveStatus, setExclusiveStatus] = useState<"none" | "pending" | "approved" | "rejected">("none");
   const [exclusiveLoading, setExclusiveLoading] = useState(false);
+
+  const [reviews, setReviews] = useState<any[]>(initialReviews);
+  const [reviewLoading, setReviewLoading] = useState(true);
+  const [services, setServices] = useState<any[]>(initialServices);
+  const [servicesLoading, setServicesLoading] = useState(true);
+
+  // Fetch reviews for the current artist
+  useEffect(() => {
+    async function fetchReviews() {
+      if (!artistId) return;
+      const {
+        data,
+        error
+      } = await supabase.from("reviews").select("*").eq("artist_id", artistId).order("created_at", {
+        ascending: false
+      });
+      if (!error && data) {
+        const formattedReviews = await Promise.all(data.map(async r => {
+          const {
+            data: p
+          } = await supabase.from("public_profiles").select("full_name, avatar_url").eq("id", r.client_id).single();
+          return {
+            id: r.id,
+            rating: r.rating,
+            comment: r.comment,
+            date: new Date(r.created_at).toLocaleDateString(),
+            clientName: p?.full_name || "Art Collector",
+            clientAvatar: p?.avatar_url
+          };
+        }));
+        setReviews(formattedReviews);
+      }
+      setReviewLoading(false);
+    }
+    fetchReviews();
+  }, [artistId]);
+
+  // Fetch services for the current artist
+  useEffect(() => {
+    async function fetchServices() {
+      if (!artistId) return;
+      const {
+        data,
+        error
+      } = await supabase.from("artist_services").select("*").eq("artist_id", artistId).eq("is_active", true);
+      if (!error && data) {
+        setServices(data);
+      }
+      setServicesLoading(false);
+    }
+    fetchServices();
+  }, [artistId]);
 
   const normalizeExclusiveStatus = (status: any): "none" | "pending" | "approved" | "rejected" => {
     if (!status) return "none";
@@ -360,18 +413,15 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
     premium: premiumArt || [],
     exclusive: exclusiveArt || []
   };
-  const isArtTab = ART_TABS.includes(tab);
+  const isArtTab = ["all", "premium", "exclusive"].includes(tab);
   const paged = isArtTab && displayed[tab] ? displayed[tab].slice(0, PAGE_SIZE * page) : [];
   const hasMore = isArtTab && displayed[tab] && displayed[tab].length > PAGE_SIZE * page;
 
-  // Form setup for Services tab
   const {
     register,
     handleSubmit,
     reset,
-    formState: {
-      isSubmitting
-    }
+    formState: { isSubmitting }
   } = useForm({
     defaultValues: {
       title: "",
@@ -379,6 +429,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
       budget: ""
     }
   });
+
   const submitRequest = () => {
     toast({
       title: "Project request sent!",
@@ -386,28 +437,57 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
     });
     reset();
   };
+
   return <div>
       <Tabs value={tab} onValueChange={v => {
       setTab(v);
       setPage(1);
     }}>
-        <div className="w-full overflow-x-auto pb-4 mb-2 -mx-1 px-1 flex justify-center no-scrollbar">
-          <TabsList className="bg-white/40 backdrop-blur rounded-2xl glass-effect w-full sm:w-max mb-2 py-1.5 sm:py-1 px-1.5 sm:px-1 min-w-max flex items-center min-h-[44px] sm:min-h-0">
-            <TabsTrigger value="all" className="text-[11px] sm:text-sm px-2.5 sm:px-4 whitespace-nowrap min-h-[36px] sm:min-h-[40px] transition-all">
-              All Art {freeArt.length > 0 && `(${freeArt.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="premium" className="text-[11px] sm:text-sm px-2.5 sm:px-4 whitespace-nowrap min-h-[36px] sm:min-h-[40px] transition-all">
-              Premium {premiumArt.length > 0 && `(${premiumArt.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="exclusive" className="text-[11px] sm:text-sm px-2.5 sm:px-4 whitespace-nowrap min-h-[36px] sm:min-h-[40px] transition-all">
-              Exclusive {exclusiveArt.length > 0 && `(${exclusiveArt.length})`}
-            </TabsTrigger>
-            <TabsTrigger value="services" className="text-[11px] sm:text-sm px-2.5 sm:px-4 whitespace-nowrap min-h-[36px] sm:min-h-[40px] transition-all">Services</TabsTrigger>
-            <TabsTrigger value="about" className="text-[11px] sm:text-sm px-2.5 sm:px-4 whitespace-nowrap min-h-[36px] sm:min-h-[40px] transition-all">About</TabsTrigger>
-          </TabsList>
+        <div className="relative mb-6 sm:mb-10 group mt-4">
+          <div className="w-full overflow-x-auto pb-4 scrollbar-hide px-1">
+            <TabsList className="flex items-center justify-start lg:justify-center w-max sm:w-full min-w-full bg-white/10 dark:bg-black/20 backdrop-blur-2xl p-1.5 sm:p-2.5 rounded-[1.5rem] sm:rounded-[3rem] border border-white/20 shadow-2xl h-auto">
+              <TabsTrigger 
+                value="all" 
+                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
+              >
+                <Image size={16} className="shrink-0" />
+                <span className="hidden xs:inline">Portfolio</span>
+                {freeArt.length > 0 && <span className="ml-1 opacity-40 font-bold">({freeArt.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="premium" 
+                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-2xl data-[state=active]:shadow-amber-500/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
+              >
+                <Crown size={16} className={cn("shrink-0", tab === "premium" ? "text-amber-500" : "")} />
+                <span className="hidden xs:inline">Premium</span>
+                {premiumArt.length > 0 && <span className="ml-1 opacity-40 font-bold">({premiumArt.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="exclusive" 
+                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-2xl data-[state=active]:shadow-purple-500/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
+              >
+                <Layers size={16} className={cn("shrink-0", tab === "exclusive" ? "text-purple-500" : "")} />
+                <span className="hidden xs:inline">Exclusive</span>
+                {exclusiveArt.length > 0 && <span className="ml-1 opacity-40 font-bold">({exclusiveArt.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="services" 
+                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
+              >
+                <Star size={16} className="shrink-0" />
+                <span className="hidden xs:inline">Services</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="about" 
+                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
+              >
+                <User size={16} className="shrink-0" />
+                <span className="hidden xs:inline">About</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
 
-        {/* "All Art", "Premium", "Exclusive" tabs */}
         <TabsContent value={tab}>
           {isArtTab && <>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 my-4">

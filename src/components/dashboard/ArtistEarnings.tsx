@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,11 @@ interface Transaction {
   id: string;
   amount: number;
   currency: string;
-  status: string;
+  status: 'completed' | 'pending' | 'failed';
   created_at: string;
-  artwork_id: string | null;
+  title: string;
+  type: 'artwork' | 'milestone';
+  category: 'Sale' | 'Payout';
   buyer_id: string | null;
 }
 
@@ -45,10 +47,12 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
     if (exportingCsv || transactions.length === 0) return;
     setExportingCsv(true);
     try {
-      const headers = ['ID', 'Date', 'Amount', 'Currency', 'Status'];
+      const headers = ['ID', 'Date', 'Type', 'Item', 'Amount', 'Currency', 'Status'];
       const rows = transactions.map(t => [
         t.id,
         new Date(t.created_at).toLocaleDateString(),
+        t.category,
+        t.title,
         Number(t.amount).toFixed(2),
         t.currency || 'USD',
         t.status
@@ -76,15 +80,17 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
         <tr>
           <td>${t.id.slice(0, 8)}&hellip;</td>
           <td>${new Date(t.created_at).toLocaleDateString()}</td>
+          <td>${t.category}</td>
+          <td>${t.title}</td>
           <td>${Number(t.amount).toFixed(2)} ${t.currency || 'USD'}</td>
-          <td>${t.status === 'success' ? 'Completed' : 'Pending'}</td>
+          <td>${t.status === 'completed' ? 'Completed' : 'Pending'}</td>
         </tr>`).join('');
       const html = `<!DOCTYPE html><html><head><title>Artswarit Earnings Report</title>
         <style>body{font-family:sans-serif;padding:32px}h1{font-size:20px;margin-bottom:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #e2e8f0;padding:8px 12px;text-align:left;font-size:13px}th{background:#f8fafc;font-weight:700}</style>
         </head><body>
         <h1>Artswarit — Earnings Report (${new Date().toLocaleDateString()})</h1>
         <p>Total transactions: ${transactions.length}</p>
-        <table><thead><tr><th>ID</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+        <table><thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Item</th><th>Amount</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody></table></body></html>`;
       const win = window.open('', '_blank');
       if (win) { win.document.write(html); win.document.close(); win.print(); }
@@ -97,20 +103,62 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
     if (!user?.id) return;
 
     try {
-      const { data, error } = await (supabase
-        .from('transactions')
-        .select('*')
-        .eq('seller_id', user.id)
-        .order('created_at', { ascending: false }) as any)
-        .abortSignal(signal);
+      // Fetch both Artwork transactions and Milestone payments
+      const [transactionsRes, paymentsRes] = await Promise.all([
+        supabase
+          .from('transactions')
+          .select('*, artworks(title)')
+          .eq('seller_id', user.id)
+          .abortSignal(signal),
+        supabase
+          .from('payments')
+          .select('*, milestone:milestone_id(title)')
+          .eq('artist_id', user.id)
+          .abortSignal(signal)
+      ]);
 
-      if (error) {
-        if (error.name === 'AbortError' || (error as any).code === 'ABORT' || error.message?.includes('signal is aborted')) return;
-        throw error;
-      }
-      setTransactions((data as Transaction[]) || []);
+      const isAbortError = (error: any) => 
+        error?.name === 'AbortError' || 
+        error?.message?.includes('signal is aborted');
+
+      if (transactionsRes.error && !isAbortError(transactionsRes.error)) throw transactionsRes.error;
+      if (paymentsRes.error && !isAbortError(paymentsRes.error)) throw paymentsRes.error;
+
+      // Transform transactions (Artwork sales)
+      const artworkTransactions: Transaction[] = (transactionsRes.data || []).map((t: any) => ({
+        id: t.id,
+        amount: Number(t.amount),
+        currency: t.currency || 'USD', // Transactions table lacks currency, defaulting to USD
+        created_at: t.created_at,
+        status: t.status === 'success' || t.status === 'completed' ? 'completed' : t.status === 'pending' ? 'pending' : 'failed',
+        title: t.artworks?.title || 'Artwork Sale',
+        type: 'artwork',
+        category: 'Sale',
+        buyer_id: t.buyer_id
+      }));
+
+      // Transform payments (Milestone payouts)
+      const milestonePayments: Transaction[] = (paymentsRes.data || []).map((p: any) => ({
+        id: p.id,
+        amount: Number(p.artist_payout || p.amount),
+        currency: p.currency || 'USD',
+        created_at: p.created_at,
+        status: p.status === 'success' || p.status === 'completed' ? 'completed' : p.status === 'pending' ? 'pending' : 'failed',
+        title: p.milestone?.title || 'Milestone Payout',
+        type: 'milestone',
+        category: 'Payout',
+        buyer_id: p.client_id
+      }));
+
+      // Merge and sort
+      const merged = [...artworkTransactions, ...milestonePayments].sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setTransactions(merged);
     } catch (err: any) {
-      if (err.name === 'AbortError' || err.code === 'ABORT' || err.message?.includes('signal is aborted')) return;
+      if (err.name === 'AbortError' || err.message?.includes('signal is aborted')) return;
+      console.error('Error fetching unified transactions:', err);
     } finally {
       setLoading(false);
     }
@@ -162,7 +210,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
         const date = new Date(t.created_at);
         return date.getMonth() === index && 
                date.getFullYear() === currentYear && 
-               t.status === 'success';
+               t.status === 'completed';
       });
       
       const earnings = monthTransactions.reduce((sum, t) => sum + convertPrice(Number(t.amount), t.currency || 'USD'), 0);
@@ -174,7 +222,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
 
   // Memoize expensive calculations
   const { totalEarnings, pendingEarnings, avgPerSale, completedCount } = useMemo(() => {
-    const completed = transactions.filter(t => t.status === 'success');
+    const completed = transactions.filter(t => t.status === 'completed');
     const pending = transactions.filter(t => t.status === 'pending');
     
     const total = completed.reduce((sum, t) => sum + convertPrice(Number(t.amount), t.currency || 'USD'), 0);
@@ -211,13 +259,13 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
       
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-1">
-          <h2 className="font-black text-2xl sm:text-3xl flex items-center gap-3 tracking-tight">
+          <h2 className="font-black text-xl sm:text-2xl lg:text-3xl flex items-center gap-2 sm:gap-3 tracking-tight">
             Earnings & Analytics
-            {isProArtist && <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500 fill-yellow-500 animate-pulse" />}
+            {isProArtist && <Crown className="h-4 w-4 sm:h-6 sm:w-6 text-yellow-500 fill-yellow-500 animate-pulse" />}
           </h2>
-          <p className="text-muted-foreground text-sm font-medium">Track your revenue and export reports</p>
+          <p className="text-muted-foreground text-[10px] sm:text-sm font-medium">Track your revenue and export reports</p>
         </div>
-        <div className="flex w-full sm:w-auto gap-2 sm:gap-3">
+        <div className="flex flex-col xs:flex-row w-full xs:w-auto gap-2 sm:gap-3">
           <Button 
             variant="outline" 
             size="lg"
@@ -225,70 +273,65 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
             disabled={exportingPdf}
             onClick={handlePdfExport}
           >
-            {exportingPdf ? (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            ) : (
-              isProArtist ? <Download className="h-4 w-4" /> : <Lock className="h-4 w-4" />
-            )}
-            <span className="text-sm">PDF Report</span>
+            <span className="text-[10px] sm:text-sm whitespace-nowrap">PDF Report</span>
           </Button>
           <Button 
             variant="outline" 
             size="lg"
-            className="flex-1 sm:flex-none h-12 rounded-xl sm:rounded-2xl flex items-center gap-2 font-bold transition-all hover:bg-primary/5 border-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+            className="flex-1 xs:flex-none h-11 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 font-bold transition-all hover:bg-primary/5 border-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
             disabled={exportingCsv}
             onClick={handleCsvExport}
           >
             {exportingCsv ? (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <span className="h-3 w-3 sm:h-4 sm:w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             ) : (
-              isProArtist ? <Download className="h-4 w-4" /> : <Lock className="h-4 w-4" />
+              isProArtist ? <Download className="h-3 w-3 sm:h-4 sm:w-4" /> : <Lock className="h-3 w-3 sm:h-4 sm:w-4" />
             )}
-            <span className="text-sm">CSV Export</span>
+            <span className="text-[10px] sm:text-sm whitespace-nowrap">CSV Export</span>
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
-          <CardHeader className="pb-2 pt-6 sm:pt-8 px-6 sm:px-8">
-            <CardTitle className="text-[10px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[1.5rem] sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
+          <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
+            <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
               Total Earnings
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-6 sm:px-8 pb-6 sm:pb-8">
-            <div className="text-3xl sm:text-4xl font-black text-foreground tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
+          <CardContent className="px-4 sm:px-8 pb-4 sm:pb-8">
+            <div className="text-2xl sm:text-4xl font-black text-foreground tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
               {formatPrice(totalEarnings)}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 font-medium">Lifetime revenue generated</p>
+            <p className="text-[10px] sm:text-sm text-muted-foreground mt-1 sm:mt-2 font-medium">Lifetime revenue</p>
           </CardContent>
         </Card>
         
-        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
-          <CardHeader className="pb-2 pt-6 sm:pt-8 px-6 sm:px-8">
-            <CardTitle className="text-[10px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[1.5rem] sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
+          <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
+            <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
               Pending Payments
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-6 sm:px-8 pb-6 sm:pb-8">
-            <div className="text-3xl sm:text-4xl font-black text-amber-600 tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
+          <CardContent className="px-4 sm:px-8 pb-4 sm:pb-8">
+            <div className="text-2xl sm:text-4xl font-black text-amber-600 tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
               {formatPrice(pendingEarnings)}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 font-medium">Processing in next cycle</p>
+            <p className="text-[10px] sm:text-sm text-muted-foreground mt-1 sm:mt-2 font-medium">Processing cycle</p>
           </CardContent>
         </Card>
         
-        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group sm:col-span-2 lg:col-span-1">
-          <CardHeader className="pb-2 pt-6 sm:pt-8 px-6 sm:px-8">
-            <CardTitle className="text-[10px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
-              Average Per Sale
+        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[1.5rem] sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group sm:col-span-2 lg:col-span-1">
+          <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
+            <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+              Avg Per Sale
             </CardTitle>
           </CardHeader>
-          <CardContent className="px-6 sm:px-8 pb-6 sm:pb-8">
-            <div className="text-3xl sm:text-4xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
+          <CardContent className="px-4 sm:px-8 pb-4 sm:pb-8">
+            <div className="text-2xl sm:text-4xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
               {formatPrice(avgPerSale)}
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-2 font-medium">From {completedCount} successful sales</p>
+            <p className="text-[10px] sm:text-sm text-muted-foreground mt-1 sm:mt-2 font-medium">From {completedCount} sales</p>
           </CardContent>
         </Card>
       </div>
@@ -314,8 +357,9 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-muted/30">
-                  <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Transaction ID</th>
                   <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Date</th>
+                  <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Type</th>
+                  <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Item</th>
                   <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Amount</th>
                   <th className="text-right px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Status</th>
                 </tr>
@@ -323,24 +367,34 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
               <tbody className="divide-y divide-border/10">
                 {transactions.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-8 py-16 text-center text-muted-foreground font-medium">
+                    <td colSpan={5} className="px-8 py-16 text-center text-muted-foreground font-medium">
                       No transactions yet
                     </td>
                   </tr>
                 ) : (
                   transactions.slice(0, 10).map(transaction => (
                     <tr key={transaction.id} className="hover:bg-primary/[0.02] transition-colors group">
-                      <td className="px-8 py-6 font-mono text-sm text-muted-foreground group-hover:text-foreground transition-colors">{transaction.id.slice(0, 8)}...</td>
                       <td className="px-8 py-6 text-sm font-bold text-foreground/80">{new Date(transaction.created_at).toLocaleDateString()}</td>
+                      <td className="px-8 py-6">
+                        <span className={cn(
+                          "inline-flex items-center rounded-lg px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider",
+                          transaction.type === "artwork" 
+                            ? "bg-blue-500/10 text-blue-600" 
+                            : "bg-purple-500/10 text-purple-600"
+                        )}>
+                          {transaction.type}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6 text-sm font-medium text-foreground truncate max-w-[200px]">{transaction.title}</td>
                       <td className="px-8 py-6 font-black text-foreground">{formatPrice(Number(transaction.amount), transaction.currency || 'USD')}</td>
                       <td className="px-8 py-6 text-right">
                         <span className={cn(
                           "inline-flex items-center rounded-xl px-4 py-1.5 text-xs font-black uppercase tracking-wider",
-                          transaction.status === "success" 
+                          transaction.status === "completed" 
                             ? "bg-green-500/10 text-green-600 dark:bg-green-500/20" 
                             : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20"
                         )}>
-                          {transaction.status === "success" ? "Completed" : "Pending"}
+                          {transaction.status === "completed" ? "Completed" : "Pending"}
                         </span>
                       </td>
                     </tr>
@@ -361,20 +415,30 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
                 <div key={transaction.id} className="p-6 space-y-4 hover:bg-muted/30 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <div className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
-                        ID: {transaction.id.slice(0, 8)}...
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "inline-flex items-center rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider",
+                          transaction.type === "artwork" 
+                            ? "bg-blue-500/10 text-blue-600" 
+                            : "bg-purple-500/10 text-purple-600"
+                        )}>
+                          {transaction.type}
+                        </span>
+                        <div className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
+                          {new Date(transaction.created_at).toLocaleDateString()}
+                        </div>
                       </div>
-                      <div className="text-sm font-bold text-muted-foreground">
-                        {new Date(transaction.created_at).toLocaleDateString()}
+                      <div className="text-sm font-bold text-foreground line-clamp-1">
+                        {transaction.title}
                       </div>
                     </div>
                     <span className={cn(
                       "inline-flex items-center rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-wider",
-                      transaction.status === "success" 
+                      transaction.status === "completed" 
                         ? "bg-green-500/10 text-green-600" 
                         : "bg-amber-500/10 text-amber-600"
                     )}>
-                      {transaction.status === "success" ? "Completed" : "Pending"}
+                      {transaction.status === "completed" ? "Completed" : "Pending"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">

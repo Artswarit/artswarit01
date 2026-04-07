@@ -92,7 +92,7 @@ export const useArtworks = () => {
   // Use the new realtime sync utility
   useRealtimeSync('artworks', fetchArtworks);
 
-  const optimizeImage = (file: File): Promise<File> => {
+  const optimizeImage = (file: File, maxDimension = 3840): Promise<File> => {
     return new Promise((resolve) => {
       if (!file.type.startsWith('image/')) {
         resolve(file);
@@ -101,7 +101,6 @@ export const useArtworks = () => {
       const image = new Image();
       const url = URL.createObjectURL(file);
       image.onload = () => {
-        const maxDimension = 1600;
         let width = image.width;
         let height = image.height;
         if (width > height && width > maxDimension) {
@@ -135,7 +134,7 @@ export const useArtworks = () => {
             resolve(optimizedFile);
           },
           'image/jpeg',
-          0.8
+          0.95 // Increased quality for professional art
         );
       };
       image.onerror = () => {

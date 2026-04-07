@@ -5,13 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Download, Eye, DollarSign, Calendar, CheckCircle, Clock, AlertCircle, Loader2, MapPin } from "lucide-react";
+import { CreditCard, DollarSign, Calendar, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BillingAddressForm } from "@/components/billing/BillingAddressForm";
 import { InvoiceDownload } from "@/components/billing/InvoiceDownload";
@@ -36,15 +33,6 @@ const ClientPayments = () => {
   
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
-  const [processing, setProcessing] = useState(false);
-  
-  const [paymentForm, setPaymentForm] = useState({
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    nameOnCard: ""
-  });
 
   const fetchPayments = useCallback(async () => {
     if (!user?.id) return;
@@ -104,34 +92,41 @@ const ClientPayments = () => {
         });
       }
 
-      // Add sales data
-      for (const sale of sales || []) {
+      // Also fetch milestone-based payments from payments table
+      const { data: milestonePayments } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('payer_id', user.id)
+        .order('created_at', { ascending: false });
+
+      // Add milestone payments
+      for (const mp of milestonePayments || []) {
         let artistInfo = { full_name: 'Unknown Artist', avatar_url: null };
         
-        if (sale.artist_id) {
+        if (mp.payee_id) {
           const { data: artist } = await supabase
             .from('public_profiles')
             .select('full_name, avatar_url')
-            .eq('id', sale.artist_id)
+            .eq('id', mp.payee_id)
             .maybeSingle();
-          
-          if (artist) {
-            artistInfo = artist;
-          }
+          if (artist) artistInfo = artist;
         }
 
-        enrichedPayments.push({
-          id: sale.id,
-          project_id: sale.artwork_id || '',
-          projectTitle: 'Project Payment',
-          artistName: artistInfo.full_name || 'Unknown Artist',
-          artistAvatar: artistInfo.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50',
-          amount: sale.amount,
-          currency: '',
-          status: sale.status as "pending" | "completed" | "failed",
-          created_at: sale.created_at,
-          updated_at: sale.updated_at,
-        });
+        // Deduplicate by checking if this ID already exists
+        if (!enrichedPayments.some(ep => ep.id === mp.id)) {
+          enrichedPayments.push({
+            id: mp.id,
+            project_id: mp.project_id || '',
+            projectTitle: mp.description || 'Milestone Payment',
+            artistName: artistInfo.full_name || 'Unknown Artist',
+            artistAvatar: artistInfo.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50',
+            amount: mp.amount,
+            currency: mp.currency || '',
+            status: mp.status as "pending" | "completed" | "failed",
+            created_at: mp.created_at,
+            updated_at: mp.updated_at || mp.created_at,
+          });
+        }
       }
 
       setPayments(enrichedPayments);
@@ -222,18 +217,7 @@ const ClientPayments = () => {
     }
   };
 
-  const handlePayment = async () => {
-    if (!selectedPayment) return;
-    
-    setProcessing(true);
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    toast({ title: "Payment functionality coming soon!" });
-    setProcessing(false);
-    setSelectedPayment(null);
-    setPaymentForm({ cardNumber: "", expiryDate: "", cvv: "", nameOnCard: "" });
-  };
+
 
   const pendingPayments = payments.filter(p => p.status === "pending");
   const completedPayments = payments.filter(p => p.status === "completed" || p.status === "failed");
@@ -346,118 +330,6 @@ const ClientPayments = () => {
                     <div className="flex items-center gap-1 text-[10px] sm:text-xs text-muted-foreground">
                       <Calendar className="h-3 w-3" />
                       <span>Created: {new Date(payment.created_at).toLocaleDateString()}</span>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="h-7 sm:h-8 text-xs">
-                        <Eye className="h-3 w-3 mr-1" />
-                        <span className="hidden sm:inline">View</span>
-                      </Button>
-                      
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button 
-                            size="sm"
-                            className="h-7 sm:h-8 text-xs bg-gradient-to-r from-artswarit-purple to-blue-500"
-                            onClick={() => setSelectedPayment(payment)}
-                          >
-                            <CreditCard className="h-3 w-3 mr-1" />
-                            Pay
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-sm sm:max-w-md">
-                          <DialogHeader>
-                            <DialogTitle className="text-base sm:text-lg">Complete Payment</DialogTitle>
-                            <DialogDescription className="text-sm">
-                              Pay {selectedPayment?.currency}{selectedPayment?.amount.toLocaleString()} to {selectedPayment?.artistName}
-                            </DialogDescription>
-                          </DialogHeader>
-                          
-                          <div className="space-y-4">
-                            <div className="bg-muted p-3 rounded-lg">
-                              <div className="space-y-1 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Project:</span>
-                                  <span className="font-medium truncate ml-2">{selectedPayment?.projectTitle}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Artist:</span>
-                                  <span>{selectedPayment?.artistName}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-muted-foreground">Amount:</span>
-                                  <span className="font-semibold">{selectedPayment?.currency}{selectedPayment?.amount.toLocaleString()}</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-3">
-                              <div>
-                                <Label htmlFor="nameOnCard" className="text-sm">Name on Card</Label>
-                                <Input
-                                  id="nameOnCard"
-                                  value={paymentForm.nameOnCard}
-                                  onChange={(e) => setPaymentForm({...paymentForm, nameOnCard: e.target.value})}
-                                  placeholder="John Doe"
-                                  className="mt-1"
-                                />
-                              </div>
-                              
-                              <div>
-                                <Label htmlFor="cardNumber" className="text-sm">Card Number</Label>
-                                <Input
-                                  id="cardNumber"
-                                  value={paymentForm.cardNumber}
-                                  onChange={(e) => setPaymentForm({...paymentForm, cardNumber: e.target.value})}
-                                  placeholder="1234 5678 9012 3456"
-                                  className="mt-1"
-                                />
-                              </div>
-                              
-                              <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                  <Label htmlFor="expiryDate" className="text-sm">Expiry</Label>
-                                  <Input
-                                    id="expiryDate"
-                                    value={paymentForm.expiryDate}
-                                    onChange={(e) => setPaymentForm({...paymentForm, expiryDate: e.target.value})}
-                                    placeholder="MM/YY"
-                                    className="mt-1"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="cvv" className="text-sm">CVV</Label>
-                                  <Input
-                                    id="cvv"
-                                    value={paymentForm.cvv}
-                                    onChange={(e) => setPaymentForm({...paymentForm, cvv: e.target.value})}
-                                    placeholder="123"
-                                    className="mt-1"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <DialogFooter className="gap-2">
-                            <Button variant="outline" onClick={() => setSelectedPayment(null)} className="text-sm">
-                              Cancel
-                            </Button>
-                            <Button 
-                              onClick={handlePayment}
-                              disabled={processing}
-                              className="bg-gradient-to-r from-artswarit-purple to-blue-500 text-sm"
-                            >
-                              {processing ? (
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              ) : (
-                                <CreditCard className="h-4 w-4 mr-2" />
-                              )}
-                              Pay {selectedPayment?.currency}{selectedPayment?.amount.toLocaleString()}
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
                     </div>
                   </div>
                 </CardContent>

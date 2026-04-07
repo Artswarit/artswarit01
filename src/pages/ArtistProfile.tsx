@@ -508,16 +508,16 @@ export default function ArtistProfile() {
               .eq("following_id", id);
             setFollowersCount(followers?.length || 0);
             
-            // Also update the current user's following status
+            // Also refetch the current user's following status to handle cross-tab sync correctly
             if (user?.id) {
-              const newRecord = payload.new as { follower_id?: string } | null;
-              const oldRecord = payload.old as { follower_id?: string } | null;
-              
-              if (payload.eventType === 'INSERT' && newRecord?.follower_id === user.id) {
-                setIsFollowing(true);
-              } else if (payload.eventType === 'DELETE' && oldRecord?.follower_id === user.id) {
-                setIsFollowing(false);
-              }
+              const { data: following } = await supabase
+                .from("follows")
+                .select("id")
+                .eq("following_id", id)
+                .eq("follower_id", user.id)
+                .maybeSingle();
+
+              setIsFollowing(!!following);
             }
           }
         )
@@ -627,8 +627,16 @@ export default function ArtistProfile() {
       return;
     }
 
+    if (loadingFollow) return;
     setLoadingFollow(true);
-    if (!isFollowing) {
+    
+    // Optimistic Update
+    const prevFollowing = isFollowing;
+    const prevFollowers = followersCount;
+    setIsFollowing(!isFollowing);
+    setFollowersCount((cnt) => isFollowing ? Math.max(cnt - 1, 0) : cnt + 1);
+
+    if (!prevFollowing) {
       // Ensure the user exists in the users table (required by foreign key)
       const { data: existingUser } = await supabase
         .from("users")
@@ -644,10 +652,6 @@ export default function ArtistProfile() {
           name: user.user_metadata?.full_name || user.email?.split("@")[0] || "User",
           role: "client",
         });
-
-        if (userError) {
-          // Continue anyway - they might just need to be in profiles
-        }
       }
 
       // follow in supabase
@@ -656,14 +660,15 @@ export default function ArtistProfile() {
         follower_id: user.id,
       });
       if (!error) {
-        setIsFollowing(true);
-        setFollowersCount((cnt) => cnt + 1);
         toast({
           title: "Followed",
           description: "You are now following this artist!",
         });
       } else {
         console.error("Follow error:", error);
+        // Revert on error
+        setIsFollowing(prevFollowing);
+        setFollowersCount(prevFollowers);
         toast({
           variant: "destructive",
           title: "Error",
@@ -678,13 +683,14 @@ export default function ArtistProfile() {
         .eq("following_id", id)
         .eq("follower_id", user.id);
       if (!error) {
-        setIsFollowing(false);
-        setFollowersCount((cnt) => Math.max(cnt - 1, 0));
         toast({
           title: "Unfollowed",
           description: "You have unfollowed this artist.",
         });
       } else {
+        // Revert on error
+        setIsFollowing(prevFollowing);
+        setFollowersCount(prevFollowers);
         toast({
           variant: "destructive",
           title: "Error",
@@ -845,7 +851,6 @@ export default function ArtistProfile() {
         <div className="flex-1 flex items-center justify-center p-4">
           <LogoLoader text="Loading artist profile..." />
         </div>
-        <Footer />
       </div>
     );
   }
@@ -863,7 +868,6 @@ export default function ArtistProfile() {
             </GlassButton>
           </GlassCard>
         </div>
-        <Footer />
       </div>
     );
   }

@@ -306,8 +306,8 @@ const Explore = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(120,119,198,0.1),transparent)] pointer-events-none" />
         
-        <div className="max-w-[1400px] relative mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-xs font-black uppercase tracking-widest mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="container-responsive relative mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-xs font-black uppercase tracking-widest mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -315,12 +315,12 @@ const Explore = () => {
             Discover the Future of Art
           </div>
           
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1000">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 tracking-tighter leading-tight sm:leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1000">
             EXPLORE THE <br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">COLLECTION</span>
+            <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase">COLLECTION</span>
           </h1>
           
-          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto px-4 font-medium leading-relaxed opacity-80 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+          <p className="text-sm sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed opacity-80 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
             Curated masterpieces from visionaries worldwide. 
             Filter by medium, style, or artist to find your next obsession.
           </p>
@@ -334,10 +334,10 @@ const Explore = () => {
 
       {/* Trending Section */}
       {(trendingArtworks.length > 0 || loading) && (
-        <section className="max-w-[1400px] mx-auto px-4 py-8 animate-in fade-in duration-1000 delay-500">
+        <section className="container-responsive mx-auto py-8 animate-in fade-in duration-1000 delay-500">
           <div className="flex items-center justify-between mb-8 sm:mb-12">
             <div>
-              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground">TRENDING NOW</h2>
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground uppercase">Trending Now</h2>
               <div className="h-1.5 w-12 bg-primary rounded-full mt-2" />
             </div>
           </div>
@@ -376,7 +376,7 @@ const Explore = () => {
           />
         </div>
 
-        <main className="max-w-[1400px] mx-auto px-4 relative z-0 mt-4">
+        <main className="container-responsive mx-auto relative z-0 mt-4">
           {(filteredArtworks && filteredArtworks.length > 0) || loading ? (
             <div className="space-y-12">
               <div className={cn(

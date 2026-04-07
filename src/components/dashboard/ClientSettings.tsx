@@ -107,6 +107,7 @@ const ClientSettings = () => {
   });
 
   const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
@@ -350,6 +351,16 @@ const ClientSettings = () => {
 
     setSaving(true);
     try {
+      // P0 Fix: Verify current password for security
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password: passwordData.currentPassword
+      });
+      
+      if (authError) {
+        throw new Error("Incorrect current password. Please try again.");
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: passwordData.newPassword
       });
@@ -357,7 +368,7 @@ const ClientSettings = () => {
       if (error) throw error;
       
       toast({ title: "Password updated successfully!" });
-      setPasswordData({ newPassword: "", confirmPassword: "" });
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: error.message });
     } finally {
@@ -390,30 +401,53 @@ const ClientSettings = () => {
 
     setDeleting(true);
     try {
+      const userId = user.id;
+      
+      // 1. Core Cleanup (Parallel)
       await Promise.all([
-        supabase.from('notifications').delete().eq('user_id', user.id),
-        supabase.from('login_sessions').delete().eq('user_id', user.id),
-        supabase.from('projects').delete().or(`artist_id.eq.${user.id},client_id.eq.${user.id}`),
-        supabase.from('profiles').delete().eq('id', user.id),
-        supabase.from('users').delete().eq('id', user.id),
+        supabase.from('notifications').delete().eq('user_id', userId),
+        supabase.from('user_blocks').delete().or(`blocker_id.eq.${userId},blocked_id.eq.${userId}`),
+        supabase.from('client_reviews').delete().or(`artist_id.eq.${userId},client_id.eq.${userId}`),
+        supabase.from('project_reviews').delete().or(`reviewer_id.eq.${userId},reviewee_id.eq.${userId}`),
+        supabase.from('login_sessions').delete().eq('user_id', userId),
+        supabase.from('project_files').delete().eq('uploader_id', userId),
+        supabase.from('messages').delete().eq('sender_id', userId),
+        supabase.from('conversations').delete().or(`client_id.eq.${userId},artist_id.eq.${userId}`),
+        supabase.from('transactions').delete().or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
       ]);
 
-      toast({
-        title: "Account deleted",
-        description: "Your account and all data have been permanently deleted.",
-      });
+      // 2. Project Data Cleanup
+      // Cascade delete might handle milestones, but we ensure project deletion
+      await supabase.from('projects').delete().or(`artist_id.eq.${userId},client_id.eq.${userId}`);
 
-      setShowDeleteDialog(false);
-      // Use signOut + navigate instead of window.location.href to keep auth state clean
-      setTimeout(async () => {
-        await signOut();
-        navigate('/');
-      }, 1500);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Deletion failed",
-        description: error.message,
+      // 3. File Cleanup from Storage
+      const storageBuckets = ['avatars', 'project-files', 'milestone-submissions', 'messaging-attachments', 'artwork_media'];
+      for (const bucket of storageBuckets) {
+        try {
+          const { data: files } = await supabase.storage.from(bucket).list(userId);
+          if (files && files.length > 0) {
+            const filesToRemove = files.map(f => `${userId}/${f.name}`);
+            await supabase.storage.from(bucket).remove(filesToRemove);
+          }
+        } catch (err) {
+          console.warn(`Could not clean storage bucket ${bucket}:`, err);
+        }
+      }
+
+      // 4. Finally delete profile and auth account
+      await supabase.from('profiles').delete().eq('id', userId);
+      const { error: deleteError } = await supabase.rpc('delete_user_account');
+      if (deleteError) throw deleteError;
+
+      toast({ title: "Account deleted successfully" });
+      await signOut();
+      navigate('/');
+    } catch (err: any) {
+      console.error('Account deletion error:', err);
+      toast({ 
+        variant: "destructive", 
+        title: "Deletion failed", 
+        description: err.message || "An error occurred during account deletion. Some data may have been partially removed."
       });
     } finally {
       setDeleting(false);
@@ -691,7 +725,10 @@ const ClientSettings = () => {
               <Switch
                 id="email-notifications"
                 checked={notificationSettings.emailNotifications}
-                onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, emailNotifications: checked }))}
+                onCheckedChange={async (checked) => {
+                  setNotificationSettings(prev => ({ ...prev, emailNotifications: checked }));
+                  await updateProfileSetting({ email_notifications: checked });
+                }}
                 className="data-[state=checked]:bg-primary h-7 w-12"
               />
             </div>
@@ -707,7 +744,10 @@ const ClientSettings = () => {
               <Switch
                 id="in-app-notifications"
                 checked={notificationSettings.inAppNotifications}
-                onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, inAppNotifications: checked }))}
+                onCheckedChange={async (checked) => {
+                  setNotificationSettings(prev => ({ ...prev, inAppNotifications: checked }));
+                  await updateProfileSetting({ in_app_notifications: checked });
+                }}
                 className="data-[state=checked]:bg-primary h-7 w-12"
               />
             </div>
@@ -725,7 +765,11 @@ const ClientSettings = () => {
               <Switch
                 id="project-notifications"
                 checked={notificationSettings.projectUpdateNotifications}
-                onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, projectUpdateNotifications: checked }))}
+                onCheckedChange={async (checked) => {
+                  setNotificationSettings(prev => ({ ...prev, projectUpdateNotifications: checked }));
+                  await updateProfileSetting({ project_update_notifications: checked });
+                }}
+                className="data-[state=checked]:bg-primary h-7 w-12"
               />
             </div>
             
@@ -740,9 +784,13 @@ const ClientSettings = () => {
                 <p className="text-xs text-muted-foreground">Notify for new messages</p>
               </div>
               <Switch
-                id="message-notifications"
+                id="chat-messages"
                 checked={notificationSettings.messageNotifications}
-                onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, messageNotifications: checked }))}
+                onCheckedChange={async (checked) => {
+                  setNotificationSettings(prev => ({ ...prev, messageNotifications: checked }));
+                  await updateProfileSetting({ message_notifications: checked });
+                }}
+                className="data-[state=checked]:bg-primary h-7 w-12"
               />
             </div>
           </CardContent>
@@ -761,32 +809,34 @@ const ClientSettings = () => {
             <CardDescription className="text-xs sm:text-sm">Update your password</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="newPassword" className="text-xs sm:text-sm flex items-center gap-2">
-                <Lock className="w-3 h-3" />
-                New Password
-              </Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-bold">Current Password</Label>
               <Input
-                id="newPassword"
-                name="newPassword"
                 type="password"
-                value={passwordData.newPassword}
-                onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                className="mt-1 h-12 bg-muted/50 border-none focus-visible:ring-primary/20 rounded-2xl px-6 font-medium min-h-[48px]"
-                placeholder="Enter new password"
+                value={passwordData.currentPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                placeholder="Enter current password"
+                className="h-11 rounded-xl"
               />
             </div>
-            
-            <div>
-              <Label htmlFor="confirmPassword" className="text-xs sm:text-sm">Confirm Password</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-bold">New Password</Label>
               <Input
-                id="confirmPassword"
-                name="confirmPassword"
+                type="password"
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                placeholder="Min 6 characters"
+                className="h-11 rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-bold">Confirm New Password</Label>
+              <Input
                 type="password"
                 value={passwordData.confirmPassword}
-                onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                className="mt-1 h-12 bg-muted/50 border-none focus-visible:ring-primary/20 rounded-2xl px-6 font-medium min-h-[48px]"
-                placeholder="Confirm new password"
+                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                placeholder="Repeat new password"
+                className="h-11 rounded-xl"
               />
             </div>
             

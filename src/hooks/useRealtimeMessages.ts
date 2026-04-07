@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +12,7 @@ interface Message {
   timestamp: Date;
   read: boolean;
   attachments?: Attachment[];
+  status?: 'sending' | 'delivered' | 'read' | 'failed';
 }
 
 const parseAttachments = (data: unknown): Attachment[] => {
@@ -232,7 +233,8 @@ export const useRealtimeMessages = () => {
         text: msg.content,
         timestamp: new Date(msg.created_at),
         read: msg.is_read || false,
-        attachments: parseAttachments(msg.attachments)
+        attachments: parseAttachments(msg.attachments),
+        status: msg.is_read ? 'read' : 'delivered'
       }));
 
       if (!signal?.aborted) {
@@ -265,6 +267,19 @@ export const useRealtimeMessages = () => {
   const sendMessage = useCallback(async (conversationId: string, content: string, attachments?: Attachment[], signal?: AbortSignal) => {
     if (!user || (!content.trim() && (!attachments || attachments.length === 0))) return null;
 
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage: Message = {
+      id: tempId,
+      senderId: user.id,
+      text: content.trim() || (attachments && attachments.length > 0 ? '📎 Attachment' : ''),
+      timestamp: new Date(),
+      read: false,
+      attachments: attachments,
+      status: 'sending'
+    };
+
+    setMessages(prev => [...prev, optimisticMessage]);
+
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -283,6 +298,16 @@ export const useRealtimeMessages = () => {
         throw error;
       }
 
+      setMessages(prev => prev.map(m => m.id === tempId ? {
+        id: data.id,
+        senderId: data.sender_id || '',
+        text: data.content,
+        timestamp: new Date(data.created_at),
+        read: data.is_read || false,
+        attachments: parseAttachments(data.attachments),
+        status: 'delivered'
+      } : m));
+
       // Update conversation's updated_at
       await supabase
         .from('conversations')
@@ -297,6 +322,9 @@ export const useRealtimeMessages = () => {
     } catch (error: any) {
       if (error.name === 'AbortError' || (error as any).code === 'ABORT' || error.message?.includes('signal is aborted')) return null;
       console.error('Error sending message:', error);
+      
+      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, status: 'failed' } : m));
+      
       toast({
         title: 'Error',
         description: 'Failed to send message',
@@ -385,7 +413,8 @@ export const useRealtimeMessages = () => {
                 text: newMsg.content,
                 timestamp: new Date(newMsg.created_at),
                 read: newMsg.is_read || false,
-                attachments: parseAttachments(newMsg.attachments)
+                attachments: parseAttachments(newMsg.attachments),
+                status: newMsg.is_read ? 'read' : 'delivered'
               };
               
               if (!controller.signal.aborted) {
@@ -414,7 +443,7 @@ export const useRealtimeMessages = () => {
             const updatedMsg = payload.new as any;
             if (updatedMsg.conversation_id === activeConversationId && !controller.signal.aborted) {
               setMessages(prev => prev.map(m => 
-                m.id === updatedMsg.id ? { ...m, read: updatedMsg.is_read } : m
+                m.id === updatedMsg.id ? { ...m, read: updatedMsg.is_read, status: updatedMsg.is_read ? 'read' : 'delivered' } : m
               ));
             }
           } else if (payload.eventType === 'DELETE') {

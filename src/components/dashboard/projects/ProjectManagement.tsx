@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,7 +58,7 @@ const ProjectManagement = () => {
   const [selectedProjectForReview, setSelectedProjectForReview] = useState<Project | null>(null);
   const [clientReviews, setClientReviews] = useState<Record<string, ClientReview>>({});
   const [readyMap, setReadyMap] = useState<Record<string, boolean>>({});
-  const [autoCompleting, setAutoCompleting] = useState<Record<string, boolean>>({});
+  const autoCompletingRef = useRef<Record<string, boolean>>({});
   const fetchProjects = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -185,10 +185,10 @@ const ProjectManagement = () => {
   const autoCompleteIfReady = useCallback(async (projectId: string, isReady: boolean) => {
     if (!isReady) return;
     
-    // Prevent concurrent executions for the same project
-    if (autoCompleting[projectId]) return;
+    // Prevent concurrent executions for the same project using ref (avoids stale closure)
+    if (autoCompletingRef.current[projectId]) return;
     
-    setAutoCompleting(prev => ({ ...prev, [projectId]: true }));
+    autoCompletingRef.current[projectId] = true;
     try {
       // Fetch fresh project state instead of relying on stale closure array
       const { data: project } = await supabase
@@ -227,9 +227,9 @@ const ProjectManagement = () => {
     } catch (err) {
       console.error('Auto-complete failed:', err);
     } finally {
-      setAutoCompleting(prev => ({ ...prev, [projectId]: false }));
+      autoCompletingRef.current[projectId] = false;
     }
-  }, [user?.id, fetchProjects, autoCompleting]);
+  }, [user?.id, fetchProjects]);
 
   const handleAcceptProject = async (project: Project, e?: React.MouseEvent) => {
     if (e) {
@@ -278,6 +278,11 @@ const ProjectManagement = () => {
       e.stopPropagation();
     }
     if (!project.client_id) return;
+
+    // Confirmation before irreversible rejection
+    const confirmed = window.confirm(`Are you sure you want to decline "${project.title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
     setActionLoading(project.id);
     try {
       const {
@@ -415,7 +420,7 @@ const ProjectManagement = () => {
   };
   const getProjectReview = (projectId: string) => clientReviews[projectId] || null;
   const activeProjects = projects.filter(p => p.status === "accepted");
-  const pendingProjects = projects.filter(p => p.status === "pending" && p.is_locked);
+  const pendingProjects = projects.filter(p => p.status === "pending");
   const completedProjects = projects.filter(p => p.status === "completed");
   if (loading) {
     return (
@@ -439,17 +444,17 @@ const ProjectManagement = () => {
 
       <Tabs defaultValue="active" className="w-full">
         <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-          <TabsList className="mb-6 w-full h-auto p-1.5 bg-muted/30 backdrop-blur-md rounded-2xl border border-border/10 flex items-stretch gap-1.5">
-            <TabsTrigger value="active" className="flex-1 min-w-[100px] py-2.5 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[9px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest min-h-[44px] sm:min-h-[48px] px-2 sm:px-4 flex items-center justify-center">
-              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+          <TabsList className="mb-6 w-full h-auto p-1 sm:p-1.5 bg-muted/30 backdrop-blur-md rounded-2xl border border-border/10 flex items-stretch gap-1 sm:gap-1.5">
+            <TabsTrigger value="active" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-widest min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
               <span className="truncate">Active ({activeProjects.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="pending" className="flex-1 min-w-[100px] py-2.5 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[9px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest min-h-[44px] sm:min-h-[48px] px-2 sm:px-4 flex items-center justify-center">
-              <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0 animate-spin" />
+            <TabsTrigger value="pending" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-widest min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
+              <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0 animate-spin" />
               <span className="truncate">Pending ({pendingProjects.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="completed" className="flex-1 min-w-[100px] py-2.5 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[9px] sm:text-[10px] uppercase tracking-wider sm:tracking-widest min-h-[44px] sm:min-h-[48px] px-2 sm:px-4 flex items-center justify-center">
-              <CheckCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 flex-shrink-0" />
+            <TabsTrigger value="completed" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-widest min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
               <span className="truncate">Done ({completedProjects.length})</span>
             </TabsTrigger>
           </TabsList>
@@ -511,18 +516,19 @@ const ProjectManagement = () => {
                       </SelectContent>
                     </Select>
                     {readyMap[project.id] && project.status !== 'completed' && (
-                      <Button size="sm" className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={() => handleCompleteProject(project)} disabled={actionLoading === project.id || autoCompleting[project.id]}>
-                        {actionLoading === project.id || autoCompleting[project.id] ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trophy className="h-4 w-4 mr-2" />}
+                      <Button size="sm" className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={() => handleCompleteProject(project)} disabled={actionLoading === project.id || autoCompletingRef.current[project.id]}>
+                        {actionLoading === project.id || autoCompletingRef.current[project.id] ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trophy className="h-4 w-4 mr-2" />}
                         Completed
                       </Button>
                     )}
                   </CardFooter>
                 </Card>)}
-            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20">
+            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto">
               <div className="w-16 h-16 bg-muted/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Clock className="w-8 h-8 text-muted-foreground/40" />
               </div>
-              <p className="text-sm font-bold text-muted-foreground/60">No active projects yet</p>
+              <h3 className="text-lg font-black text-foreground mb-1">No active projects</h3>
+              <p className="text-sm font-medium text-muted-foreground/60 px-6">Once you accept a project proposal, it will appear here for you to track and manage.</p>
             </div>}
         </TabsContent>
 
@@ -577,11 +583,12 @@ const ProjectManagement = () => {
                     </Button>
                   </CardFooter>
                 </Card>)}
-            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20">
+            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto">
               <div className="w-16 h-16 bg-muted/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Loader2 className="w-8 h-8 text-muted-foreground/40" />
               </div>
-              <p className="text-sm font-bold text-muted-foreground/60">No pending requests</p>
+              <h3 className="text-lg font-black text-foreground mb-1">Quiet in here...</h3>
+              <p className="text-sm font-medium text-muted-foreground/60 px-6">New project requests from clients will show up here. Make sure your profile is complete to attract more eyes!</p>
             </div>}
         </TabsContent>
 
@@ -648,11 +655,12 @@ const ProjectManagement = () => {
                     </CardFooter>
                   </Card>;
           })}
-            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20">
+            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto">
               <div className="w-16 h-16 bg-muted/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-muted-foreground/40" />
               </div>
-              <p className="text-sm font-bold text-muted-foreground/60">No completed projects yet</p>
+              <h3 className="text-lg font-black text-foreground mb-1">No completed works yet</h3>
+              <p className="text-sm font-medium text-muted-foreground/60 px-6">Finishing your first project is a huge milestone. Keep up the great work!</p>
             </div>}
         </TabsContent>
       </Tabs>
