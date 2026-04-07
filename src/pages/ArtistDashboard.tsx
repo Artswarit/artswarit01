@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCurrency } from "@/contexts/CurrencyContext";
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { computeProfileCompletion } from '@/hooks/useProfileCompletion';
@@ -34,12 +35,13 @@ const ArtistDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, loading: profileLoading, updateProfile, uploadImage } = useProfile();
+  const { countries, loading: loadingCountries, updateUserLocation } = useCurrency();
   const completion = useMemo(() => computeProfileCompletion(profile), [profile]);
   const { isComplete, completionPercentage, missingFields } = completion;
   const { toast } = useToast();
   const [isChatActive, setIsChatActive] = useState(false);
-  const activeTab = tab || 'profile';
-  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set([activeTab]));
+  const activeTab = tab || 'overview';
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(['overview', activeTab]));
 
   useEffect(() => {
     if (activeTab) {
@@ -150,6 +152,8 @@ const ArtistDashboard = () => {
             subtitle="Manage your projects, portfolio, and earnings in one place"
           />
 
+          <ProfileCompletionBanner />
+
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="relative mb-6 sm:mb-8 lg:mb-12">
               <div className="hidden sm:block overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
@@ -180,7 +184,7 @@ const ArtistDashboard = () => {
               </div>
             </div>
 
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
+            <div className="flex-1 overflow-y-auto pt-6 scrollbar-hide pb-[calc(10rem+var(--safe-bottom))]">
               <TabsContent value="overview" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'overview' && "hidden")}>
                   {visitedTabs.has('overview') && (
@@ -220,7 +224,6 @@ const ArtistDashboard = () => {
                   {visitedTabs.has('finances') && (
                     <div className="space-y-12">
                       <ArtistBilling />
-                      {/* Sub-group or individual components here as needed */}
                     </div>
                   )}
                 </div>
@@ -250,6 +253,8 @@ const ArtistDashboard = () => {
                           profile={profile}
                           updateProfile={updateProfile}
                           uploadImage={uploadImage}
+                          countries={countries}
+                          updateUserLocation={updateUserLocation}
                         />
                       </TabsContent>
                       

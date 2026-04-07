@@ -77,7 +77,7 @@ const ClientDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTabFromUrl = searchParams.get('tab') || 'overview';
   const [selectedTab, setSelectedTab] = useState(currentTabFromUrl);
-  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set([selectedTab]));
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(['overview', currentTabFromUrl]));
 
   // Sync visitedTabs with selectedTab to ensure content is rendered
   useEffect(() => {
@@ -671,6 +671,9 @@ const ClientDashboard = () => {
                     profile={profile} 
                     onAction={handleTabChange} 
                   />
+
+                  {/* Profile Completion Alert - Realtime & Auto-disappearing */}
+                  <ProfileCompletionBanner />
             {/* Stats Row - Modernized & Clickable Grid */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
               <div 

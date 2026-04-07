@@ -26,7 +26,9 @@ const ProfileCompletionBanner = () => {
     // No-op
   }, []);
 
-  if (loading || isComplete || isDismissed) {
+  // Smart disappearance logic: only show if not complete
+  // Removed persistent dismissal to ensure user completes profile as requested
+  if (loading || isComplete) {
     return null;
   }
 

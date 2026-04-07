@@ -25,10 +25,8 @@ interface CountryCurrency {
 const ClientProfile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { updateUserLocation } = useCurrency();
+  const { countries, loading: loadingCountries, updateUserLocation } = useCurrency();
   const [profile, setProfile] = useState<any>(null);
-  const [countries, setCountries] = useState<CountryCurrency[]>([]);
-  const [loadingCountries, setLoadingCountries] = useState(true);
   
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -41,50 +39,6 @@ const ClientProfile = () => {
     city: "",
     website: "",
   });
-
-  // Calculate profile completion
-  const calculateProfileCompletion = () => {
-    const fields = [
-      { value: formData.fullName, weight: 20, label: 'Display Name' },
-      { value: formData.bio, weight: 25, label: 'Bio' },
-      { value: formData.country, weight: 20, label: 'Country' },
-      { value: profile?.avatar_url, weight: 25, label: 'Profile Photo' },
-      { value: profile?.cover_url, weight: 10, label: 'Banner Image' },
-    ];
-    
-    let completed = 0;
-    const missing: string[] = [];
-    
-    fields.forEach(field => {
-      if (field.value && field.value.trim && field.value.trim() !== '') {
-        completed += field.weight;
-      } else if (field.value) {
-        completed += field.weight;
-      } else {
-        missing.push(field.label);
-      }
-    });
-    
-    return { percentage: completed, missing };
-  };
-
-  const profileCompletion = calculateProfileCompletion();
-
-  // Fetch countries
-  useEffect(() => {
-    const fetchCountries = async () => {
-      const { data, error } = await supabase
-        .from('country_currencies')
-        .select('*')
-        .order('country_name');
-      
-      if (!error && data) {
-        setCountries(data);
-      }
-      setLoadingCountries(false);
-    };
-    fetchCountries();
-  }, []);
 
   // Fetch profile on mount
   useEffect(() => {
@@ -298,36 +252,6 @@ const ClientProfile = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
-      {/* Profile Completion Banner */}
-      <Card className={`transition-all duration-300 ${
-        profileCompletion.percentage === 100 
-          ? 'bg-green-500/10 border-green-500/30' 
-          : 'bg-amber-500/10 border-amber-500/30'
-      }`}>
-        <CardContent className="py-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="flex items-center gap-2">
-              {profileCompletion.percentage === 100 ? (
-                <CheckCircle2 className="w-5 h-5 text-green-500" />
-              ) : (
-                <AlertCircle className="w-5 h-5 text-amber-500" />
-              )}
-              <span className="font-medium">
-                Profile Completion: {profileCompletion.percentage}%
-              </span>
-            </div>
-            <div className="flex-1 w-full">
-              <Progress value={profileCompletion.percentage} className="h-2" />
-            </div>
-            {profileCompletion.missing.length > 0 && (
-              <div className="text-xs text-muted-foreground">
-                Missing: {profileCompletion.missing.join(', ')}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Banner Section */}
       <Card className="overflow-hidden">
         <div className="relative h-32 sm:h-48 w-full group">
@@ -375,6 +299,7 @@ const ClientProfile = () => {
           Save Profile
         </Button>
       </div>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Profile Section */}

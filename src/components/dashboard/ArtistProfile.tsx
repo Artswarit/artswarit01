@@ -15,6 +15,9 @@ interface ArtistProfileProps {
   profile: any;
   updateProfile: (updates: any) => Promise<any>;
   uploadImage: (file: File, type: UploadType) => Promise<any>;
+  countries: any[];
+  updateUserLocation: (country: string, city: string) => Promise<void>;
+  isPremium?: boolean;
 }
 
 // Available categories for artists
@@ -23,17 +26,18 @@ const ArtistProfile = ({
   isLoading: externalLoading,
   profile,
   updateProfile,
-  uploadImage
+  uploadImage,
+  countries,
+  updateUserLocation,
+  isPremium
 }: ArtistProfileProps) => {
   const {
     toast
   } = useToast();
   const {
-    countries,
     userCurrencySymbol,
     formatPrice
   } = useCurrency();
-  const { isPremium } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);

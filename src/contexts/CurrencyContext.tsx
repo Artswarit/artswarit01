@@ -102,8 +102,18 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates>(FALLBACK_RATES);
   const [loading, setLoading] = useState(true);
 
-  // Fetch countries list
+  // Fetch countries list with caching
   const fetchCountries = useCallback(async () => {
+    // Try to load from cache first for instant UI
+    const cached = localStorage.getItem('artswarit:countries');
+    if (cached) {
+      try {
+        setCountries(JSON.parse(cached));
+      } catch (e) {
+        console.warn("Failed to parse cached countries");
+      }
+    }
+
     const { data, error } = await supabase
       .from('country_currencies')
       .select('*')
@@ -111,6 +121,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     if (!error && data) {
       setCountries(data);
+      localStorage.setItem('artswarit:countries', JSON.stringify(data));
     }
   }, []);
 
@@ -161,7 +172,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
-  // Detect user country and currency
+  // Detect user country but KEEP currency as USD by default for universal experience
   const detectUserLocation = useCallback(async () => {
     try {
       // Only detect if user hasn't set their country manually or isn't logged in
@@ -174,30 +185,15 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setUserCountry(data.country_code);
           setUserCity(data.city || '');
           
-          // Set currency based on country
-          const countryData = countries.find(c => c.country_code === data.country_code);
-          if (countryData) {
-            setUserCurrency(countryData.currency_code);
-            setUserCurrencySymbol(countryData.currency_symbol);
-            
-            // If logged in, update profile
-            if (user) {
-              await supabase
-                .from('profiles')
-                .update({ 
-                  country: data.country_code, 
-                  city: data.city || '', 
-                  currency: countryData.currency_code 
-                })
-                .eq('id', user.id);
-            }
-          }
+          // DO NOT auto-switch currency to local if not logged in
+          // Keep it as USD for "Universal" feel as requested by user
+          // Only switch if explicitly loaded from profile preferences
         }
       }
     } catch (error) {
       console.warn('Failed to detect user location:', error);
     }
-  }, [user, userCountry, countries]);
+  }, [user, userCountry]);
 
   // Initialize
   useEffect(() => {
