@@ -171,21 +171,23 @@ const AppRoutes = () => {
 const App = () => {
   return (
     <BrowserRouter>
-      <AppSplashScreen />
-      <TopLoadingBar />
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <AuthProvider>
-            <CurrencyProvider>
-              <RealtimeProvider>
-                <Toaster />
-                <Sonner />
-                <AppRoutes />
-              </RealtimeProvider>
-            </CurrencyProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <AppSplashScreen />
+        <TopLoadingBar />
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <AuthProvider>
+              <CurrencyProvider>
+                <RealtimeProvider>
+                  <Toaster />
+                  <Sonner />
+                  <AppRoutes />
+                </RealtimeProvider>
+              </CurrencyProvider>
+            </AuthProvider>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 };
