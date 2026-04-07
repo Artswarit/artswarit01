@@ -368,11 +368,11 @@ export default function ArtistProfile() {
         profileData = data;
       } catch (_) { /* RLS may block non-auth reads — fall through */ }
 
-      // Fallback: public_profiles view is always readable
+      // Fallback: public_profiles view is always readable but contains fewer columns
       if (!profileData) {
         const { data: pub } = await supabase
           .from('public_profiles')
-          .select('social_links, profile_visibility, is_on_vacation')
+          .select('full_name, avatar_url, bio, tags, city, country')
           .eq('id', id)
           .maybeSingle();
         profileData = pub;

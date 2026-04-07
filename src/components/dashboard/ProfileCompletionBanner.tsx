@@ -8,22 +8,40 @@ import ProfileCompletionWizard from "./ProfileCompletionWizard";
 const ProfileCompletionBanner = () => {
   const { isComplete, completionPercentage, missingFields, loading } = useProfileCompletion();
   const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
-  // Auto-open wizard if profile is incomplete
   useEffect(() => {
-    if (!isComplete && !loading) {
-      const timer = setTimeout(() => setIsWizardOpen(true), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isComplete, loading]);
+    const dismissed = localStorage.getItem('artist_profile_banner_dismissed');
+    if (dismissed === 'true') setIsDismissed(true);
+  }, []);
 
-  if (loading || isComplete) {
+  const dismissBanner = () => {
+    setIsDismissed(true);
+    localStorage.setItem('artist_profile_banner_dismissed', 'true');
+  };
+
+  // Auto-open wizard removed to avoid redundancy as requested by user
+  // User can still trigger it manually via the banner button
+  useEffect(() => {
+    // No-op
+  }, []);
+
+  if (loading || isComplete || isDismissed) {
     return null;
   }
 
   return (
     <>
       <div className="mb-8 p-4 sm:p-6 rounded-[2rem] bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 border-2 border-amber-500/20 shadow-xl shadow-amber-500/5 animate-in fade-in slide-in-from-top-6 duration-700 ease-out group overflow-hidden relative">
+        {/* Dismiss Button */}
+        <button 
+          onClick={dismissBanner}
+          className="absolute top-4 right-4 p-2 rounded-full hover:bg-black/5 text-muted-foreground/60 hover:text-foreground transition-all z-20"
+          aria-label="Dismiss banner"
+        >
+          <AlertCircle className="h-4 w-4" />
+        </button>
+
         {/* Decorative background pulse */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-colors duration-500" />
         
