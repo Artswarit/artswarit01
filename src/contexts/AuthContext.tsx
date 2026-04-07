@@ -107,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authListenerFired = true;
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false);
         
         if (session?.user) {
           fetchSubscription(session.user.id);
