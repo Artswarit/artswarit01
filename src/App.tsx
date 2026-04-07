@@ -1,4 +1,5 @@
 
+import { RealtimeProvider } from "./providers/RealtimeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -176,9 +177,11 @@ const App = () => {
         <TooltipProvider>
           <AuthProvider>
             <CurrencyProvider>
-              <Toaster />
-              <Sonner />
-              <AppRoutes />
+              <RealtimeProvider>
+                <Toaster />
+                <Sonner />
+                <AppRoutes />
+              </RealtimeProvider>
             </CurrencyProvider>
           </AuthProvider>
         </TooltipProvider>

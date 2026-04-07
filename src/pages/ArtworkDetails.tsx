@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import LogoLoader from "@/components/ui/LogoLoader";
 import { getOptimizedImageUrl, ImagePresets } from "@/lib/image-optimization";
+import { PayArtworkButton } from "@/components/payments/PayArtworkButton";
 
 export default function ArtworkDetails({ isModal = false }: { isModal?: boolean }) {
   const { id } = useParams();
@@ -144,12 +145,14 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
       likesChannel = supabase
         .channel(`details-likes-${id}-${uniqueId}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "artwork_likes", filter: `artwork_id=eq.${id}` },
-          async (payload) => {
-            const n = payload.new as any;
-            const o = payload.old as any;
-            if ((n?.user_id || o?.user_id) === user?.id) return;
+          async () => {
             const { data: l } = await supabase.from("artwork_likes").select("id").eq("artwork_id", id);
-            setLikeCount(l?.length || 0);
+            if (!isCancelled) setLikeCount(l?.length || 0);
+
+            if (user?.id) {
+              const { data: userLike } = await supabase.from("artwork_likes").select("id").eq("artwork_id", id).eq("user_id", user.id).maybeSingle();
+              if (!isCancelled) setIsLiked(!!userLike);
+            }
           })
         .subscribe();
 
@@ -280,9 +283,13 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
                   <Link to="/login">Sign in to Purchase</Link>
                 </Button>
               ) : (
-                <Button className="h-12 rounded-xl font-semibold bg-gradient-to-r from-amber-400 to-orange-500 text-white border-none shadow-lg">
-                  <Lock className="h-4 w-4 mr-2" /> Unlock Artwork
-                </Button>
+                <PayArtworkButton 
+                  artworkId={id!} 
+                  amount={artwork?.price || 0} 
+                  artworkTitle={artwork?.title || "Artwork"} 
+                  className="h-12 rounded-xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 text-white border-none shadow-lg"
+                  onSuccess={() => window.location.reload()}
+                />
               )}
               <Button variant="ghost" className="rounded-xl font-medium" onClick={() => navigate(-1)}>
                 <ArrowLeft className="h-4 w-4 mr-2" /> Go Back
@@ -542,10 +549,13 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
           {/* ── PRICE / PURCHASE CTA ────────────────────────────────── */}
           {artwork.price > 0 && (artwork.accessType === "premium" || artwork.accessType === "exclusive") && (
             <div className="px-3 sm:px-4 pb-3">
-              <Button className="w-full h-11 rounded-xl font-semibold bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-md">
-                <Crown className="h-4 w-4 mr-2" />
-                Purchase for {format(artwork.price, artwork.currency)}
-              </Button>
+              <PayArtworkButton 
+                artworkId={id!} 
+                amount={artwork.price} 
+                artworkTitle={artwork.title}
+                className="w-full h-11 rounded-xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-md transition-all active:scale-95"
+                onSuccess={() => window.location.reload()}
+              />
             </div>
           )}
 

@@ -57,7 +57,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white/80 dark:bg-card/80 backdrop-blur-xl border-b border-muted/20 fixed w-full top-0 z-50 transition-all duration-300 pt-[var(--safe-top)]">
-      <div className="w-full h-16 sm:h-20 px-4 sm:px-4 lg:px-6 flex items-center justify-between">
+      <div className="w-full h-16 sm:h-20 px-3 sm:px-4 lg:px-6 flex items-center justify-between">
         {/* Left: logo + desktop menu */}
         <div className="flex items-center gap-4 lg:gap-8">
           {/* Logo */}
@@ -66,7 +66,7 @@ const Navbar = () => {
             <img 
               src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png" 
               alt="Artswarit Logo" 
-              className="h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 object-contain relative transition-transform duration-500 group-hover:scale-110 group-active:scale-95" 
+              className="h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16 object-contain relative transition-transform duration-500 group-hover:scale-110 group-active:scale-95" 
             />
           </Link>
 

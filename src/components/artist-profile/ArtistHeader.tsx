@@ -121,32 +121,32 @@ const ArtistHeader: React.FC<Props> = ({
             {/* Info - Centered on mobile/tablet, left-aligned on laptop/desktop */}
             <div className="flex flex-col gap-3 lg:gap-4 text-white text-center lg:text-left min-w-0 w-full lg:flex-1">
               <div className="flex flex-col lg:items-start items-center gap-2">
-                <h1 className="text-3xl sm:text-4xl lg:text-6xl font-black font-heading drop-shadow-2xl tracking-tighter text-white">
+                <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-6xl font-black font-heading drop-shadow-2xl tracking-tighter text-white">
                   {artist.name}
                 </h1>
                 {/* Show Premium badge - Adjusted for better mobile fit */}
                 {isProArtist && (
-                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-950 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-black border border-yellow-200/50 shadow-xl shadow-yellow-500/20 active:scale-95 transition-transform">
-                    <Crown size={14} className="animate-bounce" /> 
+                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-950 flex items-center gap-1.5 px-3 py-1 xs:px-4 xs:py-1.5 rounded-full text-[10px] xs:text-xs sm:text-sm font-black border border-yellow-200/50 shadow-xl shadow-yellow-500/20 active:scale-95 transition-transform">
+                    <Crown size={12} className="animate-bounce xs:size-[14px]" /> 
                     <span className="uppercase tracking-widest">Premium Artist</span>
                   </Badge>
                 )}
               </div>
               
               {/* Bio with high-contrast background for perfect readability */}
-              <div className="text-sm lg:text-lg text-white font-medium max-w-xl mx-auto lg:mx-0">
-                <div className="inline-block bg-black/60 backdrop-blur-xl text-white px-4 py-2 sm:px-6 sm:py-2.5 rounded-2xl sm:rounded-[2rem] shadow-2xl border border-white/10">
+              <div className="text-xs xs:text-sm lg:text-lg text-white font-medium max-w-xl mx-auto lg:mx-0">
+                <div className="inline-block bg-black/60 backdrop-blur-xl text-white px-3 py-1.5 xs:px-4 xs:py-2 sm:px-6 sm:py-2.5 rounded-xl xs:rounded-2xl sm:rounded-[2rem] shadow-2xl border border-white/10">
                   <span className="tracking-tight">{artist.tagline || artist.category}</span>
                 </div>
               </div>
               
               {/* Tags - Better wrap behavior */}
-              <div className="flex flex-wrap gap-2 items-center justify-center lg:justify-start mt-1">
+              <div className="flex flex-wrap gap-1.5 xs:gap-2 items-center justify-center lg:justify-start mt-1">
                 {artist.tags &&
                   artist.tags.map((t: string) => (
                     <span
                       key={t}
-                      className="bg-primary/20 hover:bg-primary/40 backdrop-blur-lg text-white px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[10px] sm:text-xs shadow-lg border border-white/10 font-black uppercase tracking-widest transition-all cursor-default"
+                      className="bg-primary/20 hover:bg-primary/40 backdrop-blur-lg text-white px-2 py-0.5 xs:px-3 xs:py-1 sm:px-4 sm:py-1.5 rounded-full text-[9px] xs:text-[10px] sm:text-xs shadow-lg border border-white/10 font-black uppercase tracking-widest transition-all cursor-default"
                     >
                       {t}
                     </span>
@@ -154,9 +154,9 @@ const ArtistHeader: React.FC<Props> = ({
               </div>
               
               {/* Dopamine trigger stats: Using flex-wrap for absolute multi-device safety */}
-              <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 mt-3 sm:mt-4 p-3 sm:p-4 bg-white/5 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-white/10 shadow-2xl">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 xs:gap-2 sm:gap-3 mt-3 sm:mt-4 p-2 xs:p-3 sm:p-4 bg-white/5 backdrop-blur-md rounded-xl xs:rounded-2xl sm:rounded-3xl border border-white/10 shadow-2xl">
                 {stats.map((stat) => (
-                  <div key={stat.type} className="flex-1 min-w-[100px] sm:min-w-[120px]">
+                  <div key={stat.type} className="flex-1 min-w-[85px] xs:min-w-[100px] sm:min-w-[120px]">
                     <StatCard
                       type={stat.type as any}
                       value={stat.value}

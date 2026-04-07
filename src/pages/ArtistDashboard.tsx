@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -24,6 +24,9 @@ import ExclusiveMembers from '@/components/dashboard/ExclusiveMembers';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
+import ProfileCompletionBanner from '@/components/dashboard/ProfileCompletionBanner';
+import DashboardAttentionRequired from '@/components/dashboard/DashboardAttentionRequired';
+import DashboardMobileNav from '@/components/dashboard/DashboardMobileNav';
 
 const ArtistDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -66,8 +69,8 @@ const ArtistDashboard = () => {
     const savedTab = sessionStorage.getItem('artist_dashboard_active_tab');
 
     if (profileIncomplete && tab !== 'premium') {
-      if (tab !== 'profile') {
-        setSearchParams({ tab: 'profile' }, { replace: true });
+      if (tab !== 'account') {
+        setSearchParams({ tab: 'account' }, { replace: true });
       }
       return;
     }
@@ -76,7 +79,9 @@ const ArtistDashboard = () => {
       if (savedTab) {
         setSearchParams({ tab: savedTab }, { replace: true });
       } else if (isComplete) {
-        setSearchParams({ tab: 'profile' }, { replace: true });
+        setSearchParams({ tab: 'overview' }, { replace: true });
+      } else {
+        setSearchParams({ tab: 'account' }, { replace: true });
       }
     }
   }, [profileReady, profileIncomplete, isComplete, tab, navigate]);
@@ -144,10 +149,9 @@ const ArtistDashboard = () => {
 
   // Tab configuration with consolidated categories
   const tabs = [
-    { value: 'overview', label: 'Overview', shortLabel: 'Dash', icon: LayoutDashboard },
+    { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
+    { value: 'portfolio', label: 'My Works', shortLabel: 'Works', icon: Palette },
     { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
-    { value: 'portfolio', label: 'Portfolio', shortLabel: 'Port', icon: Palette },
-    { value: 'finances', label: 'Finances', shortLabel: 'Fin', icon: Wallet },
     { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
     { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
   ];
@@ -155,7 +159,7 @@ const ArtistDashboard = () => {
   return (
       <div className="min-h-screen bg-gray-50/50 dark:bg-background">
         <Navbar />
-        <main className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pt-[calc(5.5rem+var(--safe-top))] sm:pt-[calc(7rem+var(--safe-top))] pb-12 sm:pb-20">
+        <main className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pt-[calc(5.5rem+var(--safe-top))] sm:pt-[calc(7rem+var(--safe-top))] pb-32 sm:pb-20">
           <DashboardHeader
             user={user}
             profile={profile}
@@ -164,53 +168,12 @@ const ArtistDashboard = () => {
           />
 
           {/* Mandatory Profile Completion Alert */}
-          {profileIncomplete && (
-            <div className="mb-8 sm:mb-12 p-5 sm:p-8 rounded-[2rem] bg-gradient-to-br from-red-500/5 via-orange-500/5 to-amber-500/5 border border-red-500/10 shadow-2xl shadow-red-500/5 animate-in fade-in slide-in-from-top-6 duration-700 ease-out relative overflow-hidden group">
-              {/* Decorative background pulse */}
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-red-500/10 rounded-full blur-3xl group-hover:bg-red-500/20 transition-colors duration-500" />
-              
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
-                <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 shadow-inner">
-                  <Lock className="h-8 w-8 text-red-600 animate-pulse" />
-                </div>
-                
-                <div className="flex-1 text-center md:text-left space-y-3">
-                  <h3 className="font-black text-foreground text-xl sm:text-2xl tracking-tight">Complete Your Profile</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">
-                    Unlock full dashboard access. Your profile is currently 
-                    <span className="mx-1.5 px-2 py-0.5 rounded-lg bg-red-500 text-white font-black">{completionPercentage}%</span> 
-                    complete.
-                  </p>
-                  
-                  <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-1">
-                    {missingFields.map((field) => (
-                      <span key={field} className="text-[10px] font-black text-red-700 bg-red-500/10 px-3 py-1 rounded-full uppercase tracking-widest border border-red-500/10 hover:bg-red-500/20 transition-colors cursor-default">
-                        {field}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 w-full max-w-md mx-auto md:mx-0">
-                    <div className="flex justify-between items-end mb-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Progress</span>
-                      <span className="text-xs font-black text-red-600">{completionPercentage}%</span>
-                    </div>
-                    <div className="bg-muted/30 rounded-full h-3 overflow-hidden border border-border/20 p-0.5">
-                      <div 
-                        className="h-full bg-gradient-to-r from-red-500 via-orange-600 to-amber-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
-                        style={{ width: `${completionPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          <ProfileCompletionBanner />
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="relative mb-6 sm:mb-8 lg:mb-12">
-              <div className="overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-full grid grid-cols-3 sm:grid-cols-6">
+              <div className="hidden sm:block overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
+                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-full grid grid-cols-5 items-stretch">
                   {tabs.map((tabItem) => {
                     const Icon = tabItem.icon;
                     const isDisabled = profileIncomplete && tabItem.value !== 'account';
@@ -246,6 +209,11 @@ const ArtistDashboard = () => {
                 <div className={cn(activeTab !== 'overview' && "hidden")}>
                   {visitedTabs.has('overview') && (
                     <div className="space-y-12">
+                      <DashboardAttentionRequired 
+                        role="artist" 
+                        profile={profile} 
+                        onAction={handleTabChange} 
+                      />
                       <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
                       <ArtistEarnings isLoading={profileLoading} />
                     </div>
@@ -292,11 +260,12 @@ const ArtistDashboard = () => {
                 <div className={cn(activeTab !== 'account' && "hidden")}>
                   {visitedTabs.has('account') && (
                     <Tabs defaultValue="profile_settings" className="w-full">
-                      <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl">
-                        <TabsTrigger value="profile_settings" className="rounded-lg">Profile Details</TabsTrigger>
-                        <TabsTrigger value="membership" className="rounded-lg">Membership</TabsTrigger>
-                        <TabsTrigger value="settings" className="rounded-lg">Privacy & Security</TabsTrigger>
-                        <TabsTrigger value="exclusive" className="rounded-lg">Exclusive Circle</TabsTrigger>
+                      <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-5 h-auto">
+                        <TabsTrigger value="profile_settings" className="rounded-lg shrink-0">Profile</TabsTrigger>
+                        <TabsTrigger value="earnings" className="rounded-lg shrink-0">Earnings</TabsTrigger>
+                        <TabsTrigger value="membership" className="rounded-lg shrink-0">Membership</TabsTrigger>
+                        <TabsTrigger value="settings" className="rounded-lg shrink-0">Privacy</TabsTrigger>
+                        <TabsTrigger value="exclusive" className="rounded-lg shrink-0">Exclusive</TabsTrigger>
                       </TabsList>
                       
                       <TabsContent value="profile_settings">
@@ -308,6 +277,14 @@ const ArtistDashboard = () => {
                         />
                       </TabsContent>
                       
+                      <TabsContent value="earnings">
+                        <div className="space-y-12">
+                          <ArtistBilling />
+                          <Separator className="opacity-20" />
+                          <ArtistEarnings isLoading={profileLoading} />
+                        </div>
+                      </TabsContent>
+
                       <TabsContent value="membership">
                          <PremiumMembership />
                       </TabsContent>
@@ -325,6 +302,13 @@ const ArtistDashboard = () => {
               </TabsContent>
             </div>
           </Tabs>
+
+          <DashboardMobileNav 
+            activeTab={activeTab} 
+            onTabChange={handleTabChange} 
+            role="artist"
+            isLocked={profileIncomplete}
+          />
         </main>
         <div className={cn(activeTab === 'messages' && isChatActive ? "hidden md:block" : "")}>
           <Footer />

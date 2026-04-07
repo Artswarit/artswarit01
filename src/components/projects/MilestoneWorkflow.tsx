@@ -117,7 +117,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     
     // Subscribe to milestone updates
     const milestoneChannel = supabase
-      .channel(`project-milestones-${projectId}`)
+      .channel(`project-milestones-v2-${projectId}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -129,9 +129,9 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
       })
       .subscribe();
 
-    // Subscribe to payment updates
+    // Subscribe to payment updates (Razorpay/Internal)
     const paymentChannel = supabase
-      .channel(`project-payments-${projectId}`)
+      .channel(`project-payments-v2-${projectId}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
@@ -146,11 +146,35 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
       })
       .subscribe();
 
+    // Subscribe to transaction updates (Stripe)
+    const transactionChannel = supabase
+      .channel(`project-transactions-v2-${projectId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'transactions',
+        filter: `seller_id=eq.${project?.artist_id}` // Use artist_id as filter
+      }, (payload) => {
+        console.log('Transaction update:', payload);
+        const newTx = payload.new as any;
+        // If this transaction is a successful milestone payment for this project
+        if (newTx?.status === 'success' && newTx?.milestone_id) {
+          // Verify if the milestone belongs to this project
+          const isOurMilestone = milestones.some(m => m.id === newTx.milestone_id);
+          if (isOurMilestone) {
+            toast.success('Stripe payment confirmed!');
+            fetchMilestones();
+          }
+        }
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(milestoneChannel);
       supabase.removeChannel(paymentChannel);
+      supabase.removeChannel(transactionChannel);
     };
-  }, [projectId]);
+  }, [projectId, project?.artist_id, milestones.length]);
 
   const fetchProjectData = async () => {
     try {
@@ -189,18 +213,27 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   useRealtimeSync('milestones', fetchMilestones);
 
   const getStatusBadge = (status: string) => {
+    const s = (status || 'LOCKED').toUpperCase();
     const statusConfig: Record<string, { color: string; icon: React.ReactNode; label?: string }> = {
+      // Database Enum Values
+      PENDING: { color: 'bg-slate-100 text-slate-600 border-slate-200', icon: <Clock className="h-3 w-3" />, label: 'Pending' },
+      IN_PROGRESS: { color: 'bg-blue-50 text-blue-600 border-blue-100', icon: <FileText className="h-3 w-3" />, label: 'In Progress' },
+      SUBMITTED: { color: 'bg-indigo-50 text-indigo-600 border-indigo-100', icon: <Upload className="h-3 w-3" />, label: 'Review Pending' },
+      REVISION_REQUESTED: { color: 'bg-orange-50 text-orange-600 border-orange-100', icon: <RotateCcw className="h-3 w-3" />, label: 'Revision Requested' },
+      APPROVED: { color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: <CheckCircle className="h-3 w-3" />, label: 'Approved' },
+      PAID: { color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: <CheckCircle className="h-3 w-3" />, label: 'Completed' },
+      DISPUTED: { color: 'bg-red-50 text-red-600 border-red-100', icon: <AlertTriangle className="h-3 w-3" />, label: 'Disputed' },
+      
+      // UI Legacy Values (Mapped for compatibility)
       LOCKED: { color: 'bg-slate-100 text-slate-600 border-slate-200', icon: <Lock className="h-3 w-3" />, label: 'Locked' },
       WAITING_FUNDS: { color: 'bg-amber-50 text-amber-600 border-amber-100', icon: <Clock className="h-3 w-3" />, label: 'Waiting Funds' },
       ACTIVE: { color: 'bg-blue-50 text-blue-600 border-blue-100', icon: <FileText className="h-3 w-3" />, label: 'Active' },
       REVIEW_PENDING: { color: 'bg-indigo-50 text-indigo-600 border-indigo-100', icon: <Upload className="h-3 w-3" />, label: 'Review Pending' },
-      REVISION_REQUESTED: { color: 'bg-orange-50 text-orange-600 border-orange-100', icon: <RotateCcw className="h-3 w-3" />, label: 'Revision Requested' },
-      COMPLETED: { color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: <CheckCircle className="h-3 w-3" />, label: 'Completed' },
-      DISPUTED: { color: 'bg-red-50 text-red-600 border-red-100', icon: <AlertTriangle className="h-3 w-3" />, label: 'Disputed' }
+      COMPLETED: { color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: <CheckCircle className="h-3 w-3" />, label: 'Completed' }
     };
 
-    const config = statusConfig[status] || statusConfig.LOCKED;
-    const label = config.label || status.toLowerCase().split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    const config = statusConfig[s] || statusConfig.LOCKED;
+    const label = config.label || s.toLowerCase().split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
     return (
       <Badge variant="outline" className={`${config.color} border gap-1.5 px-2.5 py-0.5 font-bold text-[10px] uppercase tracking-wider rounded-full shadow-sm`}>
@@ -212,7 +245,9 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
 
   const calculateProgress = () => {
     if (milestones.length === 0) return 0;
-    const completedMilestones = milestones.filter(m => m.status === 'COMPLETED').length;
+    const completedMilestones = milestones.filter(m => 
+      ['PAID', 'COMPLETED', 'APPROVED'].includes((m.status || '').toUpperCase())
+    ).length;
     return (completedMilestones / milestones.length) * 100;
   };
 
@@ -221,7 +256,9 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   };
 
   const getPaidAmount = () => {
-    return milestones.filter(m => m.status === 'COMPLETED').reduce((sum, m) => sum + (m.amount || 0), 0);
+    return milestones.filter(m => 
+      ['PAID', 'COMPLETED', 'APPROVED'].includes((m.status || '').toUpperCase())
+    ).reduce((sum, m) => sum + (m.amount || 0), 0);
   };
 
   const canStartMilestone = (milestone: Milestone, index: number) => {
@@ -229,12 +266,16 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     if (isArtist && (!isPayoutsEnabled || project?.status !== 'accepted')) {
       return false;
     }
+    
+    const normalizedStatus = (milestone.status || '').toUpperCase();
+    
     // In escrow model, artist can only start when the milestone is ACTIVE (funded)
     // and previous milestone (if any) has been COMPLETED.
-    if (index === 0) return milestone.status === 'ACTIVE' || milestone.status === 'REVISION_REQUESTED';
-    const previousMilestone = milestones[index - 1];
-    const currentReady = milestone.status === 'ACTIVE' || milestone.status === 'REVISION_REQUESTED';
-    return previousMilestone.status === 'COMPLETED' && currentReady;
+    if (index === 0) return ['ACTIVE', 'IN_PROGRESS', 'REVISION_REQUESTED', 'PAID'].includes(normalizedStatus);
+    const prevStatus = (milestones[index - 1].status || '').toUpperCase();
+    const currentReady = ['ACTIVE', 'IN_PROGRESS', 'REVISION_REQUESTED', 'PAID'].includes(normalizedStatus);
+    const prevCompleted = ['PAID', 'COMPLETED', 'APPROVED'].includes(prevStatus);
+    return prevCompleted && currentReady;
   };
 
   const getStartBlockedReason = () => {
@@ -253,7 +294,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
     try {
       const { error } = await supabase
         .from('project_milestones')
-        .update({ status: 'ACTIVE' })
+        .update({ status: 'in_progress' }) // Map to DB enum
         .eq('id', milestoneId);
 
       if (error) throw error;
@@ -301,7 +342,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   }
 
   const budgetMatch = Math.abs(getTotalBudget() - (project.amount_usd || project.budget || 0)) < 0.05;
-  const hasApprovedMilestones = milestones.some(m => m.status === 'approved');
+  const hasApprovedMilestones = milestones.some(m => ['APPROVED', 'PAID', 'COMPLETED'].includes((m.status || '').toUpperCase()));
 
   return (
     <div className="space-y-6">

@@ -8,6 +8,9 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
 }
 
 
@@ -221,8 +224,24 @@ html, body {
 
   /* Enhanced responsive utilities */
   .container-responsive {
-    @apply w-full mx-auto px-3 sm:px-4 lg:px-6 xl:px-8;
+    @apply w-full mx-auto;
+    padding-left: clamp(1rem, 5vw, 5rem);
+    padding-right: clamp(1rem, 5vw, 5rem);
     max-width: 100%;
+  }
+
+  .px-fluid {
+    padding-left: clamp(1rem, 5vw, 5rem);
+    padding-right: clamp(1rem, 5vw, 5rem);
+  }
+
+  .mx-fluid {
+    margin-left: clamp(1rem, 5vw, 5rem);
+    margin-right: clamp(1rem, 5vw, 5rem);
+  }
+
+  .safe-bottom-padding {
+    padding-bottom: calc(4.5rem + var(--safe-bottom, 0px));
   }
 
   /* Typography Scaling with clamp() */
@@ -455,6 +474,42 @@ html, body {
   .grid-mobile-4 {
     @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
   }
+
+  /* Extreme mobile optimizations (320px-375px) */
+  @media (max-width: 375px) {
+    .grid-mobile-2, .grid-mobile-3, .grid-mobile-4 {
+      gap: 0.75rem !important;
+    }
+    
+    .container-responsive {
+      padding-left: 0.75rem !important;
+      padding-right: 0.75rem !important;
+    }
+
+    .px-fluid {
+      padding-left: 0.75rem !important;
+      padding-right: 0.75rem !important;
+    }
+  }
+
+  @media (max-width: 320px) {
+    .grid-mobile-2, .grid-mobile-3, .grid-mobile-4 {
+      gap: 0.5rem !important;
+    }
+    
+    .container-responsive {
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+
+    .text-fluid-xl {
+      font-size: 1.1rem !important;
+    }
+    
+    .text-fluid-2xl {
+      font-size: 1.25rem !important;
+    }
+  }
 }
 
 /* Remove #root styling from App.css that might conflict */
@@ -470,6 +525,13 @@ html, body {
 @media (max-width: 640px) {
   .container {
     @apply px-4;
+    max-width: 100vw;
+  }
+
+  section {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   /* Ensure touch targets are large enough — excluding icon-only buttons */
@@ -540,6 +602,7 @@ html, body {
 /* Reset horizontal scroll for all containers */
 .w-screen, .w-full {
   max-width: 100% !important;
+  box-sizing: border-box;
 }
 
 /* Consolidated root overflow settings */

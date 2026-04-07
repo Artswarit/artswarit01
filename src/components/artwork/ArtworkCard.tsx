@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getOptimizedImageUrl, ImagePresets } from '@/lib/image-optimization';
+import { PayArtworkButton } from '@/components/payments/PayArtworkButton';
 
 interface ArtworkCardProps {
   id: string;
@@ -118,15 +119,7 @@ const ArtworkCard = ({
         async (payload) => {
           if (isCancelled) return;
           
-          // Skip if the change was made by current user (we handle this optimistically)
-          const newRecord = payload.new as { user_id?: string } | null;
-          const oldRecord = payload.old as { user_id?: string } | null;
-          const changedUserId = newRecord?.user_id || oldRecord?.user_id;
-          if (changedUserId === user?.id) {
-            return;
-          }
-          
-          // Refetch like count on changes from other users
+          // Refetch to sync cross-component AND cross-tab state perfectly
           const { data } = await supabase
             .from('artwork_likes')
             .select('id')
@@ -134,6 +127,20 @@ const ArtworkCard = ({
           
           if (!isCancelled) {
             setCurrentLikes(data?.length || 0);
+          }
+
+          // If the interaction might be ours (cross-tab sync), refetch isLiked
+          if (user?.id) {
+            const { data: userLike } = await supabase
+              .from('artwork_likes')
+              .select('id')
+              .eq('artwork_id', id)
+              .eq('user_id', user.id)
+              .maybeSingle();
+
+            if (!isCancelled) {
+              setIsLiked(!!userLike);
+            }
           }
         }
       )
@@ -300,7 +307,19 @@ const ArtworkCard = ({
             </div>
           
           {/* Subtle gradient on hover only */}
-          <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'}`} />
+          <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent transition-opacity duration-500 flex items-center justify-center ${isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'}`}>
+            {price && price > 0 && (
+              <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                <PayArtworkButton 
+                  artworkId={id}
+                  amount={price}
+                  artworkTitle={title}
+                  className="rounded-full px-6 font-black bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20 scale-110"
+                  size="default"
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Content */}

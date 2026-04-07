@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRealtime } from "@/providers/RealtimeProvider";
 import { AttachmentInput, AttachmentPreview, AttachmentDisplay, Attachment } from "@/components/messages/MessageAttachments";
 import { cn } from "@/lib/utils";
 import {
@@ -39,6 +40,8 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     loading
   } = useRealtimeMessages();
 
+  const { typingUsers, broadcastTyping } = useRealtime();
+
   const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [messageSearchQuery, setMessageSearchQuery] = useState("");
@@ -46,6 +49,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [showConversationList, setShowConversationList] = useState(true);
   const messagesViewportRef = useRef<HTMLDivElement | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get active conversation details
   const activeConversation = conversations.find(c => c.id === activeConversationId);
@@ -179,12 +183,23 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     setPendingAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Get role from profile
+  const { profile } = useAuth();
+  const isArtist = profile?.role === 'artist';
+  const isClient = profile?.role === 'client';
+
   const handleViewProfile = () => {
     if (activeConversation?.otherUser?.id) {
-      // Artists see client profiles at /profile/:id
-      navigate(`/profile/${activeConversation.otherUser.id}`);
+      // If current user is artist, they see client profile (/profile/:id)
+      // If current user is client, they see artist profile (/artist/:id)
+      const path = isArtist ? `/profile/${activeConversation.otherUser.id}` : `/artist/${activeConversation.otherUser.id}`;
+      navigate(path);
     }
   };
+
+  const emptyStateText = isArtist 
+    ? "Connect with clients to discuss projects, share milestones, and grow your professional reputation."
+    : "Start a conversation with an artist to discuss your creative vision, get quotes, and kickstart your project.";
 
 
 
@@ -569,9 +584,14 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                                 {isOwn && (
                                   <span className={cn(
                                     "transition-colors",
-                                    msg.read ? "text-primary" : "text-muted-foreground/30"
+                                    msg.status === 'read' ? "text-primary" : 
+                                    msg.status === 'failed' ? "text-destructive" : "text-muted-foreground/40",
+                                    msg.status === 'sending' ? "animate-pulse" : ""
                                   )}>
-                                    {msg.read ? <CheckCheck className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                                    {msg.status === 'read' ? <CheckCheck className="h-4 w-4" /> : 
+                                     msg.status === 'delivered' ? <CheckCheck className="h-4 w-4" /> : 
+                                     msg.status === 'failed' ? <X className="h-4 w-4" /> : 
+                                     <Check className="h-4 w-4" />}
                                   </span>
                                 )}
                               </div>
@@ -579,6 +599,17 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                           </div>
                         );
                       })}
+                      
+                      {activeConversationId && Array.from(typingUsers).some(key => key.startsWith(`${activeConversationId}:`)) && (
+                        <div className="flex group animate-fade-in justify-start mt-2 mb-2">
+                          <div className="bg-white dark:bg-card border border-muted/20 shadow-sm rounded-[2rem] px-5 py-4 flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                          </div>
+                        </div>
+                      )}
+
                       <div className="h-4" />
                     </>
                   )}
@@ -613,6 +644,19 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                         setMessageInput(e.target.value);
                         e.target.style.height = 'auto';
                         e.target.style.height = e.target.scrollHeight + 'px';
+                        
+                        // Typing indicator
+                        if (activeConversationId) {
+                          broadcastTyping(activeConversationId, true);
+                          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                          if (e.target.value.length === 0) {
+                            broadcastTyping(activeConversationId, false);
+                          } else {
+                            typingTimeoutRef.current = setTimeout(() => {
+                              broadcastTyping(activeConversationId, false);
+                            }, 3000);
+                          }
+                        }
                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
@@ -647,12 +691,12 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
               <div className="relative mb-8 group">
                 <div className="absolute inset-0 bg-primary/15 blur-3xl rounded-full group-hover:bg-primary/20 transition-all duration-500" />
                 <div className="relative bg-white dark:bg-card p-8 sm:p-12 rounded-[3rem] shadow-2xl border border-primary/5 transition-transform duration-500 group-hover:scale-110">
-                  <MessageSquare className="h-16 w-16 sm:h-24 sm:w-24 text-primary animate-bounce shadow-primary/20" />
+                  <MessageSquare className="h-16 w-16 sm:h-24 sm:w-24 text-primary shadow-primary/20" />
                 </div>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black mb-3 tracking-tight">Select a conversation</h2>
+              <h2 className="text-2xl sm:text-4xl font-black mb-3 tracking-tight">Your Inbox</h2>
               <p className="text-xs sm:text-base text-muted-foreground/70 max-w-[240px] sm:max-w-md mx-auto leading-relaxed font-medium">
-                Choose a client from the sidebar to start discussing your creative projects and manage collaborations.
+                {emptyStateText}
               </p>
             </div>
           )}

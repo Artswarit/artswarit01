@@ -51,18 +51,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
   const isPremium = subscription?.is_active === true && subscription?.subscription_tier === 'pro';
 
-  // Fetch the current user's profile from the DB
-  const refreshProfile = useCallback(async (userId?: string) => {
+  // Fetch the current user's profile from the DB with retry logic for race conditions
+  const refreshProfile = useCallback(async (userId?: string, retries = 3) => {
     const uid = userId;
     if (!uid) return;
+    
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, bio, role, cover_url, tags, location, website')
         .eq('id', uid)
         .maybeSingle();
-      if (data) setProfile(data as UserProfile);
-    } catch { /* silent */ }
+      
+      if (data) {
+        setProfile(data as UserProfile);
+        return;
+      }
+
+      // If no profile found and we have retries left, wait and try again
+      // This handles the race condition where auth user is created but trigger hasn't finished profile creation
+      if (!data && !error && retries > 0) {
+        console.log(`Profile not found for ${uid}, retrying... (${retries} left)`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return refreshProfile(uid, retries - 1);
+      }
+    } catch (err) {
+      console.error('Error in refreshProfile:', err);
+    }
   }, []);
   useEffect(() => {
     // Fetch initial subscription
@@ -154,7 +169,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Handle Google signup profile creation
   const handleGoogleSignupProfile = async (u: User, pendingRole: string) => {
     try {
-      // Small delay to ensure DB role-based triggers (if any) or existing processes have settled
+      // Role-based triggers usually handle this, but we ensure it exists with the correct role
+      // We use a shorter delay here because our new refreshProfile has longer retries
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const { data: existingProfile } = await supabase
@@ -165,7 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (existingProfile?.role) {
         localStorage.removeItem('pendingSignupRole');
-        setLoading(false);
+        refreshProfile(u.id);
         return;
       }
 
@@ -185,19 +201,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
       if (upsertError) {
         console.error('Failed to create/upsert Google OAuth profile:', upsertError);
-        toast({
-          title: "Profile Setup Issue",
-          description: "Your account was created but we couldn't set up your profile properly.",
-          variant: "destructive"
-        });
       } else {
         localStorage.removeItem('pendingSignupRole');
+        // Final refresh to get all fields
         refreshProfile(u.id);
       }
     } catch (error) {
       console.error('Error in handleGoogleSignupProfile:', error);
-    } finally {
-      setLoading(false);
     }
   };
 

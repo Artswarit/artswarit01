@@ -131,7 +131,7 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
     <div className="bg-background border-b border-border/40 shadow-sm transition-all duration-300">
       <div className="container mx-auto px-4 py-1.5 sm:py-3">
         {/* Main Filter Row */}
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 items-stretch lg:items-center">
+        <div className="flex flex-col lg:flex-row gap-2.5 sm:gap-4 items-stretch lg:items-center">
           {/* Results Count (visible on desktop in row) */}
           <div className="hidden xl:block shrink-0 pr-2">
             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60 bg-muted/30 px-3 py-2 rounded-full border border-border/10 whitespace-nowrap">
@@ -140,20 +140,20 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
           </div>
 
           {/* Search Bar */}
-          <div className="relative flex-1 lg:max-w-[200px] xl:max-w-xs">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-3.5 h-3.5" />
+          <div className="relative flex-1 lg:max-w-[240px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground/60 w-3.5 h-3.5" />
             <Input
-              placeholder="Search..."
+              placeholder="Search artworks..."
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="pl-9 h-10 bg-white/50 dark:bg-card/50 border-border/20 rounded-xl focus-visible:ring-primary/20 text-xs sm:text-sm"
+              className="pl-9 h-10 sm:h-11 bg-white/50 dark:bg-card/50 border-border/20 rounded-xl focus-visible:ring-primary/20 text-xs sm:text-sm"
             />
           </div>
 
-          {/* Quick Filters - Scrollable on mobile */}
-          <div className="flex overflow-x-auto sm:overflow-visible pb-1 sm:pb-0 gap-2 items-center flex-1 scrollbar-hide">
+          {/* Quick Filters - Responsive Grid on mobile, flex on desktop */}
+          <div className="grid grid-cols-2 xs:grid-cols-3 lg:flex gap-2 items-center flex-1">
             <Select value={filters.category} onValueChange={(value) => handleFilterChange('category', value)}>
-              <SelectTrigger className="flex-none w-[130px] sm:w-[150px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 text-xs">
+              <SelectTrigger className="w-full lg:w-[160px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-[10px] sm:text-xs font-bold uppercase tracking-tight">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent className="bg-white/95 dark:bg-card/95 backdrop-blur-md border-border/30 rounded-2xl max-h-[300px]">
@@ -165,7 +165,7 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
             </Select>
 
             <Select value={filters.artworkType} onValueChange={(value) => handleFilterChange('artworkType', value)}>
-              <SelectTrigger className="flex-none w-[110px] sm:w-[130px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 text-xs">
+              <SelectTrigger className="w-full lg:w-[140px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-[10px] sm:text-xs font-bold uppercase tracking-tight">
                 <SelectValue placeholder="Media" />
               </SelectTrigger>
               <SelectContent className="bg-white/95 dark:bg-card/95 backdrop-blur-md border-border/30 rounded-xl">
@@ -177,12 +177,12 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
             </Select>
 
             <Select value={filters.sortBy} onValueChange={(value) => handleFilterChange('sortBy', value)}>
-              <SelectTrigger className="flex-none w-[130px] sm:w-[150px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 text-xs">
+              <SelectTrigger className="w-full lg:w-[160px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-[10px] sm:text-xs font-bold uppercase tracking-tight">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent className="bg-white/95 dark:bg-card/95 backdrop-blur-md border-border/30 rounded-xl">
                 <SelectItem value="most_recent">Most Recent</SelectItem>
-                <SelectItem value="most_liked">Most Liked</SelectItem>
+                <SelectItem value="most_liked">Most Like</SelectItem>
                 <SelectItem value="most_viewed">Most Viewed</SelectItem>
                 <SelectItem value="price_low">Price: Low to High</SelectItem>
                 <SelectItem value="price_high">Price: High to Low</SelectItem>
@@ -190,21 +190,21 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
             </Select>
           </div>
 
-          <div className="flex items-center gap-1.5 justify-between lg:justify-start">
-            <div className="flex items-center gap-1.5 flex-1 lg:flex-none">
+          <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 justify-between lg:justify-start">
+            <div className="flex items-center gap-2 flex-1 lg:flex-none">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className={cn(
-                  "h-10 px-3 rounded-xl transition-all relative overflow-hidden group active:scale-95 border border-border/10",
+                  "h-10 px-3 flex-1 xs:flex-none rounded-xl transition-all relative overflow-hidden group active:scale-95 border border-border/10",
                   showAdvanced 
                     ? "bg-primary text-primary-foreground shadow-md" 
                     : "bg-white/40 dark:bg-card/40 hover:bg-primary/5 hover:text-primary"
                 )}
               >
-                <SlidersHorizontal className={cn("w-3.5 h-3.5 mr-1.5 transition-transform duration-300", showAdvanced && "rotate-180")} />
-                <span className="font-bold text-xs">Filters</span>
+                <SlidersHorizontal className={cn("w-3.5 h-3.5 mr-2 transition-transform duration-300", showAdvanced && "rotate-180")} />
+                <span className="font-black text-[10px] uppercase tracking-widest">Filters</span>
                 {activeFiltersCount > 0 && (
                   <Badge 
                     variant="secondary" 
@@ -220,13 +220,14 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
                 size="sm"
                 onClick={resetFilters}
                 className="h-10 px-3 rounded-xl bg-white/40 dark:bg-card/40 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all active:scale-95 border border-border/10"
+                title="Reset Filters"
               >
-                <X className="w-3.5 h-3.5 sm:mr-1.5" />
-                <span className="hidden sm:inline font-bold text-xs">Reset</span>
+                <X className="w-3.5 h-3.5 xs:mr-1.5" />
+                <span className="hidden xs:inline font-black text-[10px] uppercase tracking-widest">Reset</span>
               </Button>
             </div>
 
-            <div className="flex items-center bg-muted/30 rounded-xl p-0.5 border border-border/10">
+            <div className="flex items-center justify-center bg-muted/40 rounded-xl p-1 border border-border/5 self-end xs:self-auto">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="icon"

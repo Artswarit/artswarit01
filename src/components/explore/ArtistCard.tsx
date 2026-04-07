@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,17 +50,48 @@ const ArtistCard = ({
   } = useCurrencyFormat();
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [currentFollowers, setCurrentFollowers] = useState(artist.followers);
 
-  // Check initial follow state
+  // Check initial follow state and handle subscriptions
   useEffect(() => {
-    if (!user?.id) return;
+    let isCancelled = false;
+
     const checkFollowStatus = async () => {
+      if (!user?.id) return;
       const {
         data
       } = await supabase.from('follows').select('id').eq('follower_id', user.id).eq('following_id', artist.id).maybeSingle();
-      setIsFollowing(!!data);
+      if (!isCancelled) setIsFollowing(!!data);
     };
     checkFollowStatus();
+
+    // Subscribe to follows to handle realtime cross-tab and cross-component sync
+    const instanceId = Math.random().toString(36).substring(7);
+    const followsChannel = supabase.channel(`artist-card-follows-${artist.id}-${instanceId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'follows',
+        filter: `following_id=eq.${artist.id}`
+      }, async () => {
+        if (isCancelled) return;
+        
+        // Refetch followers count globally
+        const { data: followers } = await supabase.from('follows').select('id').eq('following_id', artist.id);
+        if (!isCancelled) setCurrentFollowers(followers?.length || 0);
+
+        // SYNC CROSS TAB
+        if (user?.id) {
+          const { data: following } = await supabase.from('follows').select('id').eq('follower_id', user.id).eq('following_id', artist.id).maybeSingle();
+          if (!isCancelled) setIsFollowing(!!following);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      isCancelled = true;
+      supabase.removeChannel(followsChannel);
+    };
   }, [user?.id, artist.id]);
   const handleFollow = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -152,7 +183,7 @@ const ArtistCard = ({
                     <div className="flex flex-wrap items-center gap-y-3 gap-x-6 text-xs sm:text-sm text-muted-foreground/80 font-medium">
                       <div className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-full">
                         <Users className="w-4 h-4 text-primary/60" />
-                        <span>{formatNumber(artist.followers)} <span className="hidden sm:inline">followers</span></span>
+                        <span>{formatNumber(currentFollowers)} <span className="hidden sm:inline">followers</span></span>
                       </div>
                       <div className="flex items-center gap-1.5 bg-muted/30 px-2.5 py-1 rounded-full">
                         <Eye className="w-4 h-4 text-primary/60" />
@@ -191,10 +222,11 @@ const ArtistCard = ({
                       disabled={loading}
                       className={cn(
                         "min-w-[120px] rounded-xl font-bold transition-all duration-300 h-12",
-                        !isFollowing && "shadow-lg shadow-primary/20 hover:shadow-primary/40"
+                        !isFollowing && "shadow-lg shadow-primary/20 hover:shadow-primary/40",
+                        loading && "opacity-70 cursor-not-allowed"
                       )}
                     >
-                      {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : isFollowing ? 'Following' : 'Follow'}
+                      {isFollowing ? 'Following' : 'Follow'}
                     </Button>
                   </div>
                 </div>
@@ -251,10 +283,13 @@ const ArtistCard = ({
               onClick={handleFollow} 
               size="sm" 
               variant={isFollowing ? 'secondary' : 'default'} 
-              className="w-full rounded-xl font-bold h-10 backdrop-blur-md shadow-lg"
+              className={cn(
+                "w-full rounded-xl font-bold h-10 backdrop-blur-md shadow-lg",
+                loading && "opacity-70 cursor-not-allowed"
+              )}
               disabled={loading}
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isFollowing ? 'Following' : 'Follow'}
+              {isFollowing ? 'Following' : 'Follow'}
             </Button>
           </div>
         </div>
@@ -283,7 +318,7 @@ const ArtistCard = ({
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 text-muted-foreground/80">
                 <Users className="w-4 h-4 text-primary/60" />
-                <span className="text-xs font-semibold">{formatNumber(artist.followers)}</span>
+                <span className="text-xs font-semibold">{formatNumber(currentFollowers)}</span>
               </div>
               <div className="flex items-center gap-1.5 text-muted-foreground/80">
                 <Heart className="w-4 h-4 text-primary/60" />

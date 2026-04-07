@@ -15,16 +15,22 @@ import { cn } from "@/lib/utils";
 
 const Signup = ({ isModal = false }: { isModal?: boolean }) => {
   const navigate = useNavigate();
-  const { signUp, signInWithGoogle, loading, user } = useAuth();
+  const { signUp, signInWithGoogle, loading, user, profile } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
 
-  // Redirect if already logged in
+  // Redirect if already logged in and profile is available
   useEffect(() => {
-    if (user && !loading) {
-      navigate('/');
+    if (user && profile && !loading) {
+      const target = profile.role === 'admin' 
+        ? '/admin-dashboard' 
+        : profile.role === 'artist' 
+          ? '/artist-dashboard' 
+          : '/client-dashboard';
+      
+      navigate(target, { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, profile, loading, navigate]);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -67,7 +73,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
       
       const { error } = await signInWithGoogle();
       if (!error) {
-        // Redirect will happen automatically via auth state change
+        // Redirect will happen automatically via useEffect when auth state change + profile loads
       }
     }
   };
@@ -99,14 +105,10 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
       role: formData.role
     });
     
-    if (!error) {
-      if (formData.role === "artist") {
-        setTimeout(() => navigate("/artist-dashboard"), 1000);
-      } else {
-        setTimeout(() => navigate("/client-dashboard"), 1000);
-      }
+    if (error) {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
+    // If no error, the useEffect above will handle redirection when profile updates
   };
 
   // Password strength indicators

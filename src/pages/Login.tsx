@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 const Login = ({ isModal = false }: { isModal?: boolean }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn, signInWithGoogle, loading, user } = useAuth();
+  const { signIn, signInWithGoogle, loading, user, profile } = useAuth();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,55 +25,20 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Redirect if already logged in
+  // Redirect if already logged in and profile is available
   useEffect(() => {
-    if (user && !loading) {
-      redirectBasedOnRole();
+    if (user && profile && !loading) {
+      const target = profile.role === 'admin' 
+        ? '/admin-dashboard' 
+        : profile.role === 'artist' 
+          ? '/artist-dashboard' 
+          : '/client-dashboard';
+      
+      // Only redirect if we're not already heading somewhere specific from state
+      const from = (location.state as any)?.from?.pathname || target;
+      navigate(from, { replace: true });
     }
-  }, [user, loading, navigate]);
-
-  const redirectBasedOnRole = async () => {
-    if (!user) return;
-    setIsRedirecting(true);
-    
-    try {
-      const [profileResult, adminResult] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('role, full_name, bio, avatar_url, tags')
-          .eq('id', user.id)
-          .single(),
-        supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .maybeSingle(),
-      ]);
-
-      if (profileResult.error) {
-        console.error('Error fetching profile for redirect:', profileResult.error);
-        navigate('/');
-        return;
-      }
-
-      const profile = profileResult.data;
-      const isAdmin = profile?.role === 'admin' || adminResult.data?.role === 'admin';
-
-      if (isAdmin) {
-        navigate('/admin-dashboard');
-      } else if (profile?.role === 'artist' || profile?.role === 'premium') {
-        navigate('/artist-dashboard');
-      } else {
-        navigate('/client-dashboard');
-      }
-    } catch (error) {
-      console.error('Error in redirectBasedOnRole:', error);
-      navigate('/');
-    } finally {
-      setIsRedirecting(false);
-    }
-  };
+  }, [user, profile, loading, navigate, location]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -81,11 +46,10 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
     
     const { error } = await signIn(email, password);
     
-    if (!error) {
-      // Role-based redirect will happen via useEffect when user state updates
+    if (error) {
+      setIsSubmitting(false);
     }
-    
-    setIsSubmitting(false);
+    // If no error, the useEffect above will handle redirection when profile updates
   };
 
   const handleGoogleSignIn = async () => {

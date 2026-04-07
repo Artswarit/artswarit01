@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -299,10 +299,10 @@ const ArtworkManagement = () => {
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between bg-muted/20 sm:bg-transparent p-5 sm:p-0 rounded-[2rem] sm:rounded-none border border-border/40 sm:border-none shadow-sm sm:shadow-none animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="space-y-2">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight leading-[1.1]">
-            Artwork <span className="text-primary">Management</span>
+            My <span className="text-primary">Works</span>
           </h2>
           <p className="text-[11px] sm:text-sm lg:text-base text-muted-foreground font-medium opacity-80 leading-relaxed">
-            Curate and optimize your digital portfolio for maximum impact
+            Curate and optimize your digital portfolio to showcase your best creative assets
           </p>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
@@ -443,10 +443,10 @@ const ArtworkManagement = () => {
             <div className="rounded-[2rem] bg-muted/50 p-6 mb-6 shadow-inner">
               <FolderOpen className="h-10 w-10 text-muted-foreground/40" />
             </div>
-            <h3 className="text-xl font-black text-foreground mb-2 tracking-tight">No artworks found</h3>
-            <p className="text-sm sm:text-base text-muted-foreground text-center max-w-sm mb-8 font-medium leading-relaxed opacity-70">
+            <h3 className="text-xl font-black text-foreground mb-2 tracking-tight">Your Gallery is Empty</h3>
+            <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md mb-8 font-medium leading-relaxed opacity-70">
               {artworks.length === 0
-                ? "Your creative journey starts here. Build your portfolio by uploading your first masterpiece."
+                ? "The first work is always the hardest. Upload your best artwork now or import from Instagram to start attracting clients and building your brand."
                 : "No artworks match your current filters. Try refining your search or clearing filters."}
             </p>
             {artworks.length === 0 && (

@@ -72,7 +72,7 @@ const ArtistActionsBar: React.FC<ArtistActionsBarProps> = ({
       </Button>
 
       {/* Secondary Actions - 2 column grid on small screens, expands later */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 min-[390px]:grid-cols-2 gap-3">
         <Button
           onClick={onSave}
           variant="outline"

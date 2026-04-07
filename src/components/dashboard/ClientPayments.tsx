@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, DollarSign, Calendar, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { CreditCard, DollarSign, Calendar, CheckCircle, Clock, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BillingAddressForm } from "@/components/billing/BillingAddressForm";
 import { InvoiceDownload } from "@/components/billing/InvoiceDownload";

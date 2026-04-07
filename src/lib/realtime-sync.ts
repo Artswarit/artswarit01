@@ -31,7 +31,7 @@ export const broadcastRefresh = (type: SyncEventType) => {
 /**
  * Hook to listen for sync events and trigger refetch
  */
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
   const latestRefetch = useRef(refetch);

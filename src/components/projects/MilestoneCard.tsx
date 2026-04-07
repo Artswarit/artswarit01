@@ -71,13 +71,14 @@ export function MilestoneCard({
   const { format: formatCurrency } = useCurrencyFormat();
   
   // Status flags (separate from the isLocked prop, which refers to project-level lock)
-  const isLockedStatus = milestone.status === 'LOCKED';
-  const isWaitingFunds = milestone.status === 'WAITING_FUNDS';
-  const isActive = milestone.status === 'ACTIVE';
-  const isReviewPending = milestone.status === 'REVIEW_PENDING';
-  const isRevisionRequested = milestone.status === 'REVISION_REQUESTED';
-  const isCompleted = milestone.status === 'COMPLETED';
-  const isDisputed = milestone.status === 'DISPUTED';
+  const normalizedStatus = (milestone.status || 'LOCKED').toUpperCase();
+  const isLockedStatus = normalizedStatus === 'LOCKED' || normalizedStatus === 'PENDING';
+  const isWaitingFunds = normalizedStatus === 'WAITING_FUNDS' || normalizedStatus === 'PENDING';
+  const isActive = normalizedStatus === 'ACTIVE' || normalizedStatus === 'IN_PROGRESS';
+  const isReviewPending = normalizedStatus === 'REVIEW_PENDING' || normalizedStatus === 'SUBMITTED';
+  const isRevisionRequested = normalizedStatus === 'REVISION_REQUESTED';
+  const isCompleted = normalizedStatus === 'COMPLETED' || normalizedStatus === 'PAID' || normalizedStatus === 'APPROVED';
+  const isDisputed = normalizedStatus === 'DISPUTED';
 
   // Clients can fund milestones only when waiting for funds (escrow)
   const canFund = isClient && isWaitingFunds && !isDisputed;

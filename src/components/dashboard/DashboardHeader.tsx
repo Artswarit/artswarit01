@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, Calendar, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -158,7 +158,7 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
         {profile && (
           <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
             <CardContent className="flex items-center p-5 sm:p-6">

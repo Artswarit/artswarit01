@@ -17,7 +17,7 @@ import { LayoutDashboard, Users, MessageSquare, FileText, Settings, CreditCard, 
 import Navbar from "@/components/Navbar";
 import SavedArtists from "@/components/dashboard/SavedArtists";
 import SavedArtworks from "@/components/dashboard/SavedArtworks";
-import ClientMessages from "@/components/dashboard/ClientMessages";
+import MessagingModule from "@/components/dashboard/messages/MessagingModule";
 import ProjectRating from "@/components/dashboard/ProjectRating";
 import ClientPayments from "@/components/dashboard/ClientPayments";
 import ClientSettings from "@/components/dashboard/ClientSettings";
@@ -26,6 +26,9 @@ import PurchasedArtworks from "@/components/dashboard/PurchasedArtworks";
 import ProjectDetailModal from "@/components/dashboard/projects/ProjectDetailModal";
 import { CreateProjectForm } from "@/components/projects";
 import ArtistSelectionModal from "@/components/dashboard/projects/ArtistSelectionModal";
+import ProfileCompletionBanner from "@/components/dashboard/ProfileCompletionBanner";
+import DashboardAttentionRequired from "@/components/dashboard/DashboardAttentionRequired";
+import DashboardMobileNav from "@/components/dashboard/DashboardMobileNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -636,7 +639,7 @@ const ClientDashboard = () => {
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
       <Navbar />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12 pt-[calc(6.5rem+var(--safe-top))] sm:pt-[calc(8rem+var(--safe-top))] lg:pt-[calc(9rem+var(--safe-top))]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-32 sm:pb-12 pt-[calc(6.5rem+var(--safe-top))] sm:pt-[calc(8rem+var(--safe-top))] lg:pt-[calc(9rem+var(--safe-top))]">
         {/* Dashboard Header */}
         <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
           <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black mb-1 sm:mb-2">Client Dashboard</h1>
@@ -646,49 +649,20 @@ const ClientDashboard = () => {
         </div>
 
         {/* Mandatory Profile Completion Alert */}
-        {profileIncomplete && (
-          <div className="mb-6 p-4 sm:p-6 rounded-xl bg-gradient-to-r from-red-500/10 via-orange-500/10 to-amber-500/10 border-2 border-red-500/30">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-start gap-3 flex-1">
-                <div className="p-2 rounded-full bg-red-500/20">
-                  <Lock className="h-5 w-5 text-red-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground text-lg">Profile Completion Required</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Complete your profile to access all dashboard features. Your profile is {completionPercentage}% complete.
-                  </p>
-                  <p className="text-sm text-red-600 font-medium mt-2">
-                    Missing: {missingFields.join(', ')}
-                  </p>
-                  <div className="mt-3 bg-muted rounded-full h-3 overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 transition-all duration-500"
-                      style={{ width: `${completionPercentage}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <ProfileCompletionBanner />
 
         {/* Dashboard Navigation - Optimized for all screens */}
         <Tabs value={selectedTab} className="mb-4 sm:mb-6 lg:mb-8" onValueChange={handleTabChange}>
-          <div className="relative mb-4 sm:mb-6">
+          <div className="hidden sm:block relative mb-4 sm:mb-6">
               <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-max xl:w-full xl:flex-wrap xl:grid xl:grid-cols-5 2xl:grid-cols-10">
+                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
                   {[
                     { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard, locked: profileIncomplete },
-                    { value: 'profile', label: 'Profile', shortLabel: 'Prof', icon: User, locked: false },
+                    { value: 'collection', label: 'My Works', shortLabel: 'Works', icon: ShoppingBag, locked: profileIncomplete },
                     { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: FileText, locked: profileIncomplete },
-                    { value: 'collection', label: 'Collection', shortLabel: 'Coll', icon: ShoppingBag, locked: profileIncomplete },
                     { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare, locked: profileIncomplete },
-                    { value: 'saved', label: 'Saved', shortLabel: 'Save', icon: Bookmark, locked: profileIncomplete },
                     { value: 'artists', label: 'Artists', shortLabel: 'Art', icon: Users, locked: profileIncomplete },
-                    { value: 'ratings', label: 'Reviews', shortLabel: 'Rev', icon: Star, locked: profileIncomplete },
-                    { value: 'payments', label: 'Payments', shortLabel: 'Pay', icon: CreditCard, locked: profileIncomplete },
-                    { value: 'settings', label: 'Settings', shortLabel: 'Set', icon: Settings, locked: profileIncomplete },
+                    { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings, locked: false },
                   ].map((tab) => {
                     const Icon = tab.icon;
                     return (
@@ -722,6 +696,11 @@ const ClientDashboard = () => {
             <div className={cn(selectedTab !== 'overview' && "hidden")}>
               {visitedTabs.has('overview') && (
                 <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+                  <DashboardAttentionRequired 
+                    role="client" 
+                    profile={profile} 
+                    onAction={handleTabChange} 
+                  />
             {/* Stats Row - Modernized & Clickable Grid */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
               <div 
@@ -963,12 +942,6 @@ const ClientDashboard = () => {
           </div>
         </TabsContent>
 
-          {/* Collection Tab */}
-          <TabsContent value="collection" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
-            <div className={cn(selectedTab !== 'collection' && "hidden")}>
-              {visitedTabs.has('collection') && <PurchasedArtworks />}
-            </div>
-          </TabsContent>
 
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in outline-none focus-visible:ring-0" forceMount>
@@ -1215,47 +1188,60 @@ const ClientDashboard = () => {
         </div>
       </TabsContent>
           
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
-            <div className={cn(selectedTab !== 'profile' && "hidden")}>
-              {visitedTabs.has('profile') && <ClientProfile />}
-            </div>
-          </TabsContent>
-          
           {/* Messages Tab */}
           <TabsContent value="messages" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'messages' && "hidden")}>
-              {visitedTabs.has('messages') && <ClientMessages />}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="saved" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
-            <div className={cn(selectedTab !== 'saved' && "hidden")}>
-              {visitedTabs.has('saved') && <SavedArtworks />}
+              {visitedTabs.has('messages') && <MessagingModule />}
             </div>
           </TabsContent>
 
+          {/* Artists Tab */}
           <TabsContent value="artists" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'artists' && "hidden")}>
               {visitedTabs.has('artists') && <SavedArtists />}
             </div>
           </TabsContent>
+          
+          {/* Account Tab - Consolidated */}
+          <TabsContent value="account" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
+            <div className={cn(selectedTab !== 'account' && "hidden")}>
+              {visitedTabs.has('account') && (
+                <Tabs defaultValue="profile" className="w-full">
+                  <div className="flex overflow-x-auto pb-2 mb-6 -mx-1 px-1 scrollbar-hide">
+                    <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-5 h-auto overflow-x-auto">
+                      <TabsTrigger value="profile" className="rounded-lg text-xs px-4 py-2 shrink-0">Profile</TabsTrigger>
+                      <TabsTrigger value="purchases" className="rounded-lg text-xs px-4 py-2 shrink-0">Orders</TabsTrigger>
+                      <TabsTrigger value="payments" className="rounded-lg text-xs px-4 py-2 shrink-0">Payments</TabsTrigger>
+                      <TabsTrigger value="saved" className="rounded-lg text-xs px-4 py-2 shrink-0">Saved</TabsTrigger>
+                      <TabsTrigger value="settings" className="rounded-lg text-xs px-4 py-2 shrink-0">Settings</TabsTrigger>
+                    </TabsList>
+                  </div>
+                  
+                  <TabsContent value="profile" className="mt-0">
+                    <ClientProfile />
+                  </TabsContent>
+                  
+                  <TabsContent value="purchases" className="mt-0">
+                    <PurchasedArtworks />
+                  </TabsContent>
+                  
+                  <TabsContent value="payments" className="mt-0">
+                    <ClientPayments />
+                  </TabsContent>
+                  
+                  <TabsContent value="ratings" className="mt-0">
+                    <ProjectRating />
+                  </TabsContent>
 
-          <TabsContent value="ratings" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
-            <div className={cn(selectedTab !== 'ratings' && "hidden")}>
-              {visitedTabs.has('ratings') && <ProjectRating />}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="payments" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
-            <div className={cn(selectedTab !== 'payments' && "hidden")}>
-              {visitedTabs.has('payments') && <ClientPayments />}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="settings" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
-            <div className={cn(selectedTab !== 'settings' && "hidden")}>
-              {visitedTabs.has('settings') && <ClientSettings />}
+                  <TabsContent value="saved" className="mt-0">
+                    <SavedArtworks />
+                  </TabsContent>
+                  
+                  <TabsContent value="settings" className="mt-0">
+                    <ClientSettings />
+                  </TabsContent>
+                </Tabs>
+              )}
             </div>
           </TabsContent>
         </Tabs>
@@ -1320,6 +1306,12 @@ const ClientDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <DashboardMobileNav 
+        activeTab={selectedTab} 
+        onTabChange={handleTabChange} 
+        role="client"
+        isLocked={profileIncomplete}
+      />
     </div>
   );
 };
