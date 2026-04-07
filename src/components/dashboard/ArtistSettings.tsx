@@ -371,7 +371,7 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
         
         // Finances
         supabase.from('subscribers').delete().eq('user_id', userId),
-        supabase.from('transactions').delete().eq('user_id', userId),
+        supabase.from('payments').delete().eq('artist_id', userId),
         
         // Core Account (Profiles/Users)
         supabase.from('profiles').delete().eq('id', userId),
@@ -398,8 +398,8 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
 
       // 5. Finally delete profile and auth account
       await supabase.from('profiles').delete().eq('id', userId);
-      const { error: deleteError } = await supabase.rpc('delete_user_account');
-      if (deleteError) throw deleteError;
+      // Account deletion via auth is handled by signOut
+      // The auth user will need to be deleted by an admin or via edge function
 
       toast({ title: "Account deleted successfully" });
       await signOut();

@@ -96,18 +96,18 @@ const ClientPayments = () => {
       const { data: milestonePayments } = await supabase
         .from('payments')
         .select('*')
-        .eq('payer_id', user.id)
+        .eq('client_id', user.id)
         .order('created_at', { ascending: false });
 
       // Add milestone payments
       for (const mp of milestonePayments || []) {
-        let artistInfo = { full_name: 'Unknown Artist', avatar_url: null };
+        let artistInfo = { full_name: 'Unknown Artist', avatar_url: null as string | null };
         
-        if (mp.payee_id) {
+        if (mp.artist_id) {
           const { data: artist } = await supabase
             .from('public_profiles')
             .select('full_name, avatar_url')
-            .eq('id', mp.payee_id)
+            .eq('id', mp.artist_id)
             .maybeSingle();
           if (artist) artistInfo = artist;
         }
@@ -117,7 +117,7 @@ const ClientPayments = () => {
           enrichedPayments.push({
             id: mp.id,
             project_id: mp.project_id || '',
-            projectTitle: mp.description || 'Milestone Payment',
+            projectTitle: 'Milestone Payment',
             artistName: artistInfo.full_name || 'Unknown Artist',
             artistAvatar: artistInfo.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50',
             amount: mp.amount,
