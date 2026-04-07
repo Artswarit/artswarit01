@@ -413,7 +413,7 @@ const ClientSettings = () => {
         supabase.from('project_files').delete().eq('uploader_id', userId),
         supabase.from('messages').delete().eq('sender_id', userId),
         supabase.from('conversations').delete().or(`client_id.eq.${userId},artist_id.eq.${userId}`),
-        supabase.from('transactions').delete().or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+        supabase.from('payments').delete().eq('client_id', userId)
       ]);
 
       // 2. Project Data Cleanup
