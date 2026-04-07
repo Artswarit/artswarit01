@@ -109,18 +109,18 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
       const {
         data,
         error
-      } = await supabase.from("reviews").select("*").eq("artist_id", artistId).order("created_at", {
+      } = await supabase.from("project_reviews").select("*").eq("artist_id", artistId).order("created_at", {
         ascending: false
       });
       if (!error && data) {
-        const formattedReviews = await Promise.all(data.map(async r => {
+        const formattedReviews = await Promise.all(data.map(async (r: any) => {
           const {
             data: p
           } = await supabase.from("public_profiles").select("full_name, avatar_url").eq("id", r.client_id).single();
           return {
             id: r.id,
             rating: r.rating,
-            comment: r.comment,
+            comment: r.review_text || '',
             date: new Date(r.created_at).toLocaleDateString(),
             clientName: p?.full_name || "Art Collector",
             clientAvatar: p?.avatar_url
@@ -140,7 +140,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
       const {
         data,
         error
-      } = await supabase.from("artist_services").select("*").eq("artist_id", artistId).eq("is_active", true);
+      } = await supabase.from("artist_services").select("*").eq("artist_id", artistId);
       if (!error && data) {
         setServices(data);
       }

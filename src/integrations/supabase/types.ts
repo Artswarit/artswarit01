@@ -2237,7 +2237,6 @@ export type Database = {
           seller_id: string
           status: Database["public"]["Enums"]["transaction_status"]
           stripe_payment_intent_id: string | null
-          currency: string | null
           updated_at: string
         }
         Insert: {

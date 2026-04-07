@@ -49,11 +49,23 @@ const DashboardAttentionRequired = ({ role, profile, onAction }: DashboardAttent
       }
 
       // 2. Unread Messages (High severity)
-      const { count: unreadCount } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('receiver_id', user.id)
-        .eq('is_read', false);
+      // First get conversations where user is a participant
+      const { data: convos } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(`client_id.eq.${user.id},artist_id.eq.${user.id}`);
+      
+      let unreadCount = 0;
+      if (convos && convos.length > 0) {
+        const convoIds = convos.map(c => c.id);
+        const { count } = await supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .in('conversation_id', convoIds)
+          .neq('sender_id', user.id)
+          .eq('is_read', false);
+        unreadCount = count || 0;
+      }
 
       if (unreadCount && unreadCount > 0) {
         attentionItems.push({
@@ -101,9 +113,9 @@ const DashboardAttentionRequired = ({ role, profile, onAction }: DashboardAttent
         // For now, let's look for active projects where the next milestone isn't funded
         // Simplification: Check if they have any projects without an active milestone
         const { count: pendingFunding } = await supabase
-          .from('milestones')
+          .from('project_milestones')
           .select('id, projects!inner(client_id)', { count: 'exact', head: true })
-          .eq('status', 'PENDING')
+          .eq('status', 'pending')
           .eq('projects.client_id', user.id);
 
         if (pendingFunding && pendingFunding > 0) {

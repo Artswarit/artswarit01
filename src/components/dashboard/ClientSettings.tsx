@@ -413,7 +413,7 @@ const ClientSettings = () => {
         supabase.from('project_files').delete().eq('uploader_id', userId),
         supabase.from('messages').delete().eq('sender_id', userId),
         supabase.from('conversations').delete().or(`client_id.eq.${userId},artist_id.eq.${userId}`),
-        supabase.from('transactions').delete().or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+        supabase.from('payments').delete().eq('client_id', userId)
       ]);
 
       // 2. Project Data Cleanup
@@ -436,8 +436,8 @@ const ClientSettings = () => {
 
       // 4. Finally delete profile and auth account
       await supabase.from('profiles').delete().eq('id', userId);
-      const { error: deleteError } = await supabase.rpc('delete_user_account');
-      if (deleteError) throw deleteError;
+      // Account deletion via auth is handled by signOut
+      // The auth user will need to be deleted by an admin or via edge function
 
       toast({ title: "Account deleted successfully" });
       await signOut();
