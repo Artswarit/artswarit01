@@ -68,34 +68,17 @@ const ArtistDashboard = () => {
 
     const savedTab = sessionStorage.getItem('artist_dashboard_active_tab');
 
-    if (profileIncomplete && tab !== 'premium') {
-      if (tab !== 'account') {
-        setSearchParams({ tab: 'account' }, { replace: true });
-      }
-      return;
-    }
-
     if (!tab) {
       if (savedTab) {
         setSearchParams({ tab: savedTab }, { replace: true });
-      } else if (isComplete) {
-        setSearchParams({ tab: 'overview' }, { replace: true });
       } else {
-        setSearchParams({ tab: 'account' }, { replace: true });
+        setSearchParams({ tab: 'overview' }, { replace: true });
       }
     }
-  }, [profileReady, profileIncomplete, isComplete, tab, navigate]);
+  }, [profileReady, isComplete, tab, navigate]);
 
   // Handle tab change with URL sync
   const handleTabChange = (newTab: string) => {
-    if (profileIncomplete && newTab !== 'profile' && newTab !== 'premium') {
-      toast({
-        title: "Complete Your Profile First",
-        description: `Please fill in: ${missingFields.join(', ')} before accessing other sections.`,
-        variant: "destructive"
-      });
-      return;
-    }
     setSearchParams({ tab: newTab });
   };
 
@@ -167,36 +150,29 @@ const ArtistDashboard = () => {
             subtitle="Manage your projects, portfolio, and earnings in one place"
           />
 
-          {/* Mandatory Profile Completion Alert */}
-          <ProfileCompletionBanner />
-
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="relative mb-6 sm:mb-8 lg:mb-12">
               <div className="hidden sm:block overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
                 <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-full grid grid-cols-5 items-stretch">
                   {tabs.map((tabItem) => {
                     const Icon = tabItem.icon;
-                    const isDisabled = profileIncomplete && tabItem.value !== 'account';
                     
                     return (
                       <TabsTrigger
                         key={tabItem.value}
                         value={tabItem.value}
-                        disabled={isDisabled}
                         className={cn(
                           "flex flex-col items-center gap-1.5 text-[10px] px-3.5 py-3 rounded-xl transition-all duration-300 snap-center",
                           "sm:flex-row sm:gap-2 sm:text-xs sm:px-4 sm:py-2.5 sm:rounded-2xl",
                           "lg:text-sm lg:px-5 lg:py-3",
                           "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:shadow-primary/30", 
-                          "hover:bg-primary/5 hover:text-primary", 
-                          isDisabled && "opacity-50 cursor-not-allowed grayscale pointer-events-none"
+                          "hover:bg-primary/5 hover:text-primary"
                         )}
                       >
                         <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px] shrink-0" />
                         <span className="font-bold sm:font-medium whitespace-nowrap tracking-tight">
                           {tabItem.label}
                         </span>
-                        {isDisabled && <Lock className="h-2 w-2 sm:h-3 sm:w-3 ml-0.5 opacity-50 shrink-0" />}
                       </TabsTrigger>
                     );
                   })}

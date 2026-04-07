@@ -111,48 +111,18 @@ const ClientDashboard = () => {
   const [isDeletingProject, setIsDeletingProject] = useState<string | null>(null);
   const PROJECTS_PER_PAGE = 5;
 
-  // Force profile tab when profile is incomplete or set default tab
-  useEffect(() => {
-    if (profileReady) {
-      if (profileIncomplete) {
-        if (searchParams.get('tab') !== 'profile') {
-          setSelectedTab('profile');
-          setSearchParams({ tab: 'profile' }, { replace: true });
-        }
-      } else if (!searchParams.get('tab')) {
-        // Default to profile when complete and no tab specified
-        setSelectedTab('profile');
-        setSearchParams({ tab: 'profile' }, { replace: true });
-      }
-    }
-  }, [profileReady, profileIncomplete, searchParams, setSearchParams]);
-
-  // Handle tab change with URL sync
-  const handleTabChange = (newTab: string) => {
-    if (profileIncomplete && newTab !== 'profile') {
-      hookToast({
-        title: "Complete Your Profile First",
-        description: `Please fill in: ${missingFields.join(', ')} before accessing other sections.`,
-        variant: "destructive"
-      });
-      return;
-    }
-    setSelectedTab(newTab);
-    setSearchParams({ tab: newTab });
-    setVisitedTabs(prev => new Set(prev).add(newTab));
-  };
-
   // Read tab from URL on mount
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'settings'].includes(tabParam)) {
-      if (profileIncomplete && tabParam !== 'profile') {
-        setSelectedTab('profile');
-      } else {
-        setSelectedTab(tabParam);
-      }
+      setSelectedTab(tabParam);
+    } else if (!tabParam) {
+      // Default to overview if no tab specified
+      setSelectedTab('overview');
+      setSearchParams({ tab: 'overview' }, { replace: true });
     }
-  }, [searchParams, profileIncomplete]);
+  }, [searchParams]);
+
   const fetchProjects = useCallback(async () => {
     if (!user?.id) return;
     try {
@@ -616,6 +586,12 @@ const ClientDashboard = () => {
     }
   };
 
+  const handleTabChange = (newTab: string) => {
+    setSelectedTab(newTab);
+    setSearchParams({ tab: newTab });
+    setVisitedTabs(prev => new Set(prev).add(newTab));
+  };
+
   const activeProjects = projects.filter(p => ["In Progress", "Review", "Pending Artist", "Pending Confirm", "Draft"].includes(p.status));
   const completedProjects = projects.filter(p => p.status === "Completed");
   const rejectedProjects = projects.filter(p => p.status === "Rejected");
@@ -648,20 +624,17 @@ const ClientDashboard = () => {
           </p>
         </div>
 
-        {/* Mandatory Profile Completion Alert */}
-        <ProfileCompletionBanner />
-
         {/* Dashboard Navigation - Optimized for all screens */}
         <Tabs value={selectedTab} className="mb-4 sm:mb-6 lg:mb-8" onValueChange={handleTabChange}>
           <div className="hidden sm:block relative mb-4 sm:mb-6">
               <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
                 <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
                   {[
-                    { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard, locked: profileIncomplete },
-                    { value: 'collection', label: 'My Works', shortLabel: 'Works', icon: ShoppingBag, locked: profileIncomplete },
-                    { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: FileText, locked: profileIncomplete },
-                    { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare, locked: profileIncomplete },
-                    { value: 'artists', label: 'Artists', shortLabel: 'Art', icon: Users, locked: profileIncomplete },
+                    { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard, locked: false },
+                    { value: 'collection', label: 'My Works', shortLabel: 'Works', icon: ShoppingBag, locked: false },
+                    { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: FileText, locked: false },
+                    { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare, locked: false },
+                    { value: 'artists', label: 'Artists', shortLabel: 'Art', icon: Users, locked: false },
                     { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings, locked: false },
                   ].map((tab) => {
                     const Icon = tab.icon;
@@ -669,21 +642,18 @@ const ClientDashboard = () => {
                       <TabsTrigger
                         key={tab.value}
                         value={tab.value}
-                        disabled={tab.locked}
                         className={cn(
                           "flex flex-col items-center gap-1.5 text-[10px] px-3.5 py-3 rounded-xl transition-all duration-300 snap-center min-w-[90px]",
                           "sm:flex-row sm:gap-2 sm:text-xs sm:px-4 sm:py-2.5 sm:rounded-2xl sm:min-w-[100px]",
                           "lg:text-sm lg:px-5 lg:py-3",
                           "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:shadow-primary/30",
-                          "hover:bg-primary/5 hover:text-primary",
-                          tab.locked && "opacity-50 cursor-not-allowed grayscale pointer-events-none"
+                          "hover:bg-primary/5 hover:text-primary"
                         )}
                       >
                         <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px] shrink-0" />
                         <span className="font-bold sm:font-medium whitespace-nowrap tracking-tight">
                           {tab.label}
                         </span>
-                        {tab.locked && <Lock className="h-2 w-2 sm:h-3 sm:w-3 ml-0.5 opacity-50 shrink-0" />}
                       </TabsTrigger>
                     );
                   })}

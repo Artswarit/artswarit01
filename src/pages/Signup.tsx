@@ -22,6 +22,13 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
   // Redirect if already logged in and profile is available
   useEffect(() => {
     if (user && profile && !loading) {
+      // P0: Enforce email verification check for email/password users
+      const isGoogleUser = user.app_metadata?.provider === 'google';
+      if (!user.email_confirmed_at && !isGoogleUser) {
+        navigate('/verify-email', { replace: true });
+        return;
+      }
+
       const target = profile.role === 'admin' 
         ? '/admin-dashboard' 
         : profile.role === 'artist' 
