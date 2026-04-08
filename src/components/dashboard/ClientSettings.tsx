@@ -434,10 +434,12 @@ const ClientSettings = () => {
         }
       }
 
-      // 4. Finally delete profile and auth account
-      await supabase.from('profiles').delete().eq('id', userId);
-      // Account deletion via auth is handled by signOut
-      // The auth user will need to be deleted by an admin or via edge function
+      // 4. Finally delete auth account and profile via RPC
+      const { error: rpcError } = await supabase.rpc('delete_user_account');
+      if (rpcError) {
+        console.error("RPC deletion failed, falling back to manual profile deletion", rpcError);
+        await supabase.from('profiles').delete().eq('id', userId);
+      }
 
       toast({ title: "Account deleted successfully" });
       await signOut();
