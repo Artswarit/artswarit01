@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Analytics } from "@vercel/analytics/react";
 import ScrollToTop from "./components/ScrollToTop";
 import { useScrollAnchor } from "./hooks/useScrollAnchor";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -182,6 +183,7 @@ const App = () => {
                   <Toaster />
                   <Sonner />
                   <AppRoutes />
+                  <Analytics />
                 </RealtimeProvider>
               </CurrencyProvider>
             </AuthProvider>
