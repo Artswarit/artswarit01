@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -591,27 +592,27 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
             <CardContent className="space-y-6 pt-6 sm:pt-8">
               <div className="space-y-2">
                 <Label htmlFor="new-password" className="text-sm font-bold ml-1">New Password</Label>
-                <Input
+                <PasswordInput
                   id="new-password"
                   name="newPassword"
-                  type="password"
                   value={passwordData.newPassword}
                   onChange={handlePasswordChange}
                   className="h-12 sm:h-14 bg-muted/50 border-none focus-visible:ring-primary/20 rounded-2xl px-6 font-medium min-h-[48px]"
                   placeholder="Enter new password"
+                  autoComplete="new-password"
                 />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="confirm-password" className="text-sm font-bold ml-1">Confirm New Password</Label>
-                <Input
+                <PasswordInput
                   id="confirm-password"
                   name="confirmPassword"
-                  type="password"
                   value={passwordData.confirmPassword}
                   onChange={handlePasswordChange}
                   className="h-12 sm:h-14 bg-muted/50 border-none focus-visible:ring-primary/20 rounded-2xl px-6 font-medium min-h-[48px]"
                   placeholder="Confirm new password"
+                  autoComplete="new-password"
                 />
               </div>
               

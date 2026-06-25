@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
@@ -813,32 +814,32 @@ const ClientSettings = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label className="text-sm font-bold">Current Password</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 value={passwordData.currentPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                 placeholder="Enter current password"
                 className="h-11 rounded-xl"
+                autoComplete="current-password"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-bold">New Password</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 value={passwordData.newPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                 placeholder="Min 6 characters"
                 className="h-11 rounded-xl"
+                autoComplete="new-password"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-bold">Confirm New Password</Label>
-              <Input
-                type="password"
+              <PasswordInput
                 value={passwordData.confirmPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                 placeholder="Repeat new password"
                 className="h-11 rounded-xl"
+                autoComplete="new-password"
               />
             </div>
             
