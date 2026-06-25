@@ -1011,19 +1011,42 @@ const ProjectDetailModal = ({
                 </TabsContent>
 
                 <TabsContent id="project-tab-content-communication" value="communication" className="mt-0 outline-none focus-visible:ring-0">
-                  <div className="rounded-[2rem] border border-border/40 bg-white dark:bg-card/40 overflow-hidden flex flex-col shadow-sm h-[650px]">
-                    <div className="px-5 py-4 border-b border-border/40 bg-white/70 dark:bg-card/60 backdrop-blur-xl flex items-center gap-3 shrink-0">
-                      <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600">
-                        <MessageSquare className="h-4 w-4" />
+                  <div className="fixed inset-0 z-[10] bg-background flex flex-col pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] animate-in fade-in slide-in-from-bottom-2 duration-300 ease-apple">
+                    <div className="px-4 sm:px-6 py-3 border-b border-border/40 bg-white/80 dark:bg-card/70 backdrop-blur-xl flex items-center gap-3 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setActiveTab('workflow')}
+                        className="h-9 w-9 rounded-full -ml-2 shrink-0"
+                        aria-label="Back to project"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                      </Button>
+                      <Avatar className="h-9 w-9 shrink-0">
+                        <AvatarImage src={isArtist ? project?.client_avatar : project?.artist_avatar} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                          {(isArtist ? project?.client_name : project?.artist_name)?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-[15px] font-semibold tracking-tight leading-none truncate">
+                          {isArtist ? project?.client_name : project?.artist_name}
+                        </h3>
+                        <p className="text-[11px] text-muted-foreground mt-1 truncate">{project?.title}</p>
                       </div>
-                      <div>
-                        <h3 className="text-[15px] font-semibold tracking-tight leading-none">Project Discussion</h3>
-                        <p className="text-[11px] text-muted-foreground mt-1">Direct communication for this project</p>
-                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onOpenChange(false)}
+                        className="h-9 w-9 rounded-full shrink-0"
+                        aria-label="Close"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                      </Button>
                     </div>
 
-                    <ScrollArea className="flex-1 px-4 sm:px-6 py-5" id="chat-scroll-area">
-                      <div className="space-y-1 pb-2">
+                    <ScrollArea className="flex-1 min-h-0 px-4 sm:px-6 py-4" id="chat-scroll-area">
+                      <div className="space-y-1 pb-2 max-w-3xl mx-auto w-full">
                         {rtMessages.length === 0 ? (
                           <div className="py-20 text-center space-y-3">
                             <div className="w-14 h-14 rounded-full bg-muted/30 flex items-center justify-center mx-auto">
@@ -1095,8 +1118,8 @@ const ProjectDetailModal = ({
                       </div>
                     </ScrollArea>
 
-                    <div className="p-3 sm:p-4 bg-white/70 dark:bg-card/60 backdrop-blur-xl border-t border-border/40 shrink-0 pb-safe">
-                      <div className="flex items-end gap-2">
+                    <div className="p-3 sm:p-4 bg-white/80 dark:bg-card/70 backdrop-blur-xl border-t border-border/40 shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                      <div className="flex items-end gap-2 max-w-3xl mx-auto w-full">
                         <Textarea
                           placeholder="iMessage"
                           value={newMessage}
@@ -1121,6 +1144,7 @@ const ProjectDetailModal = ({
                     </div>
                   </div>
                 </TabsContent>
+
               </div>
             </Tabs>
           </div>
