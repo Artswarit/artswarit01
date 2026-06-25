@@ -45,6 +45,21 @@ const Navbar = () => {
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
 
+  // Auto-close mobile menu on route change
+  React.useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
+
+  // Lock body scroll while mobile menu is open
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
   const handleLogoClick = (e: React.MouseEvent) => {
     window.scrollTo({
       top: 0,
@@ -184,18 +199,6 @@ const Navbar = () => {
         <div id="mobile-menu" className="lg:hidden absolute top-full left-0 right-0 p-4 animate-in fade-in slide-in-from-top-4 duration-300 z-50">
           <div className="bg-white/95 dark:bg-card/95 backdrop-blur-2xl rounded-[2rem] border border-muted/20 shadow-2xl overflow-y-auto max-h-[calc(100dvh-4rem-var(--safe-top)-var(--safe-bottom)-2rem)] sm:max-h-[calc(100dvh-5rem-var(--safe-top)-var(--safe-bottom)-2rem)]">
             <div className="p-4 space-y-2 pb-[var(--safe-bottom)]">
-              <div className="flex items-center justify-end mb-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Close menu"
-                  className="rounded-xl hover:bg-primary/5 text-primary"
-                  onClick={closeMenu}
-                >
-                  <X className="h-5 w-5" aria-hidden="true" />
-                </Button>
-              </div>
               {menuItems.map(item => (
                 <Link 
                   to={item.path} 
