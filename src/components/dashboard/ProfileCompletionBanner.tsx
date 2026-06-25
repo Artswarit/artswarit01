@@ -20,17 +20,11 @@ const ProfileCompletionBanner = () => {
     localStorage.setItem('artist_profile_banner_dismissed', 'true');
   };
 
-  // Auto-open wizard removed to avoid redundancy as requested by user
-  // User can still trigger it manually via the banner button
-  useEffect(() => {
-    // No-op
-  }, []);
-
-  // Smart disappearance logic: only show if not complete
-  // Removed persistent dismissal to ensure user completes profile as requested
-  if (loading || isComplete) {
+  // Hide while loading, when complete, or when user has dismissed the banner
+  if (loading || isComplete || isDismissed) {
     return null;
   }
+
 
   return (
     <>
@@ -53,16 +47,28 @@ const ProfileCompletionBanner = () => {
           </div>
           
           <div className="flex-1 space-y-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-black text-foreground text-xl sm:text-2xl tracking-tight">🎯 Get Started in 5 Minutes</h3>
               <span className="px-2 py-0.5 rounded-lg bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest leading-none">
                 {completionPercentage}% Done
               </span>
             </div>
-            
+
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-medium max-w-2xl">
               Verified profiles attract <span className="text-amber-600 font-bold">3x more projects</span>. Finish setting up your professional identity to get discovered.
             </p>
+
+            {missingFields.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <span className="text-[11px] font-semibold text-muted-foreground/80 uppercase tracking-wider mr-1 self-center">Missing:</span>
+                {missingFields.map((field) => (
+                  <span key={field} className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[11px] font-semibold">
+                    {field}
+                  </span>
+                ))}
+              </div>
+            )}
+
 
             <div className="mt-4 w-full max-w-md">
               <div className="bg-muted/30 rounded-full h-3 overflow-hidden border border-border/20 p-0.5">
