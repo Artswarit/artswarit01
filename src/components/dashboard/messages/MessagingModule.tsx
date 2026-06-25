@@ -298,8 +298,14 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-13rem)] sm:h-[calc(100vh-15rem)] min-h-[550px] max-h-[900px] bg-white dark:bg-card rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-muted/20 overflow-hidden animate-fade-in relative mx-auto w-full max-w-[1400px]">
+    <div className={cn(
+      "flex flex-col bg-white dark:bg-card overflow-hidden animate-fade-in relative mx-auto w-full",
+      activeConversationId
+        ? "fixed inset-0 z-[120] h-[100dvh] max-w-none rounded-none border-0 shadow-none lg:relative lg:inset-auto lg:z-auto lg:h-[calc(100vh-15rem)] lg:max-w-[1400px] lg:rounded-[2.5rem] lg:shadow-2xl lg:border lg:border-muted/20"
+        : "h-[calc(100vh-13rem)] sm:h-[calc(100vh-15rem)] min-h-[550px] max-h-[900px] rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-muted/20 max-w-[1400px]"
+    )}>
       <div className="flex flex-1 overflow-hidden relative">
+
         {/* Conversations Sidebar */}
         <aside className={cn(
           "w-full lg:w-96 border-r border-muted/20 flex flex-col bg-slate-50/30 dark:bg-card/30 transition-all duration-500 ease-in-out z-20",
@@ -632,9 +638,9 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
               </ScrollArea>
 
               {/* Message Input Area */}
-              <div className="p-4 sm:p-8 pb-safe bg-white dark:bg-card border-t border-muted/20 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] backdrop-blur-xl">
+              <div className="px-3 sm:px-6 py-2.5 sm:py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-white/95 dark:bg-card/95 border-t border-muted/20 backdrop-blur-xl shrink-0">
                 {pendingAttachments.length > 0 && (
-                  <div className="flex flex-wrap gap-3 mb-4 animate-in slide-in-from-bottom-2 duration-300">
+                  <div className="flex flex-wrap gap-2 mb-2 animate-in slide-in-from-bottom-2 duration-300">
                     {pendingAttachments.map((attachment, index) => (
                       <AttachmentPreview 
                         key={index}
@@ -644,9 +650,9 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                     ))}
                   </div>
                 )}
-                <div className="flex items-end gap-3 sm:gap-6">
-                  <div className="flex-1 relative group">
-                    <div className="absolute left-2 bottom-2 z-10">
+                <div className="flex items-end gap-2">
+                  <div className="flex-1 relative">
+                    <div className="absolute left-1.5 bottom-1.5 z-10">
                       <AttachmentInput 
                         onAttach={handleAttach}
                         disabled={loading}
@@ -658,7 +664,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                       onChange={(e) => {
                         setMessageInput(e.target.value);
                         e.target.style.height = 'auto';
-                        e.target.style.height = e.target.scrollHeight + 'px';
+                        e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px';
                         
                         // Typing indicator
                         if (activeConversationId) {
@@ -679,27 +685,21 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                           handleSendMessage();
                         }
                       }}
-                      placeholder="Type a message..."
-                      className="w-full bg-slate-50 dark:bg-background/50 border border-muted/30 focus:border-primary/50 focus:ring-4 focus:ring-primary/5 rounded-[1.5rem] sm:rounded-[2.5rem] py-4 sm:py-5 pl-14 sm:pl-16 pr-4 sm:pr-6 text-sm sm:text-base font-bold resize-none transition-all scrollbar-hide min-h-[56px] sm:min-h-[64px] max-h-[160px] sm:max-h-[240px] leading-tight"
+                      placeholder="Message"
+                      className="w-full bg-muted/40 dark:bg-background/40 border border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/20 rounded-[20px] py-2.5 pl-11 pr-4 text-[15px] leading-snug resize-none transition-all scrollbar-hide min-h-[40px] max-h-[140px]"
                     />
-
                   </div>
                   <Button
                     onClick={handleSendMessage}
                     disabled={(!messageInput.trim() && pendingAttachments.length === 0) || loading}
                     size="icon"
-                    className="h-16 w-16 sm:h-16 sm:w-16 rounded-[1.5rem] sm:rounded-[2.5rem] bg-primary hover:bg-primary/90 shadow-2xl shadow-primary/30 transition-all shrink-0 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:scale-95 flex items-center justify-center min-h-[48px]"
+                    className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 shadow-md shadow-primary/20 transition-all shrink-0 active:scale-90 disabled:opacity-40 disabled:scale-90"
                   >
-                    {loading ? <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin" /> : <Send className="h-6 w-6 sm:h-8 sm:w-8 -mr-1" />}
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
                 </div>
-                <div className="flex items-center justify-center gap-2.5 mt-4 opacity-50">
-                  <Clock className="h-3 w-3 text-muted-foreground" />
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground text-center font-black uppercase tracking-widest">
-                    Press Enter to send • Shift + Enter for new line
-                  </p>
-                </div>
               </div>
+
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center bg-slate-50/20 dark:bg-background/10">
