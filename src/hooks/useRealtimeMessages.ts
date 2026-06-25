@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -373,39 +373,37 @@ export const useRealtimeMessages = () => {
     }));
   }, [onlineUsers]);
 
-  // Set up real-time subscriptions
+  // Refs to avoid re-subscribing the realtime channel on every state change
+  const activeConvIdRef = useRef<string | null>(null);
+  const conversationsRef = useRef<Conversation[]>([]);
+  const fetchConversationsRef = useRef(fetchConversations);
+  const playSoundRef = useRef(playNotificationSound);
+
+  useEffect(() => { activeConvIdRef.current = activeConversationId; }, [activeConversationId]);
+  useEffect(() => { conversationsRef.current = conversations; }, [conversations]);
+  useEffect(() => { fetchConversationsRef.current = fetchConversations; }, [fetchConversations]);
+  useEffect(() => { playSoundRef.current = playNotificationSound; }, [playNotificationSound]);
+
+  // Set up real-time subscriptions — keyed only on user.id to prevent reconnection loops
   useEffect(() => {
     if (!user) return;
 
     const controller = new AbortController();
-    
-    fetchConversations(controller.signal);
+    fetchConversationsRef.current(controller.signal);
 
-    // Subscribe to messages changes (INSERT and UPDATE)
     const messagesChannel = supabase
-      .channel('realtime-messages-v2')
+      .channel(`realtime-messages-${user.id}`)
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages'
-        },
+        { event: '*', schema: 'public', table: 'messages' },
         (payload) => {
+          const activeId = activeConvIdRef.current;
           if (payload.eventType === 'INSERT') {
             const newMsg = payload.new as any;
-            
-            // Add to messages if it's in the active conversation
-            if (newMsg.conversation_id === activeConversationId) {
-              const conv = conversations.find(c => c.id === activeConversationId);
-              let clearedAt: string | null | undefined = null;
-              if (conv) {
-                clearedAt = conv.clientId === user.id ? conv.client_last_cleared_at : conv.artist_last_cleared_at;
-              }
-              
-              if (clearedAt && new Date(newMsg.created_at) <= new Date(clearedAt)) {
-                return;
-              }
+            if (newMsg.conversation_id === activeId) {
+              const conv = conversationsRef.current.find(c => c.id === activeId);
+              const clearedAt = conv ? (conv.clientId === user.id ? conv.client_last_cleared_at : conv.artist_last_cleared_at) : null;
+              if (clearedAt && new Date(newMsg.created_at) <= new Date(clearedAt)) return;
 
               const formattedMsg: Message = {
                 id: newMsg.id,
@@ -416,33 +414,18 @@ export const useRealtimeMessages = () => {
                 attachments: parseAttachments(newMsg.attachments),
                 status: newMsg.is_read ? 'read' : 'delivered'
               };
-              
               if (!controller.signal.aborted) {
-                setMessages(prev => {
-                  // Check if message already exists to avoid duplicates
-                  if (prev.some(m => m.id === formattedMsg.id)) return prev;
-                  return [...prev, formattedMsg];
-                });
+                setMessages(prev => prev.some(m => m.id === formattedMsg.id) ? prev : [...prev, formattedMsg]);
               }
-
-              // Mark as read if not from current user
               if (newMsg.sender_id !== user.id) {
-                supabase
-                  .from('messages')
-                  .update({ is_read: true })
-                  .eq('id', newMsg.id)
-                  .abortSignal(controller.signal);
+                supabase.from('messages').update({ is_read: true }).eq('id', newMsg.id);
               }
             }
-
-            // Play sound for new messages from others
-            if (newMsg.sender_id !== user.id) {
-              playNotificationSound();
-            }
+            if (newMsg.sender_id !== user.id) playSoundRef.current();
           } else if (payload.eventType === 'UPDATE') {
             const updatedMsg = payload.new as any;
-            if (updatedMsg.conversation_id === activeConversationId && !controller.signal.aborted) {
-              setMessages(prev => prev.map(m => 
+            if (updatedMsg.conversation_id === activeId && !controller.signal.aborted) {
+              setMessages(prev => prev.map(m =>
                 m.id === updatedMsg.id ? { ...m, read: updatedMsg.is_read, status: updatedMsg.is_read ? 'read' : 'delivered' } : m
               ));
             }
@@ -452,28 +435,21 @@ export const useRealtimeMessages = () => {
               setMessages(prev => prev.filter(m => m.id !== deletedMsg.id));
             }
           }
-
-          // Update conversation list
           if (!controller.signal.aborted) {
-            fetchConversations(controller.signal);
+            fetchConversationsRef.current(controller.signal);
           }
         }
       )
       .subscribe();
 
-    // Subscribe to conversation updates
     const conversationsChannel = supabase
-      .channel('realtime-conversations')
+      .channel(`realtime-conversations-${user.id}`)
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'conversations'
-        },
+        { event: '*', schema: 'public', table: 'conversations' },
         () => {
           if (!controller.signal.aborted) {
-            fetchConversations(controller.signal);
+            fetchConversationsRef.current(controller.signal);
           }
         }
       )
@@ -484,7 +460,7 @@ export const useRealtimeMessages = () => {
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(conversationsChannel);
     };
-  }, [user, activeConversationId, fetchConversations, conversations, playNotificationSound]);
+  }, [user]);
 
   // Handle active conversation change
   useEffect(() => {
