@@ -1232,19 +1232,21 @@ const ClientDashboard = () => {
       
       {/* Create Project Dialog */}
       <Dialog open={createProjectOpen} onOpenChange={setCreateProjectOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>Fill in the details to create a new project.</DialogDescription>
+        <DialogContent className="p-0 gap-0 w-screen h-[100dvh] max-w-none sm:max-w-4xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl rounded-none border-0 sm:border flex flex-col overflow-hidden">
+          <DialogHeader className="px-5 py-4 border-b bg-background/95 backdrop-blur-xl shrink-0">
+            <DialogTitle className="text-lg sm:text-xl">Create New Project</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">Fill in the details to create a new project.</DialogDescription>
           </DialogHeader>
-          <CreateProjectForm 
-            onSuccess={() => {
-              setCreateProjectOpen(false);
-              fetchProjects();
-              toast.success("Project created successfully!");
-            }}
-            onCancel={() => setCreateProjectOpen(false)}
-          />
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            <CreateProjectForm 
+              onSuccess={() => {
+                setCreateProjectOpen(false);
+                fetchProjects();
+                toast.success("Project created successfully!");
+              }}
+              onCancel={() => setCreateProjectOpen(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
       <ArtistSelectionModal 

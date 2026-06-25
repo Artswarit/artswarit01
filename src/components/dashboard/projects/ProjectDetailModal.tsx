@@ -1121,7 +1121,7 @@ const ProjectDetailModal = ({
                     <div className="p-3 sm:p-4 bg-white/80 dark:bg-card/70 backdrop-blur-xl border-t border-border/40 shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
                       <div className="flex items-end gap-2 max-w-3xl mx-auto w-full">
                         <Textarea
-                          placeholder="iMessage"
+                          placeholder="Message"
                           value={newMessage}
                           onChange={e => setNewMessage(e.target.value)}
                           className="min-h-[40px] max-h-[140px] resize-none rounded-[20px] bg-muted/40 dark:bg-background/40 border border-border/40 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/40 px-4 py-2.5 text-[15px] leading-snug transition-all ease-apple"
