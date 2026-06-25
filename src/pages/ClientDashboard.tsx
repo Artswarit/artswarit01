@@ -1079,7 +1079,7 @@ const ClientDashboard = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-10 px-8 rounded-xl font-black text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5"
+                            className="h-10 px-8 rounded-xl font-medium text-sm border-border/40 hover:bg-primary/5 text-muted-foreground hover:text-primary"
                             onClick={() => setVisibleActive(v => v + PROJECTS_PER_PAGE)}
                           >
                             Load More · {Math.min(PROJECTS_PER_PAGE, searchedActiveProjects.length - visibleActive)} of {searchedActiveProjects.length - visibleActive} remaining
@@ -1147,7 +1147,7 @@ const ClientDashboard = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-10 px-8 rounded-xl font-black text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5"
+                            className="h-10 px-8 rounded-xl font-medium text-sm border-border/40 hover:bg-primary/5 text-muted-foreground hover:text-primary"
                             onClick={() => setVisibleCompleted(v => v + PROJECTS_PER_PAGE)}
                           >
                             Load More · {Math.min(PROJECTS_PER_PAGE, searchedCompletedProjects.length - visibleCompleted)} of {searchedCompletedProjects.length - visibleCompleted} remaining

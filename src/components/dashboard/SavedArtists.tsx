@@ -291,7 +291,7 @@ const SavedArtists = () => {
             <div className="flex justify-center pt-4">
               <Button
                 variant="outline"
-                className="h-12 px-10 rounded-2xl font-black text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all"
+                className="h-12 px-10 rounded-2xl font-medium text-sm border-border/40 hover:bg-primary/5 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
                 onClick={() => setVisibleCount(c => c + ITEMS_PER_PAGE)}
               >
                 Load More · {Math.min(ITEMS_PER_PAGE, savedArtists.length - visibleCount)} of {savedArtists.length - visibleCount} remaining
