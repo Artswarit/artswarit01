@@ -2532,67 +2532,112 @@ export type Database = {
         Row: {
           account_status: string | null
           avatar_url: string | null
+          avg_response_hours: number | null
           bio: string | null
+          city: string | null
+          country: string | null
           cover_url: string | null
           created_at: string | null
+          currency: string | null
+          email: string | null
+          email_notifications: boolean | null
           experience_years: number | null
           full_name: string | null
           hourly_rate: number | null
           id: string | null
+          in_app_notifications: boolean | null
+          is_on_vacation: boolean | null
           is_verified: boolean | null
+          language: string | null
           last_active_at: string | null
           location: string | null
+          message_notifications: boolean | null
           portfolio_url: string | null
           profile_visibility: boolean | null
+          project_update_notifications: boolean | null
+          recovery_codes_hash: string | null
+          recovery_phone: string | null
           role: string | null
           show_activity_stats: boolean | null
           show_last_active: boolean | null
           social_links: Json | null
           tags: string[] | null
+          timezone: string | null
+          updated_at: string | null
           website: string | null
         }
         Insert: {
           account_status?: string | null
           avatar_url?: string | null
+          avg_response_hours?: number | null
           bio?: string | null
+          city?: string | null
+          country?: string | null
           cover_url?: string | null
           created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          email_notifications?: boolean | null
           experience_years?: number | null
           full_name?: string | null
           hourly_rate?: number | null
           id?: string | null
+          in_app_notifications?: boolean | null
+          is_on_vacation?: boolean | null
           is_verified?: boolean | null
+          language?: string | null
           last_active_at?: string | null
           location?: string | null
+          message_notifications?: boolean | null
           portfolio_url?: string | null
           profile_visibility?: boolean | null
+          project_update_notifications?: boolean | null
+          recovery_codes_hash?: string | null
+          recovery_phone?: string | null
           role?: string | null
           show_activity_stats?: boolean | null
           show_last_active?: boolean | null
           social_links?: Json | null
           tags?: string[] | null
+          timezone?: string | null
+          updated_at?: string | null
           website?: string | null
         }
         Update: {
           account_status?: string | null
           avatar_url?: string | null
+          avg_response_hours?: number | null
           bio?: string | null
+          city?: string | null
+          country?: string | null
           cover_url?: string | null
           created_at?: string | null
+          currency?: string | null
+          email?: string | null
+          email_notifications?: boolean | null
           experience_years?: number | null
           full_name?: string | null
           hourly_rate?: number | null
           id?: string | null
+          in_app_notifications?: boolean | null
+          is_on_vacation?: boolean | null
           is_verified?: boolean | null
+          language?: string | null
           last_active_at?: string | null
           location?: string | null
+          message_notifications?: boolean | null
           portfolio_url?: string | null
           profile_visibility?: boolean | null
+          project_update_notifications?: boolean | null
+          recovery_codes_hash?: string | null
+          recovery_phone?: string | null
           role?: string | null
           show_activity_stats?: boolean | null
           show_last_active?: boolean | null
           social_links?: Json | null
           tags?: string[] | null
+          timezone?: string | null
+          updated_at?: string | null
           website?: string | null
         }
         Relationships: []
@@ -2602,6 +2647,7 @@ export type Database = {
           bio: string | null
           cover_photo_url: string | null
           created_at: string | null
+          email: string | null
           id: string | null
           name: string | null
           profile_pic_url: string | null
@@ -2613,6 +2659,7 @@ export type Database = {
           bio?: string | null
           cover_photo_url?: string | null
           created_at?: string | null
+          email?: string | null
           id?: string | null
           name?: string | null
           profile_pic_url?: string | null
@@ -2624,6 +2671,7 @@ export type Database = {
           bio?: string | null
           cover_photo_url?: string | null
           created_at?: string | null
+          email?: string | null
           id?: string | null
           name?: string | null
           profile_pic_url?: string | null
@@ -2635,6 +2683,7 @@ export type Database = {
       }
     }
     Functions: {
+      delete_user_account: { Args: never; Returns: undefined }
       get_artist_dashboard_stats: {
         Args: { artist_uuid: string }
         Returns: Json
