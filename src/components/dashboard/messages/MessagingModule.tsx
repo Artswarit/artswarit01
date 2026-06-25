@@ -550,67 +550,82 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                     <>
                       {filteredMessages.map((msg, idx) => {
                         const isOwn = msg.senderId === user?.id;
+                        const prev = filteredMessages[idx - 1];
+                        const next = filteredMessages[idx + 1];
+                        const prevSame = prev && prev.senderId === msg.senderId && prev.timestamp &&
+                          msg.timestamp && (msg.timestamp.getTime() - prev.timestamp.getTime() < 5 * 60 * 1000);
+                        const nextSame = next && next.senderId === msg.senderId && next.timestamp &&
+                          msg.timestamp && (next.timestamp.getTime() - msg.timestamp.getTime() < 5 * 60 * 1000);
+                        const showDay = msg.timestamp && (!prev?.timestamp || prev.timestamp.toDateString() !== msg.timestamp.toDateString());
+
                         return (
-                          <div 
-                            key={msg.id}
-                            className={cn(
-                              "flex group animate-fade-in",
-                              isOwn ? "justify-end" : "justify-start"
-                            )}
-                            style={{ animationDelay: `${idx * 25}ms` }}
-                          >
-                            <div className={cn(
-                              "flex flex-col max-w-[90%] sm:max-w-[75%]",
-                              isOwn ? "items-end" : "items-start"
-                            )}>
-                              <div className={cn(
-                                "relative px-5 py-3.5 sm:px-7 sm:py-4 rounded-[1.5rem] sm:rounded-[2rem] text-sm sm:text-base leading-relaxed shadow-sm transition-all duration-300 group-hover:shadow-md",
-                                isOwn 
-                                  ? "bg-primary text-primary-foreground rounded-tr-none shadow-primary/20 font-medium" 
-                                  : "bg-white dark:bg-card text-foreground rounded-tl-none border border-muted/20 shadow-black/5 font-medium"
-                              )}>
-                                <span>{msg.text}</span>
-                                {msg.attachments && msg.attachments.length > 0 && (
-                                  <AttachmentDisplay 
-                                    attachments={msg.attachments} 
-                                    isOwnMessage={isOwn} 
-                                  />
-                                )}
-                              </div>
-                              <div className="flex items-center gap-2.5 mt-2 px-2">
-                                <span className="text-[10px] sm:text-[11px] text-muted-foreground/60 font-black uppercase tracking-widest">
-                                  {formatMessageTime(msg.timestamp)}
+                          <React.Fragment key={msg.id}>
+                            {showDay && (
+                              <div className="flex justify-center py-2">
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 bg-muted/40 px-3 py-1 rounded-full">
+                                  {msg.timestamp?.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
                                 </span>
-                                {isOwn && (
-                                  <span className={cn(
-                                    "transition-colors",
-                                    msg.status === 'read' ? "text-primary" : 
-                                    msg.status === 'failed' ? "text-destructive" : "text-muted-foreground/40",
-                                    msg.status === 'sending' ? "animate-pulse" : ""
-                                  )}>
-                                    {msg.status === 'read' ? <CheckCheck className="h-4 w-4" /> : 
-                                     msg.status === 'delivered' ? <CheckCheck className="h-4 w-4" /> : 
-                                     msg.status === 'failed' ? <X className="h-4 w-4" /> : 
-                                     <Check className="h-4 w-4" />}
-                                  </span>
+                              </div>
+                            )}
+                            <div className={cn("flex group", isOwn ? "justify-end" : "justify-start", prevSame ? "mt-0.5" : "mt-2")}>
+                              <div className={cn("flex flex-col max-w-[80%] sm:max-w-[68%]", isOwn ? "items-end" : "items-start")}>
+                                <div
+                                  className={cn(
+                                    "bubble-in px-3.5 py-2 text-[15px] leading-snug",
+                                    isOwn
+                                      ? "bubble-in-right bg-primary text-primary-foreground"
+                                      : "bg-white dark:bg-card text-foreground border border-muted/30"
+                                  )}
+                                  style={{
+                                    borderRadius: 20,
+                                    borderBottomRightRadius: isOwn && nextSame ? 6 : 20,
+                                    borderTopRightRadius: isOwn && prevSame ? 6 : 20,
+                                    borderBottomLeftRadius: !isOwn && nextSame ? 6 : 20,
+                                    borderTopLeftRadius: !isOwn && prevSame ? 6 : 20,
+                                  }}
+                                >
+                                  <span className="whitespace-pre-wrap break-words">{msg.text}</span>
+                                  {msg.attachments && msg.attachments.length > 0 && (
+                                    <AttachmentDisplay attachments={msg.attachments} isOwnMessage={isOwn} />
+                                  )}
+                                </div>
+                                {!nextSame && (
+                                  <div className="flex items-center gap-1.5 mt-1 px-1">
+                                    <span className="text-[10px] text-muted-foreground/60">
+                                      {formatMessageTime(msg.timestamp)}
+                                    </span>
+                                    {isOwn && (
+                                      <span className={cn(
+                                        "transition-colors",
+                                        msg.status === 'read' ? "text-primary" :
+                                        msg.status === 'failed' ? "text-destructive" : "text-muted-foreground/40",
+                                        msg.status === 'sending' ? "animate-pulse" : ""
+                                      )}>
+                                        {msg.status === 'read' ? <CheckCheck className="h-3 w-3" /> :
+                                         msg.status === 'delivered' ? <CheckCheck className="h-3 w-3" /> :
+                                         msg.status === 'failed' ? <X className="h-3 w-3" /> :
+                                         <Check className="h-3 w-3" />}
+                                      </span>
+                                    )}
+                                  </div>
                                 )}
                               </div>
                             </div>
-                          </div>
+                          </React.Fragment>
                         );
                       })}
-                      
+
                       {activeConversationId && Array.from(typingUsers).some(key => key.startsWith(`${activeConversationId}:`)) && (
-                        <div className="flex group animate-fade-in justify-start mt-2 mb-2">
-                          <div className="bg-white dark:bg-card border border-muted/20 shadow-sm rounded-[2rem] px-5 py-4 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <div className="flex justify-start mt-2">
+                          <div className="bg-white dark:bg-card border border-muted/30 rounded-[20px] px-4 py-2.5 flex items-center gap-1 bubble-in">
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
+                            <span className="typing-dot" />
                           </div>
                         </div>
                       )}
 
-                      <div className="h-4" />
+                      <div className="h-2" />
                     </>
                   )}
                 </div>
