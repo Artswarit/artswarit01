@@ -28,6 +28,18 @@ html, body {
   .tap-scale { transition: transform 150ms var(--ease-apple); }
   .tap-scale:active { transform: scale(0.97); }
   .pb-safe { padding-bottom: var(--safe-bottom); }
+
+  /* Shimmer for skeleton loaders */
+  .skeleton-shimmer { position: relative; overflow: hidden; }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.06), transparent);
+    animation: shimmer 1.6s var(--ease-apple) infinite;
+  }
+  @keyframes shimmer { 100% { transform: translateX(100%); } }
 }
 
 
