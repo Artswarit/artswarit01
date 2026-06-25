@@ -77,6 +77,7 @@ const ClientDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTabFromUrl = searchParams.get('tab') || 'overview';
   const [selectedTab, setSelectedTab] = useState(currentTabFromUrl);
+  const [isChatActive, setIsChatActive] = useState(false);
   const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(['overview', currentTabFromUrl]));
 
   // Sync visitedTabs with selectedTab to ensure content is rendered
@@ -617,12 +618,14 @@ const ClientDashboard = () => {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-32 sm:pb-12 pt-[calc(6.5rem+var(--safe-top))] sm:pt-[calc(8rem+var(--safe-top))] lg:pt-[calc(9rem+var(--safe-top))]">
         {/* Dashboard Header */}
-        <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
-          <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black mb-1 sm:mb-2">Client Dashboard</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
-            Welcome back, <span className="font-black text-foreground">{userName}</span>! Manage your projects and discover new artists.
-          </p>
-        </div>
+        {selectedTab === 'overview' && (
+          <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
+            <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black mb-1 sm:mb-2">Client Dashboard</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
+              Welcome back, <span className="font-black text-foreground">{userName}</span>! Manage your projects and discover new artists.
+            </p>
+          </div>
+        )}
 
         {/* Dashboard Navigation - Optimized for all screens */}
         <Tabs value={selectedTab} className="mb-4 sm:mb-6 lg:mb-8" onValueChange={handleTabChange}>
@@ -1281,12 +1284,14 @@ const ClientDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <DashboardMobileNav 
-        activeTab={selectedTab} 
-        onTabChange={handleTabChange} 
-        role="client"
-        isLocked={profileIncomplete}
-      />
+      {!(selectedTab === 'messages' && isChatActive) && (
+        <DashboardMobileNav 
+          activeTab={selectedTab} 
+          onTabChange={handleTabChange} 
+          role="client"
+          isLocked={profileIncomplete}
+        />
+      )}
     </div>
   );
 };
