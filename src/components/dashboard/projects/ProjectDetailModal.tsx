@@ -1011,86 +1011,112 @@ const ProjectDetailModal = ({
                 </TabsContent>
 
                 <TabsContent id="project-tab-content-communication" value="communication" className="mt-0 outline-none focus-visible:ring-0">
-                  <div className="rounded-[2.5rem] border border-border/40 bg-white/40 dark:bg-card/20 overflow-hidden flex flex-col shadow-sm transition-all duration-500 hover:shadow-md h-[650px]">
-                    <div className="p-4 sm:p-5 border-b border-border/40 bg-muted/5 flex items-center gap-3 shrink-0">
+                  <div className="rounded-[2rem] border border-border/40 bg-white dark:bg-card/40 overflow-hidden flex flex-col shadow-sm h-[650px]">
+                    <div className="px-5 py-4 border-b border-border/40 bg-white/70 dark:bg-card/60 backdrop-blur-xl flex items-center gap-3 shrink-0">
                       <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600">
-                        <MessageSquare className="h-5 w-5" />
+                        <MessageSquare className="h-4 w-4" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold tracking-tight">Project Discussion</h3>
-                        <p className="text-[11px] text-muted-foreground">Direct communication for this project.</p>
+                        <h3 className="text-[15px] font-semibold tracking-tight leading-none">Project Discussion</h3>
+                        <p className="text-[11px] text-muted-foreground mt-1">Direct communication for this project</p>
                       </div>
                     </div>
 
-                    <ScrollArea className="flex-1 p-4 sm:p-5 h-full" id="chat-scroll-area">
-                      <div className="space-y-6 pb-4">
+                    <ScrollArea className="flex-1 px-4 sm:px-6 py-5" id="chat-scroll-area">
+                      <div className="space-y-1 pb-2">
                         {rtMessages.length === 0 ? (
-                          <div className="py-20 text-center space-y-4">
-                            <div className="w-16 h-16 rounded-full bg-muted/20 flex items-center justify-center mx-auto">
-                              <MessageSquare className="h-8 w-8 text-muted-foreground/30" />
+                          <div className="py-20 text-center space-y-3">
+                            <div className="w-14 h-14 rounded-full bg-muted/30 flex items-center justify-center mx-auto">
+                              <MessageSquare className="h-7 w-7 text-muted-foreground/40" />
                             </div>
-                            <p className="text-muted-foreground font-medium max-w-[200px] mx-auto">No messages yet. Send a quick update to get started!</p>
+                            <p className="text-sm text-muted-foreground max-w-[220px] mx-auto">No messages yet. Send a quick update to get started.</p>
                           </div>
                         ) : (
-                          rtMessages.map(msg => {
+                          rtMessages.map((msg, idx) => {
                             const isMe = msg.senderId === user?.id;
                             const isArtistMsg = msg.senderId === project?.artist_id;
-                            
                             const senderName = isArtistMsg ? project?.artist_name : project?.client_name;
                             const senderAvatar = isArtistMsg ? project?.artist_avatar : project?.client_avatar;
-                            
+
+                            const prev = rtMessages[idx - 1];
+                            const next = rtMessages[idx + 1];
+                            const prevSame = prev && prev.senderId === msg.senderId &&
+                              (msg.timestamp.getTime() - prev.timestamp.getTime() < 5 * 60 * 1000);
+                            const nextSame = next && next.senderId === msg.senderId &&
+                              (next.timestamp.getTime() - msg.timestamp.getTime() < 5 * 60 * 1000);
+                            const showDay = !prev || prev.timestamp.toDateString() !== msg.timestamp.toDateString();
+
                             return (
-                              <div key={msg.id} className={`flex gap-4 group ${isMe ? 'flex-row-reverse' : ''}`}>
-                                <Avatar className="h-10 w-10 ring-2 ring-background shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform">
-                                  <AvatarImage src={senderAvatar || ''} />
-                                  <AvatarFallback className="bg-primary/10 text-primary font-bold">{senderName?.charAt(0) || 'U'}</AvatarFallback>
-                                </Avatar>
-                                
-                                <div className={`flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
-                                  <div className="flex items-baseline gap-2 mb-1.5 px-1">
-                                    <span className="text-[11px] font-bold tracking-tight text-foreground/80">{senderName}</span>
-                                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                                      {formatDate(msg.timestamp, 'MMM d, h:mm a')}
+                              <React.Fragment key={msg.id}>
+                                {showDay && (
+                                  <div className="flex justify-center py-3">
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 bg-muted/40 px-3 py-1 rounded-full">
+                                      {formatDate(msg.timestamp, 'EEEE, MMM d')}
                                     </span>
                                   </div>
-                                  <div className={`px-5 py-3 rounded-[1.5rem] text-sm shadow-sm font-medium ${isMe ? 'bg-primary text-primary-foreground rounded-tr-none shadow-primary/20' : 'bg-white dark:bg-card border border-border/50 rounded-tl-none'} transition-all group-hover:shadow-md`}>
-                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+                                )}
+                                <div className={`flex gap-2 items-end ${isMe ? 'flex-row-reverse' : ''} ${prevSame ? 'mt-0.5' : 'mt-3'}`}>
+                                  <div className="w-7 shrink-0">
+                                    {!nextSame && (
+                                      <Avatar className="h-7 w-7">
+                                        <AvatarImage src={senderAvatar || ''} />
+                                        <AvatarFallback className="bg-primary/10 text-primary text-[11px] font-semibold">{senderName?.charAt(0) || 'U'}</AvatarFallback>
+                                      </Avatar>
+                                    )}
+                                  </div>
+                                  <div className={`flex flex-col max-w-[78%] ${isMe ? 'items-end' : 'items-start'}`}>
+                                    <div
+                                      className={`bubble-in ${isMe ? 'bubble-in-right' : ''} px-3.5 py-2 text-[15px] leading-snug ${
+                                        isMe
+                                          ? 'bg-primary text-primary-foreground'
+                                          : 'bg-muted/60 dark:bg-card border border-border/40 text-foreground'
+                                      }`}
+                                      style={{
+                                        borderRadius: 18,
+                                        borderBottomRightRadius: isMe && nextSame ? 6 : 18,
+                                        borderTopRightRadius: isMe && prevSame ? 6 : 18,
+                                        borderBottomLeftRadius: !isMe && nextSame ? 6 : 18,
+                                        borderTopLeftRadius: !isMe && prevSame ? 6 : 18,
+                                      }}
+                                    >
+                                      <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                                    </div>
+                                    {!nextSame && (
+                                      <span className="text-[10px] text-muted-foreground/60 mt-1 px-1">
+                                        {formatDate(msg.timestamp, 'h:mm a')}
+                                      </span>
+                                    )}
                                   </div>
                                 </div>
-                              </div>
+                              </React.Fragment>
                             );
                           })
                         )}
-                        <div className="h-2" />
                       </div>
                     </ScrollArea>
 
-                    <div className="p-4 sm:p-5 bg-muted/5 border-t border-border/40 shrink-0">
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="relative flex-1 group">
-                          <Textarea 
-                            placeholder="Type your update or question here..." 
-                            value={newMessage} 
-                            onChange={e => setNewMessage(e.target.value)} 
-                            className="min-h-[44px] sm:min-h-[50px] resize-none rounded-2xl bg-white dark:bg-card border-border/40 focus:ring-primary/10 focus:border-primary/30 p-3.5 text-sm transition-all shadow-inner hover:border-primary/30" 
-                            onKeyDown={e => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSendMessage();
-                              }
-                            }} 
-                          />
-                        </div>
-                        <div className="flex sm:flex-col justify-end gap-3">
-                          <Button 
-                            onClick={handleSendMessage} 
-                            disabled={sendingMessage || !newMessage.trim()}
-                            className="flex-1 sm:flex-none h-12 sm:w-12 rounded-xl bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all active:scale-95 group"
-                            size="icon"
-                          >
-                            {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-5 w-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />}
-                          </Button>
-                        </div>
+                    <div className="p-3 sm:p-4 bg-white/70 dark:bg-card/60 backdrop-blur-xl border-t border-border/40 shrink-0 pb-safe">
+                      <div className="flex items-end gap-2">
+                        <Textarea
+                          placeholder="iMessage"
+                          value={newMessage}
+                          onChange={e => setNewMessage(e.target.value)}
+                          className="min-h-[40px] max-h-[140px] resize-none rounded-[20px] bg-muted/40 dark:bg-background/40 border border-border/40 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/40 px-4 py-2.5 text-[15px] leading-snug transition-all ease-apple"
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSendMessage();
+                            }
+                          }}
+                        />
+                        <Button
+                          onClick={handleSendMessage}
+                          disabled={sendingMessage || !newMessage.trim()}
+                          className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 shadow-md shadow-primary/20 transition-all ease-apple active:scale-90 disabled:opacity-40 disabled:scale-90 shrink-0"
+                          size="icon"
+                        >
+                          {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
+                        </Button>
                       </div>
                     </div>
                   </div>
