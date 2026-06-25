@@ -93,27 +93,29 @@ const TermsOfService = () => {
               <div className="space-y-4 text-sm text-muted-foreground leading-relaxed pl-8">
                 <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30">
                   <p className="font-bold text-foreground text-base mb-2">Fee Structure:</p>
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-emerald-200 dark:border-emerald-800/30">
-                        <th className="py-2 text-left font-bold">Plan</th>
-                        <th className="py-2 text-left font-bold">Platform Fee</th>
-                        <th className="py-2 text-left font-bold">Artist Receives</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b border-emerald-100 dark:border-emerald-800/20">
-                        <td className="py-2">Free Artist</td>
-                        <td className="py-2 font-bold text-amber-600">15%</td>
-                        <td className="py-2">85% of milestone amount</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2">Pro Artist (₹499/month)</td>
-                        <td className="py-2 font-bold text-emerald-600">0%</td>
-                        <td className="py-2">100% of milestone amount</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div className="overflow-x-auto -mx-2 px-2">
+                    <table className="w-full text-sm min-w-[420px]">
+                      <thead>
+                        <tr className="border-b border-emerald-200 dark:border-emerald-800/30">
+                          <th className="py-2 text-left font-bold">Plan</th>
+                          <th className="py-2 text-left font-bold">Platform Fee</th>
+                          <th className="py-2 text-left font-bold">Artist Receives</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-emerald-100 dark:border-emerald-800/20">
+                          <td className="py-2">Free Artist</td>
+                          <td className="py-2 font-bold text-amber-600">15%</td>
+                          <td className="py-2">85% of milestone amount</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2">Pro Artist (₹499/month)</td>
+                          <td className="py-2 font-bold text-emerald-600">0%</td>
+                          <td className="py-2">100% of milestone amount</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>The Platform Fee is deducted <strong>at the point of artist payout</strong>, not at the point of client payment.</li>
