@@ -617,7 +617,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
               </ScrollArea>
 
               {/* Message Input Area */}
-              <div className="p-4 sm:p-8 bg-white dark:bg-card border-t border-muted/20 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] backdrop-blur-xl">
+              <div className="p-4 sm:p-8 pb-safe bg-white dark:bg-card border-t border-muted/20 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] backdrop-blur-xl">
                 {pendingAttachments.length > 0 && (
                   <div className="flex flex-wrap gap-3 mb-4 animate-in slide-in-from-bottom-2 duration-300">
                     {pendingAttachments.map((attachment, index) => (
