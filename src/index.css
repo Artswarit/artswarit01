@@ -40,6 +40,31 @@ html, body {
     animation: shimmer 1.6s var(--ease-apple) infinite;
   }
   @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+  /* iMessage-style bubble pop-in */
+  .bubble-in {
+    animation: bubble-in 320ms var(--ease-apple) both;
+    transform-origin: var(--bubble-origin, bottom left);
+  }
+  .bubble-in-right { --bubble-origin: bottom right; }
+  @keyframes bubble-in {
+    0% { opacity: 0; transform: scale(0.86) translateY(6px); }
+    60% { opacity: 1; }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* Typing dots */
+  .typing-dot {
+    width: 6px; height: 6px; border-radius: 9999px;
+    background: hsl(var(--muted-foreground) / 0.55);
+    animation: typing-bounce 1.2s var(--ease-apple) infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typing-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.55; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
 }
 
 
