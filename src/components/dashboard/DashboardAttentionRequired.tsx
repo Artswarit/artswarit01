@@ -37,16 +37,20 @@ const DashboardAttentionRequired = ({ role, profile, onAction }: DashboardAttent
 
       // 1. Profile Completion (Low/Medium severity)
       if (!completion.isComplete) {
+        const missingHint = completion.missingFields.length > 0
+          ? `Missing: ${completion.missingFields.join(', ')}.`
+          : 'Verified profiles get 3x more views.';
         attentionItems.push({
           id: 'profile-completion',
           type: 'profile',
           title: 'Complete Your Profile',
-          description: `You're ${completion.completionPercentage}% there! Verified profiles get 3x more views.`,
+          description: `You're ${completion.completionPercentage}% there! ${missingHint}`,
           actionLabel: 'Finish Setup',
-          actionTab: role === 'artist' ? 'account' : 'account', // Account tab for both now
+          actionTab: role === 'artist' ? 'account' : 'account',
           severity: 'medium'
         });
       }
+
 
       // 2. Unread Messages (High severity)
       // First get conversations where user is a participant
