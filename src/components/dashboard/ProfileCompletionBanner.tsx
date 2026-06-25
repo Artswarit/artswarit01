@@ -20,17 +20,11 @@ const ProfileCompletionBanner = () => {
     localStorage.setItem('artist_profile_banner_dismissed', 'true');
   };
 
-  // Auto-open wizard removed to avoid redundancy as requested by user
-  // User can still trigger it manually via the banner button
-  useEffect(() => {
-    // No-op
-  }, []);
-
-  // Smart disappearance logic: only show if not complete
-  // Removed persistent dismissal to ensure user completes profile as requested
-  if (loading || isComplete) {
+  // Hide while loading, when complete, or when user has dismissed the banner
+  if (loading || isComplete || isDismissed) {
     return null;
   }
+
 
   return (
     <>
