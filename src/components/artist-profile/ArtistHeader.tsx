@@ -93,7 +93,7 @@ const ArtistHeader: React.FC<Props> = ({
           src={getOptimizedImageUrl(artist.cover, ImagePresets.PROFILE_COVER)}
           alt=""
           loading="eager"
-          fetchPriority="high"
+          {...({ fetchPriority: "high" } as { fetchPriority?: "high" | "low" | "auto" })}
           className="w-full h-full object-cover object-center scale-105 blur-sm opacity-70 transition-all duration-300"
           style={{ filter: "blur(5px)" }}
         />

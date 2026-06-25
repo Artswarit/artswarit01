@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -93,11 +94,11 @@ const SignupForm = ({
         </div>
         <div>
           <Label htmlFor="password" className="text-sm sm:text-base">Password</Label>
-          <Input id="password" name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required className="mt-1 h-11 sm:h-10 text-base" disabled={loading} />
+          <PasswordInput id="password" name="password" placeholder="••••••••" value={formData.password} onChange={handleChange} required className="mt-1 text-base" disabled={loading} autoComplete="new-password" />
         </div>
         <div>
           <Label htmlFor="confirmPassword" className="text-sm sm:text-base">Confirm password</Label>
-          <Input id="confirmPassword" name="confirmPassword" type="password" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} required className="mt-1 h-11 sm:h-10 text-base" disabled={loading} />
+          <PasswordInput id="confirmPassword" name="confirmPassword" placeholder="••••••••" value={formData.confirmPassword} onChange={handleChange} required className="mt-1 text-base" disabled={loading} autoComplete="new-password" />
         </div>
         <div>
           <div className="mb-3">
