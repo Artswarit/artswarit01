@@ -528,7 +528,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                 className="flex-1 bg-slate-50/30 dark:bg-background/20"
                 viewportRef={messagesViewportRef}
               >
-                <div className="p-5 sm:p-10 space-y-6 sm:space-y-10">
+                <div className="p-4 sm:p-8 space-y-0.5">
                   {filteredMessages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 space-y-6 sm:space-y-8 text-center">
                       <div className="relative">
