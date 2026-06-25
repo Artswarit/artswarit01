@@ -1,60 +1,89 @@
+# Audit & Minimal Apple-Style Polish Plan
 
-## Goal
-Run a full UI/UX self-audit across the entire app and fix bugs, inconsistencies, and broken behaviors — without altering the color palette, fonts, or overall layout/design direction.
+Goal: Fix backend/logic gaps in the chat flow, then apply minimum, non-redesign polish (motion, spacing, consistency, micro-interactions) across all pages and dashboards so it feels closer to Apple/iOS quality. No layout or color/palette changes.
 
-## Approach
-I'll do this in passes, each touching a focused concern across all pages/components so the diff stays reviewable. After each pass I verify via build + Playwright screenshots at 320 / 768 / 1280 widths.
+---
 
-### Pass 1 — Global primitives (foundation)
-Normalize the shared building blocks so downstream fixes propagate automatically.
-- `src/components/ui/button.tsx` — single source of truth for height, radius, padding, font-weight, hover/active/disabled, and `loading` prop (spinner + auto-disabled).
-- `src/components/ui/input.tsx`, `textarea.tsx`, `select.tsx` — uniform height (h-11 mobile / h-10 desktop), radius, border, focus ring, error state.
-- New `PasswordInput` wrapper with show/hide toggle; replace raw `<Input type="password">` usages.
-- Tailwind/`index.css` tokens: standardize `--radius`, shadow scale (sm/md/lg/xl), spacing scale — no color changes.
+## Phase 1 — Chat backend & logic audit (fix blockers first)
 
-### Pass 2 — Responsiveness sweep (320 / 768 / 1280)
-For every page in `src/pages/*` and every dashboard view:
-- Replace fixed widths/`min-w-[…px]` that cause horizontal scroll with responsive equivalents.
-- Wrap overflowing tables/tab strips in `overflow-x-auto` with fade indicators (per existing pattern).
-- Ensure touch targets ≥ 44×44 on mobile (icon buttons get `min-h-11 min-w-11`).
-- Fix text overflow with `truncate` / `line-clamp` / `break-words` where clipping occurs.
-- Verify safe-area padding on auth, dashboard, settings, and modal headers.
+Targets: `src/components/dashboard/messages/MessagingModule.tsx`, `src/components/messages/MessageAttachments.tsx`, related Supabase tables (`messages`, `conversations`).
 
-### Pass 3 — Navigation & mobile menu
-- `Navbar.tsx` + mobile drawer: single close button, closes on nav-item click, focus trap, body scroll lock.
-- Audit all nav links and dashboard tab links — remove/fix dead links and buttons without handlers.
+Checks & fixes:
+- Verify conversation creation: existing-conversation lookup before insert (prevent duplicates between same client+artist+project).
+- Confirm message send flow: optimistic UI insert, rollback on error, toast on failure (currently silent failures reported earlier).
+- Realtime subscription: ensure single channel per conversation, proper cleanup on unmount, dedupe optimistic vs realtime echo.
+- Unread/read receipts: mark-as-read on conversation open; badge count refresh.
+- Attachments: file size + mime validation, signed URL refresh (1h), error toast on upload fail.
+- Auth/role guard: only conversation participants can read/send (RLS sanity check via `security--get_scan_results`).
+- Scroll behavior: auto-scroll to bottom on new message only when user is already near bottom; preserve scroll position on history load.
+- Empty / loading / error states: skeleton list, "no messages yet" empty state, retry on send fail.
+- Mobile: keyboard-safe composer (sticky bottom, safe-area inset), 44px touch targets, no horizontal scroll.
 
-### Pass 4 — Forms & auth flows
-- Login, Signup, ForgotPassword, ResetPassword, Contact, Commission, Settings forms:
-  - Visible inline validation (zod + react-hook-form messages rendered).
-  - Submit buttons use new `loading` prop → disabled + spinner during submit.
-  - Password fields use `PasswordInput`.
-- Post-auth redirect: confirm role-based redirect (artist → `/artist-dashboard`, client → `/client-dashboard`, admin → `/admin`) on login, signup-confirm, and logout (→ `/`).
-- `ProtectedRoute.tsx`: show spinner while auth resolves; never blank.
+## Phase 2 — Chat UX polish (Apple-like)
 
-### Pass 5 — Loading & error states
-- Every `useQuery`/fetch site: add skeleton or spinner; render error toast + retry; remove silent failures.
-- Empty states for lists (no artworks, no notifications, no messages) get a consistent empty component.
+- Message bubble enter animation (subtle fade+translate, 200ms ease-out).
+- Typing indicator with animated dots.
+- Timestamp grouping (show only on hover or every 5 min gap).
+- Smooth conversation list selection (active highlight transition).
+- Composer: auto-grow textarea, send button disabled state, Enter to send / Shift+Enter newline.
+- Image attachment thumbnail preview before send.
 
-### Pass 6 — Visual consistency pass
-- Cards/modals/inputs/buttons radius unified to design tokens.
-- Shadow audit — replace ad-hoc `shadow-[…]` with token scale.
-- Icon size audit per context (navbar 20, card 16, hero 24).
-- CTA hierarchy: ensure exactly one primary button per action group; secondary uses `variant="outline"` or `"ghost"`.
+## Phase 3 — Global primitives polish (affects all pages)
 
-### Pass 7 — Verification
-- `bun run build` clean.
-- Playwright script visits ~15 key routes at 320/768/1280, screenshots, checks `document.scrollingElement.scrollWidth <= clientWidth` (no horizontal scroll), dumps console errors.
-- Manual review of screenshots for clipped text / broken layouts.
+Files: `src/components/ui/button.tsx`, `card.tsx`, `input.tsx`, `tabs.tsx`, `dialog.tsx`, `dropdown-menu.tsx`, `tailwind.config.ts`, `index.css`.
 
-## Out of scope (per your instructions)
-- No color palette changes.
-- No font changes.
-- No page redesigns or layout overhauls.
-- No new features.
+- Standardize easing tokens: add `--ease-apple: cubic-bezier(0.22, 1, 0.36, 1)` and use across transitions.
+- Button: refine active scale (0.97), 150ms ease, consistent focus ring.
+- Card: unify shadow scale (sm/md/lg only), hover lift transition.
+- Tabs: animated active indicator (slide), 200ms ease.
+- Dialog/Sheet: spring-like open animation, backdrop blur consistency.
+- Input/Textarea: focus ring transition smoothing.
+- Page transitions: subtle fade between routes via a single wrapper (no router rewrite).
 
-## Risk / size
-This will touch a large number of files (primitives + most pages). Expect ~40–80 files edited across the passes. I'll keep each pass as a focused batch so you can stop me between passes if anything drifts.
+## Phase 4 — Dashboard polish (Artist + Client)
 
-## Confirm to proceed
-Reply "go" and I'll start with Pass 1. If you'd rather I scope down (e.g., "only auth + dashboards", or "skip Pass 5"), tell me which passes to run.
+Files: `ArtistDashboard.tsx`, `ClientDashboard.tsx`, `DashboardHeader.tsx`, `DashboardMobileNav.tsx`, `DashboardAttentionRequired.tsx`, cards under `dashboard/`.
+
+- Consistent section header sizing & spacing.
+- Skeleton loaders on every data fetch (replace blank states).
+- Stat cards: number count-up animation on mount.
+- Mobile nav: smooth tab indicator transition, haptic-style press feedback.
+- Empty states: friendly illustration text + single CTA.
+
+## Phase 5 — Project detail & tabs polish
+
+Files: `components/projects/*`, `components/dashboard/projects/ProjectDetailModal.tsx`, `MilestoneWorkflow.tsx`, `MilestoneCard.tsx`.
+
+- Tabs animated indicator + content cross-fade.
+- Milestone status chips: consistent color tokens, transition on status change.
+- Action buttons: loading state on async actions (approve/submit/dispute).
+- Modal: smooth open/close, focus trap, ESC close.
+- Activity log: timeline animation on new entry.
+
+## Phase 6 — Forms, buttons, text consistency sweep
+
+- Audit all forms for: consistent input height, label spacing, inline error messages, submit-loading state, double-submit prevention.
+- Typography: enforce consistent heading scale (h1/h2/h3) across pages via existing tokens.
+- Buttons: same variant = same height/radius/weight everywhere (already started in prior pass — extend coverage to remaining pages: Commissions, Events, LiveStreaming, Merchandise, Collections, Categories).
+
+## Phase 7 — Verification
+
+- `tsgo` typecheck.
+- Playwright sweep across chat (artist + client), project detail, dashboards at 320/768/1280; capture screenshots; check console for errors.
+- Manual flow: create conversation → send message → attach file → mark read → realtime echo on second session.
+
+---
+
+## Technical notes
+
+- Use existing `framer-motion` if installed; otherwise pure CSS transitions with the new easing token. Will check `package.json` first to avoid adding deps.
+- No palette, font, or layout changes — only motion, spacing, consistency, missing states.
+- All RLS / role logic stays as-is unless audit reveals a concrete bug.
+
+## Out of scope
+
+- Redesign of any page.
+- New features (voice notes, reactions, etc.).
+- Color/font changes.
+
+Reply **"go"** to start with Phase 1 (chat backend audit + fixes), or tell me to reorder/skip phases.
