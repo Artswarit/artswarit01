@@ -521,7 +521,7 @@ const ExploreArtists = () => {
                 <div className="flex justify-center pt-6">
                   <Button
                     variant="outline"
-                    className="h-12 px-10 rounded-2xl font-black text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all"
+                    className="h-12 px-10 rounded-2xl font-medium text-sm border-border/40 hover:bg-primary/5 hover:border-primary/40 text-muted-foreground hover:text-primary transition-all"
                     onClick={() => setVisibleArtists(c => c + ARTISTS_PER_PAGE)}
                   >
                     Load More · {Math.min(ARTISTS_PER_PAGE, filteredArtists.length - visibleArtists)} of {filteredArtists.length - visibleArtists} remaining

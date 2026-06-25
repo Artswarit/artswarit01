@@ -277,7 +277,10 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
         <p className="text-gray-700 italic">"{reviewText}"</p>
       )}
       <div className="text-xs text-muted-foreground mt-1">
-        {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
+        {(() => {
+          const d = createdAt ? new Date(createdAt) : null;
+          return d && !isNaN(d.getTime()) ? formatDistanceToNow(d, { addSuffix: true }) : '';
+        })()}
       </div>
 
       {/* Artist Response */}
@@ -285,11 +288,14 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
         <div className="mt-3 pl-4 border-l-2 border-primary/30 bg-background/50 rounded-r-md p-3">
           <p className="text-sm font-medium text-primary mb-1">Artist Response:</p>
           <p className="text-sm text-foreground">{artistResponse}</p>
-          {artistResponseAt && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {formatDistanceToNow(new Date(artistResponseAt), { addSuffix: true })}
-            </p>
-          )}
+          {(() => {
+            const d = artistResponseAt ? new Date(artistResponseAt) : null;
+            return d && !isNaN(d.getTime()) ? (
+              <p className="text-xs text-muted-foreground mt-1">
+                {formatDistanceToNow(d, { addSuffix: true })}
+              </p>
+            ) : null;
+          })()}
         </div>
       )}
 

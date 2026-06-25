@@ -145,14 +145,17 @@ const ArtistDashboard = () => {
       <div className="min-h-screen bg-gray-50/50 dark:bg-background">
         <Navbar />
         <main className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pt-[calc(5.5rem+var(--safe-top))] sm:pt-[calc(7rem+var(--safe-top))] pb-32 sm:pb-20">
-          <DashboardHeader
-            user={user}
-            profile={profile}
-            title="Artist Dashboard"
-            subtitle="Manage your projects, portfolio, and earnings in one place"
-          />
-
-          <ProfileCompletionBanner />
+          {activeTab === 'overview' && (
+            <>
+              <DashboardHeader
+                user={user}
+                profile={profile}
+                title="Artist Dashboard"
+                subtitle="Manage your projects, portfolio, and earnings in one place"
+              />
+              <ProfileCompletionBanner />
+            </>
+          )}
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="relative mb-6 sm:mb-8 lg:mb-12">
@@ -284,12 +287,14 @@ const ArtistDashboard = () => {
             </div>
           </Tabs>
 
-          <DashboardMobileNav 
-            activeTab={activeTab} 
-            onTabChange={handleTabChange} 
-            role="artist"
-            isLocked={profileIncomplete}
-          />
+          {!(activeTab === 'messages' && isChatActive) && (
+            <DashboardMobileNav 
+              activeTab={activeTab} 
+              onTabChange={handleTabChange} 
+              role="artist"
+              isLocked={profileIncomplete}
+            />
+          )}
         </main>
         <div className={cn(activeTab === 'messages' && isChatActive ? "hidden md:block" : "")}>
           <Footer />

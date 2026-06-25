@@ -77,6 +77,7 @@ const ClientDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTabFromUrl = searchParams.get('tab') || 'overview';
   const [selectedTab, setSelectedTab] = useState(currentTabFromUrl);
+  const [isChatActive, setIsChatActive] = useState(false);
   const [visitedTabs, setVisitedTabs] = useState<Set<string>>(new Set(['overview', currentTabFromUrl]));
 
   // Sync visitedTabs with selectedTab to ensure content is rendered
@@ -617,12 +618,14 @@ const ClientDashboard = () => {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-32 sm:pb-12 pt-[calc(6.5rem+var(--safe-top))] sm:pt-[calc(8rem+var(--safe-top))] lg:pt-[calc(9rem+var(--safe-top))]">
         {/* Dashboard Header */}
-        <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
-          <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black mb-1 sm:mb-2">Client Dashboard</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
-            Welcome back, <span className="font-black text-foreground">{userName}</span>! Manage your projects and discover new artists.
-          </p>
-        </div>
+        {selectedTab === 'overview' && (
+          <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
+            <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black mb-1 sm:mb-2">Client Dashboard</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
+              Welcome back, <span className="font-black text-foreground">{userName}</span>! Manage your projects and discover new artists.
+            </p>
+          </div>
+        )}
 
         {/* Dashboard Navigation - Optimized for all screens */}
         <Tabs value={selectedTab} className="mb-4 sm:mb-6 lg:mb-8" onValueChange={handleTabChange}>
@@ -1076,7 +1079,7 @@ const ClientDashboard = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-10 px-8 rounded-xl font-black text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5"
+                            className="h-10 px-8 rounded-xl font-medium text-sm border-border/40 hover:bg-primary/5 text-muted-foreground hover:text-primary"
                             onClick={() => setVisibleActive(v => v + PROJECTS_PER_PAGE)}
                           >
                             Load More · {Math.min(PROJECTS_PER_PAGE, searchedActiveProjects.length - visibleActive)} of {searchedActiveProjects.length - visibleActive} remaining
@@ -1144,7 +1147,7 @@ const ClientDashboard = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="h-10 px-8 rounded-xl font-black text-xs uppercase tracking-widest border-primary/20 hover:bg-primary/5"
+                            className="h-10 px-8 rounded-xl font-medium text-sm border-border/40 hover:bg-primary/5 text-muted-foreground hover:text-primary"
                             onClick={() => setVisibleCompleted(v => v + PROJECTS_PER_PAGE)}
                           >
                             Load More · {Math.min(PROJECTS_PER_PAGE, searchedCompletedProjects.length - visibleCompleted)} of {searchedCompletedProjects.length - visibleCompleted} remaining
@@ -1164,7 +1167,7 @@ const ClientDashboard = () => {
           {/* Messages Tab */}
           <TabsContent value="messages" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'messages' && "hidden")}>
-              {visitedTabs.has('messages') && <MessagingModule />}
+              {visitedTabs.has('messages') && <MessagingModule onChatActiveChange={setIsChatActive} />}
             </div>
           </TabsContent>
 
@@ -1232,19 +1235,21 @@ const ClientDashboard = () => {
       
       {/* Create Project Dialog */}
       <Dialog open={createProjectOpen} onOpenChange={setCreateProjectOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>Fill in the details to create a new project.</DialogDescription>
+        <DialogContent className="p-0 gap-0 w-screen h-[100dvh] max-w-none sm:max-w-4xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl rounded-none border-0 sm:border flex flex-col overflow-hidden">
+          <DialogHeader className="px-5 py-4 border-b bg-background/95 backdrop-blur-xl shrink-0">
+            <DialogTitle className="text-lg sm:text-xl">Create New Project</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">Fill in the details to create a new project.</DialogDescription>
           </DialogHeader>
-          <CreateProjectForm 
-            onSuccess={() => {
-              setCreateProjectOpen(false);
-              fetchProjects();
-              toast.success("Project created successfully!");
-            }}
-            onCancel={() => setCreateProjectOpen(false)}
-          />
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+            <CreateProjectForm 
+              onSuccess={() => {
+                setCreateProjectOpen(false);
+                fetchProjects();
+                toast.success("Project created successfully!");
+              }}
+              onCancel={() => setCreateProjectOpen(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
       <ArtistSelectionModal 
@@ -1279,12 +1284,14 @@ const ClientDashboard = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <DashboardMobileNav 
-        activeTab={selectedTab} 
-        onTabChange={handleTabChange} 
-        role="client"
-        isLocked={profileIncomplete}
-      />
+      {!(selectedTab === 'messages' && isChatActive) && (
+        <DashboardMobileNav 
+          activeTab={selectedTab} 
+          onTabChange={handleTabChange} 
+          role="client"
+          isLocked={profileIncomplete}
+        />
+      )}
     </div>
   );
 };
