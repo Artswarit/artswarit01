@@ -161,7 +161,7 @@ const SignupForm = ({
         </div>
       </div>
 
-      <Button type="submit" className="w-full min-h-[44px] text-base font-medium" disabled={loading}>
+      <Button type="submit" className="w-full min-h-[44px] text-base font-medium" loading={loading}>
         {loading ? "Creating account..." : "Create account"}
       </Button>
     </form>;
