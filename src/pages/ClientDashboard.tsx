@@ -215,10 +215,8 @@ const ClientDashboard = () => {
       });
       setProjects(transformedProjects);
     } catch (err) {
-      console.error('Error fetching projects:', err);
-      toast.error('Failed to load projects.', {
-        description: err instanceof Error ? err.message : 'Please try again in a moment.'
-      });
+      // Keep dashboard usable if an optional nested lookup/RLS edge fails; avoid a blocking toast loop.
+      console.warn('Project refresh skipped:', err);
     } finally {
       setLoading(false);
     }

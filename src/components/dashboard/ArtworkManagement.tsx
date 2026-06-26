@@ -363,7 +363,7 @@ const ArtworkManagement = () => {
                 checked={selectedArtworks.length === filteredArtworks.length && filteredArtworks.length > 0}
                 onCheckedChange={handleSelectAll}
                 id="select-all"
-                className="h-5.5 w-5.5 rounded-lg border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
+                className="h-5 w-5 rounded-lg border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
               />
               <label htmlFor="select-all" className="text-xs sm:text-sm font-black text-foreground/70 cursor-pointer select-none group-hover:text-primary transition-colors uppercase tracking-widest">
                 Select All
