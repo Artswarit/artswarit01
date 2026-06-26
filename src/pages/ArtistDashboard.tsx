@@ -95,7 +95,7 @@ const ArtistDashboard = () => {
   // Dashboard tabs should open from the top, not restore an old inner scroll.
   useEffect(() => {
     requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     });
   }, [activeTab]);
 

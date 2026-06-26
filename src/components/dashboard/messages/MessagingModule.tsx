@@ -97,7 +97,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     isAtBottomRef.current = true;
     // Small delay to let the messages render first
     setTimeout(() => {
-      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'instant' });
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'auto' });
     }, 50);
   }, [activeConversationId]);
 
@@ -310,7 +310,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     <div className={cn(
       "flex flex-col bg-white dark:bg-card overflow-hidden animate-fade-in relative mx-auto w-full overscroll-contain",
       activeConversationId
-        ? "fixed inset-0 z-[150] h-[100dvh] max-w-none rounded-none border-0 shadow-none pt-[var(--safe-top)] pb-[var(--safe-bottom)]"
+        ? "fixed inset-0 z-[170] h-[100dvh] max-w-none rounded-none border-0 shadow-none pt-[var(--safe-top)] pb-[var(--safe-bottom)]"
         : "h-[calc(100dvh-10rem)] sm:h-[calc(100dvh-12rem)] min-h-[460px] max-h-[900px] rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-muted/20 max-w-[1400px]"
     )}>
       <div className="flex flex-1 overflow-hidden relative">
