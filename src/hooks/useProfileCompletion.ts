@@ -36,11 +36,10 @@ export const computeProfileCompletion = (
   }
 
   // Keep completion practical and aligned with the visible profile UI.
-  // Optional creative metadata such as avatar, tags, city and country should never
-  // block a finished profile from showing as complete.
+  // Creative metadata such as bio, avatar, tags, city and country is optional and
+  // must not keep a real profile locked as "Incomplete".
   const baseFields = [
     { key: 'full_name', label: 'Display Name' },
-    { key: 'bio', label: 'Bio' },
   ];
 
   const allRequiredFields = baseFields;
@@ -50,16 +49,7 @@ export const computeProfileCompletion = (
   allRequiredFields.forEach((field) => {
     const value = (profile as any)[field.key];
 
-    if (field.key === 'bio') {
-      // Bio must exist and not be empty or default placeholder
-      const bio = (typeof value === 'string' ? value.trim() : '') || '';
-      const isValidBio = bio !== '' && 
-        bio.toLowerCase() !== 'artist on artswarit' && 
-        bio.toLowerCase() !== 'tell others about yourself and your art...';
-      if (!isValidBio) {
-        missingFields.push(field.label);
-      }
-    } else if (!value || (typeof value === 'string' && value.trim() === '')) {
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
       missingFields.push(field.label);
     }
   });
