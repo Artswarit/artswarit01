@@ -961,19 +961,19 @@ const ProjectDetailModal = ({
 
                 <TabsContent id="project-tab-content-files" value="files" className="mt-0 outline-none focus-visible:ring-0">
                   <div className="space-y-8">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex min-w-0 items-center gap-3">
                         <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-600">
                           <FileText className="h-6 w-6" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <h3 className="text-xl font-bold tracking-tight">Shared Assets</h3>
                           <p className="text-sm text-muted-foreground">Deliverables, references, and project files.</p>
                         </div>
                       </div>
                       
-                      <label className="cursor-pointer group">
-                        <div className="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all duration-300 font-bold shadow-sm active:scale-95">
+                      <label className="cursor-pointer group w-full sm:w-auto">
+                        <div className="flex h-11 w-full sm:w-auto items-center justify-center gap-2.5 px-5 rounded-2xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all duration-300 font-bold shadow-sm active:scale-95">
                           {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Upload className="h-5 w-5" /> <span>Upload</span></>}
                         </div>
                         <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} />
