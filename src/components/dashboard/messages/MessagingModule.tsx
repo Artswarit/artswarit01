@@ -112,6 +112,15 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     }
   }, [activeConversationId, onChatActiveChange]);
 
+  useEffect(() => {
+    if (!activeConversationId) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [activeConversationId]);
+
   // Handle URL sync for conversation ID
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -288,7 +297,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-12rem)] min-h-[500px] bg-white dark:bg-card rounded-2xl sm:rounded-3xl shadow-xl border border-muted/20">
+      <div className="flex items-center justify-center h-[calc(100dvh-10rem)] min-h-[420px] bg-white dark:bg-card rounded-2xl sm:rounded-3xl shadow-xl border border-muted/20">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
           <p className="text-xs sm:text-sm font-medium text-muted-foreground">Loading your messages...</p>
@@ -299,10 +308,10 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
 
   return (
     <div className={cn(
-      "flex flex-col bg-white dark:bg-card overflow-hidden animate-fade-in relative mx-auto w-full",
+      "flex flex-col bg-white dark:bg-card overflow-hidden animate-fade-in relative mx-auto w-full overscroll-contain",
       activeConversationId
-        ? "fixed inset-0 z-[120] h-[100dvh] max-w-none rounded-none border-0 shadow-none lg:relative lg:inset-auto lg:z-auto lg:h-[calc(100vh-15rem)] lg:max-w-[1400px] lg:rounded-[2.5rem] lg:shadow-2xl lg:border lg:border-muted/20"
-        : "h-[calc(100vh-13rem)] sm:h-[calc(100vh-15rem)] min-h-[550px] max-h-[900px] rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-muted/20 max-w-[1400px]"
+        ? "fixed inset-0 z-[150] h-[100dvh] max-w-none rounded-none border-0 shadow-none pt-[var(--safe-top)] pb-[var(--safe-bottom)]"
+        : "h-[calc(100dvh-10rem)] sm:h-[calc(100dvh-12rem)] min-h-[460px] max-h-[900px] rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-muted/20 max-w-[1400px]"
     )}>
       <div className="flex flex-1 overflow-hidden relative">
 
@@ -414,18 +423,18 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
           {activeConversation ? (
             <>
               {/* Chat Header */}
-              <header className="px-4 py-3 sm:px-8 sm:py-5 border-b border-muted/20 flex items-center justify-between bg-white/80 dark:bg-card/80 backdrop-blur-xl z-10">
-                <div className="flex items-center gap-4 sm:gap-6">
+              <header className="px-3 py-2.5 sm:px-6 sm:py-4 border-b border-muted/20 flex items-center justify-between bg-white/90 dark:bg-card/90 backdrop-blur-xl z-10 shrink-0">
+                <div className="flex items-center gap-3 sm:gap-5 min-w-0">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="lg:hidden rounded-xl h-12 w-12 hover:bg-primary/10 text-primary transition-all min-h-[48px]"
+                    className="rounded-full h-10 w-10 hover:bg-primary/10 text-primary transition-all shrink-0"
                     onClick={() => setActiveConversationId(null)}
                   >
                     <ArrowLeft className="h-5 w-5" />
                   </Button>
                   <div className="relative group cursor-pointer" onClick={handleViewProfile}>
-                    <Avatar className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl shadow-lg transition-transform group-hover:scale-105 duration-300">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl shadow-lg transition-transform group-hover:scale-105 duration-300">
                       <AvatarImage src={activeConversation.otherUser?.avatar} />
                       <AvatarFallback className="bg-primary/5 text-primary text-sm font-black">
                         {activeConversation.otherUser?.name?.charAt(0)}
@@ -436,7 +445,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-black text-base sm:text-xl truncate leading-tight mb-1 group cursor-pointer hover:text-primary transition-colors min-h-[24px] flex items-center" onClick={handleViewProfile}>
+                    <h3 className="font-black text-sm sm:text-lg truncate leading-tight mb-0.5 group cursor-pointer hover:text-primary transition-colors min-h-[20px] flex items-center" onClick={handleViewProfile}>
                       {activeConversation.otherUser?.name}
                     </h3>
                     <div className="flex items-center gap-3">
@@ -638,7 +647,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
               </ScrollArea>
 
               {/* Message Input Area */}
-              <div className="px-3 sm:px-6 py-2.5 sm:py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-white/95 dark:bg-card/95 border-t border-muted/20 backdrop-blur-xl shrink-0">
+              <div className="px-3 sm:px-6 py-2 sm:py-3 pb-[calc(0.75rem+var(--safe-bottom))] bg-white/95 dark:bg-card/95 border-t border-muted/20 backdrop-blur-xl shrink-0">
                 {pendingAttachments.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2 animate-in slide-in-from-bottom-2 duration-300">
                     {pendingAttachments.map((attachment, index) => (
@@ -664,7 +673,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                       onChange={(e) => {
                         setMessageInput(e.target.value);
                         e.target.style.height = 'auto';
-                        e.target.style.height = Math.min(e.target.scrollHeight, 140) + 'px';
+                        e.target.style.height = Math.min(e.target.scrollHeight, 104) + 'px';
                         
                         // Typing indicator
                         if (activeConversationId) {
@@ -686,7 +695,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                         }
                       }}
                       placeholder="Message"
-                      className="w-full bg-muted/40 dark:bg-background/40 border border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/20 rounded-[20px] py-2.5 pl-11 pr-4 text-[15px] leading-snug resize-none transition-all scrollbar-hide min-h-[40px] max-h-[140px]"
+                      className="w-full bg-muted/40 dark:bg-background/40 border border-border/40 focus:border-primary/40 focus:ring-2 focus:ring-primary/20 rounded-[20px] py-2.5 pl-11 pr-4 text-[15px] leading-snug resize-none transition-all scrollbar-hide min-h-[40px] max-h-[104px]"
                     />
                   </div>
                   <Button

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -112,13 +112,13 @@ const ProjectDetailModal = ({
   const [addingMilestone, setAddingMilestone] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("workflow");
+  const modalViewportRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToTab = (tabId: string) => {
     setActiveTab(tabId);
-    const element = document.getElementById(`project-tab-content-${tabId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    requestAnimationFrame(() => {
+      modalViewportRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+    });
   };
 
   useEffect(() => {
@@ -126,12 +126,6 @@ const ProjectDetailModal = ({
       setActiveConversationId(conversationId);
     }
   }, [conversationId, activeConversationId, setActiveConversationId]);
-
-  useEffect(() => {
-    if (initialTab && open) {
-      setActiveTab(initialTab);
-    }
-  }, [initialTab, open]);
 
   const fetchProjectData = useCallback(async (signal?: AbortSignal, silent = false) => {
     if (!projectId) return;
@@ -295,6 +289,15 @@ const ProjectDetailModal = ({
       scrollToTab(initialTab);
     }
   }, [initialTab, open]);
+
+  useEffect(() => {
+    if (!open || activeTab !== 'communication') return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open, activeTab]);
 
   // Handle chat auto-scroll
   useEffect(() => {
@@ -566,16 +569,16 @@ const ProjectDetailModal = ({
             <DialogTitle>{project.title}</DialogTitle>
             <DialogDescription>Project details and collaboration workspace</DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-1 h-full">
+          <ScrollArea className="flex-1 h-full" viewportRef={modalViewportRef}>
             <div className="flex flex-col min-h-full max-w-7xl mx-auto w-full relative border-x border-border/5">
             {/* Ultra Modern Header Section */}
-            <div className="relative overflow-hidden pt-16 pb-10 px-6 sm:px-12 border-b bg-gradient-to-br from-primary/[0.07] via-background to-primary/[0.03]">
+            <div className="relative overflow-hidden pt-8 sm:pt-12 pb-7 sm:pb-9 px-4 sm:px-10 border-b bg-gradient-to-br from-primary/[0.07] via-background to-primary/[0.03]">
               {/* Abstract Background Shapes */}
               <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
               <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
               
               <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-8">
-                <div className="space-y-4 flex-1">
+                <div className="space-y-3 flex-1 min-w-0">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
                       <GitBranch className="h-5 w-5" />
@@ -597,7 +600,7 @@ const ProjectDetailModal = ({
                   </div>
                   
                     <div className="space-y-1 sm:space-y-2">
-                      <DialogTitle className="text-3xl sm:text-5xl font-black tracking-tight leading-tight sm:leading-[1.1] pb-2 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/60">
+                      <DialogTitle className="text-2xl sm:text-4xl font-black tracking-tight leading-tight sm:leading-[1.1] pb-1 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/60">
                         {project.title}
                       </DialogTitle>
                     <div className="flex items-center gap-4 flex-wrap">
@@ -652,16 +655,16 @@ const ProjectDetailModal = ({
               </div>
             </div>
 
-            <div className="px-6 sm:px-12 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="group relative p-8 rounded-[2.5rem] bg-white dark:bg-card/40 border border-border/50 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 overflow-hidden">
+            <div className="px-4 sm:px-10 py-4 sm:py-6 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5">
+              <div className="group relative p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
-                <div className="relative z-10 flex flex-col gap-6">
-                  <div className="p-3 rounded-2xl bg-primary/10 text-primary w-fit group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                    <Clock className="h-6 w-6" />
+                <div className="relative z-10 flex flex-col gap-4">
+                  <div className="p-2.5 rounded-2xl bg-primary/10 text-primary w-fit group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                    <Clock className="h-5 w-5" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Total Budget</p>
-                    <h3 className="text-3xl font-black tracking-tighter text-foreground">
+                    <h3 className="text-2xl sm:text-3xl font-black tracking-tighter text-foreground">
                       {project.amount_usd || project.budget ? 
                         formatCurrency(project.amount_usd || project.budget || 0, project.amount_usd ? 'USD' : (project.currency || 'USD'), project.exchange_rate) : 
                         'Not set'
@@ -675,15 +678,15 @@ const ProjectDetailModal = ({
                 </div>
               </div>
 
-              <div className="group relative p-8 rounded-[2.5rem] bg-white dark:bg-card/40 border border-border/50 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/5 transition-all duration-500 overflow-hidden">
+              <div className="group relative p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-amber-500/30 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-500 overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-amber-500/10 transition-colors" />
-                <div className="relative z-10 flex flex-col gap-6">
-                  <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-600 w-fit group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
-                    <Calendar className="h-6 w-6" />
+                <div className="relative z-10 flex flex-col gap-4">
+                  <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-600 w-fit group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
+                    <Calendar className="h-5 w-5" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Target Deadline</p>
-                    <h3 className="text-3xl font-black tracking-tighter text-foreground">
+                    <h3 className="text-2xl sm:text-3xl font-black tracking-tighter text-foreground">
                       {project.deadline ? formatDate(new Date(project.deadline), 'MMM dd, yyyy') : 'Flex Timeline'}
                     </h3>
                   </div>
@@ -696,11 +699,11 @@ const ProjectDetailModal = ({
                 </div>
               </div>
 
-              <div className="group relative p-8 rounded-[2.5rem] bg-white dark:bg-card/40 border border-border/50 hover:border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/5 transition-all duration-500 overflow-hidden">
+              <div className="group relative p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-500 overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-colors" />
-                <div className="relative z-10 flex flex-col gap-6">
-                  <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 w-fit group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
-                    <CheckCircle className="h-6 w-6" />
+                <div className="relative z-10 flex flex-col gap-4">
+                  <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 w-fit group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
+                    <CheckCircle className="h-5 w-5" />
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between items-end">
@@ -721,7 +724,7 @@ const ProjectDetailModal = ({
               </div>
             </div>
 
-            <div className="px-6 sm:px-12 pb-12 space-y-12">
+            <div className="px-4 sm:px-10 pb-6 sm:pb-8 space-y-6 sm:space-y-8">
               {/* Description Section */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -738,18 +741,18 @@ const ProjectDetailModal = ({
             </div>
 
             {/* Enhanced Sticky Navigation */}
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="relative z-10 -mx-6 sm:-mx-12 px-6 sm:px-12 pt-6 pb-8 bg-background border-b border-border/40 mb-8">
+              <Tabs value={activeTab} onValueChange={scrollToTab} className="w-full">
+                <div className="relative z-10 -mx-4 sm:-mx-10 px-3 sm:px-10 pt-3 sm:pt-5 pb-4 sm:pb-6 bg-background border-b border-border/40 mb-5 sm:mb-7">
                   <div className="relative group/tabs">
                     {/* Scroll Gradient Indicators */}
                     <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 opacity-0 group-hover/tabs:opacity-100 transition-opacity pointer-events-none" />
                     <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 opacity-0 group-hover/tabs:opacity-100 transition-opacity pointer-events-none" />
                     
-                    <TabsList className="w-full h-auto min-h-[52px] sm:min-h-0 p-1.5 sm:p-2 bg-muted/50 rounded-[2rem] border border-border/40 flex items-stretch gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth shadow-inner">
+                    <TabsList className="w-full h-auto min-h-[48px] sm:min-h-0 p-1 sm:p-1.5 bg-muted/50 rounded-[1.5rem] sm:rounded-[2rem] border border-border/40 flex items-stretch gap-1 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth shadow-inner">
                     <TabsTrigger 
                       value="workflow" 
                       onClick={() => scrollToTab('workflow')}
-                      className="flex-1 min-w-[90px] sm:min-w-[140px] py-2.5 sm:py-4 px-3 sm:px-6 rounded-[1.2rem] sm:rounded-[1.5rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[44px] sm:min-h-[56px] gap-1.5 sm:gap-3 group"
+                      className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
                     >
                       <GitBranch className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
                       <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px]">Workflow</span>
@@ -757,7 +760,7 @@ const ProjectDetailModal = ({
                     <TabsTrigger 
                       value="milestones" 
                       onClick={() => scrollToTab('milestones')}
-                      className="flex-1 min-w-[90px] sm:min-w-[140px] py-2.5 sm:py-4 px-3 sm:px-6 rounded-[1.2rem] sm:rounded-[1.5rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[44px] sm:min-h-[56px] gap-1.5 sm:gap-3 group"
+                      className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
                     >
                       <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
                       <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px]">Timeline</span>
@@ -765,7 +768,7 @@ const ProjectDetailModal = ({
                     <TabsTrigger 
                       value="files" 
                       onClick={() => scrollToTab('files')}
-                      className="flex-1 min-w-[90px] sm:min-w-[140px] py-2.5 sm:py-4 px-3 sm:px-6 rounded-[1.2rem] sm:rounded-[1.5rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[44px] sm:min-h-[56px] gap-1.5 sm:gap-3 group"
+                      className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
                     >
                       <FileText className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
                       <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px]">Vault</span>
@@ -776,7 +779,7 @@ const ProjectDetailModal = ({
                     <TabsTrigger 
                       value="communication" 
                       onClick={() => scrollToTab('communication')}
-                      className="flex-1 min-w-[90px] sm:min-w-[140px] py-2.5 sm:py-4 px-3 sm:px-6 rounded-[1.2rem] sm:rounded-[1.5rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-xl data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[44px] sm:min-h-[56px] gap-1.5 sm:gap-3 group"
+                      className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
                     >
                       <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
                       <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px] whitespace-nowrap">Chat</span>
@@ -788,7 +791,7 @@ const ProjectDetailModal = ({
                 </div>
               </div>
 
-              <div className="space-y-12 pb-12">
+              <div className="space-y-8 sm:space-y-10 pb-10">
                 <TabsContent id="project-tab-content-workflow" value="workflow" className="mt-0 outline-none focus-visible:ring-0">
                   <div className="rounded-[2.5rem] border border-border/40 bg-white/40 dark:bg-card/20 p-4 sm:p-8 shadow-sm transition-all duration-500 hover:shadow-md">
                     <div className="flex items-center gap-3 mb-8">
@@ -1011,8 +1014,8 @@ const ProjectDetailModal = ({
                 </TabsContent>
 
                 <TabsContent id="project-tab-content-communication" value="communication" className="mt-0 outline-none focus-visible:ring-0">
-                  <div className="fixed inset-0 z-[10] bg-background flex flex-col pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] animate-in fade-in slide-in-from-bottom-2 duration-300 ease-apple">
-                    <div className="px-4 sm:px-6 py-3 border-b border-border/40 bg-white/80 dark:bg-card/70 backdrop-blur-xl flex items-center gap-3 shrink-0">
+                  <div className="fixed inset-0 z-[150] bg-background flex flex-col pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] animate-in fade-in slide-in-from-bottom-2 duration-300 ease-apple overscroll-contain">
+                    <div className="px-3 sm:px-6 py-2.5 border-b border-border/40 bg-white/90 dark:bg-card/80 backdrop-blur-xl flex items-center gap-3 shrink-0">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -1118,13 +1121,13 @@ const ProjectDetailModal = ({
                       </div>
                     </ScrollArea>
 
-                    <div className="p-3 sm:p-4 bg-white/80 dark:bg-card/70 backdrop-blur-xl border-t border-border/40 shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+                    <div className="p-3 sm:p-4 bg-white/90 dark:bg-card/80 backdrop-blur-xl border-t border-border/40 shrink-0 pb-[calc(0.75rem+var(--safe-bottom))]">
                       <div className="flex items-end gap-2 max-w-3xl mx-auto w-full">
                         <Textarea
                           placeholder="Message"
                           value={newMessage}
                           onChange={e => setNewMessage(e.target.value)}
-                          className="min-h-[40px] max-h-[140px] resize-none rounded-[20px] bg-muted/40 dark:bg-background/40 border border-border/40 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/40 px-4 py-2.5 text-[15px] leading-snug transition-all ease-apple"
+                          className="min-h-[40px] max-h-[104px] resize-none rounded-[20px] bg-muted/40 dark:bg-background/40 border border-border/40 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/40 px-4 py-2.5 text-[15px] leading-snug transition-all ease-apple"
                           onKeyDown={e => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                               e.preventDefault();

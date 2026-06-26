@@ -14,8 +14,18 @@ type ProfileLike = {
   bio?: string | null;
   avatar_url?: string | null;
   tags?: unknown;
-  country?: string | null;
-  city?: string | null;
+  skills?: unknown;
+  categories?: unknown;
+  profession?: string | null;
+  location?: string | null;
+};
+
+const hasText = (value: unknown) =>
+  typeof value === 'string' && value.trim().length > 0;
+
+const hasListValue = (value: unknown) => {
+  if (Array.isArray(value)) return value.some((item) => hasText(item));
+  return hasText(value);
 };
 
 export const computeProfileCompletion = (
@@ -30,17 +40,16 @@ export const computeProfileCompletion = (
     };
   }
 
-  // Define required fields for profile completion - BOTH artists and clients need country
+  // Required fields stay small and practical. Location is useful, but not a blocker:
+  // users were being marked incomplete even after finishing the visible profile form.
   const baseFields = [
     { key: 'full_name', label: 'Display Name' },
     { key: 'bio', label: 'Bio' },
     { key: 'avatar_url', label: 'Profile Picture' },
-    { key: 'country', label: 'Country' },
   ];
 
   // Additional fields for artists only
   const artistFields = [
-    { key: 'city', label: 'City' },
     { key: 'tags', label: 'Categories/Skills' }
   ];
 
@@ -55,7 +64,7 @@ export const computeProfileCompletion = (
     const value = (profile as any)[field.key];
 
     if (field.key === 'tags') {
-      if (!value || (Array.isArray(value) && value.length === 0)) {
+      if (!hasListValue(value) && !hasListValue((profile as any).skills) && !hasListValue((profile as any).categories) && !hasText((profile as any).profession)) {
         missingFields.push(field.label);
       }
     } else if (field.key === 'avatar_url') {

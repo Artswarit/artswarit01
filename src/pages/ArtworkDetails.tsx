@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
   ArrowLeft, Eye, Heart, Maximize2, Bookmark,
-  Crown, Lock, Music, Send, MessageCircle, Share2, X
+  Crown, Lock, Music, MessageCircle, Share2, X
 } from "lucide-react";
 import ArtworkFeedback from "@/components/artwork/ArtworkFeedback";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
@@ -445,16 +445,16 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
           </div>
 
           {/* ── ACTION BAR (Instagram-style) ────────────────────────── */}
-          <div className="flex items-center px-3 sm:px-4 py-2.5">
+          <div className="flex items-center px-3 sm:px-4 py-3 border-t border-border/20 bg-card/95 backdrop-blur-sm">
             {/* Left actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
               {/* Like */}
               <div className="relative">
                 <button
                   onClick={handleLike}
                   disabled={isLiking}
                   aria-label={isLiked ? "Unlike" : "Like"}
-                  className="flex items-center justify-center transition-transform duration-200 active:scale-75"
+                  className="h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 hover:bg-muted/60 disabled:opacity-60"
                 >
                   <Heart
                     className={cn(
@@ -472,7 +472,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
               <button
                 onClick={openComments}
                 aria-label="Comments"
-                className="flex items-center justify-center transition-transform duration-200 active:scale-90"
+                className="h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 hover:bg-muted/60"
               >
                 <MessageCircle className="h-6 w-6 text-foreground hover:text-muted-foreground transition-colors" />
               </button>
@@ -481,9 +481,9 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
               <button
                 onClick={handleShare}
                 aria-label="Share"
-                className="flex items-center justify-center transition-transform duration-200 active:scale-90"
+                className="h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 hover:bg-muted/60"
               >
-                <Send className="h-5.5 w-5.5 text-foreground hover:text-muted-foreground transition-colors -rotate-12" />
+                <Share2 className="h-5 w-5 text-foreground hover:text-muted-foreground transition-colors" />
               </button>
             </div>
 
@@ -494,7 +494,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
             <button
               onClick={handleBookmark}
               aria-label={isBookmarked ? "Remove from saved" : "Save"}
-              className="flex items-center justify-center transition-transform duration-200 active:scale-75"
+              className="h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 hover:bg-muted/60"
             >
               <Bookmark
                 className={cn(
