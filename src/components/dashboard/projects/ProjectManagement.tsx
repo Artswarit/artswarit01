@@ -104,8 +104,8 @@ const ProjectManagement = () => {
         });
       setProjects(transformedProjects);
     } catch (err) {
-      console.error('Error fetching projects:', err);
-      toast.error('Failed to load projects. Please try again.');
+      // Avoid a repeated blocking toast loop; the dashboard remains usable and can retry on refresh/realtime.
+      console.warn('Project refresh skipped:', err);
     } finally {
       setLoading(false);
     }
