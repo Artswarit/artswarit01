@@ -115,7 +115,7 @@ const ClientDashboard = () => {
   // Read tab from URL on mount
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'settings'].includes(tabParam)) {
+    if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(tabParam)) {
       setSelectedTab(tabParam);
     } else if (!tabParam) {
       // Default to overview if no tab specified
@@ -325,7 +325,7 @@ const ClientDashboard = () => {
       // 1. Restore Tab (if not in URL)
       if (!searchParams.get('tab')) {
         const savedTab = localStorage.getItem('client_dashboard_active_tab');
-        if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'settings'].includes(savedTab)) {
+        if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(savedTab)) {
           if (!profileIncomplete || savedTab === 'profile') {
             setSelectedTab(savedTab);
             setSearchParams({ tab: savedTab }, { replace: true });
@@ -359,7 +359,7 @@ const ClientDashboard = () => {
   // Dashboard tabs should open from the top, not restore an old inner scroll.
   useEffect(() => {
     requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     });
   }, [selectedTab]);
 
@@ -857,7 +857,7 @@ const ClientDashboard = () => {
                       <Bell className="h-5 w-5 text-blue-500" />
                       Activity
                     </h2>
-                    <Button variant="ghost" size="sm" className="h-8 text-xs font-semibold text-muted-foreground" onClick={() => setSelectedTab('settings')}>
+                    <Button variant="ghost" size="sm" className="h-8 text-xs font-semibold text-muted-foreground" onClick={() => setSelectedTab('account')}>
                       Manage
                     </Button>
                   </div>
