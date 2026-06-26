@@ -23,11 +23,6 @@ type ProfileLike = {
 const hasText = (value: unknown) =>
   typeof value === 'string' && value.trim().length > 0;
 
-const hasListValue = (value: unknown) => {
-  if (Array.isArray(value)) return value.some((item) => hasText(item));
-  return hasText(value);
-};
-
 export const computeProfileCompletion = (
   profile: ProfileLike | null | undefined
 ): ProfileCompletionStatus => {
