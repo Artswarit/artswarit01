@@ -14,9 +14,14 @@ type ProfileLike = {
   bio?: string | null;
   avatar_url?: string | null;
   tags?: unknown;
-  country?: string | null;
-  city?: string | null;
+  skills?: unknown;
+  categories?: unknown;
+  profession?: string | null;
+  location?: string | null;
 };
+
+const hasText = (value: unknown) =>
+  typeof value === 'string' && value.trim().length > 0;
 
 export const computeProfileCompletion = (
   profile: ProfileLike | null | undefined
@@ -30,53 +35,21 @@ export const computeProfileCompletion = (
     };
   }
 
-  // Define required fields for profile completion - BOTH artists and clients need country
+  // Keep completion practical and aligned with the visible profile UI.
+  // Creative metadata such as bio, avatar, tags, city and country is optional and
+  // must not keep a real profile locked as "Incomplete".
   const baseFields = [
     { key: 'full_name', label: 'Display Name' },
-    { key: 'bio', label: 'Bio' },
-    { key: 'avatar_url', label: 'Profile Picture' },
-    { key: 'country', label: 'Country' },
   ];
 
-  // Additional fields for artists only
-  const artistFields = [
-    { key: 'city', label: 'City' },
-    { key: 'tags', label: 'Categories/Skills' }
-  ];
-
-  const isArtist = profile.role === 'artist' || profile.role === 'premium';
-  const allRequiredFields = isArtist
-    ? [...baseFields, ...artistFields]
-    : baseFields;
+  const allRequiredFields = baseFields;
 
   const missingFields: string[] = [];
 
   allRequiredFields.forEach((field) => {
     const value = (profile as any)[field.key];
 
-    if (field.key === 'tags') {
-      if (!value || (Array.isArray(value) && value.length === 0)) {
-        missingFields.push(field.label);
-      }
-    } else if (field.key === 'avatar_url') {
-      // Avatar must exist and not be a generated placeholder
-      const avatarUrl = (typeof value === 'string' ? value.trim() : '') || '';
-      const isValidAvatar = avatarUrl !== '' && 
-        !avatarUrl.includes('ui-avatars.com') && 
-        !avatarUrl.includes('placeholder');
-      if (!isValidAvatar) {
-        missingFields.push(field.label);
-      }
-    } else if (field.key === 'bio') {
-      // Bio must exist and not be empty or default placeholder
-      const bio = (typeof value === 'string' ? value.trim() : '') || '';
-      const isValidBio = bio !== '' && 
-        bio.toLowerCase() !== 'artist on artswarit' && 
-        bio.toLowerCase() !== 'tell others about yourself and your art...';
-      if (!isValidBio) {
-        missingFields.push(field.label);
-      }
-    } else if (!value || (typeof value === 'string' && value.trim() === '')) {
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
       missingFields.push(field.label);
     }
   });

@@ -348,7 +348,7 @@ export default function ArtistProfile() {
   // scroll that may have happened during the loading phase
   useEffect(() => {
     if (!loading) {
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
   }, [loading]);
 

@@ -7,6 +7,7 @@ import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FollowersList } from "@/components/dashboard/FollowersList";
 import { useRealtimeSync } from "@/lib/realtime-sync";
+import { computeProfileCompletion } from "@/hooks/useProfileCompletion";
 
 interface DashboardHeaderProps {
   user?: any;
@@ -32,6 +33,7 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
     followers: 0,
   });
   const [openFollowers, setOpenFollowers] = useState(false);
+  const completion = computeProfileCompletion(profile);
 
   const fetchStats = useCallback(async (signal?: AbortSignal) => {
     if (!user?.id) return;
@@ -150,7 +152,7 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
   }, [user?.id, fetchStats]);
 
   return (
-    <div className="space-y-6 sm:space-y-10 py-4 sm:py-6 my-2 sm:my-10">
+    <div className="space-y-5 sm:space-y-7 py-2 sm:py-4 my-0 sm:my-4">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6 px-1">
         <div className="space-y-2 sm:space-y-3 max-w-2xl">
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-left-4 duration-500">{title}</h1>
@@ -164,21 +166,13 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
             <CardContent className="flex items-center p-5 sm:p-6">
               <div className="mr-4 sm:mr-5 bg-indigo-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">
                 <div className="h-6 w-6 sm:h-6 sm:w-6 text-indigo-600 flex items-center justify-center font-black text-xs">
-                  {(() => {
-                    const fields = ['full_name', 'avatar_url', 'bio', 'location', 'skills', 'experience_level'];
-                    const filled = fields.filter(f => profile[f] && (Array.isArray(profile[f]) ? profile[f].length > 0 : true)).length;
-                    return Math.round((filled / fields.length) * 100);
-                  })()}%
+                  {completion.completionPercentage}%
                 </div>
               </div>
               <div className="min-w-0">
                 <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Profile</p>
                 <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">
-                  {(() => {
-                    const fields = ['full_name', 'avatar_url', 'bio', 'location', 'skills', 'experience_level'];
-                    const filled = fields.filter(f => profile[f] && (Array.isArray(profile[f]) ? profile[f].length > 0 : true)).length;
-                    return filled === fields.length ? 'Verified' : 'Incomplete';
-                  })()}
+                    {completion.isComplete ? 'Verified' : 'Incomplete'}
                 </p>
               </div>
             </CardContent>

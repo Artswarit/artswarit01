@@ -363,7 +363,7 @@ const ArtworkManagement = () => {
                 checked={selectedArtworks.length === filteredArtworks.length && filteredArtworks.length > 0}
                 onCheckedChange={handleSelectAll}
                 id="select-all"
-                className="h-5.5 w-5.5 rounded-lg border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
+                className="h-5 w-5 rounded-lg border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
               />
               <label htmlFor="select-all" className="text-xs sm:text-sm font-black text-foreground/70 cursor-pointer select-none group-hover:text-primary transition-colors uppercase tracking-widest">
                 Select All
@@ -461,7 +461,7 @@ const ArtworkManagement = () => {
 
       {/* Upload Form Modal */}
       <Dialog open={showUploadForm} onOpenChange={setShowUploadForm}>
-        <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto rounded-[2.5rem] p-0 border-none bg-background shadow-2xl">
+        <DialogContent className="w-screen h-[100dvh] max-w-none max-h-none sm:max-w-2xl sm:w-[95vw] sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none sm:rounded-[2.5rem] p-0 border-none bg-background shadow-2xl flex flex-col">
           <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/10 px-6 py-5 sm:px-8 sm:py-6">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3 text-xl sm:text-2xl font-black tracking-tight">
@@ -475,7 +475,7 @@ const ArtworkManagement = () => {
               </DialogDescription>
             </DialogHeader>
           </div>
-          <div className="p-6 sm:p-8">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-8 pb-[calc(1.25rem+var(--safe-bottom))]">
             <ArtworkUploadForm onCancel={() => setShowUploadForm(false)} onSuccess={() => { setShowUploadForm(false); fetchArtworks(); }} />
           </div>
         </DialogContent>

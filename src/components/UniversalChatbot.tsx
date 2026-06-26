@@ -46,6 +46,13 @@ const UniversalChatbot: React.FC = () => {
       : location.pathname.includes("admin-dashboard") || role === "admin"
       ? "admin"
       : "general";
+  const isDashboardRoute =
+    location.pathname.includes("artist-dashboard") ||
+    location.pathname.includes("client-dashboard") ||
+    location.pathname.includes("admin-dashboard");
+  const isDashboardMessages =
+    isDashboardRoute &&
+    new URLSearchParams(location.search).get("tab") === "messages";
 
   useEffect(() => {
     if (open && messages.length === 0) {
@@ -146,7 +153,7 @@ const UniversalChatbot: React.FC = () => {
   return (
     <>
       {/* Floating icon button */}
-      {!open && (
+      {!open && !isDashboardRoute && !isDashboardMessages && (
         <button
           onClick={() => setOpen(true)}
           className="fixed z-[100] bottom-[calc(5rem+var(--safe-bottom))] right-5 md:bottom-7 md:right-7 h-12 w-12 rounded-full bg-primary/90 backdrop-blur-sm shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center justify-center ring-4 ring-primary/20 hover:ring-primary/40 cursor-pointer p-0"

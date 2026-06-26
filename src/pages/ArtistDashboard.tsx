@@ -92,36 +92,11 @@ const ArtistDashboard = () => {
     }
   };
 
-  // Scroll Position Tracking
+  // Dashboard tabs should open from the top, not restore an old inner scroll.
   useEffect(() => {
-    const handleScroll = () => {
-      sessionStorage.setItem(`artist_dashboard_scroll_${activeTab}`, window.scrollY.toString());
-    };
-
-    let timeoutId: NodeJS.Timeout;
-    const debouncedScroll = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(handleScroll, 100);
-    };
-
-    window.addEventListener('scroll', debouncedScroll);
-    return () => {
-      window.removeEventListener('scroll', debouncedScroll);
-      clearTimeout(timeoutId);
-    };
-  }, [activeTab]);
-
-  // Restore scroll position when tab changes
-  useEffect(() => {
-    const savedScroll = sessionStorage.getItem(`artist_dashboard_scroll_${activeTab}`);
-    if (savedScroll) {
-      // Small delay to allow content to render
-      setTimeout(() => {
-        window.scrollTo({ top: parseInt(savedScroll), behavior: 'smooth' });
-      }, 50);
-    } else {
-      window.scrollTo(0, 0);
-    }
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
   }, [activeTab]);
 
   if (profileLoading && !profile) {
@@ -144,7 +119,7 @@ const ArtistDashboard = () => {
   return (
       <div className="min-h-screen bg-gray-50/50 dark:bg-background">
         <Navbar />
-        <main className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pt-[calc(5.5rem+var(--safe-top))] sm:pt-[calc(7rem+var(--safe-top))] pb-32 sm:pb-20">
+        <main className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pt-[calc(4.75rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))] pb-[calc(7rem+var(--safe-bottom))] sm:pb-20">
           {activeTab === 'overview' && (
             <>
               <DashboardHeader
@@ -187,7 +162,7 @@ const ArtistDashboard = () => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto pt-6 scrollbar-hide pb-[calc(10rem+var(--safe-bottom))]">
+            <div className="flex-1 pt-1 sm:pt-2 scrollbar-hide pb-6">
               <TabsContent value="overview" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'overview' && "hidden")}>
                   {visitedTabs.has('overview') && (

@@ -115,8 +115,8 @@ const ClientDashboard = () => {
   // Read tab from URL on mount
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'settings'].includes(tabParam)) {
-      setSelectedTab(tabParam);
+    if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(tabParam)) {
+      setSelectedTab(tabParam === 'settings' ? 'account' : tabParam);
     } else if (!tabParam) {
       // Default to overview if no tab specified
       setSelectedTab('overview');
@@ -141,9 +141,13 @@ const ClientDashboard = () => {
       const artistIds = projects.filter(p => p.artist_id).map(p => p.artist_id);
       let artistProfiles: Record<string, any> = {};
       if (artistIds.length > 0) {
-        const {
-          data: profiles
-        } = await supabase.from('public_profiles').select('id, full_name, avatar_url').in('id', artistIds);
+        const { data: profiles, error: profileError } = await supabase
+          .from('public_profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', artistIds);
+        if (profileError) {
+          console.warn('Artist profile lookup failed; continuing with fallback names.', profileError);
+        }
         (profiles || []).forEach(p => {
           if (p.id) artistProfiles[p.id] = p;
         });
@@ -153,9 +157,13 @@ const ClientDashboard = () => {
       const projectIds = projects.filter(p => p.status === 'completed').map(p => p.id);
       let ratingsMap: Record<string, number> = {};
       if (projectIds.length > 0) {
-        const {
-          data: reviews
-        } = await supabase.from('project_reviews').select('project_id, rating').in('project_id', projectIds);
+        const { data: reviews, error: reviewsError } = await supabase
+          .from('project_reviews')
+          .select('project_id, rating')
+          .in('project_id', projectIds);
+        if (reviewsError) {
+          console.warn('Project rating lookup failed; continuing without ratings.', reviewsError);
+        }
         (reviews || []).forEach(r => {
           ratingsMap[r.project_id] = r.rating;
         });
@@ -207,8 +215,8 @@ const ClientDashboard = () => {
       });
       setProjects(transformedProjects);
     } catch (err) {
-      console.error('Error fetching projects:', err);
-      toast.error('Failed to load projects. Please refresh the page.');
+      // Keep dashboard usable if an optional nested lookup/RLS edge fails; avoid a blocking toast loop.
+      console.warn('Project refresh skipped:', err);
     } finally {
       setLoading(false);
     }
@@ -315,10 +323,11 @@ const ClientDashboard = () => {
       // 1. Restore Tab (if not in URL)
       if (!searchParams.get('tab')) {
         const savedTab = localStorage.getItem('client_dashboard_active_tab');
-        if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'settings'].includes(savedTab)) {
+        if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(savedTab)) {
           if (!profileIncomplete || savedTab === 'profile') {
-            setSelectedTab(savedTab);
-            setSearchParams({ tab: savedTab }, { replace: true });
+            const normalizedTab = savedTab === 'settings' ? 'account' : savedTab;
+            setSelectedTab(normalizedTab);
+            setSearchParams({ tab: normalizedTab }, { replace: true });
           }
         }
       }
@@ -346,17 +355,11 @@ const ClientDashboard = () => {
     restoreState();
   }, []);
 
-  // Restore scroll position when tab changes
+  // Dashboard tabs should open from the top, not restore an old inner scroll.
   useEffect(() => {
-    const savedScroll = sessionStorage.getItem(`client_dashboard_scroll_${selectedTab}`);
-    if (savedScroll) {
-      // Small delay to allow content to render
-      setTimeout(() => {
-        window.scrollTo({ top: parseInt(savedScroll), behavior: 'smooth' });
-      }, 50);
-    } else {
-      window.scrollTo(0, 0);
-    }
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
   }, [selectedTab]);
 
   // Save State Logic
@@ -377,28 +380,6 @@ const ClientDashboard = () => {
     sessionStorage.setItem('client_dashboard_ui_state', JSON.stringify(uiState));
 
   }, [selectedTab, createProjectOpen, projectModalOpen, selectedProjectId, artistSelectionOpen, assigningProjectId]);
-
-  // Scroll Position Tracking
-  useEffect(() => {
-    const handleScroll = () => {
-      if (selectedTab) {
-        sessionStorage.setItem(`client_dashboard_scroll_${selectedTab}`, window.scrollY.toString());
-      }
-    };
-
-    // Simple debounce
-    let timeoutId: NodeJS.Timeout;
-    const debouncedScroll = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(handleScroll, 100);
-    };
-
-    window.addEventListener('scroll', debouncedScroll);
-    return () => {
-      window.removeEventListener('scroll', debouncedScroll);
-      clearTimeout(timeoutId);
-    };
-  }, [selectedTab]);
 
   // Real-time subscription for projects
   useEffect(() => {
@@ -616,7 +597,7 @@ const ClientDashboard = () => {
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
       <Navbar />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-32 sm:pb-12 pt-[calc(6.5rem+var(--safe-top))] sm:pt-[calc(8rem+var(--safe-top))] lg:pt-[calc(9rem+var(--safe-top))]">
+      <div className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pb-[calc(7rem+var(--safe-bottom))] sm:pb-12 pt-[calc(4.75rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))] lg:pt-[calc(6.5rem+var(--safe-top))]">
         {/* Dashboard Header */}
         {selectedTab === 'overview' && (
           <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
@@ -875,7 +856,7 @@ const ClientDashboard = () => {
                       <Bell className="h-5 w-5 text-blue-500" />
                       Activity
                     </h2>
-                    <Button variant="ghost" size="sm" className="h-8 text-xs font-semibold text-muted-foreground" onClick={() => setSelectedTab('settings')}>
+                    <Button variant="ghost" size="sm" className="h-8 text-xs font-semibold text-muted-foreground" onClick={() => setSelectedTab('account')}>
                       Manage
                     </Button>
                   </div>
