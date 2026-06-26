@@ -116,7 +116,7 @@ const ClientDashboard = () => {
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(tabParam)) {
-      setSelectedTab(tabParam);
+      setSelectedTab(tabParam === 'settings' ? 'account' : tabParam);
     } else if (!tabParam) {
       // Default to overview if no tab specified
       setSelectedTab('overview');
@@ -327,8 +327,9 @@ const ClientDashboard = () => {
         const savedTab = localStorage.getItem('client_dashboard_active_tab');
         if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(savedTab)) {
           if (!profileIncomplete || savedTab === 'profile') {
-            setSelectedTab(savedTab);
-            setSearchParams({ tab: savedTab }, { replace: true });
+            const normalizedTab = savedTab === 'settings' ? 'account' : savedTab;
+            setSelectedTab(normalizedTab);
+            setSearchParams({ tab: normalizedTab }, { replace: true });
           }
         }
       }
