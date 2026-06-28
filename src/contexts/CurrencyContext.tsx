@@ -174,24 +174,26 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Detect user country but KEEP currency as USD by default for universal experience
   const detectUserLocation = useCallback(async () => {
-    try {
-      // Only detect if user hasn't set their country manually or isn't logged in
-      if (userCountry) return;
+    // Only detect if user hasn't set their country manually or isn't logged in
+    if (userCountry) return;
 
-      const response = await fetch('https://ipapi.co/json/');
+    // Guard against slow/blocked ipapi.co — abort after 3s and fail silently
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+    try {
+      const response = await fetch('https://ipapi.co/json/', { signal: controller.signal });
       if (response.ok) {
         const data = await response.json();
         if (data.country_code) {
           setUserCountry(data.country_code);
           setUserCity(data.city || '');
-          
-          // DO NOT auto-switch currency to local if not logged in
-          // Keep it as USD for "Universal" feel as requested by user
-          // Only switch if explicitly loaded from profile preferences
         }
       }
-    } catch (error) {
-      console.warn('Failed to detect user location:', error);
+    } catch {
+      // Network error, timeout, or blocked by client — non-essential, ignore quietly
+    } finally {
+      clearTimeout(timeoutId);
     }
   }, [user, userCountry]);
 
