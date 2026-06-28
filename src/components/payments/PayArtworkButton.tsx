@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Loader2, Lock, AlertCircle } from 'lucide-react';
 import { useRazorpay } from '@/hooks/useRazorpay';
 import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { usePaymentGateway } from '@/hooks/usePaymentGateway';
 import { PaymentMethodBadge } from '@/components/payments/PaymentMethodBadge';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -16,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { createStripeCheckoutSession } from '@/lib/payments/createStripeCheckoutSession';
 
 interface PayArtworkButtonProps {
   artworkId: string;
