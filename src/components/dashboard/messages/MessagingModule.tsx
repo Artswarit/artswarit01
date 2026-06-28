@@ -37,7 +37,10 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     activeConversationId,
     setActiveConversationId,
     sendMessage,
-    loading
+    loading,
+    hasMoreMessages,
+    loadingOlderMessages,
+    loadOlderMessages,
   } = useRealtimeMessages();
 
   const { typingUsers, broadcastTyping } = useRealtime();
