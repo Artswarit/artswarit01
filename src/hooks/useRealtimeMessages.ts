@@ -222,8 +222,10 @@ export const useRealtimeMessages = () => {
         query = query.gt('created_at', clearedAt);
       }
       
+      // Fetch most recent page in descending order, then reverse for display (ascending)
       const { data, error } = await query
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false })
+        .limit(MESSAGES_PAGE_SIZE)
         .abortSignal(signal);
 
       if (error) {
@@ -231,7 +233,8 @@ export const useRealtimeMessages = () => {
         throw error;
       }
 
-      const formattedMessages: Message[] = (data || []).map(msg => ({
+      const rows = (data || []).slice().reverse();
+      const formattedMessages: Message[] = rows.map(msg => ({
         id: msg.id,
         senderId: msg.sender_id || '',
         text: msg.content,
@@ -243,6 +246,7 @@ export const useRealtimeMessages = () => {
 
       if (!signal?.aborted) {
         setMessages(formattedMessages);
+        setHasMoreMessages((data || []).length === MESSAGES_PAGE_SIZE);
       }
 
       // Mark messages as read
