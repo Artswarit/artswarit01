@@ -94,6 +94,7 @@ export default {
 				'token-lg': 'var(--shadow-lg)',
 				'token-elevated': 'var(--shadow-elevated)',
 				'token-brand': 'var(--shadow-brand)'
+			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
 				heading: ['Poppins', 'sans-serif']
