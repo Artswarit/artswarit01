@@ -135,6 +135,19 @@ export function PayArtworkButton({
                 Payments are processed securely. Once unlocked, this artwork will be available in your library and you'll have full access to high-resolution media.
               </AlertDescription>
             </Alert>
+
+            {stripeError && (
+              <Alert
+                role="alert"
+                data-testid="stripe-error"
+                className="rounded-2xl border-destructive/30 bg-destructive/5"
+              >
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <AlertDescription className="text-sm font-medium text-destructive">
+                  {stripeError} You can try again — your selection has been kept.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
           <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-2">
