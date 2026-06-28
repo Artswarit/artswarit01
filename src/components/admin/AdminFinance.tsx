@@ -86,7 +86,7 @@ export default function AdminFinance() {
   };
 
   const filteredPayments = payments.filter(p =>
-    !search || p.id.includes(search) || p.razorpay_payment_id?.toString().includes(search) || p.client_id.includes(search) || p.artist_id.includes(search)
+    !search || p.id.includes(search) || p.client_id.includes(search) || p.artist_id.includes(search)
   );
   const filteredWithdrawals = withdrawals.filter(w =>
     !search || w.id.includes(search) || w.user_id.includes(search)
