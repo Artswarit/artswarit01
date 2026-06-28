@@ -13,6 +13,7 @@ import { useScrollAnchor } from "./hooks/useScrollAnchor";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { TopLoadingBar } from "./components/TopLoadingBar";
+import LogoLoader from "./components/ui/LogoLoader";
 import { AppSplashScreen } from "./components/AppSplashScreen";
 import Index from "./pages/Index";
 import UniversalChatbot from "./components/UniversalChatbot";
@@ -75,6 +76,16 @@ class ErrorBoundary extends React.Component<
   }
   componentDidCatch(error: unknown, info: React.ErrorInfo) {
     console.error('🚨 ErrorBoundary caught an error:', error, info.componentStack);
+    // Auto-recover from stale lazy-chunk imports after a deploy (avoids white screen)
+    const msg = error instanceof Error ? error.message : String(error);
+    if (/Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed/i.test(msg)) {
+      const key = '__chunk_reload_at';
+      const last = Number(sessionStorage.getItem(key) || 0);
+      if (Date.now() - last > 10_000) {
+        sessionStorage.setItem(key, String(Date.now()));
+        window.location.reload();
+      }
+    }
   }
   render() {
     if (this.state.hasError) {
@@ -123,7 +134,7 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+    <LogoLoader text="Loading…" />
   </div>
 );
 
