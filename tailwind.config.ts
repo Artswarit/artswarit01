@@ -78,8 +78,22 @@ export default {
 					'purple-dark': '#5E35B1',
 					gray: '#F5F5F7',
 					black: '#333333'
+				},
+				/* Canonical brand tokens — prefer these over `artswarit.*` in new code */
+				brand: {
+					from: 'var(--brand-from)',
+					to: 'var(--brand-to)',
+					'from-dark': 'var(--brand-from-dark)',
+					'to-dark': 'var(--brand-to-dark)'
 				}
 			},
+			boxShadow: {
+				'token-xs': 'var(--shadow-xs)',
+				'token-sm': 'var(--shadow-sm)',
+				'token-md': 'var(--shadow-md)',
+				'token-lg': 'var(--shadow-lg)',
+				'token-elevated': 'var(--shadow-elevated)',
+				'token-brand': 'var(--shadow-brand)'
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
 				heading: ['Poppins', 'sans-serif']
