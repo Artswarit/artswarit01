@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import React, { lazy, Suspense } from "react";
+import { Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import ScrollToTop from "./components/ScrollToTop";
 import { useScrollAnchor } from "./hooks/useScrollAnchor";
@@ -145,6 +146,9 @@ const AppRoutes = () => {
             <Route path="/verify-email" element={<PageTransition><EmailVerification /></PageTransition>} />
             <Route path="/explore" element={<PageTransition><Explore /></PageTransition>} />
             <Route path="/explore-artists" element={<PageTransition><ExploreArtists /></PageTransition>} />
+            {/* Aliases for legacy/marketing links — keep them out of NotFound */}
+            <Route path="/artists" element={<Navigate to="/explore-artists" replace />} />
+            <Route path="/search" element={<Navigate to="/explore" replace />} />
             <Route path="/categories" element={<PageTransition><Categories /></PageTransition>} />
             <Route path="/artist/:id" element={<PageTransition key="artist-public"><ArtistProfile /></PageTransition>} />
             <Route path="/profile/:id" element={<PageTransition key="user-public"><UserProfile /></PageTransition>} />

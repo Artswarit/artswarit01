@@ -316,7 +316,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // 2. Perform the actual Supabase sign out
       // We await this to ensure the session is invalidated in the database/storage
-      await supabase.auth.signOut();
+      // Revoke the refresh token on the auth server across all devices, not just this tab
+      await supabase.auth.signOut({ scope: 'global' });
 
       // 3. Clear storage keys related to Supabase to prevent ghost sessions
       // This is a safety measure if signOut didn't clean everything

@@ -25,28 +25,38 @@ const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user has a valid recovery session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Listen for auth state changes (recovery link clicked)
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          setIsValidSession(true);
-        }
-      });
+    let recoveryDetected = false;
 
-      // If already in a session from recovery link
-      if (session) {
+    // Listen first so we don't miss the PASSWORD_RECOVERY event fired from the hash
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        recoveryDetected = true;
         setIsValidSession(true);
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
+    });
 
-      return () => subscription.unsubscribe();
-    };
+    // Recovery links arrive with #type=recovery — only those should unlock this page
+    const hash = window.location.hash || '';
+    const hasRecoveryHash = hash.includes('type=recovery');
 
-    checkSession();
+    if (hasRecoveryHash) {
+      // Wait briefly for Supabase to process the recovery token from the URL hash
+      const timeout = setTimeout(() => {
+        if (!recoveryDetected) {
+          setIsValidSession(false);
+          setIsLoading(false);
+        }
+      }, 2000);
+      return () => {
+        clearTimeout(timeout);
+        subscription.unsubscribe();
+      };
+    }
+
+    setIsValidSession(false);
+    setIsLoading(false);
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -114,6 +124,42 @@ const ResetPassword = () => {
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <LogoLoader text="Verifying session…" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!isValidSession && !isSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-4 py-[80px]">
+          <Card className="glass-card border-0 shadow-xl w-full max-w-md">
+            <CardHeader className="space-y-3 pb-4">
+              <CardTitle className="text-xl sm:text-2xl text-center font-heading">
+                Invalid or expired link
+              </CardTitle>
+              <CardDescription className="text-center text-sm">
+                This password reset link is invalid or has expired. Request a new one to continue.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                onClick={() => navigate('/forgot-password')}
+                className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
+              >
+                Request new link
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/login')}
+                className="w-full h-11"
+              >
+                Back to Login
+              </Button>
+            </CardContent>
+          </Card>
         </div>
         <Footer />
       </div>
