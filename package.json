@@ -9,6 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "test": "node ./src/tests/run-tests.cjs",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
