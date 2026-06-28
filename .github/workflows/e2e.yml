@@ -26,6 +26,8 @@ jobs:
       E2E_BASE_URL: http://127.0.0.1:8080
       # Skip Playwright's auto-spawned webServer — we start `vite preview` below.
       E2E_NO_SERVER: '1'
+    steps:
+      - uses: actions/checkout@v4
 
       - uses: oven-sh/setup-bun@v2
         with:
