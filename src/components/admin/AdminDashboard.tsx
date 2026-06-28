@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Users, DollarSign, Shield, AlertTriangle, ScrollText, Activity, Briefcase, Image as ImageIcon, MessageSquare, Server
@@ -18,16 +17,16 @@ import AdminEngagement from './AdminEngagement';
 import AdminSystem from './AdminSystem';
 
 const TABS = [
-  { value: 'overview', icon: Activity, full: 'Overview', short: 'Stats' },
-  { value: 'operations', icon: Briefcase, full: 'Operations', short: 'Ops' },
-  { value: 'revenue', icon: DollarSign, full: 'Revenue', short: 'Money' },
-  { value: 'content', icon: ImageIcon, full: 'Content', short: 'Art' },
-  { value: 'engagement', icon: MessageSquare, full: 'Engagement', short: 'Engage' },
-  { value: 'system', icon: Server, full: 'System', short: 'Sys' },
-  { value: 'users', icon: Users, full: 'Users', short: 'Users' },
-  { value: 'disputes', icon: DollarSign, full: 'Disputes', short: 'Legal' },
-  { value: 'takedown', icon: AlertTriangle, full: 'Takedowns', short: 'Safety' },
-  { value: 'audit', icon: ScrollText, full: 'Audit', short: 'Logs' },
+  { value: 'overview', icon: Activity, label: 'Overview' },
+  { value: 'operations', icon: Briefcase, label: 'Operations' },
+  { value: 'revenue', icon: DollarSign, label: 'Revenue' },
+  { value: 'content', icon: ImageIcon, label: 'Content' },
+  { value: 'engagement', icon: MessageSquare, label: 'Engagement' },
+  { value: 'system', icon: Server, label: 'System' },
+  { value: 'users', icon: Users, label: 'Users' },
+  { value: 'disputes', icon: DollarSign, label: 'Disputes' },
+  { value: 'takedown', icon: AlertTriangle, label: 'Takedowns' },
+  { value: 'audit', icon: ScrollText, label: 'Audit' },
 ];
 
 export default function AdminDashboard() {
@@ -38,50 +37,52 @@ export default function AdminDashboard() {
   }, [activeTab]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 w-full animate-fade-in px-2 sm:px-0">
-      <div className="mb-2 sm:mb-6 animate-fade-in flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1">
-        <div>
-          <h1 className="font-heading text-lg sm:text-2xl lg:text-3xl font-black mb-0.5 flex items-center gap-2 tracking-tight">
-            <Shield className="h-5 w-5 sm:h-7 sm:w-7 text-primary" />
-            Governance
-          </h1>
-          <p className="text-muted-foreground text-[10px] sm:text-sm lg:text-base font-medium">
-            Manual administration · Live Sync · RBI 2026
-          </p>
+    <div className="w-full animate-fade-in">
+      {/* Header */}
+      <header className="flex items-center justify-between px-1 sm:px-2 mb-4 sm:mb-6">
+        <div className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-lg bg-foreground/5 border border-border/60 flex items-center justify-center">
+            <Shield className="h-4 w-4 text-foreground" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-semibold tracking-tight">Governance</h1>
+            <p className="text-[11px] text-muted-foreground font-medium">Live · Root access</p>
+          </div>
         </div>
-        <Badge className="bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 px-3 py-1 font-black rounded-full tracking-widest text-[9px] w-fit uppercase">
-          Root Access
-        </Badge>
-      </div>
+        <div className="flex items-center gap-1.5">
+          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+          <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">live</span>
+        </div>
+      </header>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-2 sm:mb-8">
-        <div className="relative mb-4 sm:mb-6 group">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* Sticky scrollable tab bar */}
+        <div className="sticky top-16 z-20 -mx-2 sm:-mx-0 px-2 sm:px-0 bg-background/80 backdrop-blur-md border-b border-border/60">
           <div
-            className="flex justify-center overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 pb-4 no-scrollbar"
+            className="flex items-center gap-1 overflow-x-auto no-scrollbar py-2.5"
             style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
           >
             <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-            <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 p-1 rounded-full shadow-lg border border-border/40 h-auto">
+            <TabsList className="bg-transparent inline-flex gap-1 p-0 h-auto">
               {TABS.map((t) => (
                 <TabsTrigger
                   key={t.value}
                   value={t.value}
                   className={cn(
-                    "flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-[10px] sm:text-sm px-3 sm:px-5 py-2.5 sm:py-3 rounded-full transition-all duration-300 snap-center min-w-[64px] sm:min-w-0",
-                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md",
-                    "hover:bg-primary/5 hover:text-primary data-[state=inactive]:text-muted-foreground font-black sm:font-medium whitespace-nowrap"
+                    "inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-all whitespace-nowrap font-medium",
+                    "data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-sm",
+                    "hover:bg-muted data-[state=inactive]:text-muted-foreground"
                   )}
                 >
-                  <t.icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t.full}</span>
-                  <span className="sm:hidden">{t.short}</span>
+                  <t.icon className="h-3.5 w-3.5" />
+                  <span>{t.label}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
           </div>
         </div>
 
-        <div className="mt-4 sm:mt-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className="mt-5 sm:mt-6 animate-in fade-in slide-in-from-bottom-1 duration-300">
           <TabsContent value="overview" className="m-0 border-none outline-none focus-visible:ring-0"><AdminOverview /></TabsContent>
           <TabsContent value="operations" className="m-0 border-none outline-none focus-visible:ring-0"><AdminOperations /></TabsContent>
           <TabsContent value="revenue" className="m-0 border-none outline-none focus-visible:ring-0"><AdminRevenue /></TabsContent>

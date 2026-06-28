@@ -21,15 +21,15 @@ export function rangeToDate(r: RangeKey): Date {
 
 export default function AdminFilters({ range, onChange, className }: Props) {
   return (
-    <div className={cn("flex p-1 bg-muted/40 rounded-full w-fit", className)}>
+    <div className={cn("flex p-0.5 bg-muted/50 rounded-full w-fit border border-border/40", className)}>
       {OPTIONS.map((o) => (
         <button
           key={o.key}
           onClick={() => onChange(o.key)}
           className={cn(
-            "px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all",
+            "px-3 py-1.5 rounded-full text-[11px] font-medium transition-all",
             range === o.key
-              ? "bg-primary text-primary-foreground shadow"
+              ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           )}
         >

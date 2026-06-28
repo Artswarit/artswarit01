@@ -20,6 +20,7 @@
     "test:e2e:tablet": "playwright test --project=tablet-ipad --project=tablet-landscape"
   },
   "dependencies": {
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "@hello-pangea/dnd": "^16.6.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
