@@ -21,6 +21,7 @@ const TABS = [
   { value: 'overview', icon: Activity, label: 'Overview' },
   { value: 'operations', icon: Briefcase, label: 'Operations' },
   { value: 'revenue', icon: DollarSign, label: 'Revenue' },
+  { value: 'finance', icon: Wallet, label: 'Finance' },
   { value: 'content', icon: ImageIcon, label: 'Content' },
   { value: 'engagement', icon: MessageSquare, label: 'Engagement' },
   { value: 'system', icon: Server, label: 'System' },
