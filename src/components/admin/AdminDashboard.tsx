@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Users, DollarSign, Shield, AlertTriangle, ScrollText, Activity, Briefcase, Image as ImageIcon, MessageSquare, Server
+  Users, DollarSign, Shield, AlertTriangle, ScrollText, Activity, Briefcase, Image as ImageIcon, MessageSquare, Server, Wallet
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
