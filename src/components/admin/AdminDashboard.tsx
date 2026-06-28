@@ -57,21 +57,21 @@ export default function AdminDashboard() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Sticky scrollable tab bar */}
-        <div className="sticky top-16 z-20 -mx-2 sm:-mx-0 px-2 sm:px-0 bg-background/80 backdrop-blur-md border-b border-border/60">
+        <div className="sticky top-16 sm:top-20 z-20 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 bg-background/85 backdrop-blur-md border-b border-border/60">
           <div
             className="flex items-center gap-1 overflow-x-auto no-scrollbar py-2.5"
             style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
           >
             <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-            <TabsList className="bg-transparent inline-flex gap-1 p-0 h-auto">
+            <TabsList className="bg-transparent inline-flex gap-1.5 p-0 h-auto">
               {TABS.map((t) => (
                 <TabsTrigger
                   key={t.value}
                   value={t.value}
                   className={cn(
-                    "inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full transition-all whitespace-nowrap font-medium",
-                    "data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-sm",
-                    "hover:bg-muted data-[state=inactive]:text-muted-foreground"
+                    "inline-flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full transition-all whitespace-nowrap font-medium ease-apple",
+                    "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_2px_10px_-2px_hsl(var(--primary)/0.4)]",
+                    "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted data-[state=inactive]:hover:text-foreground"
                   )}
                 >
                   <t.icon className="h-3.5 w-3.5" />
