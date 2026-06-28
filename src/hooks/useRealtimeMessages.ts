@@ -49,6 +49,8 @@ interface Conversation {
   unreadCount: number;
 }
 
+const MESSAGES_PAGE_SIZE = 30;
+
 export const useRealtimeMessages = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -56,6 +58,8 @@ export const useRealtimeMessages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
   // Set up presence
@@ -218,8 +222,10 @@ export const useRealtimeMessages = () => {
         query = query.gt('created_at', clearedAt);
       }
       
+      // Fetch most recent page in descending order, then reverse for display (ascending)
       const { data, error } = await query
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false })
+        .limit(MESSAGES_PAGE_SIZE)
         .abortSignal(signal);
 
       if (error) {
@@ -227,7 +233,8 @@ export const useRealtimeMessages = () => {
         throw error;
       }
 
-      const formattedMessages: Message[] = (data || []).map(msg => ({
+      const rows = (data || []).slice().reverse();
+      const formattedMessages: Message[] = rows.map(msg => ({
         id: msg.id,
         senderId: msg.sender_id || '',
         text: msg.content,
@@ -239,6 +246,7 @@ export const useRealtimeMessages = () => {
 
       if (!signal?.aborted) {
         setMessages(formattedMessages);
+        setHasMoreMessages((data || []).length === MESSAGES_PAGE_SIZE);
       }
 
       // Mark messages as read
@@ -262,6 +270,60 @@ export const useRealtimeMessages = () => {
       console.error('Error fetching messages:', error);
     }
   }, [user, conversations]);
+
+  // Load older messages (pagination). Returns number of messages prepended.
+  const loadOlderMessages = useCallback(async (): Promise<number> => {
+    if (!user || !activeConversationId || loadingOlderMessages || !hasMoreMessages) return 0;
+    const oldest = messages[0];
+    if (!oldest) return 0;
+
+    setLoadingOlderMessages(true);
+    try {
+      const conv = conversations.find(c => c.id === activeConversationId);
+      const clearedAt = conv ? (conv.clientId === user.id ? conv.client_last_cleared_at : conv.artist_last_cleared_at) : null;
+
+      let query = supabase
+        .from('messages')
+        .select('*')
+        .eq('conversation_id', activeConversationId)
+        .lt('created_at', oldest.timestamp.toISOString());
+
+      if (clearedAt) {
+        query = query.gt('created_at', clearedAt);
+      }
+
+      const { data, error } = await query
+        .order('created_at', { ascending: false })
+        .limit(MESSAGES_PAGE_SIZE);
+
+      if (error) throw error;
+
+      const rows = (data || []).slice().reverse();
+      const olderFormatted: Message[] = rows.map(msg => ({
+        id: msg.id,
+        senderId: msg.sender_id || '',
+        text: msg.content,
+        timestamp: new Date(msg.created_at),
+        read: msg.is_read || false,
+        attachments: parseAttachments(msg.attachments),
+        status: msg.is_read ? 'read' : 'delivered'
+      }));
+
+      setMessages(prev => {
+        const existing = new Set(prev.map(m => m.id));
+        const deduped = olderFormatted.filter(m => !existing.has(m.id));
+        return [...deduped, ...prev];
+      });
+      setHasMoreMessages((data || []).length === MESSAGES_PAGE_SIZE);
+      return olderFormatted.length;
+    } catch (err) {
+      console.error('Error loading older messages:', err);
+      return 0;
+    } finally {
+      setLoadingOlderMessages(false);
+    }
+  }, [user, activeConversationId, loadingOlderMessages, hasMoreMessages, messages, conversations]);
+
 
   // Send a new message
   const sendMessage = useCallback(async (conversationId: string, content: string, attachments?: Attachment[], signal?: AbortSignal) => {
@@ -465,11 +527,13 @@ export const useRealtimeMessages = () => {
   // Handle active conversation change
   useEffect(() => {
     if (activeConversationId) {
+      setHasMoreMessages(false);
       const controller = new AbortController();
       fetchMessages(activeConversationId, controller.signal);
       return () => controller.abort();
     } else {
       setMessages([]);
+      setHasMoreMessages(false);
     }
   }, [activeConversationId, fetchMessages]);
 
@@ -489,6 +553,9 @@ export const useRealtimeMessages = () => {
     setActiveConversationId,
     sendMessage,
     loading,
+    hasMoreMessages,
+    loadingOlderMessages,
+    loadOlderMessages,
     refetch: fetchConversations
   };
 };

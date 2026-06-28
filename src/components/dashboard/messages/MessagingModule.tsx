@@ -37,7 +37,10 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     activeConversationId,
     setActiveConversationId,
     sendMessage,
-    loading
+    loading,
+    hasMoreMessages,
+    loadingOlderMessages,
+    loadOlderMessages,
   } = useRealtimeMessages();
 
   const { typingUsers, broadcastTyping } = useRealtime();
@@ -186,6 +189,23 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
 
   const handleAttach = (attachment: Attachment) => {
     setPendingAttachments((prev) => [...prev, attachment]);
+  };
+
+  const handleLoadOlder = async () => {
+    const viewport = messagesViewportRef.current;
+    if (!viewport || loadingOlderMessages || !hasMoreMessages) return;
+    const prevHeight = viewport.scrollHeight;
+    const prevTop = viewport.scrollTop;
+    const added = await loadOlderMessages();
+    if (added > 0) {
+      // Restore scroll so the previously visible message stays in place
+      requestAnimationFrame(() => {
+        const v = messagesViewportRef.current;
+        if (!v) return;
+        const delta = v.scrollHeight - prevHeight;
+        v.scrollTop = prevTop + delta;
+      });
+    }
   };
 
   const handleRemoveAttachment = (index: number) => {
@@ -563,6 +583,23 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                     </div>
                   ) : (
                     <>
+                      {!messageSearchQuery && hasMoreMessages && (
+                        <div className="flex justify-center py-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleLoadOlder}
+                            disabled={loadingOlderMessages}
+                            className="rounded-full px-4 h-8 text-xs font-semibold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+                          >
+                            {loadingOlderMessages ? (
+                              <><Loader2 className="h-3 w-3 mr-2 animate-spin" />Loading…</>
+                            ) : (
+                              'Load older messages'
+                            )}
+                          </Button>
+                        </div>
+                      )}
                       {filteredMessages.map((msg, idx) => {
                         const isOwn = msg.senderId === user?.id;
                         const prev = filteredMessages[idx - 1];
