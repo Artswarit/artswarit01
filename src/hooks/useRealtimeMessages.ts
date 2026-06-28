@@ -527,11 +527,13 @@ export const useRealtimeMessages = () => {
   // Handle active conversation change
   useEffect(() => {
     if (activeConversationId) {
+      setHasMoreMessages(false);
       const controller = new AbortController();
       fetchMessages(activeConversationId, controller.signal);
       return () => controller.abort();
     } else {
       setMessages([]);
+      setHasMoreMessages(false);
     }
   }, [activeConversationId, fetchMessages]);
 
@@ -551,6 +553,9 @@ export const useRealtimeMessages = () => {
     setActiveConversationId,
     sendMessage,
     loading,
+    hasMoreMessages,
+    loadingOlderMessages,
+    loadOlderMessages,
     refetch: fetchConversations
   };
 };
