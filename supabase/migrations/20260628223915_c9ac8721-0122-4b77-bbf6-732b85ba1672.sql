@@ -1,0 +1,1 @@
+ALTER TABLE public.project_milestones ENABLE ROW LEVEL SECURITY;
