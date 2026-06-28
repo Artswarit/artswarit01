@@ -44,6 +44,7 @@ export function PayMilestoneButton({
   const { isProArtist } = useArtistPlan(artistId);
   const { formatGatewayAmount, gatewayCurrency, isIndian, provider } = usePaymentGateway(exchangeRate);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [stripeProcessing, setStripeProcessing] = useState(false);
 
   // Calculate earnings based on artist plan (in USD base)
   const earnings = calculateEarnings(amount, isProArtist);
@@ -54,13 +55,15 @@ export function PayMilestoneButton({
   const platformFeeDisplay = formatGatewayAmount(earnings.platformFee);
 
   const handlePayment = async () => {
-    // Close confirm dialog FIRST so its backdrop doesn't block Razorpay overlay
-    setConfirmOpen(false);
-    
+    // Guard against double-submit before React commits the disabled re-render.
+    if (stripeProcessing || loading) return;
+
     if (provider === 'stripe') {
+      setStripeProcessing(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        const response = await fetch(`${(supabase as any).supabaseUrl}/functions/v1/create-checkout-session`, {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+        const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout-session`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session?.access_token}`,
@@ -70,17 +73,20 @@ export function PayMilestoneButton({
         });
         const data = await response.json();
         if (data.url) {
+          // Stay disabled until navigation tears the page down.
           window.location.href = data.url;
-        } else {
-          throw new Error(data.error || 'Failed to create checkout session');
+          return;
         }
+        throw new Error(data.error || 'Failed to create checkout session');
       } catch (err: any) {
         toast.error(err.message || 'Failed to initiate Stripe payment');
+        setStripeProcessing(false);
       }
       return;
     }
 
-    // Default to Razorpay
+    // Razorpay — close confirm dialog FIRST so its backdrop doesn't block Razorpay overlay
+    setConfirmOpen(false);
     setTimeout(() => {
       initiatePayment({
         milestoneId,
@@ -92,15 +98,16 @@ export function PayMilestoneButton({
     }, 350);
   };
 
+
   return (
     <>
       <Button
         size="sm"
         className={`bg-primary hover:bg-primary/90 ${className}`}
         onClick={() => setConfirmOpen(true)}
-        disabled={disabled || loading}
+        disabled={disabled || loading || stripeProcessing}
       >
-        {loading ? (
+        {loading || stripeProcessing ? (
           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
         ) : (
           <DollarSign className="h-4 w-4 mr-1" />
@@ -108,7 +115,7 @@ export function PayMilestoneButton({
         Fund Milestone ({gatewayDisplayAmount})
       </Button>
 
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <Dialog open={confirmOpen} onOpenChange={(v) => !stripeProcessing && setConfirmOpen(v)}>
         <DialogContent className="w-[calc(100%-2rem)] max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle>Confirm Payment</DialogTitle>
@@ -164,15 +171,15 @@ export function PayMilestoneButton({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={loading || stripeProcessing}>
               Cancel
             </Button>
             <Button 
               className="bg-primary hover:bg-primary/90"
               onClick={handlePayment}
-              disabled={loading}
+              disabled={loading || stripeProcessing}
             >
-              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {(loading || stripeProcessing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Pay {gatewayDisplayAmount}
             </Button>
           </DialogFooter>
