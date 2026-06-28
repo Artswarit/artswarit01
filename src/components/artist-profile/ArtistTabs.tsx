@@ -445,7 +445,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
     }}>
         <div className="relative mb-6 sm:mb-10 group mt-4">
           <div className="w-full overflow-x-auto pb-4 scrollbar-hide px-1">
-            <TabsList className="flex items-center justify-start lg:justify-center w-max sm:w-full min-w-full bg-white/10 dark:bg-black/20 backdrop-blur-2xl p-1.5 sm:p-2.5 rounded-[1.5rem] sm:rounded-[3rem] border border-white/20 shadow-2xl h-auto">
+            <TabsList className="flex items-center justify-start lg:justify-center w-max sm:w-full min-w-full bg-white/10 dark:bg-black/20 backdrop-blur-2xl p-1.5 sm:p-2.5 rounded-3xl sm:rounded-[3rem] border border-white/20 shadow-2xl h-auto">
               <TabsTrigger 
                 value="all" 
                 className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"

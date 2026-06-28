@@ -845,11 +845,11 @@ const ClientSettings = () => {
             
             <Button 
               onClick={changePassword} 
-              disabled={saving || !passwordData.newPassword}
+              disabled={!passwordData.newPassword}
+              loading={saving}
               className="w-full"
               variant="outline"
             >
-              {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
               Update Password
             </Button>
           </CardContent>

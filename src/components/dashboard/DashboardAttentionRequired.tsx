@@ -163,7 +163,7 @@ const DashboardAttentionRequired = ({ role, profile, onAction }: DashboardAttent
           <div 
             key={item.id}
             className={cn(
-              "group relative overflow-hidden p-5 rounded-[1.5rem] border transition-all duration-300 hover:shadow-xl",
+              "group relative overflow-hidden p-5 rounded-3xl border transition-all duration-300 hover:shadow-xl",
               item.severity === 'high' 
                 ? "bg-red-50/50 border-red-100 dark:bg-red-950/10 dark:border-red-900/20 shadow-red-500/5" 
                 : "bg-white border-border/50 dark:bg-card/50 shadow-lg shadow-black/5"

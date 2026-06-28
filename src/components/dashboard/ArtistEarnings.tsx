@@ -293,7 +293,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[1.5rem] sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
+        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-3xl sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
           <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
             <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
               Total Earnings
@@ -307,7 +307,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
           </CardContent>
         </Card>
         
-        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[1.5rem] sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
+        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-3xl sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
           <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
             <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
               Pending Payments
@@ -321,7 +321,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
           </CardContent>
         </Card>
         
-        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-[1.5rem] sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group sm:col-span-2 lg:col-span-1">
+        <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-3xl sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group sm:col-span-2 lg:col-span-1">
           <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
             <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
               Avg Per Sale

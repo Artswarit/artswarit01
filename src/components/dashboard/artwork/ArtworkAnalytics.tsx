@@ -79,7 +79,7 @@ const ArtworkAnalytics = ({ data }: ArtworkAnalyticsProps) => {
       <CardContent className="p-4 sm:p-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {stats.map((stat, index) => (
-            <div key={index} className="p-4 sm:p-5 border border-primary/10 rounded-[1.5rem] bg-background/50 hover:bg-background hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 group">
+            <div key={index} className="p-4 sm:p-5 border border-primary/10 rounded-3xl bg-background/50 hover:bg-background hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 group">
               <div className="flex items-center justify-between mb-3">
                 <div className={`p-2 rounded-xl bg-muted/50 group-hover:bg-background transition-colors ${stat.color}`}>
                   <stat.icon className="h-5 w-5 sm:h-6 sm:w-6" />

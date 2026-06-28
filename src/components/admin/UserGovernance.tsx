@@ -359,13 +359,13 @@ export default function UserGovernance() {
         {/* Mobile View: High Density Responsive Cards */}
         <div className="block sm:hidden space-y-3">
            {filteredUsers.length === 0 ? (
-              <Card className="p-12 text-center text-muted-foreground font-medium rounded-[1.5rem] border-dashed">
+              <Card className="p-12 text-center text-muted-foreground font-medium rounded-3xl border-dashed">
                  No platform users found.
               </Card>
            ) : (
               filteredUsers.map(u => (
                 <Card key={u.id} className={cn(
-                  "p-4 rounded-[1.5rem] border shadow-sm transition-all duration-300", 
+                  "p-4 rounded-3xl border shadow-sm transition-all duration-300", 
                   selectedIds.has(u.id) ? "bg-primary/5 border-primary/20 ring-1 ring-primary/20" : "bg-card border-muted/40"
                 )}>
                    <div className="flex items-start gap-3">
