@@ -9,7 +9,13 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "test": "node ./src/tests/run-tests.cjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "chromatic": "chromatic --exit-zero-on-changes",
+    "test:e2e": "playwright test",
+    "test:e2e:mobile": "playwright test --project=mobile-iphone --project=mobile-small",
+    "test:e2e:tablet": "playwright test --project=tablet-ipad --project=tablet-landscape"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
