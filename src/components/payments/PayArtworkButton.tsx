@@ -109,8 +109,6 @@ export function PayArtworkButton({
       </Button>
 
       <Dialog open={confirmOpen} onOpenChange={(v) => !stripeProcessing && setConfirmOpen(v)}>
-
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="w-[calc(100%-2rem)] max-w-md mx-auto rounded-[2rem]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black">Unlock Artwork</DialogTitle>
