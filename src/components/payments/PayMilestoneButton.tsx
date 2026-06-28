@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Loader2, AlertCircle } from 'lucide-react';
 import { useRazorpay } from '@/hooks/useRazorpay';
@@ -7,7 +7,6 @@ import { useArtistPlan, calculateEarnings } from '@/hooks/useArtistPlan';
 import { usePaymentGateway } from '@/hooks/usePaymentGateway';
 import { PaymentMethodBadge } from '@/components/payments/PaymentMethodBadge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -17,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { createStripeCheckoutSession } from '@/lib/payments/createStripeCheckoutSession';
 
 interface PayMilestoneButtonProps {
   milestoneId: string;
