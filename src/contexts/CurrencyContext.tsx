@@ -154,9 +154,12 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Fetch exchange rates - using a free API
   const fetchExchangeRates = useCallback(async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     try {
-      // Fetch from API
-      const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+      const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
+        signal: controller.signal,
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.rates) {
@@ -164,10 +167,10 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setExchangeRates(newRates);
         }
       }
-    } catch (error) {
-      console.warn('Failed to fetch exchange rates, using fallback rates:', error);
-      // Keep using fallback rates or whatever we have
+    } catch {
+      // Fall back silently to baked-in FALLBACK_RATES
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   }, []);
