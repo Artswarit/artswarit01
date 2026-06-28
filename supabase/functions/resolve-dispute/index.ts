@@ -36,9 +36,15 @@ serve(async (req) => {
     
     if (userError || !user) throw new Error('Unauthorized');
 
-    // Currently we rely on the front-end to ensure only admins reach this UI, 
-    // but in a production app we'd also double check the `roles` table here.
-    
+    // Server-side admin guard — never trust the client UI to gate this.
+    const { data: isAdmin, error: roleErr } = await supabaseAdmin.rpc('is_admin', { _user_id: user.id });
+    if (roleErr || !isAdmin) {
+      return new Response(JSON.stringify({ error: 'Forbidden: admin role required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { disputeId, resolution, status, artistPayout, clientRefund, logType } = await req.json();
 
     if (!disputeId || !resolution || !status) {
