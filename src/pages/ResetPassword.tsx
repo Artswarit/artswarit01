@@ -25,28 +25,38 @@ const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user has a valid recovery session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Listen for auth state changes (recovery link clicked)
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          setIsValidSession(true);
-        }
-      });
+    let recoveryDetected = false;
 
-      // If already in a session from recovery link
-      if (session) {
+    // Listen first so we don't miss the PASSWORD_RECOVERY event fired from the hash
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        recoveryDetected = true;
         setIsValidSession(true);
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
+    });
 
-      return () => subscription.unsubscribe();
-    };
+    // Recovery links arrive with #type=recovery — only those should unlock this page
+    const hash = window.location.hash || '';
+    const hasRecoveryHash = hash.includes('type=recovery');
 
-    checkSession();
+    if (hasRecoveryHash) {
+      // Wait briefly for Supabase to process the recovery token from the URL hash
+      const timeout = setTimeout(() => {
+        if (!recoveryDetected) {
+          setIsValidSession(false);
+          setIsLoading(false);
+        }
+      }, 2000);
+      return () => {
+        clearTimeout(timeout);
+        subscription.unsubscribe();
+      };
+    }
+
+    setIsValidSession(false);
+    setIsLoading(false);
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
