@@ -103,7 +103,7 @@ serve(async (req) => {
             .order('started_at', { ascending: false })
             .limit(1)
             .maybeSingle();
-          const feeRate = !!subscription ? PRO_COMMISSION : STARTER_COMMISSION;
+          const feeRate = subscription ? PRO_COMMISSION : STARTER_COMMISSION;
           platformFee = Number((grossAmount * feeRate).toFixed(2));
           payoutAmount = Number((grossAmount - platformFee).toFixed(2));
         }
@@ -173,7 +173,7 @@ serve(async (req) => {
           .order('sort_order');
 
         if (siblings) {
-          const thisIndex = siblings.findIndex((m: any) => m.id === milestone.id);
+          const thisIndex = siblings.findIndex((m: { id: string }) => m.id === milestone.id);
           if (thisIndex !== -1 && thisIndex < siblings.length - 1) {
             const nextMilestone = siblings[thisIndex + 1];
             if (nextMilestone.status === 'LOCKED') {
@@ -204,9 +204,10 @@ serve(async (req) => {
         }
 
         results.push({ milestone: milestone.id, status: 'success' });
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
         console.error(`Error processing milestone ${milestone.id}:`, err);
-        results.push({ milestone: milestone.id, status: 'error', error: err.message });
+        results.push({ milestone: milestone.id, status: 'error', error: message });
       }
     }
 
@@ -218,9 +219,10 @@ serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     console.error('Edge function fatal error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
