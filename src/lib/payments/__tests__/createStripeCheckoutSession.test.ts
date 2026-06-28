@@ -21,7 +21,6 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllEnvs();
   global.fetch = ORIGINAL_FETCH;
-  vi.restoreAllMocks();
 });
 
 describe('createStripeCheckoutSession', () => {
