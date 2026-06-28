@@ -159,7 +159,7 @@ export function useSecondaryKpis() {
       const week = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const [active, pendingArt, openReports, failedPay] = await Promise.all([
         supabase.from("login_sessions").select("user_id", { count: "exact", head: true }).gte("last_active_at", day),
-        supabase.from("artworks").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("artworks").select("id", { count: "exact", head: true }).eq("status", "private"),
         supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("payments").select("id", { count: "exact", head: true }).eq("status", "failed").gte("created_at", week),
       ]);
@@ -219,7 +219,7 @@ export function useContentKpis() {
       today.setHours(0, 0, 0, 0);
       const [todayCount, pending, reportedArt] = await Promise.all([
         supabase.from("artworks").select("id", { count: "exact", head: true }).gte("created_at", today.toISOString()),
-        supabase.from("artworks").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("artworks").select("id", { count: "exact", head: true }).eq("status", "private"),
         supabase.from("reports").select("artwork_id", { count: "exact", head: true }).not("artwork_id", "is", null),
       ]);
       return {
