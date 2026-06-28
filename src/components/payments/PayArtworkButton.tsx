@@ -98,15 +98,17 @@ export function PayArtworkButton({
         variant={variant}
         className={className}
         onClick={() => setConfirmOpen(true)}
-        disabled={loading}
+        disabled={loading || stripeProcessing}
       >
-        {loading ? (
+        {loading || stripeProcessing ? (
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
         ) : (
           <Crown className="h-4 w-4 mr-2" />
         )}
         Unlock Artwork ({gatewayDisplayAmount})
       </Button>
+
+      <Dialog open={confirmOpen} onOpenChange={(v) => !stripeProcessing && setConfirmOpen(v)}>
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="w-[calc(100%-2rem)] max-w-md mx-auto rounded-[2rem]">
