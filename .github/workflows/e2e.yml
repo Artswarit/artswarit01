@@ -1,0 +1,61 @@
+name: Playwright E2E
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - mobile-iphone
+          - mobile-small
+          - tablet-ipad
+          - tablet-landscape
+    env:
+      # Optional: provide a pre-minted Supabase session to exercise authenticated
+      # dashboards. When missing, the suite gracefully skips auth-only specs.
+      E2E_SUPABASE_SESSION_JSON: ${{ secrets.E2E_SUPABASE_SESSION_JSON }}
+      E2E_SUPABASE_STORAGE_KEY: ${{ secrets.E2E_SUPABASE_STORAGE_KEY }}
+      E2E_BASE_URL: http://127.0.0.1:8080
+      # Skip Playwright's auto-spawned webServer — we start `vite preview` below.
+      E2E_NO_SERVER: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build app
+        run: bun run build
+
+      - name: Start preview server
+        run: |
+          bun run preview --port 8080 --host 127.0.0.1 &
+          npx --yes wait-on http://127.0.0.1:8080 -t 60000
+
+      - name: Run Playwright (${{ matrix.project }})
+        run: bunx playwright test --project=${{ matrix.project }}
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: |
+            playwright-report
+            test-results
+          retention-days: 14
