@@ -173,7 +173,7 @@ export default function ArtistSelectionModal({
                     size="icon"
                     variant="ghost"
                     className="h-[48px] w-[48px] sm:h-9 sm:w-9 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                  >
+                   aria-label="Add artist to project">
                     <UserPlus className="h-5 w-5 sm:h-4 sm:w-4" />
                   </Button>
                 </div>

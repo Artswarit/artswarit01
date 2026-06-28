@@ -66,7 +66,7 @@ export const ChatFullscreenPreview: React.FC<ChatFullscreenPreviewProps> = ({
     >
       {/* Sticky header */}
       <header className="flex items-center gap-3 px-3 sm:px-6 py-3 border-b border-muted/20 bg-white/95 dark:bg-card/95 backdrop-blur-xl shrink-0">
-        <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0">
+        <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0" aria-label="Back to conversations">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <Avatar className="h-10 w-10 rounded-2xl shrink-0">
@@ -76,7 +76,7 @@ export const ChatFullscreenPreview: React.FC<ChatFullscreenPreviewProps> = ({
           <p className="text-sm font-bold truncate">Aanya Sharma</p>
           <p className="text-[11px] text-emerald-600 font-semibold">Online</p>
         </div>
-        <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0">
+        <Button variant="ghost" size="icon" className="rounded-full h-10 w-10 shrink-0" aria-label="Conversation options">
           <MoreVertical className="h-5 w-5" />
         </Button>
       </header>
@@ -150,7 +150,7 @@ export const ChatFullscreenPreview: React.FC<ChatFullscreenPreviewProps> = ({
           <div className="flex-1 rounded-3xl border border-muted/30 bg-background px-4 py-2 text-sm min-h-[40px] flex items-center text-muted-foreground/80">
             {composerValue || 'Message'}
           </div>
-          <Button size="icon" className="rounded-full h-10 w-10 shrink-0">
+          <Button size="icon" className="rounded-full h-10 w-10 shrink-0" aria-label="Send message">
             <Send className="h-4 w-4" />
           </Button>
         </div>

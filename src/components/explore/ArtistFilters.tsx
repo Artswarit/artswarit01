@@ -114,7 +114,7 @@ const ArtistFilters = ({ onFiltersChange, onClose }: ArtistFiltersProps) => {
             size="icon" 
             onClick={onClose}
             className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors h-10 w-10"
-          >
+           aria-label="Close filters">
             <X className="h-5 w-5" />
           </Button>
         )}

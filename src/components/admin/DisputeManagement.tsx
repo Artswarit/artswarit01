@@ -344,7 +344,7 @@ export function DisputeManagement() {
                             </div>
                           </div>
                           {e.file_url && (
-                            <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" asChild aria-label="Open evidence file in new tab">
                               <a href={e.file_url} target="_blank" rel="noopener noreferrer">
                                 <ExternalLink className="h-4 w-4" />
                               </a>

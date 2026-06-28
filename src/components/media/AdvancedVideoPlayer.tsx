@@ -144,7 +144,7 @@ const AdvancedVideoPlayer = ({ src, poster, title, autoPlay = false }: AdvancedV
         {/* Control Buttons */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={togglePlay} className="text-white hover:bg-white/20">
+            <Button variant="ghost" size="icon" onClick={togglePlay} className="text-white hover:bg-white/20" aria-label="Play or pause video">
               {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
             </Button>
             
@@ -157,7 +157,7 @@ const AdvancedVideoPlayer = ({ src, poster, title, autoPlay = false }: AdvancedV
             </Button>
 
             <div className="flex items-center gap-2 ml-4">
-              <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white hover:bg-white/20">
+              <Button variant="ghost" size="icon" onClick={toggleMute} className="text-white hover:bg-white/20" aria-label="Toggle mute">
                 {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </Button>
               <div className="w-20">
@@ -185,7 +185,7 @@ const AdvancedVideoPlayer = ({ src, poster, title, autoPlay = false }: AdvancedV
               <option value={2} className="text-black">2x</option>
             </select>
             
-            <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-white hover:bg-white/20">
+            <Button variant="ghost" size="icon" onClick={toggleFullscreen} className="text-white hover:bg-white/20" aria-label="Toggle fullscreen">
               <Maximize className="h-4 w-4" />
             </Button>
           </div>

@@ -343,7 +343,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
           <div className="p-4 sm:p-7 space-y-4 sm:space-y-6">
             <div className="flex items-center justify-between px-1">
               <h2 className="text-2xl sm:text-3xl font-black bg-gradient-to-br from-primary via-primary/90 to-purple-600 bg-clip-text text-transparent tracking-tighter">Messages</h2>
-              <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 sm:h-14 sm:w-14 hover:bg-primary/10 hover:text-primary transition-all duration-300 min-h-[48px]">
+              <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 sm:h-14 sm:w-14 hover:bg-primary/10 hover:text-primary transition-all duration-300 min-h-[48px]" aria-label="Conversation options">
                 <MoreVertical className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
             </div>
@@ -525,7 +525,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="rounded-xl h-12 w-12 sm:h-12 sm:w-12 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all min-h-[48px]">
+                      <Button variant="ghost" size="icon" className="rounded-xl h-12 w-12 sm:h-12 sm:w-12 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all min-h-[48px]" aria-label="Conversation options">
                         <MoreVertical className="h-5 w-5 sm:h-6 sm:w-6" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -740,7 +740,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                     disabled={(!messageInput.trim() && pendingAttachments.length === 0) || loading}
                     size="icon"
                     className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 shadow-md shadow-primary/20 transition-all shrink-0 active:scale-90 disabled:opacity-40 disabled:scale-90"
-                  >
+                   aria-label="Send message">
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </Button>
                 </div>

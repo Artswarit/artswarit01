@@ -187,7 +187,7 @@ const ContentCollections = () => {
                   <p className="text-sm text-muted-foreground mt-1">{collection.description}</p>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Edit collection">
                     <Edit2 className="h-3 w-3" />
                   </Button>
                   <Button 
