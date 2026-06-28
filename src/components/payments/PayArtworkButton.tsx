@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Loader2, Lock, AlertCircle } from 'lucide-react';
 import { useRazorpay } from '@/hooks/useRazorpay';
 import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { usePaymentGateway } from '@/hooks/usePaymentGateway';
 import { PaymentMethodBadge } from '@/components/payments/PaymentMethodBadge';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -16,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { createStripeCheckoutSession } from '@/lib/payments/createStripeCheckoutSession';
 
 interface PayArtworkButtonProps {
   artworkId: string;
@@ -41,6 +41,12 @@ export function PayArtworkButton({
   const { formatGatewayAmount, gatewayCurrency, provider } = usePaymentGateway();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [stripeProcessing, setStripeProcessing] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Cancel any in-flight checkout request on unmount so the user can't get
+  // permanently stuck on a hanging request.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const gatewayDisplayAmount = formatGatewayAmount(amount);
 
@@ -50,28 +56,24 @@ export function PayArtworkButton({
     if (stripeProcessing || loading) return;
 
     if (provider === 'stripe') {
+      setStripeError(null);
       setStripeProcessing(true);
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-        const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout-session`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session?.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ artworkId }),
-        });
-        const data = await response.json();
-        if (data.url) {
-          // Leave stripeProcessing=true through the navigation so the button
-          // stays disabled while the browser tears down the page.
-          window.location.href = data.url;
-          return;
-        }
-        throw new Error(data.error || 'Failed to create checkout session');
-      } catch (err: any) {
-        toast.error(err.message || 'Failed to initiate Stripe payment');
+        const { url } = await createStripeCheckoutSession(
+          { artworkId },
+          { signal: controller.signal },
+        );
+        // Leave stripeProcessing=true through the navigation so the button
+        // stays disabled while the browser tears down the page.
+        window.location.href = url;
+        return;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to initiate Stripe payment';
+        toast.error(message);
+        setStripeError(message);
         setStripeProcessing(false);
       }
       return;
@@ -133,6 +135,19 @@ export function PayArtworkButton({
                 Payments are processed securely. Once unlocked, this artwork will be available in your library and you'll have full access to high-resolution media.
               </AlertDescription>
             </Alert>
+
+            {stripeError && (
+              <Alert
+                role="alert"
+                data-testid="stripe-error"
+                className="rounded-2xl border-destructive/30 bg-destructive/5"
+              >
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <AlertDescription className="text-sm font-medium text-destructive">
+                  {stripeError} You can try again — your selection has been kept.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
           <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -145,7 +160,7 @@ export function PayArtworkButton({
               disabled={loading || stripeProcessing}
             >
               {(loading || stripeProcessing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Confirm Purchase
+              {stripeError && !stripeProcessing ? 'Retry Payment' : 'Confirm Purchase'}
             </Button>
           </DialogFooter>
 
