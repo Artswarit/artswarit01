@@ -105,9 +105,9 @@ export function PayMilestoneButton({
         size="sm"
         className={`bg-primary hover:bg-primary/90 ${className}`}
         onClick={() => setConfirmOpen(true)}
-        disabled={disabled || loading}
+        disabled={disabled || loading || stripeProcessing}
       >
-        {loading ? (
+        {loading || stripeProcessing ? (
           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
         ) : (
           <DollarSign className="h-4 w-4 mr-1" />
@@ -115,7 +115,7 @@ export function PayMilestoneButton({
         Fund Milestone ({gatewayDisplayAmount})
       </Button>
 
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <Dialog open={confirmOpen} onOpenChange={(v) => !stripeProcessing && setConfirmOpen(v)}>
         <DialogContent className="w-[calc(100%-2rem)] max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle>Confirm Payment</DialogTitle>
@@ -171,15 +171,15 @@ export function PayMilestoneButton({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={loading || stripeProcessing}>
               Cancel
             </Button>
             <Button 
               className="bg-primary hover:bg-primary/90"
               onClick={handlePayment}
-              disabled={loading}
+              disabled={loading || stripeProcessing}
             >
-              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {(loading || stripeProcessing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Pay {gatewayDisplayAmount}
             </Button>
           </DialogFooter>
