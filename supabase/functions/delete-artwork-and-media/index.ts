@@ -146,9 +146,10 @@ serve(async (req) => {
           return { table, success: false, error: error.message }
         }
         return { table, success: true }
-      } catch (e: any) {
-        console.warn(`Cleanup exception for ${table}:`, e.message)
-        return { table, success: false, error: e.message }
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e)
+        console.warn(`Cleanup exception for ${table}:`, message)
+        return { table, success: false, error: message }
       }
     }
 
@@ -174,7 +175,7 @@ serve(async (req) => {
         console.warn('Could not fetch notifications for cleanup:', notifFetchError.message)
       } else {
         const toDelete = notifications?.filter(n => {
-          const meta = n.metadata as any
+          const meta = n.metadata as Record<string, unknown> | null
           return meta?.artwork_id === artworkId || meta?.artworkId === artworkId
         }).map(n => n.id) || []
 
@@ -184,8 +185,8 @@ serve(async (req) => {
           if (notifDelError) console.warn('Notification deletion error:', notifDelError.message)
         }
       }
-    } catch (e: any) {
-      console.warn('Notification cleanup failed:', e.message)
+    } catch (e: unknown) {
+      console.warn('Notification cleanup failed:', e instanceof Error ? e.message : String(e))
     }
 
     // Specific check for transactions as they might be restricted
@@ -202,8 +203,8 @@ serve(async (req) => {
         const { error: txUpdError } = await supabaseAdmin.from('transactions').update({ artwork_id: null }).eq('artwork_id', artworkId)
         if (txUpdError) console.warn('Transaction update error:', txUpdError.message)
       }
-    } catch (e: any) {
-      console.warn('Transaction cleanup failed:', e.message)
+    } catch (e: unknown) {
+      console.warn('Transaction cleanup failed:', e instanceof Error ? e.message : String(e))
     }
 
     // Delete the artwork from database
@@ -249,10 +250,11 @@ serve(async (req) => {
       }
     )
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Unexpected error in Edge Function:', error)
     return new Response(
-      JSON.stringify({ error: `Internal server error: ${error.message || 'Unknown error'}` }),
+      JSON.stringify({ error: `Internal server error: ${message}` }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

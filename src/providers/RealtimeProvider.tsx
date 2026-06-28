@@ -100,6 +100,11 @@ export const RealtimeProvider = ({ children }: { children: ReactNode }) => {
       systemChannel.unsubscribe();
       supabase.removeChannel(systemChannel);
     };
+    // Intentionally exclude `channel` and `toast`: re-running this effect on
+    // channel state changes would tear down and recreate the global presence
+    // subscription on every render, causing a reconnect loop and duplicate
+    // toasts. The effect only needs to react to the authenticated user id.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const broadcastTyping = useCallback(

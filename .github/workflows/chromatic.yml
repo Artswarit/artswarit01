@@ -10,6 +10,8 @@ jobs:
   chromatic:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Skip cleanly when the project token is missing so forks don't get red checks.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,8 +29,10 @@ jobs:
         uses: chromaui/action@latest
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          # Fail the build when stories drift from the accepted baseline.
           # Story files declare the mobile/tablet viewports
           # (360/390/414/768/820/1024) via parameters.chromatic.viewports.
-          exitOnceUploaded: true
+          exitZeroOnChanges: false
+          exitOnceUploaded: false
           onlyChanged: true
           buildScriptName: build-storybook

@@ -63,7 +63,7 @@ serve(async (req) => {
     const totalPayoutUsd = Number(artistPayout) || 0;
     const totalRefundUsd = Number(clientRefund) || 0;
 
-    let successResponse = { status: 'success', message: 'Dispute resolved seamlessly.' };
+    const successResponse = { status: 'success', message: 'Dispute resolved seamlessly.' };
 
     if (dispute.milestone_id && (totalPayoutUsd > 0 || totalRefundUsd > 0)) {
         // Find successful payment record
@@ -199,9 +199,10 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error: any) {
-    console.error('Resolve-Dispute Error:', error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Resolve-Dispute Error:', message);
+    return new Response(JSON.stringify({ error: message }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

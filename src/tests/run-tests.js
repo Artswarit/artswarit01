@@ -62,7 +62,6 @@ function run() {
   testRangeBuild();
   testRapidCrossClicks();
   testResizeAnchorNoCrash();
-  // eslint-disable-next-line no-console
   console.log('All tests passed');
 }
 

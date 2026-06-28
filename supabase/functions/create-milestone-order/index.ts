@@ -175,7 +175,7 @@ serve(async (req) => {
         .limit(1)
         .maybeSingle();
       
-      const exchangeRates = (ratesData?.rates as any) || { INR: 83.5 };
+      const exchangeRates = (ratesData?.rates as Record<string, number> | undefined) ?? { INR: 83.5 };
       currentRate = exchangeRates.INR || 83.5;
     }
 

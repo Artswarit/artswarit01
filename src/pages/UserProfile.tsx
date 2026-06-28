@@ -137,7 +137,7 @@ export default function UserProfile() {
       }
 
       // Get country name from country_currencies table if we have a country code
-      let countryName: string | null = profileData.location;
+      const countryName: string | null = profileData.location;
 
       setProfile({
         id: profileData.id || '',
