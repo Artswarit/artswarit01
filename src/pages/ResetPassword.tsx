@@ -130,6 +130,42 @@ const ResetPassword = () => {
     );
   }
 
+  if (!isValidSession && !isSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center px-4 py-[80px]">
+          <Card className="glass-card border-0 shadow-xl w-full max-w-md">
+            <CardHeader className="space-y-3 pb-4">
+              <CardTitle className="text-xl sm:text-2xl text-center font-heading">
+                Invalid or expired link
+              </CardTitle>
+              <CardDescription className="text-center text-sm">
+                This password reset link is invalid or has expired. Request a new one to continue.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                onClick={() => navigate('/forgot-password')}
+                className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
+              >
+                Request new link
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/login')}
+                className="w-full h-11"
+              >
+                Back to Login
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navbar />
