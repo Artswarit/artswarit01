@@ -1140,7 +1140,7 @@ const ProjectDetailModal = ({
                           disabled={sendingMessage || !newMessage.trim()}
                           className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 shadow-md shadow-primary/20 transition-all ease-apple active:scale-90 disabled:opacity-40 disabled:scale-90 shrink-0"
                           size="icon"
-                        >
+                         aria-label="Send message">
                           {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
                         </Button>
                       </div>

@@ -193,15 +193,15 @@ const AdvancedAudioPlayer = ({
                 <Shuffle className="h-4 w-4" />
               </Button>
               
-              <Button variant="ghost" size="icon" onClick={handlePrevious}>
+              <Button variant="ghost" size="icon" onClick={handlePrevious} aria-label="Previous track">
                 <SkipBack className="h-5 w-5" />
               </Button>
               
-              <Button variant="default" size="icon" onClick={togglePlay}>
+              <Button variant="default" size="icon" onClick={togglePlay} aria-label="Play or pause">
                 {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
               </Button>
               
-              <Button variant="ghost" size="icon" onClick={handleNext}>
+              <Button variant="ghost" size="icon" onClick={handleNext} aria-label="Next track">
                 <SkipForward className="h-5 w-5" />
               </Button>
               
@@ -217,7 +217,7 @@ const AdvancedAudioPlayer = ({
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={toggleMute}>
+              <Button variant="ghost" size="icon" onClick={toggleMute} aria-label="Toggle mute">
                 {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </Button>
               <div className="w-20">

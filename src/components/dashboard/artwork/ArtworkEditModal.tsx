@@ -388,7 +388,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
                   }
                 }}
               />
-              <Button type="button" onClick={addTag} size="icon" className="h-14 w-14 rounded-2xl shrink-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all">
+              <Button type="button" onClick={addTag} size="icon" className="h-14 w-14 rounded-2xl shrink-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all" aria-label="Add item">
                 <Plus className="h-7 w-7" />
               </Button>
             </div>

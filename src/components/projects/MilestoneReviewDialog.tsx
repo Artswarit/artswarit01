@@ -383,12 +383,12 @@ export function MilestoneReviewDialog({
                               <span className="text-sm truncate">{file.file_name}</span>
                             </div>
                             <div className="flex gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" asChild aria-label="Open file in new tab">
                                 <a href={file.file_url} target="_blank" rel="noopener noreferrer">
                                   <ExternalLink className="h-4 w-4" />
                                 </a>
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" asChild aria-label="Download file">
                                 <a href={file.file_url} download>
                                   <Download className="h-4 w-4" />
                                 </a>

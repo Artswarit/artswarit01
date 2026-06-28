@@ -335,7 +335,7 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
             disabled={sending || (!message.trim() && pendingAttachments.length === 0)}
             size="icon"
             className="h-[48px] w-[48px] sm:h-[60px] sm:w-[60px] shrink-0 min-h-[48px] min-w-[48px]"
-          >
+           aria-label="Send message">
             {sending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (

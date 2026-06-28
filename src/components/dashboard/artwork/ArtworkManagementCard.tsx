@@ -313,7 +313,7 @@ const ArtworkManagementCard = ({
         <div className="shrink-0 ml-1 sm:ml-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12 hover:bg-primary/10 hover:text-primary transition-colors">
+              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12 hover:bg-primary/10 hover:text-primary transition-colors" aria-label="Artwork options">
                 <MoreVertical className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
             </DropdownMenuTrigger>
@@ -425,10 +425,10 @@ const ArtworkManagementCard = ({
           'absolute inset-0 bg-black/40 flex items-center justify-center gap-2 transition-opacity duration-300',
           isHovered ? 'opacity-100' : 'opacity-0'
         )}>
-          <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" onClick={onEdit}>
+          <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" onClick={onEdit} aria-label="Edit artwork">
             <Edit className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" onClick={handleTogglePin}>
+          <Button size="icon" variant="secondary" className="h-9 w-9 rounded-full" onClick={handleTogglePin} aria-label="Pin or unpin artwork">
             {isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
           </Button>
           <Button
@@ -437,7 +437,7 @@ const ArtworkManagementCard = ({
             className="h-9 w-9 rounded-full"
             disabled={isDeleting}
             onClick={onDelete}
-          >
+           aria-label="Delete artwork">
             {isDeleting
               ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               : <Trash2 className="h-4 w-4" />}
@@ -473,7 +473,7 @@ const ArtworkManagementCard = ({
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12 hover:bg-primary/10 hover:text-primary transition-colors">
+              <Button variant="ghost" size="icon" className="h-11 w-11 sm:h-12 sm:w-12 hover:bg-primary/10 hover:text-primary transition-colors" aria-label="Artwork options">
                 <MoreVertical className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
             </DropdownMenuTrigger>

@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createStripeCheckoutSession } from '@/lib/payments/createStripeCheckoutSession';
+import { logPaymentFailure } from '@/lib/payments/logPaymentEvent';
 
 interface PayArtworkButtonProps {
   artworkId: string;
@@ -61,10 +62,14 @@ export function PayArtworkButton({
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
+      const startedAt = Date.now();
       try {
         const { url } = await createStripeCheckoutSession(
           { artworkId },
-          { signal: controller.signal },
+          {
+            signal: controller.signal,
+            logContext: { kind: 'artwork', targetId: artworkId },
+          },
         );
         // Leave stripeProcessing=true through the navigation so the button
         // stays disabled while the browser tears down the page.
@@ -72,6 +77,19 @@ export function PayArtworkButton({
         return;
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to initiate Stripe payment';
+        // Defensive log for anything the helper didn't already report (e.g.
+        // thrown synchronously before fetch ran). Helper handles
+        // timeout/network/http_error; this covers truly unexpected paths.
+        if (!(err instanceof Error) || err.name === 'Error' && !/payment service|timed out|reach/i.test(err.message)) {
+          logPaymentFailure({
+            kind: 'artwork',
+            targetId: artworkId,
+            provider: 'stripe',
+            durationMs: Date.now() - startedAt,
+            reason: 'unexpected',
+            message,
+          });
+        }
         toast.error(message);
         setStripeError(message);
         setStripeProcessing(false);

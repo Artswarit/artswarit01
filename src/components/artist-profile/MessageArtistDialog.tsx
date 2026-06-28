@@ -422,7 +422,7 @@ const MessageArtistDialog: React.FC<MessageArtistDialogProps> = ({
               disabled={sending || (!message.trim() && pendingAttachments.length === 0)}
               size="icon"
               className="h-[48px] w-[48px] shrink-0 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-95 min-h-[48px] min-w-[48px]"
-            >
+             aria-label="Send message">
               {sending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (

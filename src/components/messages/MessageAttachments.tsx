@@ -163,7 +163,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
         size="icon"
         className="h-8 w-8 absolute -top-3 -right-3 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 shadow-md border-2 border-background"
         onClick={onRemove}
-      >
+       aria-label="Remove attachment">
         <X className="h-4 w-4" />
       </Button>
     </div>

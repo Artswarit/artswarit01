@@ -34,7 +34,7 @@ const ArtworkActions = ({ artwork, onUpdate, onDelete }: ArtworkActionsProps) =>
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-12 w-12 hover:bg-white/80 transition-all active:scale-95 rounded-xl">
+          <Button variant="ghost" size="icon" className="h-12 w-12 hover:bg-white/80 transition-all active:scale-95 rounded-xl" aria-label="Artwork actions menu">
             <MoreHorizontal className="h-6 w-6" />
           </Button>
         </DropdownMenuTrigger>
