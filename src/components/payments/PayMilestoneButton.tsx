@@ -69,16 +69,30 @@ export function PayMilestoneButton({
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
+      const startedAt = Date.now();
       try {
         const { url } = await createStripeCheckoutSession(
           { milestoneId },
-          { signal: controller.signal },
+          {
+            signal: controller.signal,
+            logContext: { kind: 'milestone', targetId: milestoneId },
+          },
         );
         // Stay disabled until navigation tears the page down.
         window.location.href = url;
         return;
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Failed to initiate Stripe payment';
+        if (!(err instanceof Error) || err.name === 'Error' && !/payment service|timed out|reach/i.test(err.message)) {
+          logPaymentFailure({
+            kind: 'milestone',
+            targetId: milestoneId,
+            provider: 'stripe',
+            durationMs: Date.now() - startedAt,
+            reason: 'unexpected',
+            message,
+          });
+        }
         toast.error(message);
         setStripeError(message);
         setStripeProcessing(false);
