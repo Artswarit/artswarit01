@@ -1,10 +1,29 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Image as ImageIcon, ShieldCheck, TrendingUp, AlertCircle, Activity, FileWarning, Flag, XCircle } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, Image as ImageIcon, TrendingUp, Activity, FileWarning, Flag, XCircle, AlertCircle, ShieldCheck } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import LogoLoader from "@/components/ui/LogoLoader";
+import KpiCard from "./KpiCard";
 import { useSignupTrend, useSecondaryKpis, useRecentAudit } from "./hooks/useAdminMetrics";
+
+function formatRelative(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return `${s}s ago`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function auditTone(action: string): "ok" | "warn" | "muted" {
+  const a = (action || "").toLowerCase();
+  if (a.includes("ban") || a.includes("delete") || a.includes("warn") || a.includes("suspend")) return "warn";
+  if (a.includes("approve") || a.includes("resolve") || a.includes("success")) return "ok";
+  return "muted";
+}
 
 export default function AdminOverview() {
   const [stats, setStats] = useState<any>(null);
@@ -36,132 +55,119 @@ export default function AdminOverview() {
 
   if (loading || !stats) return <div className="h-64 flex items-center justify-center"><LogoLoader text="Loading metrics..." /></div>;
 
-  const cards = [
-    { label: "Total Users", value: stats.users, icon: Users, color: "text-blue-600", bg: "bg-blue-500/10" },
-    { label: "Active Artists", value: stats.artists, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-500/10" },
-    { label: "Live Artworks", value: stats.artworks, icon: ImageIcon, color: "text-purple-600", bg: "bg-purple-500/10" },
-    { label: "Open Disputes", value: stats.openDisputes, icon: AlertCircle, color: "text-red-600", bg: "bg-red-500/10" },
-  ];
-
-  const secondaryCards = [
-    { label: "Active 24h", value: secondary?.active24h ?? 0, icon: Activity, color: "text-emerald-600", bg: "bg-emerald-500/10" },
-    { label: "Unpublished Art", value: secondary?.pendingArtworks ?? 0, icon: FileWarning, color: "text-amber-600", bg: "bg-amber-500/10" },
-    { label: "Open Reports", value: secondary?.openReports ?? 0, icon: Flag, color: "text-orange-600", bg: "bg-orange-500/10" },
-    { label: "Failed Payments 7d", value: secondary?.failedPayments7d ?? 0, icon: XCircle, color: "text-red-600", bg: "bg-red-500/10" },
-  ];
+  const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 
   return (
-    <div className="space-y-4 sm:space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
+      {/* Primary KPI grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {cards.map((c) => (
-          <Card key={c.label} className="border shadow-none sm:shadow-sm hover:shadow-md transition-shadow rounded-2xl sm:rounded-3xl overflow-hidden bg-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 space-y-0 p-3 sm:p-6">
-              <CardTitle className="text-[9px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">{c.label}</CardTitle>
-              <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl ${c.bg}`}><c.icon className={`h-3 w-3 sm:h-4 sm:w-4 ${c.color}`} /></div>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-6 pt-0">
-              <div className="text-lg sm:text-2xl font-black">{c.value}</div>
-              <p className="text-[8px] sm:text-[10px] text-muted-foreground mt-0.5 sm:mt-1 flex items-center gap-1">
-                <Activity className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-emerald-500" /> Live data
-              </p>
-            </CardContent>
-          </Card>
+        <KpiCard label="Total Users" value={fmt(stats.users)} icon={Users} />
+        <KpiCard label="Active Artists" value={fmt(stats.artists)} icon={TrendingUp} />
+        <KpiCard label="Live Artworks" value={fmt(stats.artworks)} icon={ImageIcon} />
+        <KpiCard label="Open Disputes" value={stats.openDisputes} icon={AlertCircle} delta={stats.openDisputes > 0 ? { value: "needs review", tone: "warn" } : undefined} />
+      </div>
+
+      {/* Secondary KPI strip */}
+      <div className="flex gap-4 sm:gap-6 py-3 sm:py-4 border-y border-border/60 overflow-x-auto no-scrollbar">
+        {[
+          { label: "Active 24h", value: fmt(secondary?.active24h ?? 0), icon: Activity, tone: "text-emerald-600" },
+          { label: "Unpublished", value: fmt(secondary?.pendingArtworks ?? 0), icon: FileWarning, tone: "text-foreground" },
+          { label: "Open Reports", value: fmt(secondary?.openReports ?? 0), icon: Flag, tone: (secondary?.openReports ?? 0) > 0 ? "text-amber-600" : "text-foreground" },
+          { label: "Failed Pay 7d", value: fmt(secondary?.failedPayments7d ?? 0), icon: XCircle, tone: (secondary?.failedPayments7d ?? 0) > 0 ? "text-red-600" : "text-foreground" },
+        ].map((s) => (
+          <div key={s.label} className="flex flex-col min-w-[100px] shrink-0">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+              <s.icon className="h-3 w-3" /> {s.label}
+            </span>
+            <span className={`text-sm font-semibold font-mono mt-0.5 ${s.tone}`}>{s.value}</span>
+          </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {secondaryCards.map((c) => (
-          <Card key={c.label} className="border shadow-none sm:shadow-sm rounded-2xl sm:rounded-3xl bg-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0 p-3 sm:p-4">
-              <CardTitle className="text-[9px] sm:text-[11px] font-black uppercase tracking-widest text-muted-foreground">{c.label}</CardTitle>
-              <c.icon className={`h-3 w-3 sm:h-4 sm:w-4 ${c.color}`} />
-            </CardHeader>
-            <CardContent className="p-3 sm:p-4 pt-0"><div className="text-base sm:text-xl font-black">{c.value}</div></CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="rounded-3xl sm:rounded-[2rem] border shadow-sm overflow-hidden">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" /> Signup Growth (12 weeks)
-            </CardTitle>
-            <CardDescription className="text-[10px] sm:text-sm">Artists vs Clients per week</CardDescription>
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+        <Card className="lg:col-span-2 rounded-xl border border-border/60 shadow-none">
+          <CardHeader className="p-5 pb-3 flex flex-row items-center justify-between space-y-0">
+            <div>
+              <CardTitle className="text-sm font-semibold">Signup Growth</CardTitle>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Artists vs Clients · last 12 weeks</p>
+            </div>
+            <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">12W</span>
           </CardHeader>
-          <CardContent className="h-[260px] p-2 sm:p-6 pt-0">
+          <CardContent className="h-[260px] p-2 sm:p-5 pt-0">
             {!trend?.length ? (
-              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Not enough signup data yet</div>
+              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Not enough signup data yet</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trend}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                  <XAxis dataKey="week" fontSize={10} axisLine={false} tickLine={false} />
-                  <YAxis fontSize={10} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: 12, border: "none", fontSize: 11 }} />
-                  <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Line type="monotone" dataKey="artists" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                  <Line type="monotone" dataKey="clients" stroke="#10b981" strokeWidth={2} dot={false} />
+                <LineChart data={trend} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.08} />
+                  <XAxis dataKey="week" fontSize={10} axisLine={false} tickLine={false} stroke="currentColor" opacity={0.5} />
+                  <YAxis fontSize={10} axisLine={false} tickLine={false} stroke="currentColor" opacity={0.5} />
+                  <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid hsl(var(--border))", fontSize: 11, background: "hsl(var(--card))" }} />
+                  <Legend wrapperStyle={{ fontSize: 10 }} iconType="circle" />
+                  <Line type="monotone" dataKey="artists" stroke="hsl(var(--foreground))" strokeWidth={1.5} dot={false} />
+                  <Line type="monotone" dataKey="clients" stroke="#10b981" strokeWidth={1.5} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl sm:rounded-[2rem] border shadow-sm">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-primary" /> Platform Stability
+        <Card className="rounded-xl border border-border/60 shadow-none">
+          <CardHeader className="p-5 pb-3">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" /> Platform Stability
             </CardTitle>
-            <CardDescription className="text-[10px] sm:text-sm">Project & dispute snapshot</CardDescription>
+            <p className="text-[11px] text-muted-foreground mt-0.5">Escrow & dispute snapshot</p>
           </CardHeader>
-          <CardContent className="h-[260px] flex items-center justify-center p-4 sm:p-6">
-            <div className="text-center space-y-3 sm:space-y-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-emerald-500/10 text-emerald-600 border-2 sm:border-4 border-emerald-500/20">
-                <ShieldCheck className="h-6 w-6 sm:h-10 sm:w-10" />
+          <CardContent className="p-5 pt-0 space-y-5">
+            <div>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total Projects</p>
+              <p className="text-2xl font-semibold font-mono mt-1">{fmt(stats.projects)}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/60">
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Healthy</p>
+                <p className="text-sm font-semibold font-mono text-emerald-600 mt-0.5">{fmt(Math.max(0, stats.projects - stats.openDisputes))}</p>
               </div>
               <div>
-                <p className="text-lg sm:text-xl font-black">{stats.projects}</p>
-                <p className="text-[9px] sm:text-xs text-muted-foreground uppercase tracking-widest font-bold">Total Projects</p>
-              </div>
-              <div className="flex gap-4 justify-center">
-                <div className="text-center">
-                  <p className="text-xs sm:text-sm font-bold text-red-600">{stats.openDisputes}</p>
-                  <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase">Active Disputes</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs sm:text-sm font-bold text-emerald-600">{Math.max(0, stats.projects - stats.openDisputes)}</p>
-                  <p className="text-[8px] sm:text-[10px] text-muted-foreground uppercase">Healthy Projects</p>
-                </div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Disputes</p>
+                <p className={`text-sm font-semibold font-mono mt-0.5 ${stats.openDisputes > 0 ? "text-red-600" : "text-emerald-600"}`}>{fmt(stats.openDisputes)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="rounded-3xl sm:rounded-[2rem] border shadow-sm overflow-hidden bg-card">
-        <CardHeader className="bg-muted/30 p-4">
-          <CardTitle className="text-[10px] sm:text-sm font-black uppercase tracking-[0.2em]">Live Audit Feed</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y border-t">
-            {!audit?.length ? (
-              <p className="px-4 py-6 text-sm text-muted-foreground text-center">No admin actions recorded yet</p>
-            ) : audit.map((a: any) => (
-              <div key={a.id} className="px-4 sm:px-6 py-3 flex items-center justify-between hover:bg-muted/10 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-[8px] font-black text-primary uppercase">{(a.action || "act").slice(0, 4)}</div>
-                  <div>
-                    <p className="text-[11px] font-bold text-foreground/80">{a.action}</p>
-                    {a.reason && <p className="text-[10px] text-muted-foreground">{a.reason}</p>}
-                  </div>
+      {/* Audit feed */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-sm font-semibold">System Audit</h3>
+          <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">live feed</span>
+        </div>
+        <div className="space-y-2">
+          {!audit?.length ? (
+            <div className="p-6 text-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-xl">
+              No admin actions recorded yet
+            </div>
+          ) : audit.map((a: any) => {
+            const tone = auditTone(a.action);
+            return (
+              <div key={a.id} className={`flex gap-3 p-3 rounded-lg border border-border/60 hover:bg-muted/30 transition-colors ${tone === "warn" ? "bg-amber-50/40 dark:bg-amber-950/10" : ""}`}>
+                <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                  tone === "ok" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" :
+                  tone === "warn" ? "bg-amber-500" : "bg-muted-foreground/40"
+                }`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-foreground truncate">{a.action}</p>
+                  {a.reason ? <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{a.reason}</p> : null}
+                  <p className="text-[10px] text-muted-foreground/70 font-mono mt-1">{formatRelative(a.created_at)}</p>
                 </div>
-                <p className="text-[9px] text-muted-foreground font-mono bg-muted/50 px-2 py-0.5 rounded">{new Date(a.created_at).toLocaleString([], { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" })}</p>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
