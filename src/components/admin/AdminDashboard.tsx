@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Users, DollarSign, Shield, AlertTriangle, ScrollText, Activity, Briefcase, Image as ImageIcon, MessageSquare, Server
+  Users, DollarSign, Shield, AlertTriangle, ScrollText, Activity, Briefcase, Image as ImageIcon, MessageSquare, Server, Wallet
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
@@ -15,11 +15,13 @@ import AdminRevenue from './AdminRevenue';
 import AdminContent from './AdminContent';
 import AdminEngagement from './AdminEngagement';
 import AdminSystem from './AdminSystem';
+import AdminFinance from './AdminFinance';
 
 const TABS = [
   { value: 'overview', icon: Activity, label: 'Overview' },
   { value: 'operations', icon: Briefcase, label: 'Operations' },
   { value: 'revenue', icon: DollarSign, label: 'Revenue' },
+  { value: 'finance', icon: Wallet, label: 'Finance' },
   { value: 'content', icon: ImageIcon, label: 'Content' },
   { value: 'engagement', icon: MessageSquare, label: 'Engagement' },
   { value: 'system', icon: Server, label: 'System' },
@@ -86,6 +88,7 @@ export default function AdminDashboard() {
           <TabsContent value="overview" className="m-0 border-none outline-none focus-visible:ring-0"><AdminOverview /></TabsContent>
           <TabsContent value="operations" className="m-0 border-none outline-none focus-visible:ring-0"><AdminOperations /></TabsContent>
           <TabsContent value="revenue" className="m-0 border-none outline-none focus-visible:ring-0"><AdminRevenue /></TabsContent>
+          <TabsContent value="finance" className="m-0 border-none outline-none focus-visible:ring-0"><AdminFinance /></TabsContent>
           <TabsContent value="content" className="m-0 border-none outline-none focus-visible:ring-0"><AdminContent /></TabsContent>
           <TabsContent value="engagement" className="m-0 border-none outline-none focus-visible:ring-0"><AdminEngagement /></TabsContent>
           <TabsContent value="system" className="m-0 border-none outline-none focus-visible:ring-0"><AdminSystem /></TabsContent>
