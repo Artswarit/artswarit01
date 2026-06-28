@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { createStripeCheckoutSession } from '@/lib/payments/createStripeCheckoutSession';
+import { logPaymentFailure } from '@/lib/payments/logPaymentEvent';
 
 interface PayMilestoneButtonProps {
   milestoneId: string;
