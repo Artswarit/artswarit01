@@ -168,6 +168,19 @@ export function PayMilestoneButton({
                 Funding is held in escrow. The artist can only start work after funds are secured, and payout is released only when you approve the milestone.
               </AlertDescription>
             </Alert>
+
+            {stripeError && (
+              <Alert
+                role="alert"
+                data-testid="stripe-error"
+                className="border-destructive/30 bg-destructive/5"
+              >
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <AlertDescription className="text-sm text-destructive">
+                  {stripeError} You can try again — your milestone selection has been kept.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
           <DialogFooter>
@@ -180,7 +193,7 @@ export function PayMilestoneButton({
               disabled={loading || stripeProcessing}
             >
               {(loading || stripeProcessing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Pay {gatewayDisplayAmount}
+              {stripeError && !stripeProcessing ? 'Retry Payment' : `Pay ${gatewayDisplayAmount}`}
             </Button>
           </DialogFooter>
         </DialogContent>
