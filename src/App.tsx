@@ -13,6 +13,7 @@ import { useScrollAnchor } from "./hooks/useScrollAnchor";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { TopLoadingBar } from "./components/TopLoadingBar";
+import LogoLoader from "./components/ui/LogoLoader";
 import { AppSplashScreen } from "./components/AppSplashScreen";
 import Index from "./pages/Index";
 import UniversalChatbot from "./components/UniversalChatbot";
