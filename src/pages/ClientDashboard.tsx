@@ -612,7 +612,7 @@ const ClientDashboard = () => {
         <Tabs value={selectedTab} className="mb-4 sm:mb-6 lg:mb-8" onValueChange={handleTabChange}>
           <div className="hidden sm:block relative mb-4 sm:mb-6">
               <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-[1.5rem] shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
+                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
                   {[
                     { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard, locked: false },
                     { value: 'collection', label: 'My Works', shortLabel: 'Works', icon: ShoppingBag, locked: false },
@@ -750,7 +750,7 @@ const ClientDashboard = () => {
                 <div className="grid grid-cols-1 gap-4">
                   {activeProjects.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-14 px-6 rounded-[2.5rem] border-2 border-dashed border-border/40 bg-muted/20 backdrop-blur-sm">
-                      <div className="rounded-[1.5rem] bg-muted/50 p-5 mb-5 shadow-inner">
+                      <div className="rounded-3xl bg-muted/50 p-5 mb-5 shadow-inner">
                         <FileText className="h-8 w-8 text-muted-foreground/40" />
                       </div>
                       <h3 className="text-lg font-black text-foreground mb-1.5 tracking-tight">No active projects yet</h3>

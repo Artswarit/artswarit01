@@ -75,7 +75,7 @@ export default function AdminOverview() {
     <div className="space-y-4 sm:space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {cards.map((c) => (
-          <Card key={c.label} className="border shadow-none sm:shadow-sm hover:shadow-md transition-shadow rounded-2xl sm:rounded-[1.5rem] overflow-hidden bg-card">
+          <Card key={c.label} className="border shadow-none sm:shadow-sm hover:shadow-md transition-shadow rounded-2xl sm:rounded-3xl overflow-hidden bg-card">
             <CardHeader className="flex flex-row items-center justify-between pb-1 sm:pb-2 space-y-0 p-3 sm:p-6">
               <CardTitle className="text-[9px] sm:text-xs font-black uppercase tracking-widest text-muted-foreground">{c.label}</CardTitle>
               <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl ${c.bg}`}>
@@ -94,7 +94,7 @@ export default function AdminOverview() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="rounded-[1.5rem] sm:rounded-[2rem] border shadow-sm overflow-hidden">
+        <Card className="rounded-3xl sm:rounded-[2rem] border shadow-sm overflow-hidden">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
               <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -118,7 +118,7 @@ export default function AdminOverview() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[1.5rem] sm:rounded-[2rem] border shadow-sm">
+        <Card className="rounded-3xl sm:rounded-[2rem] border shadow-sm">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
@@ -150,7 +150,7 @@ export default function AdminOverview() {
         </Card>
       </div>
 
-      <Card className="rounded-[1.5rem] sm:rounded-[2rem] border shadow-sm overflow-hidden bg-card">
+      <Card className="rounded-3xl sm:rounded-[2rem] border shadow-sm overflow-hidden bg-card">
          <CardHeader className="bg-muted/30 p-4">
             <CardTitle className="text-[10px] sm:text-sm font-black uppercase tracking-[0.2em]">Live Audit Feed</CardTitle>
          </CardHeader>

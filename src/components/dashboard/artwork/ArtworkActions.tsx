@@ -38,7 +38,7 @@ const ArtworkActions = ({ artwork, onUpdate, onDelete }: ArtworkActionsProps) =>
             <MoreHorizontal className="h-6 w-6" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64 p-2 rounded-[1.5rem] border-primary/10 shadow-2xl backdrop-blur-xl bg-background/95 animate-in fade-in zoom-in-95 duration-200">
+        <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl border-primary/10 shadow-2xl backdrop-blur-xl bg-background/95 animate-in fade-in zoom-in-95 duration-200">
           <DropdownMenuItem onClick={() => setIsEditModalOpen(true)} className="cursor-pointer min-h-[48px] sm:min-h-[44px] gap-3 px-4 rounded-xl hover:bg-primary/5 focus:bg-primary/5 transition-colors">
             <Edit className="h-5 w-5 text-primary/70" />
             <span className="font-bold text-sm">Edit Details & Pricing</span>

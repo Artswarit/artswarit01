@@ -394,7 +394,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
                   }
                 />
                 <Label htmlFor="upload" className="cursor-pointer block relative z-10">
-                  <div className="mx-auto flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 rounded-[1.5rem] sm:rounded-[2rem] bg-primary/10 text-primary mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                  <div className="mx-auto flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 rounded-3xl sm:rounded-[2rem] bg-primary/10 text-primary mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
                     {selectedType === "image" && <ImageIcon className="h-7 w-7 sm:h-10 sm:w-10" />}
                     {selectedType === "audio" && <MusicIcon className="h-7 w-7 sm:h-10 sm:w-10" />}
                     {selectedType === "video" && <VideoIcon className="h-7 w-7 sm:h-10 sm:w-10" />}

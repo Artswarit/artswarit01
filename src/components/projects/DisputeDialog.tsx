@@ -228,7 +228,7 @@ export function DisputeDialog({
         <div className="p-8 space-y-8">
           {milestone.status === 'DISPUTED' ? (
             <div className="space-y-6">
-              <Alert variant="destructive" className="bg-red-500/5 border-red-500/20 rounded-[1.5rem] p-5">
+              <Alert variant="destructive" className="bg-red-500/5 border-red-500/20 rounded-3xl p-5">
                 <AlertCircle className="h-5 w-5 text-red-500" />
                 <AlertTitle className="font-bold text-red-700 dark:text-red-400">Dispute in Progress</AlertTitle>
                 <AlertDescription className="text-sm text-red-600/80 dark:text-red-400/80 leading-relaxed">
@@ -267,7 +267,7 @@ export function DisputeDialog({
                   placeholder="Explain exactly what went wrong... provide as much detail as possible for our review team."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="min-h-[160px] rounded-[1.5rem] bg-muted/20 border-border/30 focus:border-primary/50 focus-visible:ring-primary/10 resize-none px-6 py-5 font-medium leading-relaxed transition-all"
+                  className="min-h-[160px] rounded-3xl bg-muted/20 border-border/30 focus:border-primary/50 focus-visible:ring-primary/10 resize-none px-6 py-5 font-medium leading-relaxed transition-all"
                 />
               </div>
 
