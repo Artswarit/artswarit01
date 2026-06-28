@@ -40,16 +40,21 @@ export function PayArtworkButton({
   const { format: formatCurrency } = useCurrencyFormat();
   const { formatGatewayAmount, gatewayCurrency, provider } = usePaymentGateway();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [stripeProcessing, setStripeProcessing] = useState(false);
 
   const gatewayDisplayAmount = formatGatewayAmount(amount);
 
   const handlePayment = async () => {
-    setConfirmOpen(false);
-    
+    // Guard against rapid double-click / Enter-repeat re-firing the handler
+    // before React commits the `disabled` re-render.
+    if (stripeProcessing || loading) return;
+
     if (provider === 'stripe') {
+      setStripeProcessing(true);
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        const response = await fetch(`${(supabase as any).supabaseUrl}/functions/v1/create-checkout-session`, {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+        const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout-session`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session?.access_token}`,
@@ -59,17 +64,22 @@ export function PayArtworkButton({
         });
         const data = await response.json();
         if (data.url) {
+          // Leave stripeProcessing=true through the navigation so the button
+          // stays disabled while the browser tears down the page.
           window.location.href = data.url;
-        } else {
-          throw new Error(data.error || 'Failed to create checkout session');
+          return;
         }
+        throw new Error(data.error || 'Failed to create checkout session');
       } catch (err: any) {
         toast.error(err.message || 'Failed to initiate Stripe payment');
+        setStripeProcessing(false);
       }
       return;
     }
 
-    // Razorpay
+    // Razorpay — close confirm dialog first so its backdrop doesn't block
+    // the Razorpay overlay.
+    setConfirmOpen(false);
     setTimeout(() => {
       initiatePayment({
         artworkId,
@@ -79,6 +89,7 @@ export function PayArtworkButton({
       });
     }, 350);
   };
+
 
   return (
     <>
@@ -125,18 +136,19 @@ export function PayArtworkButton({
           </div>
 
           <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Button variant="ghost" className="rounded-xl font-bold" onClick={() => setConfirmOpen(false)}>
+            <Button variant="ghost" className="rounded-xl font-bold" onClick={() => setConfirmOpen(false)} disabled={stripeProcessing || loading}>
               Discard
             </Button>
             <Button 
               className="flex-1 rounded-xl h-12 font-black transition-all active:scale-95 shadow-lg shadow-primary/20"
               onClick={handlePayment}
-              disabled={loading}
+              disabled={loading || stripeProcessing}
             >
-              {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {(loading || stripeProcessing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Confirm Purchase
             </Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
     </>
