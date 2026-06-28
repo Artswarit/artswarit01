@@ -15,6 +15,7 @@ import AdminRevenue from './AdminRevenue';
 import AdminContent from './AdminContent';
 import AdminEngagement from './AdminEngagement';
 import AdminSystem from './AdminSystem';
+import AdminFinance from './AdminFinance';
 
 const TABS = [
   { value: 'overview', icon: Activity, label: 'Overview' },
