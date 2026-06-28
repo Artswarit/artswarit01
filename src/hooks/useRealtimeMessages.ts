@@ -49,6 +49,8 @@ interface Conversation {
   unreadCount: number;
 }
 
+const MESSAGES_PAGE_SIZE = 30;
+
 export const useRealtimeMessages = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -56,6 +58,8 @@ export const useRealtimeMessages = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
   // Set up presence
