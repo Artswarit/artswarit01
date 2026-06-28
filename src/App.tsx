@@ -76,6 +76,16 @@ class ErrorBoundary extends React.Component<
   }
   componentDidCatch(error: unknown, info: React.ErrorInfo) {
     console.error('🚨 ErrorBoundary caught an error:', error, info.componentStack);
+    // Auto-recover from stale lazy-chunk imports after a deploy (avoids white screen)
+    const msg = error instanceof Error ? error.message : String(error);
+    if (/Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed/i.test(msg)) {
+      const key = '__chunk_reload_at';
+      const last = Number(sessionStorage.getItem(key) || 0);
+      if (Date.now() - last > 10_000) {
+        sessionStorage.setItem(key, String(Date.now()));
+        window.location.reload();
+      }
+    }
   }
   render() {
     if (this.state.hasError) {
