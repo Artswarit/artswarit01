@@ -45,6 +45,10 @@ export function PayMilestoneButton({
   const { formatGatewayAmount, gatewayCurrency, isIndian, provider } = usePaymentGateway(exchangeRate);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [stripeProcessing, setStripeProcessing] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   // Calculate earnings based on artist plan (in USD base)
   const earnings = calculateEarnings(amount, isProArtist);
@@ -59,27 +63,23 @@ export function PayMilestoneButton({
     if (stripeProcessing || loading) return;
 
     if (provider === 'stripe') {
+      setStripeError(null);
       setStripeProcessing(true);
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-        const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout-session`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session?.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ milestoneId }),
-        });
-        const data = await response.json();
-        if (data.url) {
-          // Stay disabled until navigation tears the page down.
-          window.location.href = data.url;
-          return;
-        }
-        throw new Error(data.error || 'Failed to create checkout session');
-      } catch (err: any) {
-        toast.error(err.message || 'Failed to initiate Stripe payment');
+        const { url } = await createStripeCheckoutSession(
+          { milestoneId },
+          { signal: controller.signal },
+        );
+        // Stay disabled until navigation tears the page down.
+        window.location.href = url;
+        return;
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Failed to initiate Stripe payment';
+        toast.error(message);
+        setStripeError(message);
         setStripeProcessing(false);
       }
       return;
