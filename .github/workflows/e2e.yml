@@ -23,9 +23,9 @@ jobs:
       # dashboards. When missing, the suite gracefully skips auth-only specs.
       E2E_SUPABASE_SESSION_JSON: ${{ secrets.E2E_SUPABASE_SESSION_JSON }}
       E2E_SUPABASE_STORAGE_KEY: ${{ secrets.E2E_SUPABASE_STORAGE_KEY }}
-      E2E_BASE_URL: http://localhost:8080
-    steps:
-      - uses: actions/checkout@v4
+      E2E_BASE_URL: http://127.0.0.1:8080
+      # Skip Playwright's auto-spawned webServer — we start `vite preview` below.
+      E2E_NO_SERVER: '1'
 
       - uses: oven-sh/setup-bun@v2
         with:
