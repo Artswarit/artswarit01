@@ -583,6 +583,23 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                     </div>
                   ) : (
                     <>
+                      {!messageSearchQuery && hasMoreMessages && (
+                        <div className="flex justify-center py-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleLoadOlder}
+                            disabled={loadingOlderMessages}
+                            className="rounded-full px-4 h-8 text-xs font-semibold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+                          >
+                            {loadingOlderMessages ? (
+                              <><Loader2 className="h-3 w-3 mr-2 animate-spin" />Loading…</>
+                            ) : (
+                              'Load older messages'
+                            )}
+                          </Button>
+                        </div>
+                      )}
                       {filteredMessages.map((msg, idx) => {
                         const isOwn = msg.senderId === user?.id;
                         const prev = filteredMessages[idx - 1];
