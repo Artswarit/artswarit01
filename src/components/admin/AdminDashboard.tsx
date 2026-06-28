@@ -88,6 +88,7 @@ export default function AdminDashboard() {
           <TabsContent value="overview" className="m-0 border-none outline-none focus-visible:ring-0"><AdminOverview /></TabsContent>
           <TabsContent value="operations" className="m-0 border-none outline-none focus-visible:ring-0"><AdminOperations /></TabsContent>
           <TabsContent value="revenue" className="m-0 border-none outline-none focus-visible:ring-0"><AdminRevenue /></TabsContent>
+          <TabsContent value="finance" className="m-0 border-none outline-none focus-visible:ring-0"><AdminFinance /></TabsContent>
           <TabsContent value="content" className="m-0 border-none outline-none focus-visible:ring-0"><AdminContent /></TabsContent>
           <TabsContent value="engagement" className="m-0 border-none outline-none focus-visible:ring-0"><AdminEngagement /></TabsContent>
           <TabsContent value="system" className="m-0 border-none outline-none focus-visible:ring-0"><AdminSystem /></TabsContent>
