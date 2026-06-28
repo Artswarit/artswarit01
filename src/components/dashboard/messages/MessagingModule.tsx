@@ -191,6 +191,23 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     setPendingAttachments((prev) => [...prev, attachment]);
   };
 
+  const handleLoadOlder = async () => {
+    const viewport = messagesViewportRef.current;
+    if (!viewport || loadingOlderMessages || !hasMoreMessages) return;
+    const prevHeight = viewport.scrollHeight;
+    const prevTop = viewport.scrollTop;
+    const added = await loadOlderMessages();
+    if (added > 0) {
+      // Restore scroll so the previously visible message stays in place
+      requestAnimationFrame(() => {
+        const v = messagesViewportRef.current;
+        if (!v) return;
+        const delta = v.scrollHeight - prevHeight;
+        v.scrollTop = prevTop + delta;
+      });
+    }
+  };
+
   const handleRemoveAttachment = (index: number) => {
     setPendingAttachments((prev) => prev.filter((_, i) => i !== index));
   };
