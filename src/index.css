@@ -45,6 +45,27 @@ html, body {
   .tap-scale:active { transform: scale(0.97); }
   .pb-safe { padding-bottom: var(--safe-bottom); }
 
+  /* ── Brand gradient utilities (canonical) ── */
+  .bg-brand-gradient { background-image: var(--gradient-brand); }
+  .bg-brand-gradient-hover:hover { background-image: var(--gradient-brand-hover); }
+  .text-brand-gradient {
+    background-image: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .border-brand-gradient {
+    border-image: var(--gradient-brand) 1;
+  }
+
+  /* ── Elevation token utilities ── */
+  .shadow-token-xs { box-shadow: var(--shadow-xs); }
+  .shadow-token-sm { box-shadow: var(--shadow-sm); }
+  .shadow-token-md { box-shadow: var(--shadow-md); }
+  .shadow-token-lg { box-shadow: var(--shadow-lg); }
+  .shadow-token-elevated { box-shadow: var(--shadow-elevated); }
+  .shadow-token-brand { box-shadow: var(--shadow-brand); }
+
   /* Shimmer for skeleton loaders */
   .skeleton-shimmer { position: relative; overflow: hidden; }
   .skeleton-shimmer::after {
