@@ -75,6 +75,12 @@ describe('createStripeCheckoutSession', () => {
   it('aborts when an external signal is triggered', async () => {
     global.fetch = vi.fn().mockImplementation((_url, init: RequestInit) => {
       return new Promise((_resolve, reject) => {
+        if (init.signal?.aborted) {
+          const err = new Error('aborted');
+          err.name = 'AbortError';
+          reject(err);
+          return;
+        }
         init.signal?.addEventListener('abort', () => {
           const err = new Error('aborted');
           err.name = 'AbortError';
@@ -89,7 +95,7 @@ describe('createStripeCheckoutSession', () => {
       { signal: controller.signal, timeoutMs: 60_000 },
     );
     controller.abort();
-    await expect(promise).rejects.toThrow();
+    await expect(promise).rejects.toBeInstanceOf(StripeCheckoutTimeoutError);
   });
 
   it('wraps generic network failures with a retry hint', async () => {
