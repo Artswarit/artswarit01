@@ -20,6 +20,22 @@ html, body {
   --ease-apple: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-apple-in: cubic-bezier(0.32, 0, 0.67, 0);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ── Brand tokens (single source of truth for the Artswarit gradient) ── */
+  --brand-from: #7C4DFF;          /* artswarit.purple */
+  --brand-to: #3B82F6;            /* tailwind blue-500 */
+  --brand-from-dark: #5E35B1;     /* artswarit.purple-dark */
+  --brand-to-dark: #2563EB;       /* tailwind blue-600 */
+  --gradient-brand: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+  --gradient-brand-hover: linear-gradient(135deg, var(--brand-from-dark), var(--brand-to-dark));
+
+  /* ── Elevation tokens ── */
+  --shadow-xs: 0 1px 2px hsl(220 10% 10% / 0.05);
+  --shadow-sm: 0 2px 8px hsl(220 10% 10% / 0.06);
+  --shadow-md: 0 8px 24px hsl(220 10% 10% / 0.08);
+  --shadow-lg: 0 20px 60px -30px hsl(220 10% 10% / 0.3);
+  --shadow-elevated: 0 30px 80px -40px hsl(220 10% 10% / 0.4);
+  --shadow-brand: 0 10px 30px -10px hsl(var(--primary) / 0.3);
 }
 
 /* Smooth, Apple-feel transitions on common interactive primitives */
@@ -28,6 +44,27 @@ html, body {
   .tap-scale { transition: transform 150ms var(--ease-apple); }
   .tap-scale:active { transform: scale(0.97); }
   .pb-safe { padding-bottom: var(--safe-bottom); }
+
+  /* ── Brand gradient utilities (canonical) ── */
+  .bg-brand-gradient { background-image: var(--gradient-brand); }
+  .bg-brand-gradient-hover:hover { background-image: var(--gradient-brand-hover); }
+  .text-brand-gradient {
+    background-image: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .border-brand-gradient {
+    border-image: var(--gradient-brand) 1;
+  }
+
+  /* ── Elevation token utilities ── */
+  .shadow-token-xs { box-shadow: var(--shadow-xs); }
+  .shadow-token-sm { box-shadow: var(--shadow-sm); }
+  .shadow-token-md { box-shadow: var(--shadow-md); }
+  .shadow-token-lg { box-shadow: var(--shadow-lg); }
+  .shadow-token-elevated { box-shadow: var(--shadow-elevated); }
+  .shadow-token-brand { box-shadow: var(--shadow-brand); }
 
   /* Shimmer for skeleton loaders */
   .skeleton-shimmer { position: relative; overflow: hidden; }
