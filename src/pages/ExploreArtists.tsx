@@ -333,6 +333,7 @@ const ExploreArtists = () => {
     sortBy: string;
   }) => {
     let filtered = [...artists];
+    setActiveSearchQuery(filters.search || '');
 
     // Search filter
     if (filters.search) {
