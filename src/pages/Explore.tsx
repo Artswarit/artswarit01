@@ -19,6 +19,7 @@ const Explore = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filteredArtworks, setFilteredArtworks] = useState(artworks || []);
   const [currentCategory, setCurrentCategory] = useState<string>('all');
+  const [activeSearchQuery, setActiveSearchQuery] = useState<string>('');
   const location = useLocation();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
