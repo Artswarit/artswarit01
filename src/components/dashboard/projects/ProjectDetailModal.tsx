@@ -214,12 +214,19 @@ const ProjectDetailModal = ({
         }
       }
     } catch (err: any) {
-      if (err.name === 'AbortError' || err.code === 'ABORT') return;
+      if (
+        err?.name === 'AbortError' ||
+        err?.code === 'ABORT' ||
+        err?.message?.includes('AbortError') ||
+        err?.message?.includes('signal is aborted') ||
+        err?.message?.includes('Failed to fetch')
+      ) return;
       console.error('Error fetching project data:', err);
       toast.error("Failed to load project details");
     } finally {
       setLoading(false);
     }
+
   }, [projectId, onOpenChange]);
 
   useEffect(() => {

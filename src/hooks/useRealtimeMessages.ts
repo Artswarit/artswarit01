@@ -168,9 +168,17 @@ export const useRealtimeMessages = () => {
 
           const { count: unreadCount, error: unreadError } = await (unreadQuery as any).abortSignal(signal);
           
-          if (unreadError && unreadError.name !== 'AbortError' && !unreadError.message?.includes('AbortError')) {
+          if (
+            unreadError &&
+            !signal?.aborted &&
+            unreadError.name !== 'AbortError' &&
+            !unreadError.message?.includes('AbortError') &&
+            !unreadError.message?.includes('Failed to fetch') &&
+            !unreadError.message?.includes('signal is aborted')
+          ) {
             console.error('Error fetching unread count:', unreadError);
           }
+
 
           return {
             id: conv.id,

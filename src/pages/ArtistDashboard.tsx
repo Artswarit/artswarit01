@@ -100,12 +100,15 @@ const ArtistDashboard = () => {
     });
   }, [activeTab]);
 
-  // Backward-compat: legacy ?tab=premium → ?tab=membership
+  // Backward-compat: legacy ?tab=premium → ?tab=membership, ?tab=analytics → ?tab=portfolio
   useEffect(() => {
     if (tab === 'premium') {
       setSearchParams({ tab: 'membership' }, { replace: true });
+    } else if (tab === 'analytics') {
+      setSearchParams({ tab: 'portfolio' }, { replace: true });
     }
   }, [tab, setSearchParams]);
+
 
   if (profileLoading && !profile) {
     return (
@@ -121,11 +124,11 @@ const ArtistDashboard = () => {
     { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
     { value: 'portfolio', label: 'My Works', shortLabel: 'Works', icon: Palette },
     { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
-    { value: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
     { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
     { value: 'membership', label: 'Membership', shortLabel: 'Pro', icon: Crown },
     { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
   ];
+
 
 
   return (
@@ -147,7 +150,7 @@ const ArtistDashboard = () => {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="relative mb-6 sm:mb-8 lg:mb-12">
               <div className="hidden sm:block overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-7 items-stretch">
+                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
                   {tabs.map((tabItem) => {
                     const Icon = tabItem.icon;
                     
@@ -207,23 +210,26 @@ const ArtistDashboard = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="analytics" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'analytics' && "hidden")}>
-                  {visitedTabs.has('analytics') && <AdvancedAnalytics />}
-                </div>
-              </TabsContent>
+
+
 
               <TabsContent value="portfolio" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'portfolio' && "hidden")}>
                   {visitedTabs.has('portfolio') && (
-                    <div className="space-y-12">
-                      <ArtworkManagement />
-                      <Separator className="opacity-20" />
-                      <ServicesManagement />
-                    </div>
+                    <Tabs defaultValue="artworks" className="w-full">
+                      <TabsList className="mb-6 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-3 h-auto">
+                        <TabsTrigger value="artworks" className="rounded-lg shrink-0">Artworks</TabsTrigger>
+                        <TabsTrigger value="services" className="rounded-lg shrink-0">Services</TabsTrigger>
+                        <TabsTrigger value="analytics" className="rounded-lg shrink-0">Analytics</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="artworks"><ArtworkManagement /></TabsContent>
+                      <TabsContent value="services"><ServicesManagement /></TabsContent>
+                      <TabsContent value="analytics"><AdvancedAnalytics /></TabsContent>
+                    </Tabs>
                   )}
                 </div>
               </TabsContent>
+
 
               <TabsContent value="finances" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'finances' && "hidden")}>
