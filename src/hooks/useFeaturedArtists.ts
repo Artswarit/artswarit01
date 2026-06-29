@@ -164,10 +164,10 @@ export function useFeaturedArtists(limit = 8) {
       });
 
       const sorted = scored.sort((a, b) => b.score - a.score).slice(0, limit);
-      setArtists(sorted.length > 0 ? sorted : getDummyArtists(limit));
+      setArtists(sorted);
     } catch (err) {
       console.error("Featured artists fetch error:", err);
-      setArtists(getDummyArtists(limit));
+      setArtists([]);
     } finally {
       setLoading(false);
     }
