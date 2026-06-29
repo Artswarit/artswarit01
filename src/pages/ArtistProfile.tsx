@@ -824,6 +824,7 @@ export default function ArtistProfile() {
   };
 
   const handleRequestProject = () => {
+    track('commission_started', { artist_id: id, surface: 'artist_profile' });
     if (!user) {
       toast({
         title: "Not logged in",
