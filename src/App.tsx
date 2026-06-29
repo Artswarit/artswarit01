@@ -159,6 +159,7 @@ const AppRoutes = () => {
   return (
     <ErrorBoundary>
       <ScrollToTop />
+      <StripeReturnTracker />
       <UniversalChatbot />
       <AnimatePresence mode="wait">
         <Suspense fallback={<RouteFallback />}>
