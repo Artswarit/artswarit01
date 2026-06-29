@@ -317,6 +317,15 @@ export default function ArtistProfile() {
         setFollowersCount(followersData.length);
         setArtistServices(servicesData);
 
+        // De-dupe per-session so quick remounts don't re-fire.
+        trackOncePerSession(`profile:${id}`, 'artist_profile_viewed', {
+          artist_id: id,
+          artist_category: (artistProfile as any)?.tags?.[0],
+          verified: (artistProfile as any)?.is_verified ?? false,
+          surface: 'artist_profile',
+        });
+
+
         // Enrich reviews with client info — all in parallel
         const enrichedReviews = await Promise.all(
           reviewsData.map(async (rev) => {
