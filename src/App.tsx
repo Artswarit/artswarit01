@@ -15,9 +15,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { TopLoadingBar } from "./components/TopLoadingBar";
 import LogoLoader from "./components/ui/LogoLoader";
-import { AppSplashScreen } from "./components/AppSplashScreen";
 import Index from "./pages/Index";
-import UniversalChatbot from "./components/UniversalChatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Route-level code splitting — keep landing page eager, lazy-load the rest
@@ -51,6 +49,7 @@ const Recommendations = lazy(() => import("./pages/Recommendations"));
 const Commissions = lazy(() => import("./pages/Commissions"));
 const Events = lazy(() => import("./pages/Events"));
 const Merchandise = lazy(() => import("./pages/Merchandise"));
+const UniversalChatbot = lazy(() => import("./components/UniversalChatbot"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -134,24 +133,30 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
   </motion.div>
 );
 
-// Warm up high-traffic route chunks during browser idle so navigation feels instant.
-if (typeof window !== "undefined") {
-  const idle = (window as any).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1200));
-  idle(() => {
-    import("./pages/Explore");
-    import("./pages/ExploreArtists");
-    import("./pages/Login");
-    import("./pages/Signup");
-    import("./pages/ArtworkDetails");
-    import("./pages/ArtistProfile");
-  });
-}
-
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <LogoLoader text="Loading…" />
   </div>
 );
+
+const DeferredUniversalChatbot = () => {
+  const [ready, setReady] = React.useState(false);
+
+  React.useEffect(() => {
+    const idle = (window as any).requestIdleCallback || ((cb: () => void) => window.setTimeout(cb, 1600));
+    const cancelIdle = (window as any).cancelIdleCallback || window.clearTimeout;
+    const id = idle(() => setReady(true));
+    return () => cancelIdle(id);
+  }, []);
+
+  if (!ready) return null;
+
+  return (
+    <Suspense fallback={null}>
+      <UniversalChatbot />
+    </Suspense>
+  );
+};
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -161,7 +166,7 @@ const AppRoutes = () => {
     <ErrorBoundary>
       <ScrollToTop />
       <StripeReturnTracker />
-      <UniversalChatbot />
+      <DeferredUniversalChatbot />
       <AnimatePresence mode="wait">
         <Suspense fallback={<RouteFallback />}>
           <Routes location={location}>
@@ -210,7 +215,6 @@ const App = () => {
   return (
     <BrowserRouter>
       <ErrorBoundary>
-        <AppSplashScreen />
         <TopLoadingBar />
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
