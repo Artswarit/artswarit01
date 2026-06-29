@@ -298,6 +298,19 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
 
       if (milestonesError) throw milestonesError;
 
+      // Analytics: commission flow start
+      track('commission_requested', {
+        project_id: project.id,
+        artist_id: artistId,
+        amount_usd: budgetUSD,
+        milestone_count: milestones.length,
+        has_artist: !!artistId,
+      });
+      track('milestone_created', {
+        project_id: project.id,
+        milestone_count: milestones.length,
+      });
+
       // Do NOT notify artist yet; wait for explicit client confirmation
       toast.success('Project created. Assign an artist and click Confirm to send.');
       

@@ -293,6 +293,12 @@ export function MilestoneReviewDialog({
         details: { reason: revisionReason }
       });
 
+      track('revision_requested', {
+        milestone_id: milestone.id,
+        project_id: projectId,
+        revision_no: newRevisionCount,
+        reason: revisionReason,
+      });
       toast.success('Revision requested. The artist will be notified.');
       onSuccess();
       onOpenChange(false);

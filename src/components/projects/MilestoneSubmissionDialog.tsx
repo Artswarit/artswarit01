@@ -195,6 +195,12 @@ export function MilestoneSubmissionDialog({
         });
       }
 
+      track('milestone_delivered', {
+        milestone_id: milestone.id,
+        project_id: projectId,
+        is_final: isFinalUpload,
+        file_count: files.length,
+      });
       toast.success(isFinalUpload ? 'Final files uploaded successfully' : 'Milestone submitted for review');
       onSuccess();
       onOpenChange(false);
