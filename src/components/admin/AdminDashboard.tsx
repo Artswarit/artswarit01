@@ -61,22 +61,22 @@ export default function AdminDashboard() {
         {/* Sticky scrollable tab bar */}
         <div className="sticky top-16 sm:top-20 z-20 -mx-3 sm:-mx-6 lg:-mx-8 px-3 sm:px-6 lg:px-8 bg-background/85 backdrop-blur-md border-b border-border/60">
           <div
-            className="flex items-center gap-1 overflow-x-auto no-scrollbar py-2.5"
+            className="overflow-x-auto no-scrollbar py-2.5"
             style={{ msOverflowStyle: 'none', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
           >
             <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
-            <TabsList className="bg-transparent inline-flex gap-1.5 p-0 h-auto">
+            <TabsList className="bg-transparent inline-flex flex-nowrap items-center gap-2 p-0 h-auto w-max">
               {TABS.map((t) => (
                 <TabsTrigger
                   key={t.value}
                   value={t.value}
                   className={cn(
-                    "inline-flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-full transition-all whitespace-nowrap font-medium ease-apple",
+                    "shrink-0 inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-full transition-all whitespace-nowrap font-medium ease-apple border border-transparent",
                     "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_2px_10px_-2px_hsl(var(--primary)/0.4)]",
                     "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted data-[state=inactive]:hover:text-foreground"
                   )}
                 >
-                  <t.icon className="h-3.5 w-3.5" />
+                  <t.icon className="h-3.5 w-3.5 shrink-0" />
                   <span>{t.label}</span>
                 </TabsTrigger>
               ))}
