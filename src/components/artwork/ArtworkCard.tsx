@@ -36,6 +36,12 @@ interface ArtworkCardProps {
   audioUrl?: string;
   videoUrl?: string;
   tags?: string[];
+  /** Position in the result list, used for impression / click ranking analytics. */
+  position?: number;
+  /** Active search query (if any) when this card was rendered. */
+  searchQuery?: string;
+  /** Surface that rendered the card (e.g. "explore", "trending", "recommendations"). */
+  surface?: string;
 }
 
 const ArtworkCard = ({
