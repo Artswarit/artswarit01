@@ -849,3 +849,30 @@ body > .razorpay-container ~ [data-radix-alert-dialog-overlay] {
 body.razorpay-active {
   overflow: hidden !important;
 }
+
+/* ── Performance utilities ───────────────────────────────────────────── */
+/* Skip rendering off-screen list rows/cards until they scroll near viewport.
+   Massively reduces layout/paint cost on long feeds & dashboards. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 320px;
+}
+.cv-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 380px;
+}
+
+/* GPU-friendly hint for elements that animate transform/opacity. */
+.will-animate { will-change: transform, opacity; }
+
+/* Honor users who want less motion — kill non-essential animation everywhere. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
