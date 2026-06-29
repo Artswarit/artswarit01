@@ -1073,7 +1073,7 @@ const ProjectDetailModal = ({
                             const showDay = !prev || prev.timestamp.toDateString() !== msg.timestamp.toDateString();
 
                             return (
-                              <React.Fragment key={msg.id}>
+                              <div key={msg.id}>
                                 {showDay && (
                                   <div className="flex justify-center py-3">
                                     <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 bg-muted/40 px-3 py-1 rounded-full">
@@ -1114,7 +1114,7 @@ const ProjectDetailModal = ({
                                     )}
                                   </div>
                                 </div>
-                              </React.Fragment>
+                              </div>
                             );
                           })
                         )}
