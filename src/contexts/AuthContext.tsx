@@ -110,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('Auth boot timed out; continuing without blocking the UI.');
         finishLoading();
       }
-    }, 7000);
+    }, 2500);
 
     // Set up auth state listener - MUST be synchronous to avoid deadlocks
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const sessionCheck = async () => {
       try {
         const timeout = new Promise<null>((resolve) => {
-          window.setTimeout(() => resolve(null), 5000);
+          window.setTimeout(() => resolve(null), 2000);
         });
         const currentSession = await Promise.race([
           supabase.auth.getSession().then(({ data }) => data.session),
