@@ -155,26 +155,6 @@ export const usePublicArtworks = () => {
 
   useEffect(() => {
     fetchPage(0, false);
-
-    // Real-time subscription for new/updated/deleted public artworks
-    const channel = supabase
-      .channel('public-artworks-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'artworks'
-        },
-        () => {
-          fetchPage(0, false);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [fetchPage]);
 
   return {

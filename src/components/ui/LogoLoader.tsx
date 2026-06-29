@@ -32,7 +32,7 @@ const LogoLoader = ({ text = 'Loading…', fullPage = false, className }: LogoLo
         <span className="absolute h-4/5 w-4/5 rounded-full bg-primary/5 animate-ping" style={{ animationDuration: '2s' }} />
         {/* Logo */}
         <img
-          src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
+          src="/icons/artswarit-logo-96.png"
           alt="Loading…"
           className="relative w-3/5 h-3/5 object-contain drop-shadow-xl animate-pulse"
           style={{ animationDuration: '1.8s' }}

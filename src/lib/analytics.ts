@@ -1,14 +1,17 @@
 // PostHog analytics — Phase 1 instrumentation.
 // Init in main.tsx, identify/reset in AuthContext, track() for custom events.
-import posthog from "posthog-js";
+type PostHogClient = typeof import("posthog-js").default;
 
 const KEY = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
 const HOST = (import.meta.env.VITE_POSTHOG_HOST as string | undefined) ?? "https://us.i.posthog.com";
 
 let inited = false;
+let posthog: PostHogClient | null = null;
 
-export function initAnalytics() {
+export async function initAnalytics() {
   if (inited || typeof window === "undefined" || !KEY) return;
+  const module = await import("posthog-js");
+  posthog = module.default;
   inited = true;
   posthog.init(KEY, {
     api_host: HOST,
@@ -35,7 +38,7 @@ export function identifyUser(
   userId: string,
   props: Record<string, unknown> = {},
 ) {
-  if (!inited) return;
+  if (!inited || !posthog) return;
   posthog.identify(userId, props);
   // Promote user_id + role into super-properties so every subsequent event
   // — including ones fired from deep components — carries the user context.
@@ -47,12 +50,12 @@ export function identifyUser(
 
 /** Add or overwrite super-properties attached to every future event. */
 export function registerAnalyticsContext(props: Record<string, unknown>) {
-  if (!inited) return;
+  if (!inited || !posthog) return;
   posthog.register(props);
 }
 
 export function resetAnalytics() {
-  if (!inited) return;
+  if (!inited || !posthog) return;
   posthog.reset();
 }
 
@@ -127,7 +130,7 @@ export type AnalyticsEvent =
   | "error_occurred";
 
 export function track(event: AnalyticsEvent, props: Record<string, unknown> = {}) {
-  if (!inited) return;
+  if (!inited || !posthog) return;
   // Always stamp a client-side timestamp; PostHog also records its own.
   posthog.capture(event, { timestamp: new Date().toISOString(), ...props });
 }
@@ -164,5 +167,4 @@ export function trackOncePerSession(
   track(event, props);
 }
 
-export { posthog };
 

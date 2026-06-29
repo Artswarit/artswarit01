@@ -91,20 +91,6 @@ export const usePlatformReviews = (limit: number = 3) => {
 
   useEffect(() => {
     fetchReviews();
-
-    // Subscribe to new reviews
-    const channel = supabase
-      .channel('platform-reviews-changes')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'project_reviews' },
-        () => fetchReviews()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [limit]);
 
   return { reviews, loading, refresh: fetchReviews };

@@ -34,10 +34,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Artswarit">
-    <link
-      rel="apple-touch-icon"
-      href="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
-    >
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <!-- Network priming: connect early to Supabase + fonts to shave RTTs -->
     <link rel="preconnect" href="https://sqdzemlcqesgjsybbhte.supabase.co" crossorigin>
@@ -100,7 +97,7 @@
   <meta name="twitter:title" content="Artswarit – India&#39;s Leading Artist Marketplace | Hire Artists Online">
   <meta property="og:description" content="Artswarit is India&#39;s leading artist marketplace. Hire freelance musicians, writers, illustrators, photographers &amp; more. Commission artwork with escrow-secured payments.">
   <meta name="twitter:description" content="Artswarit is India&#39;s leading artist marketplace. Hire freelance musicians, writers, illustrators, photographers &amp; more. Commission artwork with escrow-secured payments.">
-  <link rel="icon" type="image/png" href="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png">
+  <link rel="icon" type="image/png" href="/icons/artswarit-logo-64.png">
 </head>
 
   <body>
@@ -121,6 +118,7 @@
           flex-direction: column;
           align-items: center;
           gap: 14px;
+          animation: boot-fade-in 260ms ease-out both;
         }
         .boot-loader__mark {
           width: 76px;
@@ -143,6 +141,7 @@
           width: 46px;
           height: 46px;
           object-fit: contain;
+          animation: boot-logo-breathe 1.8s ease-in-out infinite;
         }
         .boot-loader__text {
           margin: 0;
@@ -153,11 +152,26 @@
           color: hsl(220 10% 40%);
         }
         @keyframes boot-spin { to { transform: rotate(360deg); } }
+        @keyframes boot-logo-breathe {
+          0%, 100% { transform: scale(0.94); opacity: 0.86; }
+          50% { transform: scale(1.06); opacity: 1; }
+        }
+        @keyframes boot-fade-in {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .boot-loader__mark::before,
+          .boot-loader__mark img,
+          .boot-loader__content {
+            animation: none;
+          }
+        }
       </style>
       <div class="boot-loader" role="status" aria-live="polite" aria-label="Loading Artswarit">
         <div class="boot-loader__content">
           <div class="boot-loader__mark">
-            <img src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png" alt="Artswarit" />
+            <img src="/icons/artswarit-logo-96.png" alt="Artswarit" />
           </div>
           <p class="boot-loader__text">Loading Artswarit</p>
         </div>
@@ -179,21 +193,23 @@
       });
     </script>
     <script>
+      // Register the kill-switch worker once per version so old PWA installs
+      // drop stale app-shell caches without creating a reload loop.
       if ("serviceWorker" in navigator) {
-        const host = window.location.hostname;
-        const isLocal = host === "localhost" || host === "127.0.0.1";
-        const isLovablePreview = host.includes("lovable.app") && (host.includes("preview") || host.includes("id-preview"));
-
-        if (isLocal || isLovablePreview) {
+        const cleanupVersion = "sw-cleanup-v6";
+        window.addEventListener("load", () => {
           navigator.serviceWorker.getRegistrations?.().then((registrations) => {
-            registrations.forEach((registration) => registration.unregister());
+            registrations
+              .filter((registration) => registration.active?.scriptURL?.includes("/sw.js"))
+              .forEach((registration) => registration.update?.().catch(() => {}));
           }).catch(() => {});
-          caches?.keys?.().then((keys) => keys.forEach((key) => caches.delete(key))).catch(() => {});
-        } else {
-          window.addEventListener("load", () => {
-            navigator.serviceWorker.register("/sw.js").catch(() => {});
+
+          if (localStorage.getItem("artswarit-sw-cleanup") === cleanupVersion) return;
+          localStorage.setItem("artswarit-sw-cleanup", cleanupVersion);
+          navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
+            localStorage.removeItem("artswarit-sw-cleanup");
           });
-        }
+        });
       }
     </script>
   </body>
