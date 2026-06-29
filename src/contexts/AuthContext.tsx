@@ -288,6 +288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Account created successfully!",
         description: "Please check your email to verify your account."
       });
+      track('sign_up', { role: userData.role, source: 'email', country: userData.country });
 
       return { error: null };
     } catch (error: any) {
