@@ -718,6 +718,77 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
             </div>}
         </TabsContent>
       </Tabs>
+
+      {/* Project Request — full-view dialog */}
+      <Dialog
+        open={requestServiceTitle !== null}
+        onOpenChange={(open) => !open && setRequestServiceTitle(null)}
+      >
+        <DialogContent
+          className="p-0 gap-0 border-0 sm:border bg-background w-screen h-[100dvh] max-w-none rounded-none sm:w-full sm:max-w-xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col"
+        >
+          <DialogHeader className="px-5 sm:px-6 py-4 border-b border-border/60 bg-background/95 backdrop-blur sticky top-0 z-10">
+            <div className="flex items-center justify-between gap-3">
+              <DialogTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
+                <Mail className="text-primary" size={18} />
+                Send Project Request
+              </DialogTitle>
+              <button
+                onClick={() => setRequestServiceTitle(null)}
+                aria-label="Close"
+                className="h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </DialogHeader>
+
+          <form
+            onSubmit={handleSubmit(submitRequest)}
+            className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-5"
+          >
+            <div>
+              <label className="font-medium text-foreground block mb-1.5 text-sm">Project Title</label>
+              <Input placeholder="E.g. 'Custom Portrait'" required {...register("title")} />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1.5 text-sm">Project Description</label>
+              <Textarea
+                placeholder="Describe what you want, deadlines, references…"
+                rows={6}
+                required
+                {...register("description")}
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1.5 text-sm">
+                Budget <span className="text-muted-foreground font-normal">(optional, in {userCurrencySymbol})</span>
+              </label>
+              <Input type="number" min={0} placeholder={`Amount in ${userCurrencySymbol}`} {...register("budget")} />
+            </div>
+          </form>
+
+          <div className="px-5 sm:px-6 py-4 border-t border-border/60 bg-background/95 backdrop-blur flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:pb-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRequestServiceTitle(null)}
+              className="h-11"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              onClick={handleSubmit(submitRequest)}
+              className="h-11 bg-violet-600 text-white hover:bg-violet-700 gap-2"
+            >
+              <Mail size={16} />
+              {isSubmitting ? "Sending…" : "Send Request"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 };
 export default ArtistTabs;
