@@ -257,6 +257,72 @@ const Explore = () => {
     }
 
     setFilteredArtworks(filtered);
+
+    // ----- Analytics: search / filter / sort -----
+    const prev = lastFiltersRef.current;
+    const snapshot = {
+      search: filters.search || '',
+      category: filters.category,
+      sortBy: filters.sortBy,
+      artworkType: filters.artworkType,
+      priceRange: filters.priceRange,
+      tags: filters.tags,
+    };
+
+    // Debounced search_submitted / zero_results — only fire after user pauses typing.
+    if (snapshot.search !== (prev?.search ?? '')) {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      const query = snapshot.search;
+      const resultCount = filtered.length;
+      searchDebounceRef.current = setTimeout(() => {
+        if (!query || query === lastTrackedQueryRef.current) return;
+        lastTrackedQueryRef.current = query;
+        const started = performance.now();
+        track('search_submitted', {
+          query,
+          result_count: resultCount,
+          search_type: 'artwork',
+          latency_ms: Math.round(performance.now() - started),
+          surface: 'explore',
+        });
+        if (resultCount === 0) {
+          track('zero_results', {
+            query,
+            filters: {
+              category: snapshot.category,
+              artworkType: snapshot.artworkType,
+              priceRange: snapshot.priceRange,
+              tags: snapshot.tags,
+            },
+            search_type: 'artwork',
+          });
+        }
+        track('search_results_loaded', {
+          query,
+          result_count: resultCount,
+          search_type: 'artwork',
+        });
+      }, 500);
+    }
+
+    if (prev && prev.sortBy !== snapshot.sortBy) {
+      track('sort_changed', {
+        sort_by: snapshot.sortBy,
+        previous_sort: prev.sortBy,
+        surface: 'explore',
+      });
+    }
+    if (prev) {
+      const filterDiffs: Array<[string, unknown]> = [];
+      if (prev.category !== snapshot.category) filterDiffs.push(['category', snapshot.category]);
+      if (prev.artworkType !== snapshot.artworkType) filterDiffs.push(['artwork_type', snapshot.artworkType]);
+      if (prev.priceRange !== snapshot.priceRange) filterDiffs.push(['price_range', snapshot.priceRange]);
+      if (prev.tags.join(',') !== snapshot.tags.join(',')) filterDiffs.push(['tags', snapshot.tags]);
+      filterDiffs.forEach(([filter_type, filter_value]) => {
+        track('filter_applied', { filter_type, filter_value, surface: 'explore' });
+      });
+    }
+    lastFiltersRef.current = snapshot;
   };
 
   useEffect(() => {
