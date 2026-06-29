@@ -286,12 +286,23 @@ const ArtworkCard = ({
     if ((e.target as HTMLElement).closest('a, button')) {
       return;
     }
+    track('artwork_viewed', { artwork_id: id, artist_id: artistId, category, surface });
+    if (searchQuery) {
+      track('search_result_clicked', {
+        query: searchQuery,
+        position,
+        entity_type: 'artwork',
+        entity_id: id,
+        surface,
+      });
+    }
     navigate(`/artwork/${id}`);
   };
 
   return (
     <>
-      <div 
+      <div
+        ref={impressionRef}
         onClick={handleCardClick}
         className="block"
       >
