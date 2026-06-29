@@ -86,6 +86,8 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
 }) => {
   const [tab, setTab] = useState("all");
   const [page, setPage] = useState(1);
+  // null = dialog closed. string (possibly "") = open, prefilled with service title.
+  const [requestServiceTitle, setRequestServiceTitle] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { initiatePayment, loading: paymentLoading } = useArtworkPayment();
