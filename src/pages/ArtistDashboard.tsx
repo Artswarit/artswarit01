@@ -16,7 +16,8 @@ import ArtistSettings from '@/components/dashboard/ArtistSettings';
 import PremiumMembership from '@/components/premium/PremiumMembership';
 import { ArtistBilling } from '@/components/dashboard/ArtistBilling';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, User, DollarSign, MessageSquare, Settings, Crown, Bell, Briefcase, Wrench, Lock, Wallet, Users, LayoutDashboard } from 'lucide-react';
+import { Palette, User, DollarSign, MessageSquare, Settings, Crown, Bell, Briefcase, Wrench, Lock, Wallet, Users, LayoutDashboard, BarChart3 } from 'lucide-react';
+import AdvancedAnalytics from '@/components/dashboard/artist/AdvancedAnalytics';
 import { Separator } from '@/components/ui/separator';
 import ProjectManagement from '@/components/dashboard/projects/ProjectManagement';
 import ArtistNotifications from '@/components/dashboard/ArtistNotifications';
@@ -120,6 +121,7 @@ const ArtistDashboard = () => {
     { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
     { value: 'portfolio', label: 'My Works', shortLabel: 'Works', icon: Palette },
     { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
+    { value: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
     { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
     { value: 'membership', label: 'Membership', shortLabel: 'Pro', icon: Crown },
     { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
@@ -145,7 +147,7 @@ const ArtistDashboard = () => {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="relative mb-6 sm:mb-8 lg:mb-12">
               <div className="hidden sm:block overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
+                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-7 items-stretch">
                   {tabs.map((tabItem) => {
                     const Icon = tabItem.icon;
                     
@@ -202,6 +204,12 @@ const ArtistDashboard = () => {
               <TabsContent value="projects" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'projects' && "hidden")}>
                   {visitedTabs.has('projects') && <ProjectManagement />}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="analytics" className="outline-none focus-visible:ring-0" forceMount>
+                <div className={cn(activeTab !== 'analytics' && "hidden")}>
+                  {visitedTabs.has('analytics') && <AdvancedAnalytics />}
                 </div>
               </TabsContent>
 
