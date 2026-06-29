@@ -107,14 +107,23 @@ const ArtistDashboard = () => {
     );
   }
 
+  // Backward-compat: legacy ?tab=premium → ?tab=membership
+  useEffect(() => {
+    if (tab === 'premium') {
+      setSearchParams({ tab: 'membership' }, { replace: true });
+    }
+  }, [tab, setSearchParams]);
+
   // Tab configuration with consolidated categories
   const tabs = [
     { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
     { value: 'portfolio', label: 'My Works', shortLabel: 'Works', icon: Palette },
     { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
     { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
+    { value: 'membership', label: 'Membership', shortLabel: 'Pro', icon: Crown },
     { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
   ];
+
 
   return (
       <div className="min-h-screen bg-gray-50/50 dark:bg-background">
@@ -135,7 +144,7 @@ const ArtistDashboard = () => {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="relative mb-6 sm:mb-8 lg:mb-12">
               <div className="hidden sm:block overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-5 items-stretch">
+                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
                   {tabs.map((tabItem) => {
                     const Icon = tabItem.icon;
                     
@@ -167,17 +176,27 @@ const ArtistDashboard = () => {
                 <div className={cn(activeTab !== 'overview' && "hidden")}>
                   {visitedTabs.has('overview') && (
                     <div className="space-y-12">
+                      {/* 1. Critical alerts that need action */}
                       <DashboardAttentionRequired 
                         role="artist" 
                         profile={profile} 
                         onAction={handleTabChange} 
                       />
-                      <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
+                      {/* 2. Primary KPIs: earnings + active work */}
                       <ArtistEarnings isLoading={profileLoading} />
+                      {/* 3. Engagement & activity feed */}
+                      <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
                     </div>
                   )}
                 </div>
               </TabsContent>
+
+              <TabsContent value="membership" className="outline-none focus-visible:ring-0" forceMount>
+                <div className={cn(activeTab !== 'membership' && "hidden")}>
+                  {visitedTabs.has('membership') && <PremiumMembership />}
+                </div>
+              </TabsContent>
+
 
               <TabsContent value="projects" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'projects' && "hidden")}>
@@ -217,13 +236,13 @@ const ArtistDashboard = () => {
                 <div className={cn(activeTab !== 'account' && "hidden")}>
                   {visitedTabs.has('account') && (
                     <Tabs defaultValue="profile_settings" className="w-full">
-                      <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-5 h-auto">
+                      <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-4 h-auto">
                         <TabsTrigger value="profile_settings" className="rounded-lg shrink-0">Profile</TabsTrigger>
                         <TabsTrigger value="earnings" className="rounded-lg shrink-0">Earnings</TabsTrigger>
-                        <TabsTrigger value="membership" className="rounded-lg shrink-0">Membership</TabsTrigger>
                         <TabsTrigger value="settings" className="rounded-lg shrink-0">Privacy</TabsTrigger>
                         <TabsTrigger value="exclusive" className="rounded-lg shrink-0">Exclusive</TabsTrigger>
                       </TabsList>
+
                       
                       <TabsContent value="profile_settings">
                         <ArtistProfile
@@ -244,9 +263,8 @@ const ArtistDashboard = () => {
                         </div>
                       </TabsContent>
 
-                      <TabsContent value="membership">
-                         <PremiumMembership />
-                      </TabsContent>
+
+
 
                       <TabsContent value="settings">
                         <ArtistSettings isLoading={profileLoading} />
