@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { track } from '@/lib/analytics';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -194,6 +195,26 @@ export default function DisputeSettlement() {
       }
 
       toast.success('Dispute resolved securely. Financial transfers initiated.');
+
+      const ctx = {
+        dispute_id: d.id,
+        project_id: d.project_id,
+        milestone_id: d.milestone_id,
+        artist_id: d.artist_id,
+        client_id: d.client_id,
+        currency: d.currency ?? 'USD',
+        resolution: res,
+      };
+      track('dispute_resolved', { ...ctx, status, artist_payout: artistPayout, client_refund: clientRefund });
+      if (status === 'resolved_cancelled' && clientRefund > 0) {
+        track('refund_processed', { ...ctx, amount: clientRefund });
+      } else if (status === 'resolved_split') {
+        if (clientRefund > 0) track('partial_refund_processed', { ...ctx, refund_amount: clientRefund, payout_amount: artistPayout });
+        if (artistPayout > 0) track('escrow_released_after_dispute', { ...ctx, amount: artistPayout, release_type: 'split' });
+      } else if (status === 'resolved_approved' && artistPayout > 0) {
+        track('escrow_released_after_dispute', { ...ctx, amount: artistPayout, release_type: 'full_to_artist' });
+      }
+
       fetchDisputes();
       setDialogOpen(false);
     } catch (err: any) {
@@ -208,6 +229,14 @@ export default function DisputeSettlement() {
     try {
       await supabase.from('disputes').update({ status: 'under_review', updated_at: new Date().toISOString() }).eq('id', d.id);
       await writeAuditLog(user?.id || 'system', 'DISPUTE_NEUTRAL_HOLD', d.id, resolution);
+      track('dispute_review_started', {
+        dispute_id: d.id,
+        project_id: d.project_id,
+        milestone_id: d.milestone_id,
+        artist_id: d.artist_id,
+        client_id: d.client_id,
+        reason: resolution,
+      });
       toast.success('Funds placed on Neutral Hold block');
       fetchDisputes();
       setDialogOpen(false);

@@ -13,13 +13,19 @@ export function initAnalytics() {
   posthog.init(KEY, {
     api_host: HOST,
     person_profiles: "identified_only",
-    capture_pageview: "history_change", // SPA route changes
+    capture_pageview: "history_change",
     capture_pageleave: true,
     autocapture: true,
-    capture_performance: { web_vitals: true }, // LCP / INP / CLS / FCP / TTFB
-    capture_exceptions: true, // unhandled JS errors + rejections
+    capture_performance: { web_vitals: true },
+    capture_exceptions: true,
     persistence: "localStorage+cookie",
     loaded: (ph) => {
+      // Super-properties attached to every event — gives funnels a consistent
+      // context object without each call-site having to repeat itself.
+      ph.register({
+        environment: import.meta.env.MODE,
+        app: "artswarit-web",
+      });
       if (import.meta.env.DEV) ph.debug(false);
     },
   });
@@ -31,6 +37,18 @@ export function identifyUser(
 ) {
   if (!inited) return;
   posthog.identify(userId, props);
+  // Promote user_id + role into super-properties so every subsequent event
+  // — including ones fired from deep components — carries the user context.
+  posthog.register({
+    user_id: userId,
+    user_role: (props as any).role ?? undefined,
+  });
+}
+
+/** Add or overwrite super-properties attached to every future event. */
+export function registerAnalyticsContext(props: Record<string, unknown>) {
+  if (!inited) return;
+  posthog.register(props);
 }
 
 export function resetAnalytics() {
@@ -41,16 +59,21 @@ export function resetAnalytics() {
 // Typed registry of custom events from the Artswarit analytics spec.
 // Add properties as you fire them — extra fields are allowed.
 export type AnalyticsEvent =
+  // Auth / onboarding
   | "sign_up"
   | "login"
   | "profile_completed"
+  // Portfolio
   | "portfolio_created"
   | "artwork_uploaded"
   | "service_created"
   | "artist_profile_viewed"
   | "artwork_viewed"
+  | "portfolio_viewed"
+  // Discovery
   | "search"
   | "filter_used"
+  // Commission funnel
   | "commission_requested"
   | "commission_accepted"
   | "escrow_created"
@@ -59,22 +82,35 @@ export type AnalyticsEvent =
   | "revision_requested"
   | "project_completed"
   | "review_submitted"
+  | "escrow_released"
+  // Disputes
   | "dispute_raised"
+  | "evidence_submitted"
+  | "dispute_review_started"
   | "dispute_resolved"
   | "refund_processed"
-  | "subscription_upgraded"
+  | "partial_refund_processed"
+  | "escrow_released_after_dispute"
+  // Payments
   | "payment_success"
   | "payment_failed"
-  | "message_sent"
-  | "notification_clicked"
-  | "error_occurred"
+  // Subscriptions
   | "pricing_viewed"
   | "upgrade_clicked"
-  | "portfolio_viewed";
+  | "checkout_started"
+  | "subscription_upgraded"
+  | "subscription_renewed"
+  | "subscription_cancelled"
+  | "subscription_expired"
+  // Engagement
+  | "message_sent"
+  | "notification_clicked"
+  | "error_occurred";
 
 export function track(event: AnalyticsEvent, props: Record<string, unknown> = {}) {
   if (!inited) return;
-  posthog.capture(event, props);
+  // Always stamp a client-side timestamp; PostHog also records its own.
+  posthog.capture(event, { timestamp: new Date().toISOString(), ...props });
 }
 
 export { posthog };

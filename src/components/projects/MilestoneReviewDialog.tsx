@@ -83,7 +83,7 @@ export function MilestoneReviewDialog({
   const fetchProjectDetails = async () => {
     const { data } = await supabase
       .from('projects')
-      .select('id, description, artist_id')
+      .select('id, description, artist_id, client_id')
       .eq('id', projectId)
       .single();
     setProjectData(data);
@@ -218,6 +218,33 @@ export function MilestoneReviewDialog({
         action: 'milestone_approved',
         details: { milestoneId: milestone.id }
       });
+
+      // Fire escrow_released — payout has been initiated by release-milestone-payout.
+      try {
+        const { data: m } = await supabase
+          .from('project_milestones')
+          .select('amount, currency, auto_approve_at')
+          .eq('id', milestone.id)
+          .single();
+        const releaseType: 'manual' | 'auto_after_48h' =
+          milestone.auto_approve_at && new Date(milestone.auto_approve_at).getTime() <= Date.now()
+            ? 'auto_after_48h'
+            : 'manual';
+        track('escrow_released', {
+          project_id: projectId,
+          milestone_id: milestone.id,
+          artist_id: projectData?.artist_id ?? null,
+          client_id: projectData?.client_id ?? user?.id ?? null,
+          amount: m?.amount ?? null,
+          currency: m?.currency ?? 'USD',
+          release_type: releaseType,
+          approval_time: new Date().toISOString(),
+          payout_status: data?.payout_status ?? 'initiated',
+          payment_provider: data?.provider ?? null,
+        });
+      } catch (e) {
+        console.error('escrow_released track failed', e);
+      }
 
       const isLastMilestone = await (async () => {
         try {

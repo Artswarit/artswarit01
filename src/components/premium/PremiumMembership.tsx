@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { track } from '@/lib/analytics';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { usePremiumSubscription } from '@/hooks/usePremiumSubscription';
@@ -36,9 +38,19 @@ const PremiumMembership = () => {
   } = useToast();
   const { initiateSubscription, loading: upgradeLoading } = usePremiumPayment();
 
+  useEffect(() => {
+    track('pricing_viewed', {
+      surface: 'premium_membership',
+      current_plan: isProArtist ? 'pro' : 'starter',
+    });
+  }, [isProArtist]);
+
   const handleUpgrade = async (planType?: string) => {
+    const plan = (planType as any) || 'monthly';
+    track('upgrade_clicked', { plan, current_plan: isProArtist ? 'pro' : 'starter' });
+    track('checkout_started', { plan, kind: 'subscription' });
     await initiateSubscription({
-      plan: (planType as any) || 'monthly',
+      plan,
       onSuccess: () => {
         // Broadcast for other tabs
         broadcastRefresh('subscription');
