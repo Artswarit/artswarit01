@@ -100,12 +100,15 @@ const ArtistDashboard = () => {
     });
   }, [activeTab]);
 
-  // Backward-compat: legacy ?tab=premium → ?tab=membership
+  // Backward-compat: legacy ?tab=premium → ?tab=membership, ?tab=analytics → ?tab=portfolio
   useEffect(() => {
     if (tab === 'premium') {
       setSearchParams({ tab: 'membership' }, { replace: true });
+    } else if (tab === 'analytics') {
+      setSearchParams({ tab: 'portfolio' }, { replace: true });
     }
   }, [tab, setSearchParams]);
+
 
   if (profileLoading && !profile) {
     return (
