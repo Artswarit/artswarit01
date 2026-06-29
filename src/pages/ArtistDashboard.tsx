@@ -263,9 +263,8 @@ const ArtistDashboard = () => {
                         </div>
                       </TabsContent>
 
-                      <TabsContent value="membership">
-                         <PremiumMembership />
-                      </TabsContent>
+
+
 
                       <TabsContent value="settings">
                         <ArtistSettings isLoading={profileLoading} />
