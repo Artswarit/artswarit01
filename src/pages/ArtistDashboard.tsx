@@ -216,14 +216,20 @@ const ArtistDashboard = () => {
               <TabsContent value="portfolio" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'portfolio' && "hidden")}>
                   {visitedTabs.has('portfolio') && (
-                    <div className="space-y-12">
-                      <ArtworkManagement />
-                      <Separator className="opacity-20" />
-                      <ServicesManagement />
-                    </div>
+                    <Tabs defaultValue="artworks" className="w-full">
+                      <TabsList className="mb-6 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-3 h-auto">
+                        <TabsTrigger value="artworks" className="rounded-lg shrink-0">Artworks</TabsTrigger>
+                        <TabsTrigger value="services" className="rounded-lg shrink-0">Services</TabsTrigger>
+                        <TabsTrigger value="analytics" className="rounded-lg shrink-0">Analytics</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="artworks"><ArtworkManagement /></TabsContent>
+                      <TabsContent value="services"><ServicesManagement /></TabsContent>
+                      <TabsContent value="analytics"><AdvancedAnalytics /></TabsContent>
+                    </Tabs>
                   )}
                 </div>
               </TabsContent>
+
 
               <TabsContent value="finances" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'finances' && "hidden")}>
