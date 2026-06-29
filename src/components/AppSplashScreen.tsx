@@ -34,7 +34,7 @@ export const AppSplashScreen = () => {
             }}
             className="relative"
           >
-            <img 
+            <img loading="lazy" decoding="async" 
               src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png" 
               alt="Artswarit Logo" 
               className="h-24 w-24 sm:h-32 sm:w-32 object-contain"

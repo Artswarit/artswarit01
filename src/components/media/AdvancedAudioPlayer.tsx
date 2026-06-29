@@ -154,7 +154,7 @@ const AdvancedAudioPlayer = ({
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
             {currentTrack?.artwork && (
-              <img 
+              <img loading="lazy" decoding="async" 
                 src={currentTrack.artwork} 
                 alt={currentTrack.title}
                 className="w-16 h-16 rounded-lg object-cover"

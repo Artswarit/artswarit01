@@ -256,7 +256,7 @@ const TwoFactorSetup = () => {
                 
                 {qrCode && (
                   <div className="flex justify-center p-4 bg-white rounded-lg">
-                    <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
+                    <img loading="lazy" decoding="async" src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
                   </div>
                 )}
 

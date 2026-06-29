@@ -346,7 +346,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
               className="flex items-center gap-3 flex-1 min-w-0 group"
             >
               {artwork.artistAvatar ? (
-                <img
+                <img loading="lazy" decoding="async"
                   src={artwork.artistAvatar}
                   alt={artwork.artist}
                   className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all"
@@ -388,7 +388,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
             {artwork.type === "image" && artwork.imageUrl && (
               <>
                 <div className="bg-muted/30 flex items-center justify-center">
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={getOptimizedImageUrl(artwork.imageUrl, ImagePresets.ARTWORK_DETAIL)}
                     alt={artwork.title}
                     className="w-full h-auto max-h-[90vh] object-contain block mx-auto"
@@ -405,7 +405,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
                   <DialogContent className="max-w-[98vw] max-h-[98vh] p-0 border-none bg-background rounded-2xl overflow-hidden flex items-center justify-center">
                     <DialogTitle className="sr-only">Fullscreen — {artwork.title}</DialogTitle>
                     <DialogDescription className="sr-only">Full size view of {artwork.title}</DialogDescription>
-                    <img src={artwork.imageUrl} alt={artwork.title} className="max-w-full max-h-[96vh] object-contain" />
+                    <img loading="lazy" decoding="async" src={artwork.imageUrl} alt={artwork.title} className="max-w-full max-h-[96vh] object-contain" />
                   </DialogContent>
                 </Dialog>
               </>
@@ -422,7 +422,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
             {(artwork.type === "audio" || artwork.type === "music") && (
               <div className="p-6 space-y-4">
                 {artwork.imageUrl ? (
-                  <img src={artwork.imageUrl} alt={artwork.title} className="w-full rounded-xl object-cover max-h-72" />
+                  <img loading="lazy" decoding="async" src={artwork.imageUrl} alt={artwork.title} className="w-full rounded-xl object-cover max-h-72" />
                 ) : (
                   <div className="w-full h-48 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                     <Music className="h-14 w-14 text-primary/30" />

@@ -317,7 +317,7 @@ export default function UserGovernance() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="h-9 w-9 rounded-full overflow-hidden bg-primary/10 border-2 border-background flex items-center justify-center shrink-0 shadow-sm">
-                            {u.avatar_url ? <img src={u.avatar_url} alt="" className="h-full w-full object-cover" /> : <span className="text-[10px] font-black text-primary">{(u.full_name || u.email).substring(0,2).toUpperCase()}</span>}
+                            {u.avatar_url ? <img loading="lazy" decoding="async" src={u.avatar_url} alt="" className="h-full w-full object-cover" /> : <span className="text-[10px] font-black text-primary">{(u.full_name || u.email).substring(0,2).toUpperCase()}</span>}
                           </div>
                           <div className="flex flex-col min-w-0">
                             <span className="font-bold text-sm text-foreground truncate">{u.full_name || 'Anonymous User'}</span>
@@ -377,7 +377,7 @@ export default function UserGovernance() {
                          <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2.5 min-w-0">
                                <div className="h-10 w-10 rounded-xl overflow-hidden bg-primary/5 border border-muted/20 flex items-center justify-center shrink-0">
-                                  {u.avatar_url ? <img src={u.avatar_url} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black text-primary">{(u.full_name || u.email).substring(0,2).toUpperCase()}</span>}
+                                  {u.avatar_url ? <img loading="lazy" decoding="async" src={u.avatar_url} alt="" className="h-full w-full object-cover" /> : <span className="text-xs font-black text-primary">{(u.full_name || u.email).substring(0,2).toUpperCase()}</span>}
                                </div>
                                <div className="flex flex-col min-w-0">
                                  <span className="font-black text-sm text-foreground truncate tracking-tight">{u.full_name || 'Anonymous User'}</span>

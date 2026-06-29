@@ -157,7 +157,7 @@ const LiveStreaming = () => {
               {activeStreams.slice(1).map((stream) => (
                 <Card key={stream.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedStream(stream)}>
                   <div className="relative">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={stream.thumbnail} 
                       alt={stream.title}
                       className="w-full h-48 object-cover rounded-t-lg"
@@ -191,7 +191,7 @@ const LiveStreaming = () => {
               {upcomingStreams.map((stream) => (
                 <Card key={stream.id} className="hover:shadow-md transition-shadow">
                   <div className="relative">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={stream.thumbnail} 
                       alt={stream.title}
                       className="w-full h-48 object-cover rounded-t-lg opacity-75"
