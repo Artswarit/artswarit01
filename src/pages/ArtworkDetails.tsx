@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import LogoLoader from "@/components/ui/LogoLoader";
+import { trackOncePerSession } from "@/lib/analytics";
 import { getOptimizedImageUrl, ImagePresets } from "@/lib/image-optimization";
 import { PayArtworkButton } from "@/components/payments/PayArtworkButton";
 
