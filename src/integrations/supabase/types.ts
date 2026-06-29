@@ -1088,8 +1088,11 @@ export type Database = {
       }
       notifications: {
         Row: {
+          archived_at: string | null
           created_at: string
+          expires_at: string | null
           id: string
+          is_archived: boolean
           is_read: boolean
           message: string
           metadata: Json | null
@@ -1098,8 +1101,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
+          expires_at?: string | null
           id?: string
+          is_archived?: boolean
           is_read?: boolean
           message: string
           metadata?: Json | null
@@ -1108,8 +1114,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
+          expires_at?: string | null
           id?: string
+          is_archived?: boolean
           is_read?: boolean
           message?: string
           metadata?: Json | null
@@ -2683,6 +2692,7 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_old_notifications: { Args: never; Returns: undefined }
       delete_user_account: { Args: never; Returns: undefined }
       get_artist_dashboard_stats: {
         Args: { artist_uuid: string }
