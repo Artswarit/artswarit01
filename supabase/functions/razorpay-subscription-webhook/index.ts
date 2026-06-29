@@ -167,6 +167,29 @@ serve(async (req) => {
           metadata: { subscription_id: subscription.id }
         });
 
+        // Analytics — server-confirmed activation vs renewal. paid_count is
+        // 1 for the first successful charge and increments on each renewal.
+        const paidCount: number = subscription.paid_count ?? 1;
+        const amount = payment?.amount ? payment.amount / 100 : 0;
+        const ctx = {
+          provider: 'razorpay',
+          plan: subscription.plan_id ?? 'monthly',
+          subscription_id: subscription.id,
+          invoice_id: payment?.invoice_id ?? null,
+          payment_id: payment?.id ?? null,
+          amount,
+          currency: (payment?.currency ?? 'INR').toUpperCase(),
+          billing_cycle: 'monthly',
+          renewal_number: paidCount,
+        };
+        const phEvent = event.event === 'subscription.activated' || paidCount <= 1
+          ? 'subscription_upgraded'
+          : 'subscription_renewed';
+        await phCapture(phEvent, finalUserId, ctx);
+        if (event.event === 'subscription.charged') {
+          await phCapture('payment_success', finalUserId, { ...ctx, kind: 'subscription' });
+        }
+
         // console.log("Subscription activated for user:", finalUserId);
         break;
       }
