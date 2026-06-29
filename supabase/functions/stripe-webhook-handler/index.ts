@@ -100,7 +100,7 @@ serve(async (req) => {
         ]);
       } else if (type === 'milestone_payment') {
         const milestoneId = metadata?.milestone_id;
-        const _projectId = metadata?.project_id;
+        const projectId = metadata?.project_id;
         const clientId = metadata?.buyer_id;
         const artistId = metadata?.seller_id;
 
@@ -115,7 +115,7 @@ serve(async (req) => {
           .from('project_milestones')
           .update({ status: 'PAID' })
           .eq('id', milestoneId);
-        
+
         // 3. Update payment record
         await supabase
           .from('payments')
@@ -127,6 +127,23 @@ serve(async (req) => {
           { user_id: artistId, type: 'milestone_paid', title: 'Milestone Funded', message: `A milestone for your project has been funded.` },
           { user_id: clientId, type: 'payment_success', title: 'Payment Successful', message: `Milestone payment was successful.` }
         ]);
+
+        // Analytics — server-confirmed escrow funding.
+        const amount = (session.amount_total ?? 0) / 100;
+        const ctx = {
+          provider: 'stripe',
+          project_id: projectId,
+          milestone_id: milestoneId,
+          artist_id: artistId,
+          client_id: clientId,
+          payment_id: session.payment_intent ?? session.id,
+          amount,
+          currency: (session.currency ?? 'usd').toUpperCase(),
+        };
+        if (clientId) {
+          await phCapture('payment_success', clientId, { ...ctx, kind: 'milestone' });
+          await phCapture('escrow_created', clientId, ctx);
+        }
       } else if (type === 'premium_plan') {
         const userId = metadata?.user_id;
         const plan = metadata?.plan;
@@ -150,6 +167,22 @@ serve(async (req) => {
           title: 'Premium Activated',
           message: `Welcome to ${plan}! You now have 0% platform fees.`
         });
+
+        // Analytics — server-confirmed subscription upgrade.
+        if (userId) {
+          const subCtx = {
+            provider: 'stripe',
+            plan,
+            subscription_id: session.subscription ?? session.id,
+            invoice_id: session.invoice ?? null,
+            amount: (session.amount_total ?? 0) / 100,
+            currency: (session.currency ?? 'usd').toUpperCase(),
+            billing_cycle: plan,
+            renewal_number: 1,
+          };
+          await phCapture('subscription_upgraded', userId, subCtx);
+          await phCapture('payment_success', userId, { ...subCtx, kind: 'subscription' });
+        }
       }
     }
 
