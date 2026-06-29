@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
+import { track } from '@/lib/analytics';
 
 interface Artist {
   id: string;
