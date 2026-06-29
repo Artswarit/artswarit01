@@ -121,11 +121,11 @@ const ArtistDashboard = () => {
     { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
     { value: 'portfolio', label: 'My Works', shortLabel: 'Works', icon: Palette },
     { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
-    { value: 'analytics', label: 'Analytics', shortLabel: 'Stats', icon: BarChart3 },
     { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
     { value: 'membership', label: 'Membership', shortLabel: 'Pro', icon: Crown },
     { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
   ];
+
 
 
   return (
