@@ -266,6 +266,12 @@ const ArtworkCard = ({
       });
       return;
     }
+    track(isSaved ? 'wishlist_removed' : 'wishlist_added', {
+      artwork_id: id,
+      artist_id: artistId,
+      category,
+      surface,
+    });
     toggleSaveArtwork(id);
   };
 
