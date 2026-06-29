@@ -30,16 +30,17 @@ const LockedFeature: React.FC<LockedFeatureProps> = ({
   if (!isLocked) return <>{children}</>;
 
   return (
-    <div className={cn("relative isolate overflow-hidden rounded-3xl", className)}>
+    <div className={cn("relative isolate overflow-hidden rounded-3xl border border-border/40 bg-card/40", className)}>
+      {/* Constrained preview so the upgrade card stays visible without scrolling. */}
       <div
-        className="pointer-events-none select-none blur-md opacity-40"
+        className="pointer-events-none select-none blur-md opacity-30 max-h-[420px] overflow-hidden"
         aria-hidden
       >
         {children}
       </div>
 
-      <div className="absolute inset-0 flex items-center justify-center p-6 bg-background/40 backdrop-blur-xl">
-        <div className="max-w-md w-full rounded-2xl border border-border/60 bg-card/90 backdrop-blur-xl shadow-2xl p-6 sm:p-8 text-center">
+      <div className="absolute inset-0 flex items-start sm:items-center justify-center p-4 sm:p-6 pt-10 bg-background/50 backdrop-blur-xl">
+        <div className="max-w-md w-full rounded-2xl border border-border/60 bg-card/95 backdrop-blur-xl shadow-2xl p-6 sm:p-8 text-center">
           <div className="mx-auto h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-4">
             <Lock className="h-5 w-5" />
           </div>
