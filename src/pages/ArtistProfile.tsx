@@ -670,6 +670,7 @@ export default function ArtistProfile() {
         follower_id: user.id,
       });
       if (!error) {
+        track('artist_followed', { artist_id: id, surface: 'artist_profile' });
         toast({
           title: "Followed",
           description: "You are now following this artist!",
