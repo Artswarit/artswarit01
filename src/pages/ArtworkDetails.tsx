@@ -137,6 +137,15 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
         artistAvatar: artist?.avatar_url || null,
         tags: data.tags || [],
       });
+      trackOncePerSession(`artwork:${data.id}`, 'artwork_viewed', {
+        artwork_id: data.id,
+        artist_id: data.artist_id,
+        category: data.category,
+        medium: data.media_type,
+        price: data.price || 0,
+        access_type: accessType,
+        surface: 'artwork_details',
+      });
       setLoading(false);
 
       if (isCancelled) return;
