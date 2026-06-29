@@ -134,10 +134,22 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => (
   </motion.div>
 );
 
-// Transparent fallback — keeps the previous route painted while the next
-// chunk loads. The top loading bar provides the only navigation feedback,
-// so route switches no longer flash a full splash screen.
-const RouteFallback = () => null;
+// Transparent for the first 200 ms so fast chunk loads don't flash a spinner,
+// then falls back to the branded logo loader so slow networks never sit on a
+// blank white screen between routes.
+const RouteFallback = () => {
+  const [show, setShow] = React.useState(false);
+  React.useEffect(() => {
+    const id = window.setTimeout(() => setShow(true), 200);
+    return () => window.clearTimeout(id);
+  }, []);
+  if (!show) return null;
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <LogoLoader text="Loading…" />
+    </div>
+  );
+};
 
 const DeferredUniversalChatbot = () => {
   const [ready, setReady] = React.useState(false);

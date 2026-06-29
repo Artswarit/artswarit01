@@ -3,13 +3,14 @@ import { useSearchParams } from "react-router-dom";
 import ArtworkCard from "@/components/artwork/ArtworkCard";
 import ArtworkCardModern from "@/components/artist-profile/ArtworkCardModern";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Star, MapPin, Mail, Lock, Crown, Image, Layers, User } from "lucide-react";
+import { Star, MapPin, Mail, Lock, Crown, Image, Layers, User, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ReviewCard from "@/components/reviews/ReviewCard";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { useArtworkPayment } from "@/hooks/useArtworkPayment";
@@ -86,6 +87,8 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
 }) => {
   const [tab, setTab] = useState("all");
   const [page, setPage] = useState(1);
+  // null = dialog closed. string (possibly "") = open, prefilled with service title.
+  const [requestServiceTitle, setRequestServiceTitle] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { initiatePayment, loading: paymentLoading } = useArtworkPayment();
@@ -430,12 +433,57 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
     }
   });
 
-  const submitRequest = () => {
-    toast({
-      title: "Project request sent!",
-      description: "The artist will be notified of your interest."
-    });
-    reset();
+  // Prefill the project title with the chosen service when the dialog opens.
+  useEffect(() => {
+    if (requestServiceTitle !== null) {
+      reset({ title: requestServiceTitle, description: "", budget: "" });
+    }
+  }, [requestServiceTitle]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const submitRequest = async (values: { title: string; description: string; budget: string }) => {
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please log in to send a project request.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const clientName =
+        (user as any)?.user_metadata?.full_name ||
+        (user as any)?.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        "A client";
+      const budgetText = values.budget ? ` (Budget: ${userCurrencySymbol}${values.budget})` : "";
+      await supabase.from("notifications").insert({
+        user_id: artistId,
+        title: `New project request: ${values.title}`,
+        message: `${clientName} sent a project request${budgetText}. ${values.description}`.slice(0, 500),
+        type: "info",
+        metadata: {
+          kind: "project_request",
+          client_id: user.id,
+          title: values.title,
+          description: values.description,
+          budget: values.budget || null,
+          currency: userCurrencySymbol,
+        },
+      });
+      toast({
+        title: "Project request sent!",
+        description: "The artist will be notified of your interest.",
+      });
+      reset({ title: "", description: "", budget: "" });
+      setRequestServiceTitle(null);
+    } catch (err: any) {
+      console.error("Project request failed", err);
+      toast({
+        title: "Could not send request",
+        description: err?.message || "Please try again in a moment.",
+        variant: "destructive",
+      });
+    }
   };
 
   return <div>
@@ -551,39 +599,52 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
                 Services & Project Request
               </h3>
 
-              {services.length === 0 ? <div className="mb-7 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-                  This artist hasn't listed fixed services yet. Send a project request below.
-                </div> : <div className="grid gap-4 mb-7">
-                  {services.map(service => <div key={service.id} className="p-4 rounded-xl border bg-white/60 shadow flex flex-col md:flex-row justify-between items-start md:items-center">
-                      <div>
-                        <div className="text-lg font-semibold text-gray-900">{service.title}</div>
-                        {service.description && <div className="text-gray-700">{service.description}</div>}
+              {services.length === 0 ? (
+                <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground text-center">
+                  This artist hasn't listed fixed services yet.
+                  <div className="mt-4">
+                    <Button
+                      onClick={() => setRequestServiceTitle("")}
+                      className="bg-violet-600 text-white hover:bg-violet-700 gap-2"
+                    >
+                      <Mail size={16} /> Send a Project Request
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {services.map(service => (
+                    <div
+                      key={service.id}
+                      className="p-4 rounded-xl border bg-card shadow-sm flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="text-base sm:text-lg font-semibold text-foreground">
+                          {service.title}
+                        </div>
+                        {service.description && (
+                          <div className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                            {service.description}
+                          </div>
+                        )}
+                        {service.starting_price !== null && (
+                          <div className="font-semibold text-amber-700 mt-2 text-sm">
+                            {formatPlus(service.starting_price)}
+                          </div>
+                        )}
                       </div>
-                      {service.starting_price !== null && <div className="font-semibold text-amber-700 mt-2 md:mt-0 md:ml-4 flex items-center gap-0.5">
-                          
-                          {formatPlus(service.starting_price)}
-                        </div>}
-                    </div>)}
-                </div>}
-
-              <form onSubmit={handleSubmit(submitRequest)} className="bg-white/80 rounded-xl p-6 shadow space-y-4">
-                <div>
-                  <label className="font-medium text-gray-700 block mb-1">Project Title</label>
-                  <Input placeholder="E.g. 'Custom Portrait'" required {...register("title")} />
+                      <div className="shrink-0 sm:ml-auto">
+                        <Button
+                          onClick={() => setRequestServiceTitle(service.title)}
+                          className="w-full sm:w-auto bg-violet-600 text-white hover:bg-violet-700 gap-2 h-11"
+                        >
+                          <Mail size={16} /> Request
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <label className="font-medium text-gray-700 block mb-1">Project Description</label>
-                  <Textarea placeholder="Describe what you want..." rows={4} required {...register("description")} />
-                </div>
-                <div>
-                  <label className="font-medium text-gray-700 block mb-1">Budget (optional, in {userCurrencySymbol})</label>
-                  <Input type="number" min={0} placeholder={`Amount in ${userCurrencySymbol}`} {...register("budget")} />
-                </div>
-                <Button type="submit" disabled={isSubmitting} className="bg-violet-600 text-white hover:bg-violet-700 font-semibold gap-2 flex items-center">
-                  <Mail size={17} />
-                  {isSubmitting ? "Sending..." : "Send Request"}
-                </Button>
-              </form>
+              )}
             </div>}
 
           {/* Expanded "About" tab details */}
@@ -657,6 +718,77 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
             </div>}
         </TabsContent>
       </Tabs>
+
+      {/* Project Request — full-view dialog */}
+      <Dialog
+        open={requestServiceTitle !== null}
+        onOpenChange={(open) => !open && setRequestServiceTitle(null)}
+      >
+        <DialogContent
+          className="p-0 gap-0 border-0 sm:border bg-background w-screen h-[100dvh] max-w-none rounded-none sm:w-full sm:max-w-xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col"
+        >
+          <DialogHeader className="px-5 sm:px-6 py-4 border-b border-border/60 bg-background/95 backdrop-blur sticky top-0 z-10">
+            <div className="flex items-center justify-between gap-3">
+              <DialogTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
+                <Mail className="text-primary" size={18} />
+                Send Project Request
+              </DialogTitle>
+              <button
+                onClick={() => setRequestServiceTitle(null)}
+                aria-label="Close"
+                className="h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </DialogHeader>
+
+          <form
+            onSubmit={handleSubmit(submitRequest)}
+            className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-5"
+          >
+            <div>
+              <label className="font-medium text-foreground block mb-1.5 text-sm">Project Title</label>
+              <Input placeholder="E.g. 'Custom Portrait'" required {...register("title")} />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1.5 text-sm">Project Description</label>
+              <Textarea
+                placeholder="Describe what you want, deadlines, references…"
+                rows={6}
+                required
+                {...register("description")}
+              />
+            </div>
+            <div>
+              <label className="font-medium text-foreground block mb-1.5 text-sm">
+                Budget <span className="text-muted-foreground font-normal">(optional, in {userCurrencySymbol})</span>
+              </label>
+              <Input type="number" min={0} placeholder={`Amount in ${userCurrencySymbol}`} {...register("budget")} />
+            </div>
+          </form>
+
+          <div className="px-5 sm:px-6 py-4 border-t border-border/60 bg-background/95 backdrop-blur flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:pb-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRequestServiceTitle(null)}
+              className="h-11"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              onClick={handleSubmit(submitRequest)}
+              className="h-11 bg-violet-600 text-white hover:bg-violet-700 gap-2"
+            >
+              <Mail size={16} />
+              {isSubmitting ? "Sending…" : "Send Request"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 };
 export default ArtistTabs;
