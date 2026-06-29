@@ -51,19 +51,27 @@ const PurchasedArtworks = () => {
       // Fetch artwork details for those IDs
       const { data: artworkData, error: artworkError } = await supabase
         .from('artworks')
-        .select(`
-          *,
-          profiles:artist_id (full_name)
-        `)
+        .select('*')
         .in('id', artworkIds);
 
       if (artworkError) throw artworkError;
+
+      // Fetch artist names from public_profiles (no FK relation available)
+      const artistIds = Array.from(new Set((artworkData || []).map(a => a.artist_id).filter(Boolean)));
+      let artistMap = new Map<string, string>();
+      if (artistIds.length > 0) {
+        const { data: artists } = await supabase
+          .from('public_profiles')
+          .select('id, full_name')
+          .in('id', artistIds);
+        artistMap = new Map((artists || []).map(p => [p.id, p.full_name || 'Unknown Artist']));
+      }
 
       // Transform data to match ArtworkCard expectations
       const transformedArtworks: PurchasedArtwork[] = (artworkData || []).map(a => ({
         id: a.id,
         title: a.title,
-        artist: (a.profiles as any)?.full_name || 'Unknown Artist',
+        artist: artistMap.get(a.artist_id) || 'Unknown Artist',
         artist_id: a.artist_id,
         type: a.media_type,
         imageUrl: a.media_url,
@@ -74,6 +82,7 @@ const PurchasedArtworks = () => {
         audioUrl: a.media_type === 'audio' ? a.media_url : null,
         videoUrl: a.media_type === 'video' ? a.media_url : null
       }));
+
 
       setArtworks(transformedArtworks);
     } catch (error) {
