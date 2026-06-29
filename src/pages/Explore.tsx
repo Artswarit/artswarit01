@@ -114,6 +114,7 @@ const Explore = () => {
     forSaleOnly?: boolean;
   }) => {
     let filtered = [...(artworks || [])];
+    setActiveSearchQuery(filters.search || '');
     if (filters.category && filters.category !== 'all') {
       const slug = toSlug(filters.category);
       const params = new URLSearchParams(location.search);
