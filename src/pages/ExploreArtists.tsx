@@ -578,11 +578,14 @@ const ExploreArtists = () => {
                   ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'
                   : 'space-y-4'
               }>
-                {filteredArtists.slice(0, visibleArtists).map((artist) => (
+                {filteredArtists.slice(0, visibleArtists).map((artist, idx) => (
                   <ArtistCard
                     key={artist.id}
                     artist={artist}
                     viewMode={viewMode}
+                    position={idx}
+                    searchQuery={activeSearchQuery || undefined}
+                    surface="explore_artists"
                   />
                 ))}
               </div>
