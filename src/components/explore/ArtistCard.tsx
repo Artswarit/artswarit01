@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { cn } from '@/lib/utils';
 import { getOptimizedImageUrl, ImagePresets } from '@/lib/image-optimization';
+import { track } from '@/lib/analytics';
+import { useImpressionTracker } from '@/hooks/useImpressionTracker';
 interface Artist {
   id: string;
   name: string;
@@ -36,11 +38,17 @@ interface ArtistCardProps {
   artist: Artist;
   viewMode: 'grid' | 'list';
   onFollow?: (artistId: string) => void;
+  position?: number;
+  searchQuery?: string;
+  surface?: string;
 }
 const ArtistCard = ({
   artist,
   viewMode,
-  onFollow
+  onFollow,
+  position,
+  searchQuery,
+  surface,
 }: ArtistCardProps) => {
   const {
     user
@@ -51,6 +59,37 @@ const ArtistCard = ({
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentFollowers, setCurrentFollowers] = useState(artist.followers);
+  const impressionRef = useImpressionTracker<HTMLDivElement>({
+    id: artist.id,
+    event: 'artist_impression',
+    props: {
+      artist_id: artist.id,
+      artist_category: artist.category,
+      verified: artist.verified,
+      position,
+      query: searchQuery,
+      surface,
+    },
+  });
+
+  const handleCardClick = () => {
+    track('artist_profile_viewed', {
+      artist_id: artist.id,
+      artist_category: artist.category,
+      verified: artist.verified,
+      surface,
+    });
+    if (searchQuery) {
+      track('search_result_clicked', {
+        query: searchQuery,
+        position,
+        entity_type: 'artist',
+        entity_id: artist.id,
+        surface,
+      });
+    }
+  };
+
 
   // Check initial follow state and handle subscriptions
   useEffect(() => {
@@ -109,6 +148,7 @@ const ArtistCard = ({
         if (error) throw error;
         setIsFollowing(false);
         toast.success('Unfollowed artist');
+        track('artist_unfollowed', { artist_id: artist.id, surface });
       } else {
         const {
           error
@@ -119,6 +159,7 @@ const ArtistCard = ({
         if (error) throw error;
         setIsFollowing(true);
         toast.success('Following artist!');
+        track('artist_followed', { artist_id: artist.id, surface });
       }
       onFollow?.(artist.id);
     } catch (err: any) {
@@ -137,8 +178,8 @@ const ArtistCard = ({
     return num.toString();
   };
   if (viewMode === 'list') {
-    return <Link to={`/artist/${artist.id}`} className="block group">
-        <Card className="hover:shadow-xl transition-all duration-300 border-primary/5 hover:border-primary/20 overflow-hidden bg-card/50 backdrop-blur-sm">
+    return <Link to={`/artist/${artist.id}`} className="block group" onClick={handleCardClick}>
+        <Card ref={impressionRef as any} className="hover:shadow-xl transition-all duration-300 border-primary/5 hover:border-primary/20 overflow-hidden bg-card/50 backdrop-blur-sm">
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               <div className="relative self-center sm:self-auto">
@@ -236,8 +277,8 @@ const ArtistCard = ({
         </Card>
       </Link>;
   }
-  return <Link to={`/artist/${artist.id}`} className="block group h-full">
-      <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 h-full border-primary/5 hover:border-primary/20 bg-card/50 backdrop-blur-sm group/card">
+  return <Link to={`/artist/${artist.id}`} className="block group h-full" onClick={handleCardClick}>
+      <Card ref={impressionRef as any} className="overflow-hidden hover:shadow-2xl transition-all duration-500 h-full border-primary/5 hover:border-primary/20 bg-card/50 backdrop-blur-sm group/card">
         <div className="relative aspect-[4/5] overflow-hidden">
           <img loading="lazy" decoding="async" 
             src={getOptimizedImageUrl(artist.imageUrl, ImagePresets.THUMBNAIL)} 

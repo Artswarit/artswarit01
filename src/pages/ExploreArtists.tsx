@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
+import { track } from '@/lib/analytics';
 
 interface Artist {
   id: string;
@@ -60,6 +61,10 @@ const isProfileComplete = (profile: any): boolean => {
 const ExploreArtists = () => {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [filteredArtists, setFilteredArtists] = useState<Artist[]>([]);
+  const [activeSearchQuery, setActiveSearchQuery] = useState('');
+  const lastFiltersRef = useRef<{ search: string; category: string; sortBy: string; availability: string; location: string; priceRange: string; badges: string[] } | null>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTrackedQueryRef = useRef<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -328,6 +333,7 @@ const ExploreArtists = () => {
     sortBy: string;
   }) => {
     let filtered = [...artists];
+    setActiveSearchQuery(filters.search || '');
 
     // Search filter
     if (filters.search) {
@@ -405,6 +411,70 @@ const ExploreArtists = () => {
     }
 
     setFilteredArtists(filtered);
+
+    // ----- Analytics: search / filter / sort -----
+    const prev = lastFiltersRef.current;
+    const snapshot = {
+      search: filters.search || '',
+      category: filters.category,
+      sortBy: filters.sortBy,
+      availability: filters.availability,
+      location: filters.location,
+      priceRange: filters.priceRange,
+      badges: filters.badges || [],
+    };
+    if (snapshot.search !== (prev?.search ?? '')) {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      const query = snapshot.search;
+      const resultCount = filtered.length;
+      searchDebounceRef.current = setTimeout(() => {
+        if (!query || query === lastTrackedQueryRef.current) return;
+        lastTrackedQueryRef.current = query;
+        track('search_submitted', {
+          query,
+          result_count: resultCount,
+          search_type: 'artist',
+          surface: 'explore_artists',
+        });
+        if (resultCount === 0) {
+          track('zero_results', {
+            query,
+            filters: {
+              category: snapshot.category,
+              availability: snapshot.availability,
+              location: snapshot.location,
+              priceRange: snapshot.priceRange,
+              badges: snapshot.badges,
+            },
+            search_type: 'artist',
+          });
+        }
+        track('search_results_loaded', {
+          query,
+          result_count: resultCount,
+          search_type: 'artist',
+        });
+      }, 500);
+    }
+    if (prev && prev.sortBy !== snapshot.sortBy) {
+      track('sort_changed', {
+        sort_by: snapshot.sortBy,
+        previous_sort: prev.sortBy,
+        surface: 'explore_artists',
+      });
+    }
+    if (prev) {
+      const diffs: Array<[string, unknown]> = [];
+      if (prev.category !== snapshot.category) diffs.push(['category', snapshot.category]);
+      if (prev.availability !== snapshot.availability) diffs.push(['availability', snapshot.availability]);
+      if (prev.location !== snapshot.location) diffs.push(['location', snapshot.location]);
+      if (prev.priceRange !== snapshot.priceRange) diffs.push(['price_range', snapshot.priceRange]);
+      if (prev.badges.join(',') !== snapshot.badges.join(',')) diffs.push(['badges', snapshot.badges]);
+      diffs.forEach(([filter_type, filter_value]) => {
+        track('filter_applied', { filter_type, filter_value, surface: 'explore_artists' });
+      });
+    }
+    lastFiltersRef.current = snapshot;
   };
 
 
@@ -508,11 +578,14 @@ const ExploreArtists = () => {
                   ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'
                   : 'space-y-4'
               }>
-                {filteredArtists.slice(0, visibleArtists).map((artist) => (
+                {filteredArtists.slice(0, visibleArtists).map((artist, idx) => (
                   <ArtistCard
                     key={artist.id}
                     artist={artist}
                     viewMode={viewMode}
+                    position={idx}
+                    searchQuery={activeSearchQuery || undefined}
+                    surface="explore_artists"
                   />
                 ))}
               </div>

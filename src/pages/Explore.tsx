@@ -12,16 +12,22 @@ import LogoLoader from '@/components/ui/LogoLoader';
 import { Button } from '@/components/ui/button';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArtworkSkeleton } from '@/components/artwork/ArtworkSkeleton';
+import { track } from '@/lib/analytics';
 
 const Explore = () => {
   const { artworks, loading, error, hasMore, loadMore, loadingMore } = usePublicArtworks();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filteredArtworks, setFilteredArtworks] = useState(artworks || []);
   const [currentCategory, setCurrentCategory] = useState<string>('all');
+  const [activeSearchQuery, setActiveSearchQuery] = useState<string>('');
   const location = useLocation();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const SCROLL_KEY = 'explore_scroll_y';
+  // Track previous filter state to detect what actually changed for analytics.
+  const lastFiltersRef = useRef<{ search: string; category: string; sortBy: string; artworkType: string; priceRange: string; tags: string[] } | null>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTrackedQueryRef = useRef<string>('');
 
   // Restore scroll position only when returning via back button (popstate)
   useEffect(() => {
@@ -108,6 +114,7 @@ const Explore = () => {
     forSaleOnly?: boolean;
   }) => {
     let filtered = [...(artworks || [])];
+    setActiveSearchQuery(filters.search || '');
     if (filters.category && filters.category !== 'all') {
       const slug = toSlug(filters.category);
       const params = new URLSearchParams(location.search);
@@ -252,6 +259,72 @@ const Explore = () => {
     }
 
     setFilteredArtworks(filtered);
+
+    // ----- Analytics: search / filter / sort -----
+    const prev = lastFiltersRef.current;
+    const snapshot = {
+      search: filters.search || '',
+      category: filters.category,
+      sortBy: filters.sortBy,
+      artworkType: filters.artworkType,
+      priceRange: filters.priceRange,
+      tags: filters.tags,
+    };
+
+    // Debounced search_submitted / zero_results — only fire after user pauses typing.
+    if (snapshot.search !== (prev?.search ?? '')) {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      const query = snapshot.search;
+      const resultCount = filtered.length;
+      searchDebounceRef.current = setTimeout(() => {
+        if (!query || query === lastTrackedQueryRef.current) return;
+        lastTrackedQueryRef.current = query;
+        const started = performance.now();
+        track('search_submitted', {
+          query,
+          result_count: resultCount,
+          search_type: 'artwork',
+          latency_ms: Math.round(performance.now() - started),
+          surface: 'explore',
+        });
+        if (resultCount === 0) {
+          track('zero_results', {
+            query,
+            filters: {
+              category: snapshot.category,
+              artworkType: snapshot.artworkType,
+              priceRange: snapshot.priceRange,
+              tags: snapshot.tags,
+            },
+            search_type: 'artwork',
+          });
+        }
+        track('search_results_loaded', {
+          query,
+          result_count: resultCount,
+          search_type: 'artwork',
+        });
+      }, 500);
+    }
+
+    if (prev && prev.sortBy !== snapshot.sortBy) {
+      track('sort_changed', {
+        sort_by: snapshot.sortBy,
+        previous_sort: prev.sortBy,
+        surface: 'explore',
+      });
+    }
+    if (prev) {
+      const filterDiffs: Array<[string, unknown]> = [];
+      if (prev.category !== snapshot.category) filterDiffs.push(['category', snapshot.category]);
+      if (prev.artworkType !== snapshot.artworkType) filterDiffs.push(['artwork_type', snapshot.artworkType]);
+      if (prev.priceRange !== snapshot.priceRange) filterDiffs.push(['price_range', snapshot.priceRange]);
+      if (prev.tags.join(',') !== snapshot.tags.join(',')) filterDiffs.push(['tags', snapshot.tags]);
+      filterDiffs.forEach(([filter_type, filter_value]) => {
+        track('filter_applied', { filter_type, filter_value, surface: 'explore' });
+      });
+    }
+    lastFiltersRef.current = snapshot;
   };
 
   useEffect(() => {
@@ -354,6 +427,8 @@ const Explore = () => {
                 >
                   <ArtworkCard
                     {...artwork}
+                    position={idx}
+                    surface="explore_trending"
                   />
                 </div>
               ))
@@ -396,6 +471,9 @@ const Explore = () => {
                     >
                       <ArtworkCard
                         {...artwork}
+                        position={idx}
+                        searchQuery={activeSearchQuery || undefined}
+                        surface="explore"
                       />
                     </div>
                   ))

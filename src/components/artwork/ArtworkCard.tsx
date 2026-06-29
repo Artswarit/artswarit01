@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics';
+import { useImpressionTracker } from '@/hooks/useImpressionTracker';
 import { Heart, Eye, Play, ExternalLink, Bookmark, Flag, MoreVertical } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import GlassCard from '@/components/ui/glass-card';
@@ -36,6 +38,12 @@ interface ArtworkCardProps {
   audioUrl?: string;
   videoUrl?: string;
   tags?: string[];
+  /** Position in the result list, used for impression / click ranking analytics. */
+  position?: number;
+  /** Active search query (if any) when this card was rendered. */
+  searchQuery?: string;
+  /** Surface that rendered the card (e.g. "explore", "trending", "recommendations"). */
+  surface?: string;
 }
 
 const ArtworkCard = ({
@@ -51,7 +59,15 @@ const ArtworkCard = ({
   currency = 'USD',
   category,
   tags,
+  position,
+  searchQuery,
+  surface,
 }: ArtworkCardProps) => {
+  const impressionRef = useImpressionTracker<HTMLDivElement>({
+    id,
+    event: 'artwork_impression',
+    props: { artist_id: artistId, category, position, query: searchQuery, surface },
+  });
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -250,6 +266,12 @@ const ArtworkCard = ({
       });
       return;
     }
+    track(isSaved ? 'wishlist_removed' : 'wishlist_added', {
+      artwork_id: id,
+      artist_id: artistId,
+      category,
+      surface,
+    });
     toggleSaveArtwork(id);
   };
 
@@ -264,12 +286,23 @@ const ArtworkCard = ({
     if ((e.target as HTMLElement).closest('a, button')) {
       return;
     }
+    track('artwork_viewed', { artwork_id: id, artist_id: artistId, category, surface });
+    if (searchQuery) {
+      track('search_result_clicked', {
+        query: searchQuery,
+        position,
+        entity_type: 'artwork',
+        entity_id: id,
+        surface,
+      });
+    }
     navigate(`/artwork/${id}`);
   };
 
   return (
     <>
-      <div 
+      <div
+        ref={impressionRef}
         onClick={handleCardClick}
         className="block"
       >

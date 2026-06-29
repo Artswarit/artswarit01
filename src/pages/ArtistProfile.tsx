@@ -27,6 +27,7 @@ import { useArtistAvailability } from "@/hooks/useArtistAvailability";
 import { format as formatDate } from "date-fns";
 import { Calendar, TrendingUp } from "lucide-react";
 import LogoLoader from "@/components/ui/LogoLoader";
+import { track, trackOncePerSession } from "@/lib/analytics";
 
 // --- Demo Data for fallback ---
 const ARTIST_UUID_1 = "11111111-1111-1111-1111-111111111111";
@@ -315,6 +316,15 @@ export default function ArtistProfile() {
         setProfileState(artistProfile);
         setFollowersCount(followersData.length);
         setArtistServices(servicesData);
+
+        // De-dupe per-session so quick remounts don't re-fire.
+        trackOncePerSession(`profile:${id}`, 'artist_profile_viewed', {
+          artist_id: id,
+          artist_category: (artistProfile as any)?.tags?.[0],
+          verified: (artistProfile as any)?.is_verified ?? false,
+          surface: 'artist_profile',
+        });
+
 
         // Enrich reviews with client info — all in parallel
         const enrichedReviews = await Promise.all(
@@ -660,6 +670,7 @@ export default function ArtistProfile() {
         follower_id: user.id,
       });
       if (!error) {
+        track('artist_followed', { artist_id: id, surface: 'artist_profile' });
         toast({
           title: "Followed",
           description: "You are now following this artist!",
@@ -683,6 +694,7 @@ export default function ArtistProfile() {
         .eq("following_id", id)
         .eq("follower_id", user.id);
       if (!error) {
+        track('artist_unfollowed', { artist_id: id, surface: 'artist_profile' });
         toast({
           title: "Unfollowed",
           description: "You have unfollowed this artist.",
@@ -703,6 +715,7 @@ export default function ArtistProfile() {
 
   // Message handler
   const handleMessage = () => {
+    track('contact_artist_clicked', { artist_id: id, surface: 'artist_profile' });
     if (!user?.id) {
       toast({
         title: "Not logged in",
@@ -813,6 +826,7 @@ export default function ArtistProfile() {
   };
 
   const handleRequestProject = () => {
+    track('commission_started', { artist_id: id, surface: 'artist_profile' });
     if (!user) {
       toast({
         title: "Not logged in",
