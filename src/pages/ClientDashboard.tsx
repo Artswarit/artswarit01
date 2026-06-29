@@ -1185,21 +1185,15 @@ const ClientDashboard = () => {
               {visitedTabs.has('account') && (
                 <Tabs defaultValue="profile" className="w-full">
                   <div className="flex overflow-x-auto pb-2 mb-6 -mx-1 px-1 scrollbar-hide">
-                    <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-5 h-auto overflow-x-auto">
+                    <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-3 h-auto overflow-x-auto">
                       <TabsTrigger value="profile" className="rounded-lg text-xs px-4 py-2 shrink-0">Profile</TabsTrigger>
-                      <TabsTrigger value="purchases" className="rounded-lg text-xs px-4 py-2 shrink-0">Orders</TabsTrigger>
                       <TabsTrigger value="payments" className="rounded-lg text-xs px-4 py-2 shrink-0">Payments</TabsTrigger>
-                      <TabsTrigger value="saved" className="rounded-lg text-xs px-4 py-2 shrink-0">Saved</TabsTrigger>
                       <TabsTrigger value="settings" className="rounded-lg text-xs px-4 py-2 shrink-0">Settings</TabsTrigger>
                     </TabsList>
                   </div>
                   
                   <TabsContent value="profile" className="mt-0">
                     <ClientProfile />
-                  </TabsContent>
-                  
-                  <TabsContent value="purchases" className="mt-0">
-                    <PurchasedArtworks />
                   </TabsContent>
                   
                   <TabsContent value="payments" className="mt-0">
@@ -1210,9 +1204,7 @@ const ClientDashboard = () => {
                     <ProjectRating />
                   </TabsContent>
 
-                  <TabsContent value="saved" className="mt-0">
-                    <SavedArtworks />
-                  </TabsContent>
+
                   
                   <TabsContent value="settings" className="mt-0">
                     <ClientSettings />
