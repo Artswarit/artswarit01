@@ -46,7 +46,8 @@ export function useFeaturedArtists(limit = 8) {
         .eq("account_status", "approved");
 
       if (error || !profiles || profiles.length === 0) {
-        setArtists(getDummyArtists(limit));
+        // No demo/dummy data in production — show empty state instead of fake artists.
+        setArtists([]);
         setLoading(false);
         return;
       }
@@ -56,7 +57,7 @@ export function useFeaturedArtists(limit = 8) {
         .filter((p) => p.profile_visibility === true);
 
       if (completeProfiles.length === 0) {
-        setArtists(getDummyArtists(limit));
+        setArtists([]);
         setLoading(false);
         return;
       }
