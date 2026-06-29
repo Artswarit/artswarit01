@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { track } from '@/lib/analytics';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { usePremiumSubscription } from '@/hooks/usePremiumSubscription';
