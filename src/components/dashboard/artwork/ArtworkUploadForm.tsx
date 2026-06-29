@@ -73,7 +73,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
       e.preventDefault();
       e.stopPropagation();
     }
-    navigate('/artist-dashboard?tab=premium');
+    navigate('/artist-dashboard?tab=membership');
   };
 
   // File size limits per type (in bytes)

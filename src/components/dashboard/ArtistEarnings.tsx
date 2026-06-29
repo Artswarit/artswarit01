@@ -43,7 +43,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
   const [exportingPdf, setExportingPdf] = useState(false);
 
   const handleCsvExport = async () => {
-    if (!isProArtist) { navigate('/artist-dashboard?tab=premium'); return; }
+    if (!isProArtist) { navigate('/artist-dashboard?tab=membership'); return; }
     if (exportingCsv || transactions.length === 0) return;
     setExportingCsv(true);
     try {
@@ -71,7 +71,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
   };
 
   const handlePdfExport = async () => {
-    if (!isProArtist) { navigate('/artist-dashboard?tab=premium'); return; }
+    if (!isProArtist) { navigate('/artist-dashboard?tab=membership'); return; }
     if (exportingPdf) return;
     setExportingPdf(true);
     try {
@@ -253,7 +253,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
         <FeatureLimitBanner 
           title="Unlock Financial Reports" 
           description="Upgrade to Pro to export PDF reports and CSV data for your earnings."
-          onUpgrade={() => navigate('/artist-dashboard?tab=premium')}
+          onUpgrade={() => navigate('/artist-dashboard?tab=membership')}
         />
       )}
       
