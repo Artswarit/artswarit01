@@ -59,7 +59,15 @@ const ArtworkCard = ({
   currency = 'USD',
   category,
   tags,
+  position,
+  searchQuery,
+  surface,
 }: ArtworkCardProps) => {
+  const impressionRef = useImpressionTracker<HTMLDivElement>({
+    id,
+    event: 'artwork_impression',
+    props: { artist_id: artistId, category, position, query: searchQuery, surface },
+  });
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
