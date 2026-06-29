@@ -265,14 +265,14 @@ serve(async (req) => {
       case "payment.failed": {
         const payment = payload.payment?.entity;
         const email = payment?.email;
-        
+
         if (email) {
           const { data: profile } = await supabase
             .from("profiles")
             .select("id")
             .eq("email", email)
             .maybeSingle();
-          
+
           if (profile) {
             await supabase.from("notifications").insert({
               user_id: profile.id,
@@ -280,6 +280,14 @@ serve(async (req) => {
               title: "Payment Failed",
               message: "Your subscription payment failed. Please update your payment method.",
               metadata: { payment_id: payment.id }
+            });
+
+            await phCapture('subscription_payment_failed', profile.id, {
+              provider: 'razorpay',
+              payment_id: payment?.id ?? null,
+              amount: payment?.amount ? payment.amount / 100 : 0,
+              currency: (payment?.currency ?? 'INR').toUpperCase(),
+              failure_reason: payment?.error_description ?? payment?.error_reason ?? null,
             });
           }
         }
