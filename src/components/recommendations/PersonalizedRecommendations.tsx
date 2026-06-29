@@ -366,7 +366,7 @@ const PersonalizedRecommendations = () => {
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   <Link to={`/artwork/${recommendation.id}`}>
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={recommendation.thumbnail} 
                       alt={recommendation.title}
                       className="w-20 h-20 rounded-lg object-cover"

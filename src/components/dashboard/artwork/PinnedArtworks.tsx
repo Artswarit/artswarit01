@@ -124,7 +124,7 @@ const PinnedArtworks = () => {
                             className="flex items-center bg-background/60 backdrop-blur-xl rounded-3xl border border-primary/10 p-4 shadow-lg hover:shadow-primary/5 hover:border-primary/20 transition-all group"
                           >
                             <div className="h-20 w-20 rounded-2xl overflow-hidden mr-5 shadow-inner border border-white/10 shrink-0">
-                              <img 
+                              <img loading="lazy" decoding="async" 
                                 src={artwork.imageUrl} 
                                 alt={artwork.title} 
                                 className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -180,7 +180,7 @@ const PinnedArtworks = () => {
                   className="flex items-center bg-background/40 backdrop-blur-sm rounded-3xl border border-primary/5 p-4 hover:border-primary/20 transition-all group"
                 >
                   <div className="h-20 w-20 rounded-2xl overflow-hidden mr-5 shadow-inner border border-white/10 shrink-0">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={artwork.imageUrl} 
                       alt={artwork.title} 
                       className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"

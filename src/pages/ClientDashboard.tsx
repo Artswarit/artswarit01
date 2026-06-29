@@ -783,7 +783,7 @@ const ClientDashboard = () => {
                             </div>
                             <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate mb-1">{project.title}</h3>
                             <div className="flex items-center gap-2 mb-4">
-                              <img src={project.artistAvatar} alt={project.artist} className="h-5 w-5 rounded-full object-cover" />
+                              <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-5 w-5 rounded-full object-cover" />
                               <span className="text-sm text-muted-foreground">Artist: <span className="text-foreground font-medium">{project.artist}</span></span>
                             </div>
                             
@@ -834,7 +834,7 @@ const ClientDashboard = () => {
                       <Link key={artist.id} to={`/artist/${artist.id}`} className="group bg-white/70 dark:bg-card/70 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-muted/20 hover:shadow-md hover:border-primary/20 transition-all duration-300 animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
                         <div className="flex items-center gap-3">
                           <div className="relative shrink-0">
-                            <img src={artist.profileImage} alt={artist.name} className="h-12 w-12 rounded-2xl object-cover ring-2 ring-white dark:ring-border group-hover:ring-primary/50 transition-all" />
+                            <img loading="lazy" decoding="async" src={artist.profileImage} alt={artist.name} className="h-12 w-12 rounded-2xl object-cover ring-2 ring-white dark:ring-border group-hover:ring-primary/50 transition-all" />
                             <div className="absolute -bottom-1 -right-1 bg-yellow-500 text-[8px] font-bold text-white px-1 rounded flex items-center gap-0.5 shadow-sm">
                               <Star className="h-2 w-2 fill-white" /> {artist.rating}
                             </div>
@@ -954,7 +954,7 @@ const ClientDashboard = () => {
                       {searchedActiveProjects.slice(0, visibleActive).map((project, index) => <div key={project.id} className="p-3 sm:p-4 border border-gray-100 dark:border-border rounded-lg bg-white/70 dark:bg-card/70 transition-all duration-300 hover:shadow-md animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
                             <div className="flex justify-between items-start gap-2">
                               <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <img src={project.artistAvatar} alt={project.artist} className="h-8 w-8 rounded-full object-cover shrink-0" />
+                                <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-8 w-8 rounded-full object-cover shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <h4 className="font-medium text-sm sm:text-base truncate">{project.title}</h4>
                                   <Link to={`/artist/${project.artistId}`} className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -1092,7 +1092,7 @@ const ClientDashboard = () => {
                       {searchedCompletedProjects.slice(0, visibleCompleted).map((project, index) => <div key={project.id} className="p-3 sm:p-4 border border-gray-100 dark:border-border rounded-lg bg-white/70 dark:bg-card/70 transition-all duration-300 hover:shadow-md animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
                             <div className="flex justify-between items-start gap-2">
                               <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <img src={project.artistAvatar} alt={project.artist} className="h-8 w-8 rounded-full object-cover shrink-0" />
+                                <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-8 w-8 rounded-full object-cover shrink-0" />
                                 <div className="flex-1 min-w-0">
                                   <h4 className="font-medium text-sm sm:text-base truncate">{project.title}</h4>
                                   <Link to={`/artist/${project.artistId}`} className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">

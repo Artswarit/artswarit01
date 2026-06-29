@@ -55,7 +55,7 @@ const ChatbotArtistCard: React.FC<Props> = ({ artist, onFollow, onMessage }) => 
 
   return (
     <Card className="flex items-center gap-3 p-2 my-2">
-      <img src={artist.image_url} alt={artist.name} className="h-14 w-14 object-cover rounded-lg border" />
+      <img loading="lazy" decoding="async" src={artist.image_url} alt={artist.name} className="h-14 w-14 object-cover rounded-lg border" />
       <CardContent className="flex-1 p-0">
         <div className="font-semibold text-base">{artist.name}</div>
         <div className="text-xs text-gray-600">{artist.category} • {artist.city}</div>

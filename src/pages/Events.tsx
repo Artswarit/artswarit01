@@ -165,7 +165,7 @@ const Events = () => {
                   </div>
                   
                   <div className="relative">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={filteredEvents[0].image} 
                       alt={filteredEvents[0].title}
                       className="w-full h-full object-cover"
@@ -191,7 +191,7 @@ const Events = () => {
               {filteredEvents.slice(1).map((event) => (
                 <Card key={event.id} className="hover:shadow-lg transition-shadow">
                   <div className="relative">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={event.image} 
                       alt={event.title}
                       className="w-full h-48 object-cover rounded-t-lg"

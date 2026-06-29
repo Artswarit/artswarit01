@@ -255,7 +255,7 @@ const ArtistProfile = ({
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
               <div className="relative mx-auto w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-xl group">
-                <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <img loading="lazy" decoding="async" src={avatarUrl} alt="Profile" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer backdrop-blur-[2px]" onClick={() => avatarInputRef.current?.click()}>
                   {isUploadingAvatar ? <Loader2 className="h-10 w-10 animate-spin text-white" /> : <Camera className="h-10 w-10 text-white drop-shadow-lg" />}
                 </div>
@@ -285,7 +285,7 @@ const ArtistProfile = ({
             </CardHeader>
             <CardContent className="pt-6">
               <div className="relative w-full h-40 sm:h-52 rounded-2xl overflow-hidden group cursor-pointer shadow-inner" onClick={() => coverInputRef.current?.click()}>
-                <img src={coverUrl} alt="Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <img loading="lazy" decoding="async" src={coverUrl} alt="Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
                   {isUploadingCover ? <Loader2 className="h-10 w-10 animate-spin text-white" /> : <div className="flex flex-col items-center gap-2 text-white">
                       <Upload className="h-10 w-10 drop-shadow-lg" />

@@ -249,7 +249,7 @@ const ArtworkManagementCard = ({
           </div>
           
           <div className="relative h-12 w-12 sm:h-16 sm:w-16 shrink-0 overflow-hidden rounded-lg shadow-sm border border-border/50">
-            <img src={imageUrl} alt={artwork.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" />
+            <img loading="lazy" decoding="async" src={imageUrl} alt={artwork.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" />
             {isPinned && (
               <div className="absolute top-0.5 left-0.5 rounded-full bg-primary p-0.5 shadow-sm">
                 <Pin className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-primary-foreground fill-current" />
@@ -392,7 +392,7 @@ const ArtworkManagementCard = ({
 
       {/* Image Container */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
-        <img
+        <img loading="lazy" decoding="async"
           src={imageUrl}
           alt={artwork.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

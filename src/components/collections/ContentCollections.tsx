@@ -221,7 +221,7 @@ const ContentCollections = () => {
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {collection.items.slice(0, 4).map((item, index) => (
                   <div key={item.id} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={item.thumbnail} 
                       alt={item.title}
                       className="w-full h-full object-cover"
@@ -276,7 +276,7 @@ const ContentCollections = () => {
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {selectedCollection.items.map((item, index) => (
                   <div key={item.id} className="flex items-center gap-3 p-2 rounded hover:bg-gray-50">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={item.thumbnail} 
                       alt={item.title}
                       className="w-10 h-10 rounded object-cover"

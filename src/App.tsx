@@ -123,14 +123,28 @@ class ErrorBoundary extends React.Component<
 
 const PageTransition = ({ children }: { children: React.ReactNode }) => (
   <motion.div
-    initial={{ opacity: 0, y: 10 }}
+    initial={{ opacity: 0, y: 6 }}
     animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -10 }}
-    transition={{ duration: 0.25, ease: "easeOut" }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+    style={{ willChange: "opacity, transform" }}
   >
     {children}
   </motion.div>
 );
+
+// Warm up high-traffic route chunks during browser idle so navigation feels instant.
+if (typeof window !== "undefined") {
+  const idle = (window as any).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1200));
+  idle(() => {
+    import("./pages/Explore");
+    import("./pages/ExploreArtists");
+    import("./pages/Login");
+    import("./pages/Signup");
+    import("./pages/ArtworkDetails");
+    import("./pages/ArtistProfile");
+  });
+}
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">

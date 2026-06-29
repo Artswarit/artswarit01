@@ -337,7 +337,7 @@ export default function ContentModeration() {
                   <Card key={r.id} className="border-l-4 border-l-red-500 border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/10">
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row gap-4">
-                        {r.artwork_image && <img src={r.artwork_image} alt="" className="w-20 h-20 rounded-lg object-cover border shrink-0" />}
+                        {r.artwork_image && <img loading="lazy" decoding="async" src={r.artwork_image} alt="" className="w-20 h-20 rounded-lg object-cover border shrink-0" />}
                         <div className="flex-1 min-w-0 space-y-1.5">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-bold text-sm truncate">{r.artwork_title}</h4>
@@ -368,7 +368,7 @@ export default function ContentModeration() {
                   <Card key={r.id} className="border-l-4 border-l-amber-400">
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row gap-4">
-                        {r.artwork_image && <img src={r.artwork_image} alt="" className="w-16 h-16 rounded-lg object-cover border shrink-0" />}
+                        {r.artwork_image && <img loading="lazy" decoding="async" src={r.artwork_image} alt="" className="w-16 h-16 rounded-lg object-cover border shrink-0" />}
                         <div className="flex-1 min-w-0 space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-bold text-sm truncate">{r.artwork_title}</h4>
@@ -402,7 +402,7 @@ export default function ContentModeration() {
               <div className="space-y-2">
                 {resolvedReports.slice(0, 10).map(r => (
                   <div key={r.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 opacity-60">
-                    {r.artwork_image && <img src={r.artwork_image} alt="" className="w-10 h-10 rounded object-cover" />}
+                    {r.artwork_image && <img loading="lazy" decoding="async" src={r.artwork_image} alt="" className="w-10 h-10 rounded object-cover" />}
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold truncate">{r.artwork_title}</p>
                       {r.artwork_status === 'archived' && (
@@ -431,7 +431,7 @@ export default function ContentModeration() {
             <div className="space-y-6">
               {selectedReport.artwork_image && (
                 <div className="w-full bg-slate-950 rounded-2xl overflow-hidden border-2 border-slate-800 flex items-center justify-center min-h-[400px] max-h-[600px] shadow-2xl">
-                  <img 
+                  <img loading="lazy" decoding="async" 
                     src={selectedReport.artwork_image} 
                     alt="" 
                     className="max-w-full max-h-[600px] object-contain transition-all duration-500 hover:scale-105" 

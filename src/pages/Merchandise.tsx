@@ -171,7 +171,7 @@ const Merchandise = () => {
                 {featuredProducts.map((product) => (
                   <Card key={product.id} className="hover:shadow-lg transition-shadow">
                     <div className="relative">
-                      <img 
+                      <img loading="lazy" decoding="async" 
                         src={product.image} 
                         alt={product.name}
                         className="w-full h-64 object-cover rounded-t-lg"
@@ -243,7 +243,7 @@ const Merchandise = () => {
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow">
                   <div className="relative">
-                    <img 
+                    <img loading="lazy" decoding="async" 
                       src={product.image} 
                       alt={product.name}
                       className="w-full h-48 object-cover rounded-t-lg"

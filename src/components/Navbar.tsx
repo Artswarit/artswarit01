@@ -78,7 +78,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" onClick={handleLogoClick} className="relative group shrink-0">
             <div className="absolute -inset-2 bg-primary/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-            <img 
+            <img loading="lazy" decoding="async" 
               src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png" 
               alt="Artswarit Logo" 
               className="h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16 object-contain relative transition-transform duration-500 group-hover:scale-110 group-active:scale-95" 
