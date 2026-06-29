@@ -51,6 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
   const isPremium = subscription?.is_active === true && subscription?.subscription_tier === 'pro';
 
+  const finishLoading = useCallback(() => {
+    setLoading(false);
+  }, []);
+
   // Fetch the current user's profile from the DB with retry logic for race conditions
   const refreshProfile = useCallback(async (userId?: string, retries = 3) => {
     const uid = userId;
@@ -100,14 +104,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     let authListenerFired = false;
+    let mounted = true;
+    const bootTimeout = window.setTimeout(() => {
+      if (mounted) {
+        console.warn('Auth boot timed out; continuing without blocking the UI.');
+        finishLoading();
+      }
+    }, 7000);
 
     // Set up auth state listener - MUST be synchronous to avoid deadlocks
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        if (!mounted) return;
         authListenerFired = true;
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
+        finishLoading();
         
         if (session?.user) {
           fetchSubscription(session.user.id);
@@ -121,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         } else {
-          setLoading(false);
+          finishLoading();
           setSubscription(null);
           setProfile(null);
           localStorage.removeItem('pendingSignupRole');
@@ -131,23 +143,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Fallback if listener doesn't fire immediately
     const sessionCheck = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      if (!authListenerFired) {
+      try {
+        const timeout = new Promise<null>((resolve) => {
+          window.setTimeout(() => resolve(null), 5000);
+        });
+        const currentSession = await Promise.race([
+          supabase.auth.getSession().then(({ data }) => data.session),
+          timeout,
+        ]);
+
+        if (!mounted || authListenerFired) return;
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        setLoading(false);
+        finishLoading();
         if (currentSession?.user) {
           fetchSubscription(currentSession.user.id);
           refreshProfile(currentSession.user.id);
         }
+      } catch (error) {
+        if (!mounted || authListenerFired) return;
+        console.warn('Initial auth session check failed; continuing signed out.', error);
+        setSession(null);
+        setUser(null);
+        setSubscription(null);
+        setProfile(null);
+        finishLoading();
       }
     };
     sessionCheck();
 
     return () => {
+      mounted = false;
+      window.clearTimeout(bootTimeout);
       authSubscription.unsubscribe();
     };
-  }, []);
+  }, [finishLoading, refreshProfile]);
 
   // Real-time subscription for profile sync
   useEffect(() => {
@@ -390,7 +420,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={value}>
       {loading && <LogoLoader fullPage text="Loading Artswarit…" />}
-      <div style={loading ? { visibility: 'hidden', overflow: 'hidden', height: 0 } : undefined}>
+      <div aria-busy={loading} style={loading ? { visibility: 'hidden', overflow: 'hidden', height: 0 } : undefined}>
         {children}
       </div>
     </AuthContext.Provider>

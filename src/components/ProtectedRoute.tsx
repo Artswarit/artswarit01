@@ -41,6 +41,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
       return;
     }
 
+    if (requiredRole === 'admin' && isAdmin) {
+      return;
+    }
+
     if (requiredRole && profile?.role) {
       if (requiredRole === 'admin' && !isAdmin) {
         navigate('/', { replace: true });
@@ -88,6 +92,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
 
   // Prevent rendering if admin only but not admin
   if (adminOnly && !isAdmin) return null;
+
+  if (requiredRole === 'admin' && isAdmin) {
+    return <>{children}</>;
+  }
 
   // If a specific role is required, wait for the profile to be loaded
   // This prevents the "Users stuck in wrong dashboard" issue if profile is missing
