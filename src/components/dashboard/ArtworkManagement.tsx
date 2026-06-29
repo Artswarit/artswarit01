@@ -332,10 +332,12 @@ const ArtworkManagement = () => {
         </div>
       </div>
 
-      {/* Analytics - Only for Pro Artists */}
-      {showAnalytics && isProArtist && !analyticsLoading && (
-        <div className="animate-in fade-in zoom-in-95 duration-500">
-          <ArtworkAnalytics data={analytics} />
+      {/* Analytics panel — basic artwork metrics for Pro + advanced PostHog analytics
+          (locked preview for non-Pro). */}
+      {showAnalytics && (
+        <div className="animate-in fade-in zoom-in-95 duration-500 space-y-8">
+          {isProArtist && !analyticsLoading && <ArtworkAnalytics data={analytics} />}
+          <AdvancedAnalytics />
         </div>
       )}
 
