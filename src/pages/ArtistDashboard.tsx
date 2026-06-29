@@ -107,14 +107,23 @@ const ArtistDashboard = () => {
     );
   }
 
+  // Backward-compat: legacy ?tab=premium → ?tab=membership
+  useEffect(() => {
+    if (tab === 'premium') {
+      setSearchParams({ tab: 'membership' }, { replace: true });
+    }
+  }, [tab, setSearchParams]);
+
   // Tab configuration with consolidated categories
   const tabs = [
     { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
     { value: 'portfolio', label: 'My Works', shortLabel: 'Works', icon: Palette },
     { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
     { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
+    { value: 'membership', label: 'Membership', shortLabel: 'Pro', icon: Crown },
     { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
   ];
+
 
   return (
       <div className="min-h-screen bg-gray-50/50 dark:bg-background">
