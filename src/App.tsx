@@ -215,6 +215,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <ErrorBoundary>
+        <IntroSplashGate />
         <TopLoadingBar />
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
