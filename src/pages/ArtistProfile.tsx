@@ -27,6 +27,7 @@ import { useArtistAvailability } from "@/hooks/useArtistAvailability";
 import { format as formatDate } from "date-fns";
 import { Calendar, TrendingUp } from "lucide-react";
 import LogoLoader from "@/components/ui/LogoLoader";
+import { track, trackOncePerSession } from "@/lib/analytics";
 
 // --- Demo Data for fallback ---
 const ARTIST_UUID_1 = "11111111-1111-1111-1111-111111111111";
