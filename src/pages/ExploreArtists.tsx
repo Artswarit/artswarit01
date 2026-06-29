@@ -61,6 +61,10 @@ const isProfileComplete = (profile: any): boolean => {
 const ExploreArtists = () => {
   const [artists, setArtists] = useState<Artist[]>([]);
   const [filteredArtists, setFilteredArtists] = useState<Artist[]>([]);
+  const [activeSearchQuery, setActiveSearchQuery] = useState('');
+  const lastFiltersRef = useRef<{ search: string; category: string; sortBy: string; availability: string; location: string; priceRange: string; badges: string[] } | null>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTrackedQueryRef = useRef<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
