@@ -63,8 +63,18 @@ const ArtworkManagement = () => {
 
   // Toggle analytics panel. For non-Pro users the panel renders in a
   // locked (blurred) state via LockedFeature so they can preview the data.
+  const analyticsRef = React.useRef<HTMLDivElement | null>(null);
   const handleAnalyticsClick = () => {
-    setShowAnalytics((v) => !v);
+    setShowAnalytics((v) => {
+      const next = !v;
+      if (next) {
+        // Scroll the panel into view so the upgrade CTA is visible immediately.
+        requestAnimationFrame(() => {
+          analyticsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+      return next;
+    });
   };
 
   const filteredArtworks = useMemo(() => {
