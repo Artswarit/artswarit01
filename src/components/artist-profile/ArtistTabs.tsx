@@ -433,12 +433,57 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
     }
   });
 
-  const submitRequest = () => {
-    toast({
-      title: "Project request sent!",
-      description: "The artist will be notified of your interest."
-    });
-    reset();
+  // Prefill the project title with the chosen service when the dialog opens.
+  useEffect(() => {
+    if (requestServiceTitle !== null) {
+      reset({ title: requestServiceTitle, description: "", budget: "" });
+    }
+  }, [requestServiceTitle]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const submitRequest = async (values: { title: string; description: string; budget: string }) => {
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please log in to send a project request.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const clientName =
+        (user as any)?.user_metadata?.full_name ||
+        (user as any)?.user_metadata?.name ||
+        user.email?.split("@")[0] ||
+        "A client";
+      const budgetText = values.budget ? ` (Budget: ${userCurrencySymbol}${values.budget})` : "";
+      await supabase.from("notifications").insert({
+        user_id: artistId,
+        title: `New project request: ${values.title}`,
+        message: `${clientName} sent a project request${budgetText}. ${values.description}`.slice(0, 500),
+        type: "info",
+        metadata: {
+          kind: "project_request",
+          client_id: user.id,
+          title: values.title,
+          description: values.description,
+          budget: values.budget || null,
+          currency: userCurrencySymbol,
+        },
+      });
+      toast({
+        title: "Project request sent!",
+        description: "The artist will be notified of your interest.",
+      });
+      reset({ title: "", description: "", budget: "" });
+      setRequestServiceTitle(null);
+    } catch (err: any) {
+      console.error("Project request failed", err);
+      toast({
+        title: "Could not send request",
+        description: err?.message || "Please try again in a moment.",
+        variant: "destructive",
+      });
+    }
   };
 
   return <div>
