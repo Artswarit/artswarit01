@@ -411,6 +411,70 @@ const ExploreArtists = () => {
     }
 
     setFilteredArtists(filtered);
+
+    // ----- Analytics: search / filter / sort -----
+    const prev = lastFiltersRef.current;
+    const snapshot = {
+      search: filters.search || '',
+      category: filters.category,
+      sortBy: filters.sortBy,
+      availability: filters.availability,
+      location: filters.location,
+      priceRange: filters.priceRange,
+      badges: filters.badges || [],
+    };
+    if (snapshot.search !== (prev?.search ?? '')) {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      const query = snapshot.search;
+      const resultCount = filtered.length;
+      searchDebounceRef.current = setTimeout(() => {
+        if (!query || query === lastTrackedQueryRef.current) return;
+        lastTrackedQueryRef.current = query;
+        track('search_submitted', {
+          query,
+          result_count: resultCount,
+          search_type: 'artist',
+          surface: 'explore_artists',
+        });
+        if (resultCount === 0) {
+          track('zero_results', {
+            query,
+            filters: {
+              category: snapshot.category,
+              availability: snapshot.availability,
+              location: snapshot.location,
+              priceRange: snapshot.priceRange,
+              badges: snapshot.badges,
+            },
+            search_type: 'artist',
+          });
+        }
+        track('search_results_loaded', {
+          query,
+          result_count: resultCount,
+          search_type: 'artist',
+        });
+      }, 500);
+    }
+    if (prev && prev.sortBy !== snapshot.sortBy) {
+      track('sort_changed', {
+        sort_by: snapshot.sortBy,
+        previous_sort: prev.sortBy,
+        surface: 'explore_artists',
+      });
+    }
+    if (prev) {
+      const diffs: Array<[string, unknown]> = [];
+      if (prev.category !== snapshot.category) diffs.push(['category', snapshot.category]);
+      if (prev.availability !== snapshot.availability) diffs.push(['availability', snapshot.availability]);
+      if (prev.location !== snapshot.location) diffs.push(['location', snapshot.location]);
+      if (prev.priceRange !== snapshot.priceRange) diffs.push(['price_range', snapshot.priceRange]);
+      if (prev.badges.join(',') !== snapshot.badges.join(',')) diffs.push(['badges', snapshot.badges]);
+      diffs.forEach(([filter_type, filter_value]) => {
+        track('filter_applied', { filter_type, filter_value, surface: 'explore_artists' });
+      });
+    }
+    lastFiltersRef.current = snapshot;
   };
 
 
