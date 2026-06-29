@@ -102,14 +102,91 @@
 </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        .boot-loader {
+          min-height: 100vh;
+          min-height: 100dvh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: hsl(220 70% 98%);
+          color: hsl(220 10% 10%);
+          font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .boot-loader__content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 14px;
+        }
+        .boot-loader__mark {
+          width: 76px;
+          height: 76px;
+          border-radius: 999px;
+          display: grid;
+          place-items: center;
+          position: relative;
+        }
+        .boot-loader__mark::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          border: 2px solid hsl(250 70% 60% / 0.18);
+          border-top-color: hsl(250 70% 60%);
+          animation: boot-spin 1.15s linear infinite;
+        }
+        .boot-loader__mark img {
+          width: 46px;
+          height: 46px;
+          object-fit: contain;
+        }
+        .boot-loader__text {
+          margin: 0;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: hsl(220 10% 40%);
+        }
+        @keyframes boot-spin { to { transform: rotate(360deg); } }
+        @media (prefers-color-scheme: dark) {
+          .boot-loader {
+            background: hsl(220 30% 10%);
+            color: hsl(220 20% 98%);
+          }
+          .boot-loader__text { color: hsl(220 20% 70%); }
+        }
+      </style>
+      <div class="boot-loader" role="status" aria-live="polite" aria-label="Loading Artswarit">
+        <div class="boot-loader__content">
+          <div class="boot-loader__mark">
+            <img src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png" alt="Artswarit" />
+          </div>
+          <p class="boot-loader__text">Loading Artswarit</p>
+        </div>
+      </div>
+    </div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      window.addEventListener("error", (event) => {
+        if (/Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed/i.test(String(event.message || ""))) {
+          const key = "__artswarit_chunk_reload_at";
+          const last = Number(sessionStorage.getItem(key) || 0);
+          if (Date.now() - last > 10000) {
+            sessionStorage.setItem(key, String(Date.now()));
+            window.location.reload();
+          }
+        }
+      });
+    </script>
+    <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/sw.js");
+          navigator.serviceWorker.register("/sw.js").catch(() => {});
         });
       }
     </script>
