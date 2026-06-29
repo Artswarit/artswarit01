@@ -186,6 +186,52 @@ serve(async (req) => {
       }
     }
 
+    // Stripe subscription lifecycle — fire only after webhook signature has
+    // already been verified above. We resolve user_id via the subscribers row
+    // we keyed on the Stripe subscription id at upgrade time.
+    const lifecycle: Record<string, string | null> = {
+      'invoice.paid': 'subscription_renewed',
+      'invoice.payment_failed': 'subscription_payment_failed',
+      'invoice.payment_succeeded': 'subscription_payment_recovered',
+      'customer.subscription.deleted': 'subscription_cancelled',
+      'customer.subscription.updated': null, // handled below for cancel_at_period_end
+    };
+    if (event.type in lifecycle || event.type === 'customer.subscription.updated') {
+      const obj: any = event.data.object;
+      const subscriptionId: string | undefined = obj.subscription ?? obj.id;
+      let analyticsEvent = lifecycle[event.type];
+
+      // Mark expired vs cancelled vs renewed based on payload shape.
+      if (event.type === 'customer.subscription.updated') {
+        if (obj.status === 'canceled' || obj.cancel_at_period_end) analyticsEvent = 'subscription_cancelled';
+        else if (obj.status === 'unpaid' || obj.status === 'past_due') analyticsEvent = 'subscription_payment_failed';
+      }
+      if (event.type === 'customer.subscription.deleted' && obj.ended_at && !obj.canceled_at) {
+        analyticsEvent = 'subscription_expired';
+      }
+
+      if (analyticsEvent && subscriptionId) {
+        const { data: sub } = await supabase
+          .from('subscribers')
+          .select('user_id, plan, subscription_tier, email')
+          .eq('stripe_customer_id', subscriptionId)
+          .maybeSingle();
+
+        if (sub?.user_id) {
+          await phCapture(analyticsEvent as string, sub.user_id, {
+            provider: 'stripe',
+            plan: sub.plan ?? sub.subscription_tier ?? null,
+            subscription_id: subscriptionId,
+            invoice_id: obj.id ?? null,
+            amount: obj.amount_paid ? obj.amount_paid / 100 : (obj.amount_due ?? 0) / 100,
+            currency: (obj.currency ?? 'usd').toUpperCase(),
+            failure_reason: obj.last_payment_error?.message ?? obj.billing_reason ?? null,
+          });
+        }
+      }
+    }
+
+
     return new Response(
       JSON.stringify({ received: true }),
       { 
