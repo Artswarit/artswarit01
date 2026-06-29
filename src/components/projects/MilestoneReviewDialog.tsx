@@ -83,7 +83,7 @@ export function MilestoneReviewDialog({
   const fetchProjectDetails = async () => {
     const { data } = await supabase
       .from('projects')
-      .select('id, description, artist_id')
+      .select('id, description, artist_id, client_id')
       .eq('id', projectId)
       .single();
     setProjectData(data);
