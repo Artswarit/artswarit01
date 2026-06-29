@@ -23,6 +23,10 @@ const Explore = () => {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const SCROLL_KEY = 'explore_scroll_y';
+  // Track previous filter state to detect what actually changed for analytics.
+  const lastFiltersRef = useRef<{ search: string; category: string; sortBy: string; artworkType: string; priceRange: string; tags: string[] } | null>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTrackedQueryRef = useRef<string>('');
 
   // Restore scroll position only when returning via back button (popstate)
   useEffect(() => {
