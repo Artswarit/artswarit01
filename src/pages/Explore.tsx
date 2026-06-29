@@ -427,6 +427,8 @@ const Explore = () => {
                 >
                   <ArtworkCard
                     {...artwork}
+                    position={idx}
+                    surface="explore_trending"
                   />
                 </div>
               ))
