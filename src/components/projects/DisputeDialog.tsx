@@ -122,6 +122,14 @@ export function DisputeDialog({
           file_url: publicUrl,
           file_name: evidenceFile.name
         });
+
+        track('evidence_submitted', {
+          dispute_id: dispute.id,
+          project_id: projectId,
+          milestone_id: milestone.id,
+          file_name: evidenceFile.name,
+          file_size: evidenceFile.size,
+        });
       }
 
       // Update milestone status to DISPUTED
@@ -137,6 +145,14 @@ export function DisputeDialog({
         user_id: user?.id,
         action: 'dispute_raised',
         details: { reason, disputeId: dispute.id }
+      });
+
+      track('dispute_raised', {
+        dispute_id: dispute.id,
+        project_id: projectId,
+        milestone_id: milestone.id,
+        reason,
+        has_evidence: !!evidenceFile,
       });
 
       toast.success('Dispute raised successfully. Our team will review it shortly.');
