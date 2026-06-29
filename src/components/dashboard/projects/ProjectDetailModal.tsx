@@ -565,58 +565,95 @@ const ProjectDetailModal = ({
         </DialogContent>
       ) : (
         <DialogContent className="max-w-none w-screen h-screen max-h-none overflow-hidden flex flex-col p-0 pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] gap-0 border-none shadow-none bg-background backdrop-blur-2xl rounded-none">
-          <DialogHeader className="px-5 sm:px-8 py-4 border-b bg-background/95 backdrop-blur-xl shrink-0">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <DialogTitle className="text-lg sm:text-xl font-bold truncate">
-                  {project.title}
-                </DialogTitle>
-                <DialogDescription className="text-xs sm:text-sm flex items-center gap-2 flex-wrap mt-1">
-                  <Badge
-                    className={cn(
-                      "px-2 py-0.5 rounded-full font-semibold text-[10px] uppercase tracking-wide",
-                      project.status === 'accepted' ? 'bg-emerald-500 text-white hover:bg-emerald-600' :
-                      project.status === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' :
-                      'bg-primary text-white hover:bg-primary/90'
-                    )}
-                  >
-                    {project.status}
-                  </Badge>
-                  <span className="text-muted-foreground">#{project.id.slice(0, 8)}</span>
-                  <span className="text-muted-foreground">·</span>
-                  <Link
-                    to={user?.id === project.artist_id ? `/profile/${project.client_id}` : `/artist/${project.artist_id}`}
-                    className="flex items-center gap-1.5 hover:text-foreground transition-colors"
-                  >
-                    <Avatar className="h-5 w-5">
-                      <AvatarImage src={user?.id === project.artist_id ? project.client_avatar : project.artist_avatar} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-bold">
-                        {(user?.id === project.artist_id ? project.client_name : project.artist_name)?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-semibold">
-                      {user?.id === project.artist_id ? project.client_name : project.artist_name}
-                    </span>
-                  </Link>
-                </DialogDescription>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 rounded-full shrink-0"
-                onClick={() => {
-                  toast.info('Syncing latest updates...');
-                  fetchProjectData(undefined, false);
-                }}
-                aria-label="Refresh"
-              >
-                <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-              </Button>
-            </div>
+          <DialogHeader className="sr-only">
+            <DialogTitle>{project.title}</DialogTitle>
+            <DialogDescription>Project details and collaboration workspace</DialogDescription>
           </DialogHeader>
           <ScrollArea className="flex-1 h-full" viewportRef={modalViewportRef}>
-            <div className="flex flex-col min-h-full max-w-7xl mx-auto w-full relative">
+            <div className="flex flex-col min-h-full max-w-7xl mx-auto w-full relative border-x border-border/5">
+            {/* Ultra Modern Header Section */}
+            <div className="relative overflow-hidden pt-8 sm:pt-12 pb-7 sm:pb-9 px-4 sm:px-10 border-b bg-gradient-to-br from-primary/[0.07] via-background to-primary/[0.03]">
+              {/* Abstract Background Shapes */}
+              <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+              
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-8">
+                <div className="space-y-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                      <GitBranch className="h-5 w-5" />
+                    </div>
+                    <Badge variant="outline" className="px-3 py-1 rounded-full bg-background/50 backdrop-blur-md border-primary/20 text-primary font-bold tracking-wide uppercase text-[10px]">
+                      Project ID: #{project.id.slice(0, 8)}
+                    </Badge>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 rounded-full hover:bg-primary/10 text-primary/60 hover:text-primary transition-all ml-auto"
+                      onClick={() => {
+                        toast.info('Syncing latest updates...');
+                        fetchProjectData(undefined, false);
+                      }}
+                    >
+                      <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                    </Button>
+                  </div>
+                  
+                    <div className="space-y-1 sm:space-y-2">
+                      <DialogTitle className="text-2xl sm:text-4xl font-black tracking-tight leading-tight sm:leading-[1.1] pb-1 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/60">
+                        {project.title}
+                      </DialogTitle>
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <Badge 
+                        className={cn(
+                          "px-4 py-1.5 rounded-full font-bold text-[11px] uppercase tracking-wider shadow-lg shadow-primary/5 transition-all duration-500",
+                          project.status === 'accepted' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 
+                          project.status === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' : 
+                          'bg-primary text-white hover:bg-primary/90'
+                        )}
+                      >
+                        {project.status}
+                      </Badge>
+                      <Separator orientation="vertical" className="h-4 bg-border/40" />
+                      <Link 
+                        to={user?.id === project.artist_id ? `/profile/${project.client_id}` : `/artist/${project.artist_id}`} 
+                        className="flex items-center gap-2 group cursor-pointer"
+                      >
+                        <Avatar className="h-8 w-8 ring-2 ring-background ring-offset-2 ring-offset-primary/10 transition-transform group-hover:scale-110">
+                          <AvatarImage src={user?.id === project.artist_id ? project.client_avatar : project.artist_avatar} />
+                          <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
+                            {(user?.id === project.artist_id ? project.client_name : project.artist_name)?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-bold text-primary group-hover:text-foreground transition-colors">
+                          {user?.id === project.artist_id ? project.client_name : project.artist_name}
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
 
+                <div className="flex flex-col items-start sm:items-end gap-3">
+                  <div className="flex -space-x-3">
+                    <Link to={`/artist/${project.artist_id}`}>
+                      <Avatar className="h-10 w-10 ring-4 ring-background hover:scale-105 transition-transform">
+                        <AvatarImage src={project.artist_avatar} />
+                        <AvatarFallback className="bg-primary/10 text-primary font-bold">A</AvatarFallback>
+                      </Avatar>
+                    </Link>
+                    <Link to={`/profile/${project.client_id}`}>
+                      <Avatar className="h-10 w-10 ring-4 ring-background hover:scale-105 transition-transform">
+                        <AvatarImage src={project.client_avatar} />
+                        <AvatarFallback className="bg-amber-500/10 text-amber-600 font-bold">C</AvatarFallback>
+                      </Avatar>
+                    </Link>
+                  </div>
+                  <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 bg-muted/20 px-3 py-1 rounded-full">
+                    Collaborative Workspace
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <div className="px-4 sm:px-10 py-4 sm:py-6 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5">
               <div className="group relative p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 overflow-hidden">
