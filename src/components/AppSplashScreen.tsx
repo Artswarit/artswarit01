@@ -7,9 +7,11 @@ export const AppSplashScreen = () => {
 
   useEffect(() => {
     // Hide splash screen after a defined time or initial data load
+    // index.html already shows a branded boot loader before React mounts.
+    // Hide this overlay almost immediately so the app is interactive ASAP.
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 2000);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, []);
