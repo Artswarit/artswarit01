@@ -236,13 +236,13 @@ const ArtistDashboard = () => {
                 <div className={cn(activeTab !== 'account' && "hidden")}>
                   {visitedTabs.has('account') && (
                     <Tabs defaultValue="profile_settings" className="w-full">
-                      <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-5 h-auto">
+                      <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-4 h-auto">
                         <TabsTrigger value="profile_settings" className="rounded-lg shrink-0">Profile</TabsTrigger>
                         <TabsTrigger value="earnings" className="rounded-lg shrink-0">Earnings</TabsTrigger>
-                        <TabsTrigger value="membership" className="rounded-lg shrink-0">Membership</TabsTrigger>
                         <TabsTrigger value="settings" className="rounded-lg shrink-0">Privacy</TabsTrigger>
                         <TabsTrigger value="exclusive" className="rounded-lg shrink-0">Exclusive</TabsTrigger>
                       </TabsList>
+
                       
                       <TabsContent value="profile_settings">
                         <ArtistProfile
