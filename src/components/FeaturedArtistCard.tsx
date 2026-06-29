@@ -3,9 +3,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Crown } from "lucide-react";
-import { cn } from "@/lib/utils";
-
-import { useArtistPlan } from "@/hooks/useArtistPlan";
 
 interface FeaturedArtistCardProps {
   id: string;
@@ -14,6 +11,7 @@ interface FeaturedArtistCardProps {
   imageUrl: string;
   followers?: number;
   bio?: string;
+  verified?: boolean;
 }
 
 const FeaturedArtistCard = ({
@@ -23,9 +21,8 @@ const FeaturedArtistCard = ({
   imageUrl,
   followers = 0,
   bio = "",
+  verified = false,
 }: FeaturedArtistCardProps) => {
-  const { isProArtist } = useArtistPlan(id);
-
   return (
     <Link to={`/artist/${id}`} className="block h-full group">
       <Card className="relative h-full overflow-hidden rounded-2xl sm:rounded-[2rem] border border-muted/20 bg-card shadow-lg hover:shadow-2xl transition-all duration-500">
@@ -40,7 +37,7 @@ const FeaturedArtistCard = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-60 sm:opacity-40 group-hover:opacity-80 transition-opacity duration-500" />
           
           {/* Premium Badge */}
-          {isProArtist && (
+          {verified && (
              <div className="absolute top-4 right-4 z-10">
                <div className="px-3 py-1.5 bg-amber-500/90 backdrop-blur-md rounded-full flex items-center gap-1.5 shadow-lg border border-amber-400/50">
                 <Crown className="w-3.5 h-3.5 text-white" />

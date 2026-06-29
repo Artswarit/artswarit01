@@ -5,8 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { identifyUser, resetAnalytics, track } from '@/lib/analytics';
 
-import LogoLoader from '@/components/ui/LogoLoader';
-
 interface UserProfile {
   id: string;
   full_name: string | null;
@@ -427,10 +425,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={value}>
-      {loading && <LogoLoader fullPage text="Loading Artswarit…" />}
-      <div aria-busy={loading} style={loading ? { visibility: 'hidden', overflow: 'hidden', height: 0 } : undefined}>
-        {children}
-      </div>
+      {children}
     </AuthContext.Provider>
   );
 };

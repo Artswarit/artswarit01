@@ -74,23 +74,6 @@ export const useCategoryCounts = () => {
 
   useEffect(() => {
     fetchCounts();
-
-    // Subscribe to real-time profile changes
-    const channel = supabase
-      .channel('category-counts-realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'profiles' },
-        () => {
-          console.log('Profiles updated, refreshing category counts...');
-          fetchCounts();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const getCount = (categoryTitle: string): number => {
