@@ -176,17 +176,27 @@ const ArtistDashboard = () => {
                 <div className={cn(activeTab !== 'overview' && "hidden")}>
                   {visitedTabs.has('overview') && (
                     <div className="space-y-12">
+                      {/* 1. Critical alerts that need action */}
                       <DashboardAttentionRequired 
                         role="artist" 
                         profile={profile} 
                         onAction={handleTabChange} 
                       />
-                      <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
+                      {/* 2. Primary KPIs: earnings + active work */}
                       <ArtistEarnings isLoading={profileLoading} />
+                      {/* 3. Engagement & activity feed */}
+                      <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
                     </div>
                   )}
                 </div>
               </TabsContent>
+
+              <TabsContent value="membership" className="outline-none focus-visible:ring-0" forceMount>
+                <div className={cn(activeTab !== 'membership' && "hidden")}>
+                  {visitedTabs.has('membership') && <PremiumMembership />}
+                </div>
+              </TabsContent>
+
 
               <TabsContent value="projects" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'projects' && "hidden")}>
