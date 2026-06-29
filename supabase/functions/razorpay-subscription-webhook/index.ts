@@ -233,7 +233,19 @@ serve(async (req) => {
             metadata: { subscription_id: subscription.id }
           });
 
-          // console.log("Subscription deactivated for user:", finalUserId);
+          // Analytics — distinguish user-initiated cancel, payment-failure halt,
+          // and natural end-of-term completion.
+          const phEvent =
+            event.event === 'subscription.halted' ? 'subscription_payment_failed'
+              : event.event === 'subscription.completed' ? 'subscription_expired'
+              : 'subscription_cancelled';
+          await phCapture(phEvent, finalUserId, {
+            provider: 'razorpay',
+            plan: subscription.plan_id ?? 'monthly',
+            subscription_id: subscription.id,
+            renewal_number: subscription.paid_count ?? null,
+            failure_reason: event.event === 'subscription.halted' ? 'payment_halted' : null,
+          });
         }
         break;
       }
