@@ -471,6 +471,9 @@ const Explore = () => {
                     >
                       <ArtworkCard
                         {...artwork}
+                        position={idx}
+                        searchQuery={activeSearchQuery || undefined}
+                        surface="explore"
                       />
                     </div>
                   ))
