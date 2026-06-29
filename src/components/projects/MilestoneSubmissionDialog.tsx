@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { track } from '@/lib/analytics';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -195,6 +196,12 @@ export function MilestoneSubmissionDialog({
         });
       }
 
+      track('milestone_delivered', {
+        milestone_id: milestone.id,
+        project_id: projectId,
+        is_final: isFinalUpload,
+        file_count: files.length,
+      });
       toast.success(isFinalUpload ? 'Final files uploaded successfully' : 'Milestone submitted for review');
       onSuccess();
       onOpenChange(false);

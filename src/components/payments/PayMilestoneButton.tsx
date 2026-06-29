@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import { DollarSign, Loader2, AlertCircle } from 'lucide-react';
 import { useRazorpay } from '@/hooks/useRazorpay';
@@ -106,9 +107,13 @@ export function PayMilestoneButton({
       initiatePayment({
         milestoneId,
         onSuccess: (paymentId) => {
+          track('payment_success', { milestone_id: milestoneId, provider: 'razorpay', amount_usd: amount, payment_id: paymentId });
+          track('escrow_created', { milestone_id: milestoneId, amount_usd: amount, provider: 'razorpay' });
           onSuccess?.();
         },
-        onFailure: () => {},
+        onFailure: () => {
+          track('payment_failed', { milestone_id: milestoneId, provider: 'razorpay', amount_usd: amount });
+        },
       });
     }, 350);
   };

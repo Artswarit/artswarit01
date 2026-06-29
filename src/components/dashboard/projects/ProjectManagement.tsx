@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { track } from '@/lib/analytics';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -264,6 +265,12 @@ const ProjectManagement = () => {
         });
       }
       toast.success('Project accepted successfully!');
+      track('commission_accepted', {
+        project_id: project.id,
+        artist_id: user?.id,
+        client_id: project.client_id,
+        created_at: project.created_at,
+      });
       fetchProjects();
     } catch (err) {
       console.error('Error accepting project:', err);
@@ -402,6 +409,12 @@ const ProjectManagement = () => {
         });
       }
       toast.success('Project marked as completed!');
+      track('project_completed', {
+        project_id: project.id,
+        artist_id: user?.id,
+        client_id: project.client_id,
+        milestone_count: (milestones || []).length,
+      });
       fetchProjects();
     } catch (err) {
       console.error('Error completing project:', err);

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { track } from '@/lib/analytics';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -297,6 +298,19 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         .insert(milestonesData as any);
 
       if (milestonesError) throw milestonesError;
+
+      // Analytics: commission flow start
+      track('commission_requested', {
+        project_id: project.id,
+        artist_id: artistId,
+        amount_usd: budgetUSD,
+        milestone_count: milestones.length,
+        has_artist: !!artistId,
+      });
+      track('milestone_created', {
+        project_id: project.id,
+        milestone_count: milestones.length,
+      });
 
       // Do NOT notify artist yet; wait for explicit client confirmation
       toast.success('Project created. Assign an artist and click Confirm to send.');

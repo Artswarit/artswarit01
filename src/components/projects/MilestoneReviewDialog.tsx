@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { track } from '@/lib/analytics';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -293,6 +294,12 @@ export function MilestoneReviewDialog({
         details: { reason: revisionReason }
       });
 
+      track('revision_requested', {
+        milestone_id: milestone.id,
+        project_id: projectId,
+        revision_no: newRevisionCount,
+        reason: revisionReason,
+      });
       toast.success('Revision requested. The artist will be notified.');
       onSuccess();
       onOpenChange(false);
