@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { cn } from '@/lib/utils';
 import { getOptimizedImageUrl, ImagePresets } from '@/lib/image-optimization';
+import { track } from '@/lib/analytics';
+import { useImpressionTracker } from '@/hooks/useImpressionTracker';
 interface Artist {
   id: string;
   name: string;
