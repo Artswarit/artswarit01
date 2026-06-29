@@ -551,39 +551,52 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
                 Services & Project Request
               </h3>
 
-              {services.length === 0 ? <div className="mb-7 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
-                  This artist hasn't listed fixed services yet. Send a project request below.
-                </div> : <div className="grid gap-4 mb-7">
-                  {services.map(service => <div key={service.id} className="p-4 rounded-xl border bg-white/60 shadow flex flex-col md:flex-row justify-between items-start md:items-center">
-                      <div>
-                        <div className="text-lg font-semibold text-gray-900">{service.title}</div>
-                        {service.description && <div className="text-gray-700">{service.description}</div>}
+              {services.length === 0 ? (
+                <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground text-center">
+                  This artist hasn't listed fixed services yet.
+                  <div className="mt-4">
+                    <Button
+                      onClick={() => setRequestServiceTitle("")}
+                      className="bg-violet-600 text-white hover:bg-violet-700 gap-2"
+                    >
+                      <Mail size={16} /> Send a Project Request
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {services.map(service => (
+                    <div
+                      key={service.id}
+                      className="p-4 rounded-xl border bg-card shadow-sm flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="text-base sm:text-lg font-semibold text-foreground">
+                          {service.title}
+                        </div>
+                        {service.description && (
+                          <div className="text-sm text-muted-foreground mt-0.5 line-clamp-2">
+                            {service.description}
+                          </div>
+                        )}
+                        {service.starting_price !== null && (
+                          <div className="font-semibold text-amber-700 mt-2 text-sm">
+                            {formatPlus(service.starting_price)}
+                          </div>
+                        )}
                       </div>
-                      {service.starting_price !== null && <div className="font-semibold text-amber-700 mt-2 md:mt-0 md:ml-4 flex items-center gap-0.5">
-                          
-                          {formatPlus(service.starting_price)}
-                        </div>}
-                    </div>)}
-                </div>}
-
-              <form onSubmit={handleSubmit(submitRequest)} className="bg-white/80 rounded-xl p-6 shadow space-y-4">
-                <div>
-                  <label className="font-medium text-gray-700 block mb-1">Project Title</label>
-                  <Input placeholder="E.g. 'Custom Portrait'" required {...register("title")} />
+                      <div className="shrink-0 sm:ml-auto">
+                        <Button
+                          onClick={() => setRequestServiceTitle(service.title)}
+                          className="w-full sm:w-auto bg-violet-600 text-white hover:bg-violet-700 gap-2 h-11"
+                        >
+                          <Mail size={16} /> Request
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <label className="font-medium text-gray-700 block mb-1">Project Description</label>
-                  <Textarea placeholder="Describe what you want..." rows={4} required {...register("description")} />
-                </div>
-                <div>
-                  <label className="font-medium text-gray-700 block mb-1">Budget (optional, in {userCurrencySymbol})</label>
-                  <Input type="number" min={0} placeholder={`Amount in ${userCurrencySymbol}`} {...register("budget")} />
-                </div>
-                <Button type="submit" disabled={isSubmitting} className="bg-violet-600 text-white hover:bg-violet-700 font-semibold gap-2 flex items-center">
-                  <Mail size={17} />
-                  {isSubmitting ? "Sending..." : "Send Request"}
-                </Button>
-              </form>
+              )}
             </div>}
 
           {/* Expanded "About" tab details */}
