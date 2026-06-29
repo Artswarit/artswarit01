@@ -70,9 +70,28 @@ export type AnalyticsEvent =
   | "artist_profile_viewed"
   | "artwork_viewed"
   | "portfolio_viewed"
-  // Discovery
+  | "service_viewed"
+  // Discovery / Search
   | "search"
+  | "search_submitted"
+  | "zero_results"
+  | "search_results_loaded"
+  | "search_result_clicked"
   | "filter_used"
+  | "filter_applied"
+  | "sort_changed"
+  // Impressions
+  | "artist_impression"
+  | "service_impression"
+  | "artwork_impression"
+  // Marketplace engagement
+  | "wishlist_added"
+  | "wishlist_removed"
+  | "artist_followed"
+  | "artist_unfollowed"
+  | "share_clicked"
+  | "contact_artist_clicked"
+  | "commission_started"
   // Commission funnel
   | "commission_requested"
   | "commission_accepted"
