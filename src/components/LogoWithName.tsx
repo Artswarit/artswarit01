@@ -18,7 +18,7 @@ const LogoWithName = ({
       data-testid="logo-with-name"
     >
       <img
-        src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
+        src="/icons/artswarit-logo-96.png"
         alt="Artswarit Logo"
         className={`object-contain ${sizeMap[size]}`}
       />

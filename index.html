@@ -34,10 +34,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Artswarit">
-    <link
-      rel="apple-touch-icon"
-      href="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
-    >
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <!-- Network priming: connect early to Supabase + fonts to shave RTTs -->
     <link rel="preconnect" href="https://sqdzemlcqesgjsybbhte.supabase.co" crossorigin>
@@ -100,7 +97,7 @@
   <meta name="twitter:title" content="Artswarit – India&#39;s Leading Artist Marketplace | Hire Artists Online">
   <meta property="og:description" content="Artswarit is India&#39;s leading artist marketplace. Hire freelance musicians, writers, illustrators, photographers &amp; more. Commission artwork with escrow-secured payments.">
   <meta name="twitter:description" content="Artswarit is India&#39;s leading artist marketplace. Hire freelance musicians, writers, illustrators, photographers &amp; more. Commission artwork with escrow-secured payments.">
-  <link rel="icon" type="image/png" href="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png">
+  <link rel="icon" type="image/png" href="/icons/artswarit-logo-64.png">
 </head>
 
   <body>
@@ -174,7 +171,7 @@
       <div class="boot-loader" role="status" aria-live="polite" aria-label="Loading Artswarit">
         <div class="boot-loader__content">
           <div class="boot-loader__mark">
-            <img src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png" alt="Artswarit" />
+            <img src="/icons/artswarit-logo-96.png" alt="Artswarit" />
           </div>
           <p class="boot-loader__text">Loading Artswarit</p>
         </div>
@@ -196,23 +193,23 @@
       });
     </script>
     <script>
-      // Do not register an app-shell service worker here. /sw.js remains as a
-      // one-release kill-switch for browsers that already have an old worker,
-      // but registering it on every production load causes a reload loop.
+      // Register the kill-switch worker once per version so old PWA installs
+      // drop stale app-shell caches without creating a reload loop.
       if ("serviceWorker" in navigator) {
-        const host = window.location.hostname;
-        const isLocal = host === "localhost" || host === "127.0.0.1";
-        const isLovablePreview = host.includes("lovable.app") && (host.includes("preview") || host.includes("id-preview"));
+        const cleanupVersion = "sw-cleanup-v6";
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.getRegistrations?.().then((registrations) => {
+            registrations
+              .filter((registration) => registration.active?.scriptURL?.includes("/sw.js"))
+              .forEach((registration) => registration.update?.().catch(() => {}));
+          }).catch(() => {});
 
-        if (isLocal || isLovablePreview) {
-          window.addEventListener("load", () => {
-            navigator.serviceWorker.getRegistrations?.().then((registrations) => {
-              registrations
-                .filter((registration) => registration.active?.scriptURL?.endsWith("/sw.js"))
-                .forEach((registration) => registration.unregister());
-            }).catch(() => {});
+          if (localStorage.getItem("artswarit-sw-cleanup") === cleanupVersion) return;
+          localStorage.setItem("artswarit-sw-cleanup", cleanupVersion);
+          navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
+            localStorage.removeItem("artswarit-sw-cleanup");
           });
-        }
+        });
       }
     </script>
   </body>

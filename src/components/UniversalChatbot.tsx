@@ -161,7 +161,7 @@ const UniversalChatbot: React.FC = () => {
         >
           <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center p-0.5 shadow-sm overflow-hidden">
             <img
-              src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
+              src="/icons/artswarit-logo-96.png"
               alt="Artswarit"
               className="h-full w-full object-contain relative z-10 hover:opacity-90 transition-opacity transform scale-105"
             />
@@ -178,7 +178,7 @@ const UniversalChatbot: React.FC = () => {
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 flex items-center justify-center shrink-0">
                   <img
-                    src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
+                    src="/icons/artswarit-logo-96.png"
                     alt="Artswarit"
                     className="h-10 w-10 object-contain filter drop-shadow-[0_6px_6px_rgba(0,0,0,0.5)] drop-shadow-[0_0_12px_rgba(255,255,255,0.4)] hover:-translate-y-1 hover:scale-105 transition-all duration-300"
                   />
@@ -229,7 +229,7 @@ const UniversalChatbot: React.FC = () => {
                   {msg.sender === "bot" && (
                     <div className="h-8 w-8 flex items-center justify-center shrink-0 mb-0.5 z-10">
                       <img
-                        src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
+                        src="/icons/artswarit-logo-96.png"
                         alt=""
                         className="h-7 w-7 object-contain drop-shadow-sm"
                       />
@@ -250,7 +250,7 @@ const UniversalChatbot: React.FC = () => {
                 <div className="flex items-end gap-1.5 justify-start animate-in slide-in-from-bottom-2 fade-in duration-300 ease-out">
                   <div className="h-8 w-8 flex items-center justify-center shrink-0 mb-0.5 z-10">
                     <img
-                      src="/lovable-uploads/eec23911-0863-40d6-84da-ea787a8759c1.png"
+                      src="/icons/artswarit-logo-96.png"
                       alt=""
                       className="h-7 w-7 object-contain drop-shadow-sm"
                     />
