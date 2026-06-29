@@ -148,6 +148,7 @@ const ArtistCard = ({
         if (error) throw error;
         setIsFollowing(false);
         toast.success('Unfollowed artist');
+        track('artist_unfollowed', { artist_id: artist.id, surface });
       } else {
         const {
           error
@@ -158,6 +159,7 @@ const ArtistCard = ({
         if (error) throw error;
         setIsFollowing(true);
         toast.success('Following artist!');
+        track('artist_followed', { artist_id: artist.id, surface });
       }
       onFollow?.(artist.id);
     } catch (err: any) {
