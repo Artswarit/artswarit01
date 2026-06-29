@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { track } from '@/lib/analytics';
+import { useImpressionTracker } from '@/hooks/useImpressionTracker';
 import { Heart, Eye, Play, ExternalLink, Bookmark, Flag, MoreVertical } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import GlassCard from '@/components/ui/glass-card';
