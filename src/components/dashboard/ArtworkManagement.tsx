@@ -60,13 +60,10 @@ const ArtworkManagement = () => {
     }
   };
 
-  // Handle analytics button click with premium gating
+  // Toggle analytics panel. For non-Pro users the panel renders in a
+  // locked (blurred) state via LockedFeature so they can preview the data.
   const handleAnalyticsClick = () => {
-    if (!isProArtist) {
-      setShowUpgradePrompt(true);
-    } else {
-      setShowAnalytics(!showAnalytics);
-    }
+    setShowAnalytics((v) => !v);
   };
 
   const filteredArtworks = useMemo(() => {
