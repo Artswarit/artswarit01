@@ -713,6 +713,7 @@ export default function ArtistProfile() {
 
   // Message handler
   const handleMessage = () => {
+    track('contact_artist_clicked', { artist_id: id, surface: 'artist_profile' });
     if (!user?.id) {
       toast({
         title: "Not logged in",
