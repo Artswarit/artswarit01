@@ -59,6 +59,37 @@ const ArtistCard = ({
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentFollowers, setCurrentFollowers] = useState(artist.followers);
+  const impressionRef = useImpressionTracker<HTMLDivElement>({
+    id: artist.id,
+    event: 'artist_impression',
+    props: {
+      artist_id: artist.id,
+      artist_category: artist.category,
+      verified: artist.verified,
+      position,
+      query: searchQuery,
+      surface,
+    },
+  });
+
+  const handleCardClick = () => {
+    track('artist_profile_viewed', {
+      artist_id: artist.id,
+      artist_category: artist.category,
+      verified: artist.verified,
+      surface,
+    });
+    if (searchQuery) {
+      track('search_result_clicked', {
+        query: searchQuery,
+        position,
+        entity_type: 'artist',
+        entity_id: artist.id,
+        surface,
+      });
+    }
+  };
+
 
   // Check initial follow state and handle subscriptions
   useEffect(() => {
