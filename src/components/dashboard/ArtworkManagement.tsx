@@ -16,6 +16,7 @@ import ArtworkEditModal from './artwork/ArtworkEditModal';
 import ArtworkSearchFilters from './artwork/ArtworkSearchFilters';
 import ArtworkBulkActions from './artwork/ArtworkBulkActions';
 import ArtworkAnalytics from './artwork/ArtworkAnalytics';
+import AdvancedAnalytics from './artist/AdvancedAnalytics';
 import ArtworkManagementCard from './artwork/ArtworkManagementCard';
 import {
   Dialog,
