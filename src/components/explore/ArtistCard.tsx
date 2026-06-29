@@ -178,8 +178,8 @@ const ArtistCard = ({
     return num.toString();
   };
   if (viewMode === 'list') {
-    return <Link to={`/artist/${artist.id}`} className="block group">
-        <Card className="hover:shadow-xl transition-all duration-300 border-primary/5 hover:border-primary/20 overflow-hidden bg-card/50 backdrop-blur-sm">
+    return <Link to={`/artist/${artist.id}`} className="block group" onClick={handleCardClick}>
+        <Card ref={impressionRef as any} className="hover:shadow-xl transition-all duration-300 border-primary/5 hover:border-primary/20 overflow-hidden bg-card/50 backdrop-blur-sm">
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               <div className="relative self-center sm:self-auto">
