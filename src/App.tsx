@@ -9,6 +9,7 @@ import React, { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import ScrollToTop from "./components/ScrollToTop";
+import { StripeReturnTracker } from "./components/analytics/StripeReturnTracker";
 import { useScrollAnchor } from "./hooks/useScrollAnchor";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
