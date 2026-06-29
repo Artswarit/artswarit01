@@ -277,8 +277,8 @@ const ArtistCard = ({
         </Card>
       </Link>;
   }
-  return <Link to={`/artist/${artist.id}`} className="block group h-full">
-      <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 h-full border-primary/5 hover:border-primary/20 bg-card/50 backdrop-blur-sm group/card">
+  return <Link to={`/artist/${artist.id}`} className="block group h-full" onClick={handleCardClick}>
+      <Card ref={impressionRef as any} className="overflow-hidden hover:shadow-2xl transition-all duration-500 h-full border-primary/5 hover:border-primary/20 bg-card/50 backdrop-blur-sm group/card">
         <div className="relative aspect-[4/5] overflow-hidden">
           <img loading="lazy" decoding="async" 
             src={getOptimizedImageUrl(artist.imageUrl, ImagePresets.THUMBNAIL)} 
