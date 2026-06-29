@@ -694,6 +694,7 @@ export default function ArtistProfile() {
         .eq("following_id", id)
         .eq("follower_id", user.id);
       if (!error) {
+        track('artist_unfollowed', { artist_id: id, surface: 'artist_profile' });
         toast({
           title: "Unfollowed",
           description: "You have unfollowed this artist.",
