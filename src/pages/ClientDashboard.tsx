@@ -1144,7 +1144,14 @@ const ClientDashboard = () => {
           )}
         </div>
       </TabsContent>
-          
+
+          {/* My Works (Collection) Tab */}
+          <TabsContent value="collection" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
+            <div className={cn(selectedTab !== 'collection' && "hidden")}>
+              {visitedTabs.has('collection') && <PurchasedArtworks />}
+            </div>
+          </TabsContent>
+
           {/* Messages Tab */}
           <TabsContent value="messages" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'messages' && "hidden")}>
