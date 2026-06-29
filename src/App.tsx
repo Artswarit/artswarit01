@@ -15,6 +15,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import { TopLoadingBar } from "./components/TopLoadingBar";
 import LogoLoader from "./components/ui/LogoLoader";
+import IntroSplashGate from "./components/IntroSplashGate";
 import Index from "./pages/Index";
 import ProtectedRoute from "./components/ProtectedRoute";
 
