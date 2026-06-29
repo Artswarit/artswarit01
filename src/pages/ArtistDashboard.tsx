@@ -99,6 +99,13 @@ const ArtistDashboard = () => {
     });
   }, [activeTab]);
 
+  // Backward-compat: legacy ?tab=premium → ?tab=membership
+  useEffect(() => {
+    if (tab === 'premium') {
+      setSearchParams({ tab: 'membership' }, { replace: true });
+    }
+  }, [tab, setSearchParams]);
+
   if (profileLoading && !profile) {
     return (
       <div className="min-h-screen bg-gray-50/50 dark:bg-background flex items-center justify-center">
@@ -107,12 +114,6 @@ const ArtistDashboard = () => {
     );
   }
 
-  // Backward-compat: legacy ?tab=premium → ?tab=membership
-  useEffect(() => {
-    if (tab === 'premium') {
-      setSearchParams({ tab: 'membership' }, { replace: true });
-    }
-  }, [tab, setSearchParams]);
 
   // Tab configuration with consolidated categories
   const tabs = [
