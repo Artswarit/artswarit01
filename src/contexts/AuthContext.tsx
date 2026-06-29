@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { identifyUser, resetAnalytics, track } from '@/lib/analytics';
 
 import LogoLoader from '@/components/ui/LogoLoader';
 
@@ -124,8 +125,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           fetchSubscription(session.user.id);
           refreshProfile(session.user.id);
+          identifyUser(session.user.id, {
+            email: session.user.email,
+            role: (session.user.user_metadata as any)?.role,
+          });
           
           if (event === 'SIGNED_IN') {
+            track('login', { method: (session.user.app_metadata as any)?.provider ?? 'password' });
             // Check for pending signup role (Google OAuth)
             const pendingRole = localStorage.getItem('pendingSignupRole');
             if (pendingRole) {
@@ -137,6 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSubscription(null);
           setProfile(null);
           localStorage.removeItem('pendingSignupRole');
+          if (event === 'SIGNED_OUT') resetAnalytics();
         }
       }
     );
@@ -281,6 +288,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Account created successfully!",
         description: "Please check your email to verify your account."
       });
+      track('sign_up', { role: userData.role, source: 'email', country: userData.country });
 
       return { error: null };
     } catch (error: any) {
