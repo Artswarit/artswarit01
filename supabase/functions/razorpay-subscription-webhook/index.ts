@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.8";
+import { phCapture } from "../_shared/posthog.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -166,6 +167,29 @@ serve(async (req) => {
           metadata: { subscription_id: subscription.id }
         });
 
+        // Analytics — server-confirmed activation vs renewal. paid_count is
+        // 1 for the first successful charge and increments on each renewal.
+        const paidCount: number = subscription.paid_count ?? 1;
+        const amount = payment?.amount ? payment.amount / 100 : 0;
+        const ctx = {
+          provider: 'razorpay',
+          plan: subscription.plan_id ?? 'monthly',
+          subscription_id: subscription.id,
+          invoice_id: payment?.invoice_id ?? null,
+          payment_id: payment?.id ?? null,
+          amount,
+          currency: (payment?.currency ?? 'INR').toUpperCase(),
+          billing_cycle: 'monthly',
+          renewal_number: paidCount,
+        };
+        const phEvent = event.event === 'subscription.activated' || paidCount <= 1
+          ? 'subscription_upgraded'
+          : 'subscription_renewed';
+        await phCapture(phEvent, finalUserId, ctx);
+        if (event.event === 'subscription.charged') {
+          await phCapture('payment_success', finalUserId, { ...ctx, kind: 'subscription' });
+        }
+
         // console.log("Subscription activated for user:", finalUserId);
         break;
       }
@@ -209,7 +233,19 @@ serve(async (req) => {
             metadata: { subscription_id: subscription.id }
           });
 
-          // console.log("Subscription deactivated for user:", finalUserId);
+          // Analytics — distinguish user-initiated cancel, payment-failure halt,
+          // and natural end-of-term completion.
+          const phEvent =
+            event.event === 'subscription.halted' ? 'subscription_payment_failed'
+              : event.event === 'subscription.completed' ? 'subscription_expired'
+              : 'subscription_cancelled';
+          await phCapture(phEvent, finalUserId, {
+            provider: 'razorpay',
+            plan: subscription.plan_id ?? 'monthly',
+            subscription_id: subscription.id,
+            renewal_number: subscription.paid_count ?? null,
+            failure_reason: event.event === 'subscription.halted' ? 'payment_halted' : null,
+          });
         }
         break;
       }
@@ -229,14 +265,14 @@ serve(async (req) => {
       case "payment.failed": {
         const payment = payload.payment?.entity;
         const email = payment?.email;
-        
+
         if (email) {
           const { data: profile } = await supabase
             .from("profiles")
             .select("id")
             .eq("email", email)
             .maybeSingle();
-          
+
           if (profile) {
             await supabase.from("notifications").insert({
               user_id: profile.id,
@@ -244,6 +280,14 @@ serve(async (req) => {
               title: "Payment Failed",
               message: "Your subscription payment failed. Please update your payment method.",
               metadata: { payment_id: payment.id }
+            });
+
+            await phCapture('subscription_payment_failed', profile.id, {
+              provider: 'razorpay',
+              payment_id: payment?.id ?? null,
+              amount: payment?.amount ? payment.amount / 100 : 0,
+              currency: (payment?.currency ?? 'INR').toUpperCase(),
+              failure_reason: payment?.error_description ?? payment?.error_reason ?? null,
             });
           }
         }
