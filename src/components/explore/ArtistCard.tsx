@@ -38,11 +38,17 @@ interface ArtistCardProps {
   artist: Artist;
   viewMode: 'grid' | 'list';
   onFollow?: (artistId: string) => void;
+  position?: number;
+  searchQuery?: string;
+  surface?: string;
 }
 const ArtistCard = ({
   artist,
   viewMode,
-  onFollow
+  onFollow,
+  position,
+  searchQuery,
+  surface,
 }: ArtistCardProps) => {
   const {
     user
