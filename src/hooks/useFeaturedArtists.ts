@@ -46,7 +46,8 @@ export function useFeaturedArtists(limit = 8) {
         .eq("account_status", "approved");
 
       if (error || !profiles || profiles.length === 0) {
-        setArtists(getDummyArtists(limit));
+        // No demo/dummy data in production — show empty state instead of fake artists.
+        setArtists([]);
         setLoading(false);
         return;
       }
@@ -56,7 +57,7 @@ export function useFeaturedArtists(limit = 8) {
         .filter((p) => p.profile_visibility === true);
 
       if (completeProfiles.length === 0) {
-        setArtists(getDummyArtists(limit));
+        setArtists([]);
         setLoading(false);
         return;
       }
@@ -163,10 +164,10 @@ export function useFeaturedArtists(limit = 8) {
       });
 
       const sorted = scored.sort((a, b) => b.score - a.score).slice(0, limit);
-      setArtists(sorted.length > 0 ? sorted : getDummyArtists(limit));
+      setArtists(sorted);
     } catch (err) {
       console.error("Featured artists fetch error:", err);
-      setArtists(getDummyArtists(limit));
+      setArtists([]);
     } finally {
       setLoading(false);
     }

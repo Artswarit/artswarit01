@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Crown } from "lucide-react";
+import { Users, BadgeCheck } from "lucide-react";
 
 interface FeaturedArtistCardProps {
   id: string;
@@ -36,12 +36,12 @@ const FeaturedArtistCard = ({
           {/* Enhanced overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-60 sm:opacity-40 group-hover:opacity-80 transition-opacity duration-500" />
           
-          {/* Premium Badge */}
+          {/* Verified Badge — only shown for accounts the platform has explicitly verified */}
           {verified && (
              <div className="absolute top-4 right-4 z-10">
-               <div className="px-3 py-1.5 bg-amber-500/90 backdrop-blur-md rounded-full flex items-center gap-1.5 shadow-lg border border-amber-400/50">
-                <Crown className="w-3.5 h-3.5 text-white" />
-                <span className="text-[10px] font-black uppercase tracking-tighter text-white">Premium</span>
+               <div className="px-3 py-1.5 bg-primary/90 backdrop-blur-md rounded-full flex items-center gap-1.5 shadow-lg border border-primary/40">
+                <BadgeCheck className="w-3.5 h-3.5 text-white" />
+                <span className="text-[10px] font-black uppercase tracking-tighter text-white">Verified</span>
               </div>
              </div>
           )}

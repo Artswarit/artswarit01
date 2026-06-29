@@ -63,8 +63,18 @@ const ArtworkManagement = () => {
 
   // Toggle analytics panel. For non-Pro users the panel renders in a
   // locked (blurred) state via LockedFeature so they can preview the data.
+  const analyticsRef = React.useRef<HTMLDivElement | null>(null);
   const handleAnalyticsClick = () => {
-    setShowAnalytics((v) => !v);
+    setShowAnalytics((v) => {
+      const next = !v;
+      if (next) {
+        // Scroll the panel into view so the upgrade CTA is visible immediately.
+        requestAnimationFrame(() => {
+          analyticsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+      return next;
+    });
   };
 
   const filteredArtworks = useMemo(() => {
@@ -335,7 +345,7 @@ const ArtworkManagement = () => {
       {/* Analytics panel — basic artwork metrics for Pro + advanced PostHog analytics
           (locked preview for non-Pro). */}
       {showAnalytics && (
-        <div className="animate-in fade-in zoom-in-95 duration-500 space-y-8">
+        <div ref={analyticsRef} className="animate-in fade-in zoom-in-95 duration-500 space-y-8 scroll-mt-24">
           {isProArtist && !analyticsLoading && <ArtworkAnalytics data={analytics} />}
           <AdvancedAnalytics />
         </div>

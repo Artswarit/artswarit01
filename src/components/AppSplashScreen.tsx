@@ -9,9 +9,11 @@ export const AppSplashScreen = () => {
     // Hide splash screen after a defined time or initial data load
     // index.html already shows a branded boot loader before React mounts.
     // Hide this overlay almost immediately so the app is interactive ASAP.
+    // Show the branded intro for a full beat so the animation is visible
+    // (previously hidden after 250 ms which felt like a flash).
     const timer = setTimeout(() => {
       setIsVisible(false);
-    }, 250);
+    }, 2200);
 
     return () => clearTimeout(timer);
   }, []);
