@@ -207,11 +207,8 @@ const ArtistDashboard = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="analytics" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'analytics' && "hidden")}>
-                  {visitedTabs.has('analytics') && <AdvancedAnalytics />}
-                </div>
-              </TabsContent>
+
+
 
               <TabsContent value="portfolio" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'portfolio' && "hidden")}>
