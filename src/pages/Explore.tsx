@@ -12,6 +12,7 @@ import LogoLoader from '@/components/ui/LogoLoader';
 import { Button } from '@/components/ui/button';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArtworkSkeleton } from '@/components/artwork/ArtworkSkeleton';
+import { track } from '@/lib/analytics';
 
 const Explore = () => {
   const { artworks, loading, error, hasMore, loadMore, loadingMore } = usePublicArtworks();
