@@ -68,7 +68,7 @@ const Index = () => {
 
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
       
       <AnimatedHeroSlider />
