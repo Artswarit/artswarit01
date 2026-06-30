@@ -888,6 +888,7 @@ const ClientDashboard = () => {
           <TabsContent value="projects" className="space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'projects' && "hidden")}>
               {visitedTabs.has('projects') && (
+                <TabErrorBoundary tabLabel="Projects">
                 <>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                     <h2 className="font-heading text-base sm:text-lg lg:text-xl font-black uppercase tracking-tight">All Projects</h2>
