@@ -16,7 +16,7 @@ import ArtistSettings from '@/components/dashboard/ArtistSettings';
 import PremiumMembership from '@/components/premium/PremiumMembership';
 import { ArtistBilling } from '@/components/dashboard/ArtistBilling';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, User, DollarSign, MessageSquare, Settings, Crown, Bell, Briefcase, Wrench, Lock, Wallet, Users, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { artistDashboardTabs } from '@/components/dashboard/dashboardTabs';
 
 import { Separator } from '@/components/ui/separator';
 import ProjectManagement from '@/components/dashboard/projects/ProjectManagement';
@@ -119,15 +119,10 @@ const ArtistDashboard = () => {
   }
 
 
-  // Tab configuration with consolidated categories
-  const tabs = [
-    { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
-    { value: 'portfolio', label: 'My Works', shortLabel: 'Works', icon: Palette },
-    { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
-    { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
-    { value: 'membership', label: 'Membership', shortLabel: 'Pro', icon: Crown },
-    { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
-  ];
+  // Tab configuration — shared with the mobile bottom nav via
+  // src/components/dashboard/dashboardTabs.ts so the two surfaces can't
+  // drift out of sync when a top-level tab is added.
+  const tabs = artistDashboardTabs;
 
 
 

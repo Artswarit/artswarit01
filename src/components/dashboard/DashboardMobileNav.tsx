@@ -1,18 +1,7 @@
 import React from 'react';
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Palette, 
-  Briefcase, 
-  Wallet, 
-  MessageSquare, 
-  Settings, 
-  Lock,
-  ShoppingBag,
-  FileText,
-  Users,
-  Crown
-} from "lucide-react";
+import { Lock } from "lucide-react";
+import { getDashboardTabs } from "./dashboardTabs";
 
 interface DashboardMobileNavProps {
   activeTab: string;
@@ -21,31 +10,21 @@ interface DashboardMobileNavProps {
   isLocked?: boolean; // Whether non-account tabs are locked
 }
 
-const DashboardMobileNav = ({ 
-  activeTab, 
-  onTabChange, 
-  role, 
-  isLocked = false 
+const DashboardMobileNav = ({
+  activeTab,
+  onTabChange,
+  role,
+  isLocked = false
 }: DashboardMobileNavProps) => {
-  
-  const artistTabs = [
-    { value: 'overview', label: 'Home', icon: LayoutDashboard },
-    { value: 'portfolio', label: 'Works', icon: Palette },
-    { value: 'projects', label: 'Projects', icon: Briefcase },
-    { value: 'messages', label: 'Messages', icon: MessageSquare },
-    { value: 'membership', label: 'Pro', icon: Crown },
-    { value: 'account', label: 'Account', icon: Settings },
-  ];
 
-  const clientTabs = [
-    { value: 'overview', label: 'Home', icon: LayoutDashboard },
-    { value: 'projects', label: 'Projects', icon: FileText },
-    { value: 'messages', label: 'Messages', icon: MessageSquare },
-    { value: 'artists', label: 'Artists', icon: Users },
-    { value: 'account', label: 'Account', icon: Settings },
-  ];
-
-  const tabs = role === 'artist' ? artistTabs : clientTabs;
+  // Mobile tab list is derived from the same config the desktop dashboards
+  // use, so the two surfaces cannot silently fall out of sync when a new
+  // top-level tab is added. See src/components/dashboard/dashboardTabs.ts.
+  const tabs = getDashboardTabs(role).map((t) => ({
+    value: t.value,
+    label: t.mobileLabel,
+    icon: t.icon,
+  }));
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden pb-[env(safe-area-inset-bottom)]">
@@ -64,10 +43,10 @@ const DashboardMobileNav = ({
               onClick={() => !isTabLocked && onTabChange(tab.value)}
               disabled={isTabLocked}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-w-[48px] sm:min-w-[60px] py-1.5 sm:py-2 transition-all duration-300 relative",
+                "flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-w-[44px] sm:min-w-[60px] py-1.5 sm:py-2 transition-all duration-300 relative flex-1",
                 isActive ? "text-primary scale-110" : "text-muted-foreground/60",
                 isTabLocked && "opacity-30 grayscale cursor-not-allowed",
-                "max-w-[64px] sm:max-w-[70px]"
+                "max-w-[60px] sm:max-w-[70px]"
               )}
             >
               {isActive && (
