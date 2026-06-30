@@ -272,8 +272,9 @@ export function MilestoneReviewDialog({
         onOpenChange(false);
       }
     } catch (error: any) {
-      toast.error('Failed to approve milestone');
-      console.error(error);
+      const message = error?.message || 'Failed to approve milestone and release payout. Please try again or contact support.';
+      toast.error(message);
+      console.error('release-milestone-payout failed:', error);
     } finally {
       setProcessing(false);
     }
