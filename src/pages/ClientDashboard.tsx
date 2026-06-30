@@ -1152,7 +1152,7 @@ const ClientDashboard = () => {
           {/* Messages Tab */}
           <TabsContent value="messages" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'messages' && "hidden")}>
-              {visitedTabs.has('messages') && <MessagingModule onChatActiveChange={setIsChatActive} />}
+              {visitedTabs.has('messages') && <TabErrorBoundary tabLabel="Messages"><MessagingModule onChatActiveChange={setIsChatActive} /></TabErrorBoundary>}
             </div>
           </TabsContent>
 
