@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { broadcastRefresh, useRealtimeSync } from '@/lib/realtime-sync';
+import { uploadFileWithProgress, type UploadProgress } from '@/lib/uploadWithProgress';
 
 export const useArtworks = () => {
   const [artworks, setArtworks] = useState<any[]>([]);
@@ -145,7 +146,10 @@ export const useArtworks = () => {
     });
   };
 
-  const uploadArtwork = async (artworkData: any) => {
+  const uploadArtwork = async (
+    artworkData: any,
+    onProgress?: (progress: UploadProgress) => void,
+  ) => {
     if (!user) {
       return { error: 'User not authenticated' };
     }
@@ -157,17 +161,18 @@ export const useArtworks = () => {
       if (artworkData.file) {
         const optimizedFile = await optimizeImage(artworkData.file);
         const fileName = `${user.id}/${Date.now()}-${optimizedFile.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('artworks')
-          .upload(fileName, optimizedFile);
-
-        if (uploadError) throw uploadError;
+        const { path } = await uploadFileWithProgress({
+          bucket: 'artworks',
+          path: fileName,
+          file: optimizedFile,
+          onProgress,
+        });
 
         // Get public URL
         const { data: urlData } = supabase.storage
           .from('artworks')
-          .getPublicUrl(uploadData.path);
-        
+          .getPublicUrl(path);
+
         mediaUrl = urlData.publicUrl;
       }
 
