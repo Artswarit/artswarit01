@@ -274,7 +274,6 @@ const ProjectDetailModal = ({
       table: 'payments',
       filter: `project_id=eq.${projectId}`
     }, (payload) => {
-      console.log('Payment update in modal:', payload);
       if ((payload.new as any)?.status === 'success') {
         toast.success('Payment confirmed! Your project is being updated...');
         fetchProjectData(undefined, false);
