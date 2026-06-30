@@ -43,10 +43,10 @@ const DashboardMobileNav = ({
               onClick={() => !isTabLocked && onTabChange(tab.value)}
               disabled={isTabLocked}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-w-[48px] sm:min-w-[60px] py-1.5 sm:py-2 transition-all duration-300 relative",
+                "flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-w-[44px] sm:min-w-[60px] py-1.5 sm:py-2 transition-all duration-300 relative flex-1",
                 isActive ? "text-primary scale-110" : "text-muted-foreground/60",
                 isTabLocked && "opacity-30 grayscale cursor-not-allowed",
-                "max-w-[64px] sm:max-w-[70px]"
+                "max-w-[60px] sm:max-w-[70px]"
               )}
             >
               {isActive && (
