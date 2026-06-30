@@ -199,7 +199,6 @@ const ServicesManagement: React.FC = () => {
         console.error("[ServicesManagement] Save error:", error);
         toast({ variant: "destructive", title: "Failed to update service" });
       } else {
-        console.log("[ServicesManagement] Service updated successfully");
         toast({ title: "Service updated" });
         setIsDialogOpen(false);
         // Update local state for instant feedback
