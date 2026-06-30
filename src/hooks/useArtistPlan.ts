@@ -77,11 +77,15 @@ export const useArtistPlan = (userId: string | undefined | null) => {
 
     setLoading(true);
     
+    // Exclude expired rows (renew_at in past) so stale subscribers don't keep
+    // the Pro plan flag on. Lifetime plans store renew_at = null.
+    const nowIso = new Date().toISOString();
     const { data, error } = await supabase
       .from("subscribers")
       .select("*")
       .eq("user_id", userId)
       .eq("is_active", true)
+      .or(`renew_at.is.null,renew_at.gt.${nowIso}`)
       .order("started_at", { ascending: false })
       .limit(1)
       .maybeSingle();
