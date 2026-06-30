@@ -382,20 +382,10 @@ const ClientDashboard = () => {
 
   }, [selectedTab, createProjectOpen, projectModalOpen, selectedProjectId, artistSelectionOpen, assigningProjectId]);
 
-  // Real-time subscription for projects
+  // Real-time subscription for notifications and saved artists
+  // (projects realtime handled by useRealtimeSync above to avoid double-fetch)
   useEffect(() => {
     if (!user?.id) return;
-    const projectsChannel = supabase.channel(`client-projects-${user.id}`).on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'projects',
-      filter: `client_id=eq.${user.id}`
-    }, payload => {
-      fetchProjects();
-      if (payload.eventType === 'UPDATE') {
-        toast.success('Project status updated!');
-      }
-    }).subscribe();
     const notificationsChannel = supabase.channel(`client-notifications-${user.id}`).on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
@@ -414,7 +404,6 @@ const ClientDashboard = () => {
       fetchSavedArtistsCount();
     }).subscribe();
     return () => {
-      supabase.removeChannel(projectsChannel);
       supabase.removeChannel(notificationsChannel);
       supabase.removeChannel(savedArtistsChannel);
     };
