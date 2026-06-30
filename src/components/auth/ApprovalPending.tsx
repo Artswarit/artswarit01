@@ -85,7 +85,15 @@ const ApprovalPending = () => {
                 <li>• Upload portfolio samples</li>
                 <li>• Write a compelling bio</li>
               </ul>
-              <Button className="w-full mt-3" variant="outline">
+              <Button
+                className="w-full mt-3"
+                variant="outline"
+                onClick={() => {
+                  const role = profile?.role;
+                  const path = role === 'client' ? '/client-dashboard?tab=account' : '/artist-dashboard?tab=account';
+                  navigate(path);
+                }}
+              >
                 Update Profile
               </Button>
             </div>
