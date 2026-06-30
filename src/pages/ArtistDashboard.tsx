@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
 import ProfileCompletionBanner from '@/components/dashboard/ProfileCompletionBanner';
 import DashboardAttentionRequired from '@/components/dashboard/DashboardAttentionRequired';
+import TabErrorBoundary from '@/components/dashboard/TabErrorBoundary';
 import DashboardMobileNav from '@/components/dashboard/DashboardMobileNav';
 
 const ArtistDashboard = () => {
