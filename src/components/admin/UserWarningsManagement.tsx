@@ -49,6 +49,7 @@ export function UserWarningsManagement() {
   const { user } = useAuth();
   const [warnings, setWarnings] = useState<Warning[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
 
@@ -63,6 +64,8 @@ export function UserWarningsManagement() {
   }, []);
 
   const fetchWarnings = async () => {
+    setLoading(true);
+    setLoadError(null);
     try {
       const { data, error } = await supabase
         .from('user_warnings')
@@ -72,6 +75,7 @@ export function UserWarningsManagement() {
       if (error) throw error;
       setWarnings(data || []);
     } catch (error: any) {
+      setLoadError(error);
       toast.error('Failed to load warnings');
       console.error(error);
     } finally {
@@ -174,6 +178,17 @@ export function UserWarningsManagement() {
       <div className="flex items-center justify-center p-8">
         <LogoLoader text="Loading warnings…" />
       </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <RetryableError
+        title="Couldn't load warnings"
+        error={loadError}
+        onRetry={fetchWarnings}
+        loading={loading}
+      />
     );
   }
 
