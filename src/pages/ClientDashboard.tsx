@@ -880,7 +880,8 @@ const ClientDashboard = () => {
             </div>
                 </div>
               </div>
-            )}
+                </TabErrorBoundary>
+              )}
           </div>
         </TabsContent>
 
