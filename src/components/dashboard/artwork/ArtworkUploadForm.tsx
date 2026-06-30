@@ -65,6 +65,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
   const [releaseDate, setReleaseDate] = useState<Date | undefined>(undefined);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [showAiConfirm, setShowAiConfirm] = useState(false);
   const [aiConfirmed, setAiConfirmed] = useState(false);
 
@@ -202,7 +203,8 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
     };
 
     // Upload artwork using the hook
-    const result = await uploadArtwork(artworkData);
+    setUploadProgress(0);
+    const result = await uploadArtwork(artworkData, ({ percent }) => setUploadProgress(percent));
 
     if (result.error) {
       toast({
@@ -237,6 +239,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
       }
     }
     setIsUploading(false);
+    setUploadProgress(null);
   };
 
   return (
