@@ -1,11 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Clock, Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 
 const ApprovalPending = () => {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
   const { profile: baseProfile } = useProfile();
   const profile = baseProfile as typeof baseProfile & { account_status?: string };
 
@@ -83,7 +85,15 @@ const ApprovalPending = () => {
                 <li>• Upload portfolio samples</li>
                 <li>• Write a compelling bio</li>
               </ul>
-              <Button className="w-full mt-3" variant="outline">
+              <Button
+                className="w-full mt-3"
+                variant="outline"
+                onClick={() => {
+                  const role = profile?.role;
+                  const path = role === 'client' ? '/client-dashboard?tab=account' : '/artist-dashboard?tab=account';
+                  navigate(path);
+                }}
+              >
                 Update Profile
               </Button>
             </div>
@@ -101,7 +111,11 @@ const ApprovalPending = () => {
                 <li>• Bio should be clear and engaging</li>
                 <li>• Images must be high quality and appropriate</li>
               </ul>
-              <Button className="w-full mt-3" variant="outline">
+              <Button
+                className="w-full mt-3"
+                variant="outline"
+                onClick={() => navigate('/terms-of-service')}
+              >
                 Review Guidelines
               </Button>
             </div>
