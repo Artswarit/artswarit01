@@ -60,9 +60,8 @@ const EarningsAnalysis = () => {
   const [timeframe, setTimeframe] = useState("yearly");
   const [yearFilter, setYearFilter] = useState("2025");
 
-  const handleExportReport = (format: string) => {
+  const handleExportReport = (_format: string) => {
     // In a real app, this would generate and download the report
-    console.log(`Exporting report in ${format} format...`);
   };
 
   return (

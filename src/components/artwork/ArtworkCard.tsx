@@ -241,7 +241,6 @@ const ArtworkCard = ({
 
   const handlePlay = (e: React.MouseEvent) => {
     e.preventDefault();
-    console.log('Playing artwork:', id);
   };
 
   const getTypeIcon = () => {

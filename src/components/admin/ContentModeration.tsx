@@ -186,7 +186,8 @@ export default function ContentModeration() {
       // Actually delete the artwork and its media via Edge Function
       if (selectedReport.artwork_id) {
         setProcessing(true);
-        console.log('Invoking delete function for artwork:', selectedReport.artwork_id);
+
+
         
         try {
           const { data, error: deleteError } = await supabase.functions.invoke('delete-artwork-and-media', {

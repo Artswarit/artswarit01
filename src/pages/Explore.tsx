@@ -15,7 +15,7 @@ import { ArtworkSkeleton } from '@/components/artwork/ArtworkSkeleton';
 import { track } from '@/lib/analytics';
 
 const Explore = () => {
-  const { artworks, loading, error, hasMore, loadMore, loadingMore } = usePublicArtworks();
+  const { artworks, loading, error, hasMore, loadMore, loadingMore, refetch } = usePublicArtworks();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filteredArtworks, setFilteredArtworks] = useState(artworks || []);
   const [currentCategory, setCurrentCategory] = useState<string>('all');
@@ -359,7 +359,7 @@ const Explore = () => {
               We're having trouble reaching the gallery. Please check your connection and try again.
             </p>
             <Button 
-              onClick={() => window.location.reload()}
+              onClick={() => refetch()}
               className="w-full rounded-2xl h-12 font-black uppercase tracking-widest"
             >
               Retry Connection

@@ -74,7 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // If no profile found and we have retries left, wait and try again
       // This handles the race condition where auth user is created but trigger hasn't finished profile creation
       if (!data && !error && retries > 0) {
-        console.log(`Profile not found for ${uid}, retrying... (${retries} left)`);
         await new Promise(resolve => setTimeout(resolve, 1000));
         return refreshProfile(uid, retries - 1);
       }

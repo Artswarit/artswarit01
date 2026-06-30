@@ -160,7 +160,6 @@ const ClientPayments = () => {
           filter: `buyer_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('Transaction update:', payload.eventType);
           fetchPayments();
           if (payload.eventType === 'UPDATE') {
             toast({ title: 'Payment status updated!' });

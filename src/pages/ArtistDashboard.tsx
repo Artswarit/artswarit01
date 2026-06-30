@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
 import ProfileCompletionBanner from '@/components/dashboard/ProfileCompletionBanner';
 import DashboardAttentionRequired from '@/components/dashboard/DashboardAttentionRequired';
+import TabErrorBoundary from '@/components/dashboard/TabErrorBoundary';
 import DashboardMobileNav from '@/components/dashboard/DashboardMobileNav';
 
 const ArtistDashboard = () => {
@@ -176,32 +177,38 @@ const ArtistDashboard = () => {
               <TabsContent value="overview" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'overview' && "hidden")}>
                   {visitedTabs.has('overview') && (
-                    <div className="space-y-12">
-                      {/* 1. Critical alerts that need action */}
-                      <DashboardAttentionRequired 
-                        role="artist" 
-                        profile={profile} 
-                        onAction={handleTabChange} 
-                      />
-                      {/* 2. Primary KPIs: earnings + active work */}
-                      <ArtistEarnings isLoading={profileLoading} />
-                      {/* 3. Engagement & activity feed */}
-                      <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
-                    </div>
+                    <TabErrorBoundary tabLabel="Overview">
+                      <div className="space-y-12">
+                        {/* 1. Critical alerts that need action */}
+                        <DashboardAttentionRequired 
+                          role="artist" 
+                          profile={profile} 
+                          onAction={handleTabChange} 
+                        />
+                        {/* 2. Primary KPIs: earnings + active work */}
+                        <ArtistEarnings isLoading={profileLoading} />
+                        {/* 3. Engagement & activity feed */}
+                        <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
+                      </div>
+                    </TabErrorBoundary>
                   )}
                 </div>
               </TabsContent>
 
               <TabsContent value="membership" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'membership' && "hidden")}>
-                  {visitedTabs.has('membership') && <PremiumMembership />}
+                  {visitedTabs.has('membership') && (
+                    <TabErrorBoundary tabLabel="Membership"><PremiumMembership /></TabErrorBoundary>
+                  )}
                 </div>
               </TabsContent>
 
 
               <TabsContent value="projects" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'projects' && "hidden")}>
-                  {visitedTabs.has('projects') && <ProjectManagement />}
+                  {visitedTabs.has('projects') && (
+                    <TabErrorBoundary tabLabel="Projects"><ProjectManagement /></TabErrorBoundary>
+                  )}
                 </div>
               </TabsContent>
 
@@ -211,14 +218,16 @@ const ArtistDashboard = () => {
               <TabsContent value="portfolio" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'portfolio' && "hidden")}>
                   {visitedTabs.has('portfolio') && (
-                    <Tabs defaultValue="artworks" className="w-full">
-                      <TabsList className="mb-6 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-2 h-auto">
-                        <TabsTrigger value="artworks" className="rounded-lg shrink-0">Artworks</TabsTrigger>
-                        <TabsTrigger value="services" className="rounded-lg shrink-0">Services</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="artworks"><ArtworkManagement /></TabsContent>
-                      <TabsContent value="services"><ServicesManagement /></TabsContent>
-                    </Tabs>
+                    <TabErrorBoundary tabLabel="Portfolio">
+                      <Tabs defaultValue="artworks" className="w-full">
+                        <TabsList className="mb-6 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-2 h-auto">
+                          <TabsTrigger value="artworks" className="rounded-lg shrink-0">Artworks</TabsTrigger>
+                          <TabsTrigger value="services" className="rounded-lg shrink-0">Services</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="artworks"><ArtworkManagement /></TabsContent>
+                        <TabsContent value="services"><ServicesManagement /></TabsContent>
+                      </Tabs>
+                    </TabErrorBoundary>
                   )}
                 </div>
               </TabsContent>
@@ -228,52 +237,58 @@ const ArtistDashboard = () => {
 
               <TabsContent value="messages" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'messages' && "hidden")}>
-                  {visitedTabs.has('messages') && <MessagingModule onChatActiveChange={setIsChatActive} />}
+                  {visitedTabs.has('messages') && (
+                    <TabErrorBoundary tabLabel="Messages">
+                      <MessagingModule onChatActiveChange={setIsChatActive} />
+                    </TabErrorBoundary>
+                  )}
                 </div>
               </TabsContent>
 
               <TabsContent value="account" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'account' && "hidden")}>
                   {visitedTabs.has('account') && (
-                    <Tabs defaultValue="profile_settings" className="w-full">
-                      <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-4 h-auto">
-                        <TabsTrigger value="profile_settings" className="rounded-lg shrink-0">Profile</TabsTrigger>
-                        <TabsTrigger value="earnings" className="rounded-lg shrink-0">Earnings</TabsTrigger>
-                        <TabsTrigger value="settings" className="rounded-lg shrink-0">Privacy</TabsTrigger>
-                        <TabsTrigger value="exclusive" className="rounded-lg shrink-0">Exclusive</TabsTrigger>
-                      </TabsList>
+                    <TabErrorBoundary tabLabel="Account">
+                      <Tabs defaultValue="profile_settings" className="w-full">
+                        <TabsList className="mb-8 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-4 h-auto">
+                          <TabsTrigger value="profile_settings" className="rounded-lg shrink-0">Profile</TabsTrigger>
+                          <TabsTrigger value="earnings" className="rounded-lg shrink-0">Earnings</TabsTrigger>
+                          <TabsTrigger value="settings" className="rounded-lg shrink-0">Privacy</TabsTrigger>
+                          <TabsTrigger value="exclusive" className="rounded-lg shrink-0">Exclusive</TabsTrigger>
+                        </TabsList>
 
-                      
-                      <TabsContent value="profile_settings">
-                        <ArtistProfile
-                          isLoading={profileLoading}
-                          profile={profile}
-                          updateProfile={updateProfile}
-                          uploadImage={uploadImage}
-                          countries={countries}
-                          updateUserLocation={updateUserLocation}
-                        />
-                      </TabsContent>
-                      
-                      <TabsContent value="earnings">
-                        <div className="space-y-12">
-                          <ArtistBilling />
-                          <Separator className="opacity-20" />
-                          <ArtistEarnings isLoading={profileLoading} />
-                        </div>
-                      </TabsContent>
+                        
+                        <TabsContent value="profile_settings">
+                          <ArtistProfile
+                            isLoading={profileLoading}
+                            profile={profile}
+                            updateProfile={updateProfile}
+                            uploadImage={uploadImage}
+                            countries={countries}
+                            updateUserLocation={updateUserLocation}
+                          />
+                        </TabsContent>
+                        
+                        <TabsContent value="earnings">
+                          <div className="space-y-12">
+                            <ArtistBilling />
+                            <Separator className="opacity-20" />
+                            <ArtistEarnings isLoading={profileLoading} />
+                          </div>
+                        </TabsContent>
 
 
 
 
-                      <TabsContent value="settings">
-                        <ArtistSettings isLoading={profileLoading} />
-                      </TabsContent>
+                        <TabsContent value="settings">
+                          <ArtistSettings isLoading={profileLoading} />
+                        </TabsContent>
 
-                      <TabsContent value="exclusive">
-                        <ExclusiveMembers />
-                      </TabsContent>
-                    </Tabs>
+                        <TabsContent value="exclusive">
+                          <ExclusiveMembers />
+                        </TabsContent>
+                      </Tabs>
+                    </TabErrorBoundary>
                   )}
                 </div>
               </TabsContent>

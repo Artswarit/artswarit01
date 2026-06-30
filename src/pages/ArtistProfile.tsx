@@ -472,7 +472,6 @@ export default function ArtistProfile() {
     async function fetchFollowersData() {
       // skip for demo profiles
       if (!id || id === ARTIST_UUID_1 || id === ARTIST_UUID_2) {
-        console.log("[ARTIST PROFILE] Demo/fallback profile - skipping real DB fetch");
         return;
       }
 

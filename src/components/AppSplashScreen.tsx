@@ -6,16 +6,35 @@ export const AppSplashScreen = () => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // Hide splash screen after a defined time or initial data load
-    // index.html already shows a branded boot loader before React mounts.
-    // Hide this overlay almost immediately so the app is interactive ASAP.
-    // Show the branded intro for a full beat so the animation is visible
-    // (previously hidden after 250 ms which felt like a flash).
-    const timer = setTimeout(() => {
-      setIsVisible(false);
-    }, 2200);
+    // Dismiss when the page has actually finished loading (assets, fonts, etc.)
+    // but keep a minimum visible duration so the loader animation completes one
+    // full cycle (~1.8s) and never cuts mid-animation on fast devices. A hard
+    // cap guards against environments where 'load' never fires.
+    const MIN_DURATION = 1800;
+    const MAX_DURATION = 5000;
+    const start = performance.now();
 
-    return () => clearTimeout(timer);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const dismiss = () => {
+      const elapsed = performance.now() - start;
+      const remaining = Math.max(0, MIN_DURATION - elapsed);
+      timer = setTimeout(() => setIsVisible(false), remaining);
+    };
+
+    if (document.readyState === "complete") {
+      dismiss();
+    } else {
+      window.addEventListener("load", dismiss, { once: true });
+    }
+
+    const safety = setTimeout(() => setIsVisible(false), MAX_DURATION);
+
+    return () => {
+      window.removeEventListener("load", dismiss);
+      if (timer) clearTimeout(timer);
+      clearTimeout(safety);
+    };
   }, []);
 
   return (

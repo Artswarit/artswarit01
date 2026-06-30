@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
+import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 interface Project {
   id: string;
   title: string;
@@ -116,7 +117,7 @@ const ClientDashboard = () => {
   // Read tab from URL on mount
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(tabParam)) {
+    if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'account', 'settings'].includes(tabParam)) {
       setSelectedTab(tabParam === 'settings' ? 'account' : tabParam);
     } else if (!tabParam) {
       // Default to overview if no tab specified
@@ -324,7 +325,7 @@ const ClientDashboard = () => {
       // 1. Restore Tab (if not in URL)
       if (!searchParams.get('tab')) {
         const savedTab = localStorage.getItem('client_dashboard_active_tab');
-        if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(savedTab)) {
+        if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'account', 'settings'].includes(savedTab)) {
           if (!profileIncomplete || savedTab === 'profile') {
             const normalizedTab = savedTab === 'settings' ? 'account' : savedTab;
             setSelectedTab(normalizedTab);
@@ -632,6 +633,7 @@ const ClientDashboard = () => {
           <TabsContent value="overview" className="space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'overview' && "hidden")}>
               {visitedTabs.has('overview') && (
+                <TabErrorBoundary tabLabel="Overview">
                 <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                   <DashboardAttentionRequired 
                     role="client" 
@@ -878,7 +880,8 @@ const ClientDashboard = () => {
             </div>
                 </div>
               </div>
-            )}
+                </TabErrorBoundary>
+              )}
           </div>
         </TabsContent>
 
@@ -887,6 +890,7 @@ const ClientDashboard = () => {
           <TabsContent value="projects" className="space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'projects' && "hidden")}>
               {visitedTabs.has('projects') && (
+                <TabErrorBoundary tabLabel="Projects">
                 <>
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                     <h2 className="font-heading text-base sm:text-lg lg:text-xl font-black uppercase tracking-tight">All Projects</h2>
@@ -1124,7 +1128,8 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </>
-          )}
+                </TabErrorBoundary>
+              )}
         </div>
       </TabsContent>
 
@@ -1132,6 +1137,7 @@ const ClientDashboard = () => {
           <TabsContent value="collection" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'collection' && "hidden")}>
               {visitedTabs.has('collection') && (
+                <TabErrorBoundary tabLabel="My Works">
                 <Tabs defaultValue="purchased" className="w-full">
                   <TabsList className="bg-muted/50 p-1 rounded-xl mb-4 inline-flex w-auto">
                     <TabsTrigger value="purchased" className="rounded-lg text-xs px-4 py-2">Purchased</TabsTrigger>
@@ -1144,6 +1150,7 @@ const ClientDashboard = () => {
                     <SavedArtworks />
                   </TabsContent>
                 </Tabs>
+                </TabErrorBoundary>
               )}
             </div>
           </TabsContent>
@@ -1151,14 +1158,14 @@ const ClientDashboard = () => {
           {/* Messages Tab */}
           <TabsContent value="messages" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'messages' && "hidden")}>
-              {visitedTabs.has('messages') && <MessagingModule onChatActiveChange={setIsChatActive} />}
+              {visitedTabs.has('messages') && <TabErrorBoundary tabLabel="Messages"><MessagingModule onChatActiveChange={setIsChatActive} /></TabErrorBoundary>}
             </div>
           </TabsContent>
 
           {/* Artists Tab */}
           <TabsContent value="artists" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'artists' && "hidden")}>
-              {visitedTabs.has('artists') && <SavedArtists />}
+              {visitedTabs.has('artists') && <TabErrorBoundary tabLabel="Artists"><SavedArtists /></TabErrorBoundary>}
             </div>
           </TabsContent>
           
@@ -1166,6 +1173,7 @@ const ClientDashboard = () => {
           <TabsContent value="account" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'account' && "hidden")}>
               {visitedTabs.has('account') && (
+                <TabErrorBoundary tabLabel="Account">
                 <Tabs defaultValue="profile" className="w-full">
                   <div className="flex overflow-x-auto pb-2 mb-6 -mx-1 px-1 scrollbar-hide">
                     <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-3 h-auto overflow-x-auto">
@@ -1193,6 +1201,7 @@ const ClientDashboard = () => {
                     <ClientSettings />
                   </TabsContent>
                 </Tabs>
+                </TabErrorBoundary>
               )}
             </div>
           </TabsContent>

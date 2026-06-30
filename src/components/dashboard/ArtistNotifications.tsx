@@ -76,7 +76,6 @@ const ArtistNotifications = ({ isLoading, onNotificationClick }: ArtistNotificat
           filter: `user_id=eq.${user.id}`
         },
         () => {
-          console.log('Notifications realtime update received');
           fetchNotifications();
         }
       )
