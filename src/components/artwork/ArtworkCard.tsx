@@ -44,6 +44,8 @@ interface ArtworkCardProps {
   searchQuery?: string;
   /** Surface that rendered the card (e.g. "explore", "trending", "recommendations"). */
   surface?: string;
+  /** Hide the unlock/pay button (e.g. on the user's own Collection where the artwork is already purchased). */
+  alreadyUnlocked?: boolean;
 }
 
 const ArtworkCard = ({
