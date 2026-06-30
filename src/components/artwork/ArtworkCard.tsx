@@ -64,6 +64,7 @@ const ArtworkCard = ({
   position,
   searchQuery,
   surface,
+  alreadyUnlocked = false,
 }: ArtworkCardProps) => {
   const impressionRef = useImpressionTracker<HTMLDivElement>({
     id,
