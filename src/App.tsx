@@ -42,7 +42,7 @@ const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Notifications = lazy(() => import("./pages/Notifications"));
-const FeatureAudit = lazy(() => import("./pages/FeatureAudit"));
+
 const LiveStreaming = lazy(() => import("./pages/LiveStreaming"));
 const Collections = lazy(() => import("./pages/Collections"));
 const Trending = lazy(() => import("./pages/Trending"));
