@@ -187,6 +187,7 @@ const PurchasedArtworks = () => {
               category={artwork.category}
               audioUrl={artwork.audioUrl || undefined}
               videoUrl={artwork.videoUrl || undefined}
+              alreadyUnlocked
             />
           ))}
         </div>

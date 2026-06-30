@@ -44,6 +44,8 @@ interface ArtworkCardProps {
   searchQuery?: string;
   /** Surface that rendered the card (e.g. "explore", "trending", "recommendations"). */
   surface?: string;
+  /** Hide the unlock/pay button (e.g. on the user's own Collection where the artwork is already purchased). */
+  alreadyUnlocked?: boolean;
 }
 
 const ArtworkCard = ({
@@ -62,6 +64,7 @@ const ArtworkCard = ({
   position,
   searchQuery,
   surface,
+  alreadyUnlocked = false,
 }: ArtworkCardProps) => {
   const impressionRef = useImpressionTracker<HTMLDivElement>({
     id,
@@ -340,7 +343,7 @@ const ArtworkCard = ({
           
           {/* Subtle gradient on hover only */}
           <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent transition-opacity duration-500 flex items-center justify-center ${isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'}`}>
-            {price && price > 0 && (
+            {!alreadyUnlocked && price && price > 0 && (
               <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                 <PayArtworkButton 
                   artworkId={id}
