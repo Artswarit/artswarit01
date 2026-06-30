@@ -189,8 +189,7 @@ const ChangeEmailForm = () => {
             />
           </div>
 
-          <Button type="submit" disabled={loading || !newEmail || !confirmEmail}>
-            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          <Button type="submit" disabled={!newEmail || !confirmEmail} loading={loading}>
             Send Verification Email
           </Button>
         </form>

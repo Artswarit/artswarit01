@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import LogoWithName from "@/components/LogoWithName";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Loader2, Mail, CheckCircle } from "lucide-react";
+import { ArrowLeft, Mail, CheckCircle } from "lucide-react";
 
 const ForgotPassword = () => {
   const { toast } = useToast();
@@ -118,16 +118,9 @@ const ForgotPassword = () => {
                   <Button
                     type="submit"
                     className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
-                    disabled={isSubmitting}
+                    loading={isSubmitting}
                   >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      "Send Reset Link"
-                    )}
+                    {isSubmitting ? "Sending..." : "Send Reset Link"}
                   </Button>
                 </form>
               )}

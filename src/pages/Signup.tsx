@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { X, Palette, Users, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
+import { X, Palette, Users, Eye, EyeOff, ArrowRight, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Signup = ({ isModal = false }: { isModal?: boolean }) => {
@@ -490,13 +490,10 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                 <Button
                   type="submit"
                   className="w-full h-12 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-medium text-[15px] shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-300 group mt-2"
-                  disabled={loading || isSubmitting}
+                  loading={isSubmitting || loading}
                 >
                   {isSubmitting || loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating account...
-                    </>
+                    "Creating account..."
                   ) : (
                     <span className="flex items-center gap-2">
                       Create account
