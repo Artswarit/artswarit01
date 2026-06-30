@@ -1159,7 +1159,7 @@ const ClientDashboard = () => {
           {/* Artists Tab */}
           <TabsContent value="artists" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'artists' && "hidden")}>
-              {visitedTabs.has('artists') && <SavedArtists />}
+              {visitedTabs.has('artists') && <TabErrorBoundary tabLabel="Artists"><SavedArtists /></TabErrorBoundary>}
             </div>
           </TabsContent>
           
