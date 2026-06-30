@@ -15,7 +15,7 @@ import { ArtworkSkeleton } from '@/components/artwork/ArtworkSkeleton';
 import { track } from '@/lib/analytics';
 
 const Explore = () => {
-  const { artworks, loading, error, hasMore, loadMore, loadingMore } = usePublicArtworks();
+  const { artworks, loading, error, hasMore, loadMore, loadingMore, refetch } = usePublicArtworks();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filteredArtworks, setFilteredArtworks] = useState(artworks || []);
   const [currentCategory, setCurrentCategory] = useState<string>('all');
