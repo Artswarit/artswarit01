@@ -13,6 +13,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Upload, X, FileText, AlertTriangle, Check, GripVertical, Calendar, Loader2, TrendingUp } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { Progress } from '@/components/ui/progress';
+import { uploadFileWithProgress } from '@/lib/uploadWithProgress';
 import { cn } from '@/lib/utils';
 
 interface MilestoneInput {
@@ -64,6 +66,8 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
   const [budget, setBudget] = useState<number>(0);
   const [deadline, setDeadline] = useState('');
   const [referenceFiles, setReferenceFiles] = useState<ReferenceFile[]>([]);
+  // Per-file byte-level upload progress (key = file index, value = 0–100).
+  const [refProgress, setRefProgress] = useState<Record<number, number>>({});
 
   // Milestones
   const [milestones, setMilestones] = useState<MilestoneInput[]>([
@@ -222,16 +226,21 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
       const fileRecords = [];
 
       if (referenceFiles.length > 0 && user?.id) {
-        for (const { file } of referenceFiles) {
+        setRefProgress({});
+        for (let i = 0; i < referenceFiles.length; i++) {
+          const { file } = referenceFiles[i];
           const timestamp = Date.now();
           const fileName = `${timestamp}-${file.name}`;
           const filePath = `${user.id}/${project.id}/${fileName}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from('project-files')
-            .upload(filePath, file);
 
-          if (uploadError) throw uploadError;
+          await uploadFileWithProgress({
+            bucket: 'project-files',
+            path: filePath,
+            file,
+            onProgress: ({ percent }) => {
+              setRefProgress((prev) => (prev[i] === percent ? prev : { ...prev, [i]: percent }));
+            },
+          });
 
           const { data: { publicUrl } } = supabase.storage
             .from('project-files')
@@ -436,22 +445,38 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
             
             {referenceFiles.length > 0 && (
               <div className="flex flex-wrap gap-3 mt-4">
-                {referenceFiles.map((rf, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-white/60 backdrop-blur-sm rounded-2xl border border-border/40 group/file hover:shadow-md transition-all">
-                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                      <FileText className="h-4 w-4" />
+                {referenceFiles.map((rf, index) => {
+                  const pct = refProgress[index];
+                  const showProgress = submitting && typeof pct === 'number';
+                  return (
+                    <div key={index} className="flex flex-col gap-1.5 p-3 bg-white/60 backdrop-blur-sm rounded-2xl border border-border/40 group/file hover:shadow-md transition-all min-w-[200px]">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                          <FileText className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-bold truncate max-w-[150px]">{rf.file.name}</span>
+                        {showProgress && (
+                          <span className="ml-auto text-[10px] font-mono text-muted-foreground tabular-nums">
+                            {pct}%
+                          </span>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+                          onClick={() => removeFile(index)}
+                          disabled={submitting}
+                          aria-label="Remove file"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {showProgress && (
+                        <Progress value={pct} className="h-1" aria-label={`Upload progress for ${rf.file.name}`} />
+                      )}
                     </div>
-                    <span className="text-sm font-bold truncate max-w-[150px]">{rf.file.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
-                      onClick={() => removeFile(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

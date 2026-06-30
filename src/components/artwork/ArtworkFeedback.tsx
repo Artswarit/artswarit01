@@ -11,6 +11,7 @@ import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { RetryableError } from '@/components/shared/RetryableError';
 
 /* ── Reply type ──────────────────────────────────────────── */
 type Reply = {
@@ -334,7 +335,7 @@ interface ArtworkFeedbackProps {
 const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { feedback, isLoading, error, addFeedback, isAddingFeedback } = useArtworkFeedback(artworkId);
+  const { feedback, isLoading, error, refetch, addFeedback, isAddingFeedback } = useArtworkFeedback(artworkId);
   const [newComment, setNewComment] = useState('');
   const [newRating, setNewRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
@@ -426,7 +427,13 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : error ? (
-            <p className="text-destructive text-center py-12 text-sm">Failed to load comments</p>
+            <RetryableError
+              title="Couldn't load comments"
+              error={error}
+              onRetry={() => refetch()}
+              loading={isLoading}
+              size="sm"
+            />
           ) : feedback && feedback.length > 0 ? (
             <div className="divide-y divide-border/20">
               {feedback.map((item) => (

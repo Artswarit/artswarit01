@@ -22,6 +22,7 @@ import { MilestoneWorkflow } from "@/components/projects";
 import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
 import { RefreshCw } from "lucide-react";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
+import { uploadFileWithProgress } from "@/lib/uploadWithProgress";
 interface ProjectDetailModalProps {
   projectId: string | null;
   open: boolean;
@@ -101,6 +102,8 @@ const ProjectDetailModal = ({
   
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
   const [newMilestone, setNewMilestone] = useState({
@@ -446,12 +449,16 @@ const ProjectDetailModal = ({
     const file = e.target.files?.[0];
     if (!file || !projectId || !user?.id) return;
     setUploading(true);
+    setUploadProgress(0);
+    setUploadFileName(file.name);
     try {
       const fileName = `${user.id}/${projectId}/${Date.now()}-${file.name}`;
-      const {
-        error: uploadError
-      } = await supabase.storage.from('project-files').upload(fileName, file);
-      if (uploadError) throw uploadError;
+      await uploadFileWithProgress({
+        bucket: 'project-files',
+        path: fileName,
+        file,
+        onProgress: ({ percent }) => setUploadProgress(percent),
+      });
       const {
         error: insertError
       } = await supabase.from('project_files').insert({
@@ -469,6 +476,10 @@ const ProjectDetailModal = ({
       toast.error(err.message || "Upload failed");
     } finally {
       setUploading(false);
+      setUploadProgress(null);
+      setUploadFileName(null);
+      // Reset the input so re-uploading the same file fires onChange.
+      e.target.value = '';
     }
   };
   const handleDownloadFile = async (file: ProjectFile) => {
@@ -980,11 +991,32 @@ const ProjectDetailModal = ({
                       
                       <label className="cursor-pointer group w-full sm:w-auto">
                         <div className="flex h-11 w-full sm:w-auto items-center justify-center gap-2.5 px-5 rounded-2xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all duration-300 font-bold shadow-sm active:scale-95">
-                          {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Upload className="h-5 w-5" /> <span>Upload</span></>}
+                          {uploading ? (
+                            <>
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                              <span className="tabular-nums">
+                                {uploadProgress !== null ? `${uploadProgress}%` : 'Uploading…'}
+                              </span>
+                            </>
+                          ) : (
+                            <><Upload className="h-5 w-5" /> <span>Upload</span></>
+                          )}
                         </div>
                         <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} />
                       </label>
                     </div>
+
+                    {uploading && uploadProgress !== null && (
+                      <div className="space-y-1.5 px-1">
+                        <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                          <span className="truncate max-w-[70%] font-medium">{uploadFileName}</span>
+                          <span className="font-mono tabular-nums">{uploadProgress}%</span>
+                        </div>
+                        <Progress value={uploadProgress} className="h-1" aria-label="File upload progress" />
+                      </div>
+                    )}
+
+
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {files.length === 0 ? (

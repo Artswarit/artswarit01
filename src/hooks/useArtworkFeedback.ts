@@ -76,7 +76,7 @@ export function useArtworkFeedback(artworkId: string) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
 
-  const { data: feedback, isLoading, error } = useQuery({
+  const { data: feedback, isLoading, error, refetch } = useQuery({
     queryKey: ['feedback', artworkId],
     queryFn: () => fetchFeedback(artworkId),
     enabled: !!artworkId,
@@ -92,5 +92,5 @@ export function useArtworkFeedback(artworkId: string) {
     },
   });
 
-  return { feedback, isLoading, error, addFeedback: mutation.mutate, isAddingFeedback: mutation.isPending };
+  return { feedback, isLoading, error, refetch, addFeedback: mutation.mutate, isAddingFeedback: mutation.isPending };
 }

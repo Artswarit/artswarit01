@@ -17,6 +17,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Upload, X, FileText, Image, Video, Music } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { uploadFileWithProgress } from '@/lib/uploadWithProgress';
 
 interface Milestone {
   id: string;
@@ -60,6 +62,8 @@ export function MilestoneSubmissionDialog({
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // Per-file byte-level upload progress (key = file index, value = 0–100).
+  const [progress, setProgress] = useState<Record<number, number>>({});
 
   useEffect(() => {
     if (milestone?.id) {
@@ -140,15 +144,20 @@ export function MilestoneSubmissionDialog({
 
       if (submissionError) throw submissionError;
 
-      // Upload files
-      for (const { file } of files) {
+      // Upload files (sequential to keep per-file progress unambiguous)
+      setProgress({});
+      for (let i = 0; i < files.length; i++) {
+        const { file } = files[i];
         const filePath = `${user?.id}/${milestone.id}/${Date.now()}-${file.name}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('milestone-submissions')
-          .upload(filePath, file);
 
-        if (uploadError) throw uploadError;
+        await uploadFileWithProgress({
+          bucket: 'milestone-submissions',
+          path: filePath,
+          file,
+          onProgress: ({ percent }) => {
+            setProgress((prev) => (prev[i] === percent ? prev : { ...prev, [i]: percent }));
+          },
+        });
 
         const { data: { publicUrl } } = supabase.storage
           .from('milestone-submissions')
@@ -218,6 +227,7 @@ export function MilestoneSubmissionDialog({
     setNotes('');
     setFiles([]);
     setAgreed(false);
+    setProgress({});
     localStorage.removeItem(`milestone_draft_${milestone?.id}`);
   };
 
@@ -298,25 +308,43 @@ export function MilestoneSubmissionDialog({
             <div className="space-y-2">
               <Label>Selected Files ({files.length})</Label>
               <div className="space-y-2 max-h-40 overflow-y-auto">
-                {files.map((uploadedFile, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-lg">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {getFileIcon(uploadedFile.file.type)}
-                      <span className="text-sm truncate">{uploadedFile.file.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        ({(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB)
-                      </span>
+                {files.map((uploadedFile, index) => {
+                  const pct = progress[index];
+                  const showProgress = submitting && typeof pct === 'number';
+                  return (
+                    <div key={index} className="p-2 bg-muted rounded-lg space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {getFileIcon(uploadedFile.file.type)}
+                          <span className="text-sm truncate">{uploadedFile.file.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({(uploadedFile.file.size / 1024 / 1024).toFixed(2)} MB)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {showProgress && (
+                            <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+                              {pct}%
+                            </span>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => removeFile(index)}
+                            disabled={submitting}
+                            aria-label="Remove file"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      {showProgress && (
+                        <Progress value={pct} className="h-1" aria-label={`Upload progress for ${uploadedFile.file.name}`} />
+                      )}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => removeFile(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

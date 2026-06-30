@@ -65,6 +65,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
   const [releaseDate, setReleaseDate] = useState<Date | undefined>(undefined);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [showAiConfirm, setShowAiConfirm] = useState(false);
   const [aiConfirmed, setAiConfirmed] = useState(false);
 
@@ -202,7 +203,8 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
     };
 
     // Upload artwork using the hook
-    const result = await uploadArtwork(artworkData);
+    setUploadProgress(0);
+    const result = await uploadArtwork(artworkData, ({ percent }) => setUploadProgress(percent));
 
     if (result.error) {
       toast({
@@ -237,6 +239,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
       }
     }
     setIsUploading(false);
+    setUploadProgress(null);
   };
 
   return (
@@ -546,7 +549,11 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
             {isUploading ? (
               <div className="flex items-center gap-3">
                 <div className="h-4 w-4 sm:h-5 sm:w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>Processing...</span>
+                <span className="tabular-nums">
+                  {uploadProgress !== null && uploadProgress < 100
+                    ? `Uploading ${uploadProgress}%`
+                    : 'Processing...'}
+                </span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
