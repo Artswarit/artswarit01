@@ -111,7 +111,11 @@ const ApprovalPending = () => {
                 <li>• Bio should be clear and engaging</li>
                 <li>• Images must be high quality and appropriate</li>
               </ul>
-              <Button className="w-full mt-3" variant="outline">
+              <Button
+                className="w-full mt-3"
+                variant="outline"
+                onClick={() => navigate('/terms-of-service')}
+              >
                 Review Guidelines
               </Button>
             </div>
