@@ -1167,6 +1167,7 @@ const ClientDashboard = () => {
           <TabsContent value="account" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'account' && "hidden")}>
               {visitedTabs.has('account') && (
+                <TabErrorBoundary tabLabel="Account">
                 <Tabs defaultValue="profile" className="w-full">
                   <div className="flex overflow-x-auto pb-2 mb-6 -mx-1 px-1 scrollbar-hide">
                     <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-3 h-auto overflow-x-auto">
@@ -1194,6 +1195,7 @@ const ClientDashboard = () => {
                     <ClientSettings />
                   </TabsContent>
                 </Tabs>
+                </TabErrorBoundary>
               )}
             </div>
           </TabsContent>
