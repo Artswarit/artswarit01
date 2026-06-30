@@ -1133,6 +1133,7 @@ const ClientDashboard = () => {
           <TabsContent value="collection" className="animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'collection' && "hidden")}>
               {visitedTabs.has('collection') && (
+                <TabErrorBoundary tabLabel="My Works">
                 <Tabs defaultValue="purchased" className="w-full">
                   <TabsList className="bg-muted/50 p-1 rounded-xl mb-4 inline-flex w-auto">
                     <TabsTrigger value="purchased" className="rounded-lg text-xs px-4 py-2">Purchased</TabsTrigger>
@@ -1145,6 +1146,7 @@ const ClientDashboard = () => {
                     <SavedArtworks />
                   </TabsContent>
                 </Tabs>
+                </TabErrorBoundary>
               )}
             </div>
           </TabsContent>
