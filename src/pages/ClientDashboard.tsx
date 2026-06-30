@@ -324,7 +324,7 @@ const ClientDashboard = () => {
       // 1. Restore Tab (if not in URL)
       if (!searchParams.get('tab')) {
         const savedTab = localStorage.getItem('client_dashboard_active_tab');
-        if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(savedTab)) {
+        if (savedTab && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'account', 'settings'].includes(savedTab)) {
           if (!profileIncomplete || savedTab === 'profile') {
             const normalizedTab = savedTab === 'settings' ? 'account' : savedTab;
             setSelectedTab(normalizedTab);
