@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, Loader2, CheckCircle } from 'lucide-react';
+import { Mail, CheckCircle } from 'lucide-react';
 
 const ChangeEmailForm = () => {
   const { user } = useAuth();
@@ -189,8 +189,7 @@ const ChangeEmailForm = () => {
             />
           </div>
 
-          <Button type="submit" disabled={loading || !newEmail || !confirmEmail}>
-            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          <Button type="submit" disabled={!newEmail || !confirmEmail} loading={loading}>
             Send Verification Email
           </Button>
         </form>

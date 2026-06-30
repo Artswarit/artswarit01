@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LogoWithName from "@/components/LogoWithName";
-import { Eye, EyeOff, Loader2, X, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, X, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -283,13 +283,11 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                 <Button
                   type="submit"
                   className="w-full h-12 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-medium text-[15px] shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-300 group"
-                  disabled={loading || isSubmitting}
+                  disabled={loading}
+                  loading={isSubmitting}
                 >
                   {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
-                    </>
+                    "Signing in..."
                   ) : (
                     <span className="flex items-center gap-2">
                       Sign In

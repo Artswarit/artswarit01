@@ -220,14 +220,12 @@ const EmailVerification = () => {
                   <div className="flex flex-col gap-2 pt-2">
                     <Button
                       onClick={handleResendVerification}
-                      disabled={isResending || cooldown > 0}
+                      disabled={cooldown > 0}
+                      loading={isResending}
                       className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
                     >
                       {isResending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Sending...
-                        </>
+                        "Sending..."
                       ) : cooldown > 0 ? (
                         `Resend in ${cooldown}s`
                       ) : (
