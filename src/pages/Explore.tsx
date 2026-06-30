@@ -359,7 +359,7 @@ const Explore = () => {
               We're having trouble reaching the gallery. Please check your connection and try again.
             </p>
             <Button 
-              onClick={() => window.location.reload()}
+              onClick={() => refetch()}
               className="w-full rounded-2xl h-12 font-black uppercase tracking-widest"
             >
               Retry Connection
