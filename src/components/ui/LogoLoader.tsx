@@ -22,19 +22,22 @@ const LogoLoader = ({ text = 'Loading…', fullPage = false, className }: LogoLo
   const loader = (
     <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
       {/* Logo with animated rings */}
-      <div className="relative flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 scale-[0.85] sm:scale-100">
-        {/* Outer ring – slow spin */}
+      <div className="relative grid place-items-center w-16 h-16 sm:w-20 sm:h-20 scale-[0.85] sm:scale-100">
+        {/* Outer ring – symmetric dual-arc spin so rotation feels centred, not "upward" */}
         <span
-          className="absolute h-full w-full rounded-full border-2 border-primary/20 border-t-primary animate-spin"
-          style={{ animationDuration: '1.4s' }}
+          className="absolute inset-0 m-auto h-full w-full rounded-full border-2 border-primary/20 border-t-primary border-b-primary animate-spin"
+          style={{ animationDuration: '1.4s', transformOrigin: '50% 50%' }}
         />
         {/* Middle glow pulse */}
-        <span className="absolute h-4/5 w-4/5 rounded-full bg-primary/5 animate-ping" style={{ animationDuration: '2s' }} />
-        {/* Logo */}
+        <span
+          className="absolute inset-0 m-auto h-4/5 w-4/5 rounded-full bg-primary/5 animate-ping"
+          style={{ animationDuration: '2s' }}
+        />
+        {/* Logo — absolutely centred so flex/grid alignment can never push it off-axis */}
         <img
           src="/icons/artswarit-logo-96.png"
           alt="Loading…"
-          className="relative w-3/5 h-3/5 object-contain drop-shadow-xl animate-pulse"
+          className="absolute inset-0 m-auto w-3/5 h-3/5 object-contain drop-shadow-xl animate-pulse"
           style={{ animationDuration: '1.8s' }}
         />
       </div>
