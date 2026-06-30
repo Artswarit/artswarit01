@@ -16,7 +16,7 @@ import ArtistSettings from '@/components/dashboard/ArtistSettings';
 import PremiumMembership from '@/components/premium/PremiumMembership';
 import { ArtistBilling } from '@/components/dashboard/ArtistBilling';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, User, DollarSign, MessageSquare, Settings, Crown, Bell, Briefcase, Wrench, Lock, Wallet, Users, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { artistDashboardTabs } from '@/components/dashboard/dashboardTabs';
 
 import { Separator } from '@/components/ui/separator';
 import ProjectManagement from '@/components/dashboard/projects/ProjectManagement';
