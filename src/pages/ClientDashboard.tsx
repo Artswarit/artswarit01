@@ -382,20 +382,10 @@ const ClientDashboard = () => {
 
   }, [selectedTab, createProjectOpen, projectModalOpen, selectedProjectId, artistSelectionOpen, assigningProjectId]);
 
-  // Real-time subscription for projects
+  // Real-time subscription for notifications and saved artists
+  // (projects realtime handled by useRealtimeSync above to avoid double-fetch)
   useEffect(() => {
     if (!user?.id) return;
-    const projectsChannel = supabase.channel(`client-projects-${user.id}`).on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'projects',
-      filter: `client_id=eq.${user.id}`
-    }, payload => {
-      fetchProjects();
-      if (payload.eventType === 'UPDATE') {
-        toast.success('Project status updated!');
-      }
-    }).subscribe();
     const notificationsChannel = supabase.channel(`client-notifications-${user.id}`).on('postgres_changes', {
       event: 'INSERT',
       schema: 'public',
@@ -414,7 +404,6 @@ const ClientDashboard = () => {
       fetchSavedArtistsCount();
     }).subscribe();
     return () => {
-      supabase.removeChannel(projectsChannel);
       supabase.removeChannel(notificationsChannel);
       supabase.removeChannel(savedArtistsChannel);
     };
@@ -613,7 +602,7 @@ const ClientDashboard = () => {
         <Tabs value={selectedTab} className="mb-4 sm:mb-6 lg:mb-8" onValueChange={handleTabChange}>
           <div className="hidden sm:block relative mb-4 sm:mb-6">
               <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
+                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
                   {clientDashboardTabs.map((tab) => {
                     const Icon = tab.icon;
                     return (
