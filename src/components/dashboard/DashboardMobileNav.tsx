@@ -10,7 +10,8 @@ import {
   Lock,
   ShoppingBag,
   FileText,
-  Users
+  Users,
+  Crown
 } from "lucide-react";
 
 interface DashboardMobileNavProps {
@@ -32,6 +33,7 @@ const DashboardMobileNav = ({
     { value: 'portfolio', label: 'Works', icon: Palette },
     { value: 'projects', label: 'Projects', icon: Briefcase },
     { value: 'messages', label: 'Messages', icon: MessageSquare },
+    { value: 'membership', label: 'Pro', icon: Crown },
     { value: 'account', label: 'Account', icon: Settings },
   ];
 
@@ -50,7 +52,7 @@ const DashboardMobileNav = ({
       {/* Decorative background glassmorphism */}
       <div className="absolute inset-0 bg-white/80 dark:bg-card/90 backdrop-blur-2xl border-t border-border/40 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]" />
       
-      <div className="relative flex justify-around items-center px-1 sm:px-2 py-2 sm:py-3 min-h-[75px] sm:min-h-[85px]">
+      <div className="relative flex justify-around items-center px-0.5 sm:px-2 py-2 sm:py-3 min-h-[75px] sm:min-h-[85px]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.value;
@@ -62,10 +64,10 @@ const DashboardMobileNav = ({
               onClick={() => !isTabLocked && onTabChange(tab.value)}
               disabled={isTabLocked}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-w-[56px] sm:min-w-[60px] py-1.5 sm:py-2 transition-all duration-300 relative",
+                "flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-w-[48px] sm:min-w-[60px] py-1.5 sm:py-2 transition-all duration-300 relative",
                 isActive ? "text-primary scale-110" : "text-muted-foreground/60",
                 isTabLocked && "opacity-30 grayscale cursor-not-allowed",
-                "max-w-[70px]"
+                "max-w-[64px] sm:max-w-[70px]"
               )}
             >
               {isActive && (
