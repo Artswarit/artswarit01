@@ -633,6 +633,7 @@ const ClientDashboard = () => {
           <TabsContent value="overview" className="space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in outline-none focus-visible:ring-0" forceMount>
             <div className={cn(selectedTab !== 'overview' && "hidden")}>
               {visitedTabs.has('overview') && (
+                <TabErrorBoundary tabLabel="Overview">
                 <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                   <DashboardAttentionRequired 
                     role="client" 
