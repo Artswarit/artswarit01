@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Home, Users, Search as SearchIcon, TrendingUp, Sparkles, X } from "lucide-react";
+import { Home, Users, Search as SearchIcon, TrendingUp, X } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import NotificationBell from "@/components/NotificationBell";
 import MessageBadge from "@/components/MessageBadge";
@@ -28,10 +28,6 @@ const menuItems = [{
   name: "Trending",
   path: "/trending",
   icon: <TrendingUp size={18} />
-}, {
-  name: "For You",
-  path: "/recommendations",
-  icon: <Sparkles size={18} />
 }];
 
 const Navbar = () => {
