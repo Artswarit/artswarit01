@@ -119,15 +119,10 @@ const ArtistDashboard = () => {
   }
 
 
-  // Tab configuration with consolidated categories
-  const tabs = [
-    { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard },
-    { value: 'portfolio', label: 'My Works', shortLabel: 'Works', icon: Palette },
-    { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: Briefcase },
-    { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare },
-    { value: 'membership', label: 'Membership', shortLabel: 'Pro', icon: Crown },
-    { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings },
-  ];
+  // Tab configuration — shared with the mobile bottom nav via
+  // src/components/dashboard/dashboardTabs.ts so the two surfaces can't
+  // drift out of sync when a top-level tab is added.
+  const tabs = artistDashboardTabs;
 
 
 
