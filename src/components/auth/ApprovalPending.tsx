@@ -15,10 +15,10 @@ const ApprovalPending = () => {
     switch (profile?.account_status || "pending") {
       case 'pending':
         return {
-          icon: <Clock className="h-12 w-12 text-yellow-500" />,
+          icon: <Clock className="h-12 w-12 text-warning" />,
           title: 'Profile Under Review',
           description: 'Your artist profile is being reviewed by our team. This usually takes 24-48 hours.',
-          color: 'border-yellow-200 bg-yellow-50'
+          color: 'border-warning/30 bg-warning/5'
         };
       case 'needs_update':
         return {
