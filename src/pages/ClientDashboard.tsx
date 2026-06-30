@@ -21,6 +21,7 @@ import MessagingModule from "@/components/dashboard/messages/MessagingModule";
 import ProjectRating from "@/components/dashboard/ProjectRating";
 import ClientPayments from "@/components/dashboard/ClientPayments";
 import ClientSettings from "@/components/dashboard/ClientSettings";
+import { clientDashboardTabs } from "@/components/dashboard/dashboardTabs";
 import ClientProfile from "@/components/dashboard/ClientProfile";
 import PurchasedArtworks from "@/components/dashboard/PurchasedArtworks";
 import ProjectDetailModal from "@/components/dashboard/projects/ProjectDetailModal";
