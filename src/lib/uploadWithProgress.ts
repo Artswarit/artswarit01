@@ -1,25 +1,22 @@
 /**
- * Upload a single file to Supabase Storage with byte-level progress.
+ * Per-file byte-level upload helper for Supabase Storage.
  *
- * Why this exists:
- *   The `supabase-js` storage client (`.upload()`) uses `fetch` internally and
- *   does NOT expose progress events. To surface real upload progress we mint a
- *   signed upload URL via `createSignedUploadUrl()` and PUT the file with
- *   `XMLHttpRequest`, which fires `upload.onprogress`.
+ * The Supabase JS SDK's `.upload()` uses `fetch`, which cannot report
+ * upload progress. To surface real byte progress in the UI we:
  *
- * Falls back transparently to `.upload()` when the signed-URL path is
- * unavailable (older buckets / network shape), so call sites get a
- * best-effort byte progress and still complete on quirky environments.
+ *   1. Ask Supabase for a one-shot signed upload URL.
+ *   2. PUT the file with `XMLHttpRequest` so we can listen to
+ *      `xhr.upload.onprogress`.
  *
- * Returns the storage path (same shape as `.upload({ data: { path } })`) so
- * existing call sites can call `getPublicUrl(path)` without changes.
+ * If signing fails (older buckets, permission edge cases) we transparently
+ * fall back to the standard SDK upload and emit 0% / 100% events.
  */
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UploadProgress {
   loaded: number;
   total: number;
-  /** 0–100, clamped. `total === 0` reports 0 until completion. */
+  /** Integer 0–100. */
   percent: number;
 }
 
@@ -28,9 +25,7 @@ export interface UploadWithProgressOptions {
   path: string;
   file: File;
   onProgress?: (progress: UploadProgress) => void;
-  /** Aborts the in-flight upload. */
   signal?: AbortSignal;
-  /** Forwarded to the underlying upload. */
   contentType?: string;
   upsert?: boolean;
 }
@@ -63,7 +58,6 @@ async function uploadViaSignedUrl(
     if (contentType || file.type) {
       xhr.setRequestHeader("Content-Type", contentType || file.type);
     }
-    // Supabase signed PUT does not require auth header (token is in URL).
     xhr.upload.onprogress = (event) => {
       if (!onProgress) return;
       const total = event.lengthComputable ? event.total : file.size;
@@ -73,14 +67,10 @@ async function uploadViaSignedUrl(
         percent: clampPercent(event.loaded, total),
       });
     };
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        onProgress?.({ loaded: file.size, total: file.size, percent: 100 });
-        resolve();
-      } else {
-        reject(new Error(`Upload failed (${xhr.status}): ${xhr.responseText || xhr.statusText}`));
-      }
-    };
+    xhr.onload = () =>
+      xhr.status >= 200 && xhr.status < 300
+        ? resolve()
+        : reject(new Error(`Upload failed (${xhr.status})`));
     xhr.onerror = () => reject(new Error("Network error during upload"));
     xhr.onabort = () => reject(new DOMException("Upload aborted", "AbortError"));
     if (signal) {
@@ -100,8 +90,6 @@ async function uploadViaSdkFallback(
   opts: UploadWithProgressOptions,
 ): Promise<UploadWithProgressResult> {
   const { bucket, path, file, onProgress, contentType, upsert } = opts;
-  // No real progress available — emit a 0% start and 100% on success so
-  // consumers can still render a progress UI without special-casing.
   onProgress?.({ loaded: 0, total: file.size, percent: 0 });
   const { data, error } = await supabase.storage
     .from(bucket)
@@ -114,16 +102,18 @@ async function uploadViaSdkFallback(
   return { path: data?.path ?? path };
 }
 
+/**
+ * Upload a file to Supabase Storage with byte-level progress reporting.
+ * Prefers signed-URL + XHR; falls back to the SDK upload if signing fails.
+ */
 export async function uploadFileWithProgress(
   opts: UploadWithProgressOptions,
 ): Promise<UploadWithProgressResult> {
   try {
     return await uploadViaSignedUrl(opts);
   } catch (err) {
+    // Don't fall back on user-initiated aborts.
     if ((err as DOMException)?.name === "AbortError") throw err;
-    // Fall back so a bucket that doesn't support signed upload URLs (or a
-    // transient signing error) doesn't block the user. Progress will be
-    // 0 → 100 without intermediate updates in that case.
     return await uploadViaSdkFallback(opts);
   }
 }
