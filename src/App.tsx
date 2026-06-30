@@ -42,7 +42,7 @@ const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Notifications = lazy(() => import("./pages/Notifications"));
-const FeatureAudit = lazy(() => import("./pages/FeatureAudit"));
+
 const LiveStreaming = lazy(() => import("./pages/LiveStreaming"));
 const Collections = lazy(() => import("./pages/Collections"));
 const Trending = lazy(() => import("./pages/Trending"));
@@ -206,7 +206,7 @@ const AppRoutes = () => {
             <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
             <Route path="/refund-policy" element={<PageTransition><RefundPolicy /></PageTransition>} />
             <Route path="/contact-us" element={<PageTransition><ContactUs /></PageTransition>} />
-            <Route path="/feature-audit" element={<PageTransition><FeatureAudit /></PageTransition>} />
+            
             <Route path="/live-streaming" element={<PageTransition><LiveStreaming /></PageTransition>} />
             <Route path="/collections" element={<PageTransition><Collections /></PageTransition>} />
             <Route path="/trending" element={<PageTransition><Trending /></PageTransition>} />
