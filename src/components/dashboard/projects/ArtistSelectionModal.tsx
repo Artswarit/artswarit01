@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, UserPlus, Star } from "lucide-react";
 import { toast } from "sonner";
+import { RetryableError } from "@/components/shared/RetryableError";
 
 interface Artist {
   id: string;
@@ -35,6 +36,7 @@ export default function ArtistSelectionModal({
 }: ArtistSelectionModalProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [artists, setArtists] = useState<Artist[]>([]);
 
   useEffect(() => {
@@ -45,6 +47,7 @@ export default function ArtistSelectionModal({
 
   const fetchSavedArtists = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       // 1. Get saved artists IDs
       const { data: saved, error: savedError } = await supabase
@@ -107,6 +110,7 @@ export default function ArtistSelectionModal({
       setArtists(artistsWithStats);
     } catch (error: any) {
       console.error("Error fetching artists:", error);
+      setLoadError(error);
       toast.error("Failed to load saved artists");
     } finally {
       setLoading(false);
@@ -130,6 +134,14 @@ export default function ArtistSelectionModal({
               <Loader2 className="h-10 w-10 animate-spin mb-3" />
               <p className="text-base">Loading artists...</p>
             </div>
+          ) : loadError ? (
+            <RetryableError
+              title="Couldn't load saved artists"
+              error={loadError}
+              onRetry={fetchSavedArtists}
+              loading={loading}
+              size="sm"
+            />
           ) : artists.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <p className="text-muted-foreground mb-6 text-base">
