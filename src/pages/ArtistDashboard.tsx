@@ -144,7 +144,7 @@ const ArtistDashboard = () => {
           )}
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <div className="relative mb-6 sm:mb-8 lg:mb-12">
+            <div className="relative mb-6 sm:mb-8 lg:mb-12 sticky top-[calc(4rem+var(--safe-top,0px))] z-30 bg-gray-50/80 dark:bg-background/80 backdrop-blur-md py-2">
               <div className="hidden sm:block overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
                 <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
                   {tabs.map((tabItem) => {

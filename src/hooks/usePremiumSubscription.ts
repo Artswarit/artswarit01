@@ -31,11 +31,16 @@ export const usePremiumSubscription = (userId: string | undefined | null) => {
     }
 
     setLoading(true);
-    const { data, error } = await supabase
+    // Only treat as active if is_active=true AND (lifetime OR renew_at in future).
+    // This prevents stale rows where the worker never flipped is_active on expiry
+    // from making the UI show "Premium" forever.
+    const nowIso = new Date().toISOString();
+    const { data } = await supabase
       .from("subscribers")
       .select("*")
       .eq("user_id", userId)
       .eq("is_active", true)
+      .or(`renew_at.is.null,renew_at.gt.${nowIso}`)
       .order("started_at", { ascending: false })
       .limit(1)
       .maybeSingle();
