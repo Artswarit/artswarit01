@@ -1126,7 +1126,8 @@ const ClientDashboard = () => {
                 </div>
               </div>
             </>
-          )}
+                </TabErrorBoundary>
+              )}
         </div>
       </TabsContent>
 
