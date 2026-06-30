@@ -613,14 +613,7 @@ const ClientDashboard = () => {
           <div className="hidden sm:block relative mb-4 sm:mb-6">
               <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
                 <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md inline-flex gap-1.5 sm:gap-2 p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
-                  {[
-                    { value: 'overview', label: 'Overview', shortLabel: 'Home', icon: LayoutDashboard, locked: false },
-                    { value: 'collection', label: 'My Works', shortLabel: 'Works', icon: ShoppingBag, locked: false },
-                    { value: 'projects', label: 'Projects', shortLabel: 'Proj', icon: FileText, locked: false },
-                    { value: 'messages', label: 'Messages', shortLabel: 'Msg', icon: MessageSquare, locked: false },
-                    { value: 'artists', label: 'Artists', shortLabel: 'Art', icon: Users, locked: false },
-                    { value: 'account', label: 'Account', shortLabel: 'Acc', icon: Settings, locked: false },
-                  ].map((tab) => {
+                  {clientDashboardTabs.map((tab) => {
                     const Icon = tab.icon;
                     return (
                       <TabsTrigger
