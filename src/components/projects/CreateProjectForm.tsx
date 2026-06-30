@@ -13,6 +13,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Upload, X, FileText, AlertTriangle, Check, GripVertical, Calendar, Loader2, TrendingUp } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { Progress } from '@/components/ui/progress';
+import { uploadFileWithProgress } from '@/lib/uploadWithProgress';
 import { cn } from '@/lib/utils';
 
 interface MilestoneInput {
