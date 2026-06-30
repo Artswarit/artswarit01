@@ -229,15 +229,7 @@ const ArtistDashboard = () => {
               </TabsContent>
 
 
-              <TabsContent value="finances" className="outline-none focus-visible:ring-0" forceMount>
-                <div className={cn(activeTab !== 'finances' && "hidden")}>
-                  {visitedTabs.has('finances') && (
-                    <div className="space-y-12">
-                      <ArtistBilling />
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
+
 
               <TabsContent value="messages" className="outline-none focus-visible:ring-0" forceMount>
                 <div className={cn(activeTab !== 'messages' && "hidden")}>
