@@ -116,7 +116,7 @@ const ClientDashboard = () => {
   // Read tab from URL on mount
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'ratings', 'payments', 'account', 'settings'].includes(tabParam)) {
+    if (tabParam && ['overview', 'profile', 'projects', 'collection', 'messages', 'artists', 'account', 'settings'].includes(tabParam)) {
       setSelectedTab(tabParam === 'settings' ? 'account' : tabParam);
     } else if (!tabParam) {
       // Default to overview if no tab specified
