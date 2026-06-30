@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
+import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 interface Project {
   id: string;
   title: string;
