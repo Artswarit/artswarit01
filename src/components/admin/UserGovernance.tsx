@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
+import { RetryableError } from '@/components/shared/RetryableError';
 
 /* ── Types ── */
 interface ManagedUser {
@@ -49,6 +50,7 @@ export default function UserGovernance() {
   const { user } = useAuth();
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterRole, setFilterRole] = useState<string>('all');
@@ -65,6 +67,7 @@ export default function UserGovernance() {
   // Fetch logic connects to live Supabase DB
   const fetchUsers = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const [profilesRes, adminRolesRes, warningsRes, payoutRes] = await Promise.all([
         supabase.from('profiles').select('id, full_name, email, role, account_status, avatar_url, created_at').order('created_at', { ascending: false }),
@@ -103,6 +106,7 @@ export default function UserGovernance() {
       setUsers(mapped);
     } catch (err) {
       console.error('Failed to load users:', err);
+      setLoadError(err);
       toast.error('Failed to load users');
     } finally { setLoading(false); }
   }, []);
@@ -214,6 +218,18 @@ export default function UserGovernance() {
       </div>
     );
   }
+
+  if (loadError) {
+    return (
+      <RetryableError
+        title="Couldn't load users"
+        error={loadError}
+        onRetry={fetchUsers}
+        loading={loading}
+      />
+    );
+  }
+
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500">
