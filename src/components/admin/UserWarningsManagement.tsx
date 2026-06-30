@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { AlertTriangle, Plus, Ban, ShieldAlert, Clock, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import LogoLoader from '@/components/ui/LogoLoader';
+import { RetryableError } from '@/components/shared/RetryableError';
 
 interface Warning {
   id: string;
