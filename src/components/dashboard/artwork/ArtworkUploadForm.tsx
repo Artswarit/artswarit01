@@ -549,7 +549,11 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
             {isUploading ? (
               <div className="flex items-center gap-3">
                 <div className="h-4 w-4 sm:h-5 sm:w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>Processing...</span>
+                <span className="tabular-nums">
+                  {uploadProgress !== null && uploadProgress < 100
+                    ? `Uploading ${uploadProgress}%`
+                    : 'Processing...'}
+                </span>
               </div>
             ) : (
               <div className="flex items-center gap-2">
