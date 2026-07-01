@@ -145,9 +145,7 @@ const RouteFallback = () => {
   }, []);
   if (!show) return null;
   return (
-    <div className="min-h-[60vh] flex items-center justify-center">
-      <LogoLoader text="Loading…" />
-    </div>
+    <LogoLoader text="Loading…" fullPage />
   );
 };
 
