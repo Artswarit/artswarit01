@@ -53,7 +53,10 @@ const LogoLoader = ({ text = 'Loading…', fullPage = false, className }: LogoLo
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm">
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-sm p-0 m-0"
+        style={{ height: '100dvh', width: '100dvw', top: 0, left: 0, right: 0, bottom: 0 }}
+      >
         {loader}
       </div>
     );
