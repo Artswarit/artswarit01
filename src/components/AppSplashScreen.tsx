@@ -44,7 +44,8 @@ export const AppSplashScreen = () => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-white dark:bg-card"
+          className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-white dark:bg-card p-0 m-0"
+          style={{ height: '100dvh', width: '100dvw', top: 0, left: 0, right: 0, bottom: 0, paddingTop: 0, paddingBottom: 0 }}
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
