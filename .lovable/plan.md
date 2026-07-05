@@ -1,96 +1,138 @@
 
-# Artswarit Platform — Fix & Upgrade Plan
+## Goal
 
-This is a large multi-area request. I'll group it into 6 phases. Each phase is independently shippable and won't break existing functionality. I'll implement them in order, in this single thread, unless you want to drop or reorder anything.
+Replace the current tabbed admin console with the uploaded design: a fixed left sidebar + top search bar + a dense KPI grid, charts, recent activity feed, and platform health panel. Every number, list, and status is powered by real Supabase data and updates in realtime — no mocked values.
 
----
+## New layout
 
-## Phase 1 — Navigation & Performance (no more "loading on every route")
-
-**Diagnosis I'll run first:** route-level `LogoLoader` is currently rendered as Suspense fallback for every `React.lazy` route, so any cache-miss chunk re-shows the splash. Combined with `AuthContext` re-firing on visibility changes and several dashboards calling `setLoading(true)` on every tab switch, this produces the constant loading flash.
-
-**Fixes:**
-- Replace global Suspense fallback with a thin `TopLoadingBar` (already exists) + keep previous route painted (no full splash on navigation).
-- Add a shared React Query `staleTime` (e.g. 60s) + `keepPreviousData` so tab switches use cache, not a spinner.
-- Convert dashboard tab loads to "show cached data, refresh in background" pattern (no `setLoading(true)` when data already present).
-- Scope realtime subscriptions to only: notifications, messages, project status, milestone updates. Remove redundant `useRealtimeSync('notifications', …)` duplicates in `ArtistNotifications`.
-- Prefetch lazy chunks on hover/visible (link prefetch) so transitions feel instant.
-
-## Phase 2 — Intro / Splash Animation
-
-- Restore `AppSplashScreen` as a true intro: shows only on first app open (PWA launch or fresh tab), gated by `sessionStorage` so it doesn't reappear on internal navigation.
-- Mount it before React hydrates via the existing `index.html` boot loader (CSS-only logo + name fade-in already partly there) and hand off to React when ready.
-- Skip on Lovable preview iframes.
-
-## Phase 3 — Project Detail Page sidebar overlap
-
-- Only structural fix, no UI change: convert sticky sidebar container to `position: sticky; top: <header>; align-self: start; max-height: calc(100dvh - <header>); overflow-y: auto;` inside a CSS grid (`grid-cols-[1fr_320px]`).
-- Remove the `z-index` that currently lets it paint over the bottom tab strip.
-- Apply `pb-safe` so the bottom tab bar (TIMELINE/VAULT/CHAT) doesn't clip the last card on mobile.
-- Verify with Playwright at 759×676 (the viewport in your screenshot) and at 1440×900.
-
-## Phase 4 — Artist Dashboard
-
-**a) Premium button**
-- Audit every "Premium" / "Upgrade" CTA. Route all of them through a single `useUpgradeToPro()` helper that navigates to `/artist-dashboard?tab=membership` (new dedicated tab) or opens `PremiumMembership` consistently.
-
-**b) Overview reorg** (no info removed, no visual redesign)
-New order:
-1. Greeting + Pro status banner
-2. KPI row: Earnings (month) · Pending Payouts · Active Projects · Profile Views
-3. Action row: Active Projects list + Pending Milestones
-4. Engagement: Recent Likes / Saves / Follows
-5. Insights teaser (locked for free users → links to Analytics tab)
-6. Quick links / shortcuts
-
-**c) Settings**
-- Remove `Membership` sub-tab from Settings.
-- Add `Membership` as a top-level Artist Dashboard tab using existing `PremiumMembership` component.
-
-**d) Dashboard nav reorg**
-Proposed top-level order: Overview · Projects · Artworks · Messages · Analytics · Earnings · Membership · Notifications · Settings.
-Audit each tab; remove dead/duplicate buttons; verify every redirect.
-
-## Phase 5 — Advanced Analytics (Pro only) + Locked Premium Features
-
-**Analytics tab** (Pro-only, locked preview for free):
-Pull from PostHog Query API via a new edge function `artist-analytics` (server-side, uses `POSTHOG_KEY` already configured for capture — needs a `POSTHOG_PERSONAL_API_KEY` secret for read access; I'll ask before adding).
-Metrics: profile views, portfolio views, artwork views, likes, saves, shares, contact clicks, inquiry clicks, project invites, proposal acceptance rate, profile→contact conversion, visitor geo, traffic source, new vs returning, device, search appearances, portfolio-over-time, top artworks, engagement trends.
-
-**Locked feature pattern:**
-- New `<LockedFeature feature="csv_export | pdf_report | advanced_analytics">` wrapper showing blurred preview + "Upgrade to Pro" CTA, driven by `useArtistPlan()`.
-- Apply to CSV Export, PDF Report, Advanced Analytics, Premium Reports.
-- Verify PDF generation (jsPDF) works after unlock.
-
-## Phase 6 — Notification System (Artist + Client)
-
-**UI/UX**
-- Unified notification center page + bell dropdown:
-  - Real-time (already wired) · read/unread states · mark one/all read · search · filters · categories (Projects, Payments, Messages, Reviews, System, Membership) · infinite scroll · preferences page (email/in-app/push per category).
-
-**Retention policy (DB migration)**
 ```text
-- read notifications  > 30 days  → delete
-- unread              > 90 days  → archive (is_archived=true)
-- archived            > 180 days → delete
+┌─────────────┬────────────────────────────────────────────────────┐
+│  Artswarit  │  🔍 Search users/projects/txns   🟢 systems  🔔 AK │
+│             ├────────────────────────────────────────────────────┤
+│ Dashboard ● │  Dashboard                                         │
+│ Users       │  Here's what's happening across Artswarit today.   │
+│ Projects    │  ┌──────┬──────┬──────┬──────┬──────┐              │
+│ Escrow      │  │ KPI  │ KPI  │ KPI  │ KPI  │ KPI  │ (11 cards)   │
+│ Disputes  4 │  ├──────┴──────┴──────┴──────┴──────┤              │
+│ Withdrawals │  │ Revenue trend        │ Escrow vol │              │
+│ Portfolio   │  ├──────────┬───────────┴────────────┤              │
+│ Payments    │  │ Users    │ Subs    │ Top categories             │
+│ Analytics   │  ├──────────┴───────────┬────────────┤              │
+│ Settings    │  │ Recent activity      │ Platform health          │
+│             │  └──────────────────────┴────────────┘              │
+│ ‹ Collapse  │                                                    │
+└─────────────┴────────────────────────────────────────────────────┘
 ```
-Implemented via:
-- `is_archived boolean default false` column on `notifications`.
-- `archived_at`, `expires_at` columns.
-- `cleanup_old_notifications()` SQL function.
-- pg_cron job nightly at 03:00 UTC.
-- Index on `(user_id, is_read, created_at)` to keep cleanup + queries fast.
 
-## Phase 7 — Verification
+Mobile: sidebar collapses into a bottom sheet / hamburger; KPI grid stacks 2-cols; charts stack single column.
 
-For each phase I'll Playwright-test the affected flows at mobile + desktop, screenshot, and confirm no regressions before moving to the next.
+## Sidebar sections → existing data
 
----
+| Section        | Data source                                                          | Realtime  |
+| -------------- | -------------------------------------------------------------------- | --------- |
+| Dashboard      | Aggregated KPIs (below)                                              | yes       |
+| Users          | `UserGovernance` (existing component, restyled shell)                | yes       |
+| Projects       | `AdminOperations` (projects + milestones breakdown)                  | yes       |
+| Escrow         | `payments` where status in (`held`, `escrow`), `AdminFinance` subset | yes       |
+| Disputes       | `DisputeSettlement` (existing)                                       | yes       |
+| Withdrawals    | `withdrawals` table (pending / paid / failed)                        | yes       |
+| Portfolio      | `ContentModeration` (artworks pending / reported)                    | yes       |
+| Payments       | `AdminRevenue` (payments + fees)                                     | yes       |
+| Analytics      | `AdminEngagement` + `AdminSystem` (engagement + system health)       | yes       |
+| Settings       | Simple stub (theme, admin profile) — no new backend                  | —         |
 
-### Questions before I start
+Existing tab bar is removed; each sidebar item mounts one of the current components inside the new shell so no business logic is lost.
 
-1. **PostHog read access** — Phase 5 needs a `POSTHOG_PERSONAL_API_KEY` secret to query analytics server-side. OK to add? (Alternative: derive analytics from our own Supabase event tables — slower to build, no extra secret.)
-2. **Notification retention numbers** — OK with 30 / 90 / 180 day windows above, or different?
-3. **Scope** — implement all 6 phases sequentially in this thread, or ship phase-by-phase with your review between each?
+## Dashboard KPI cards (all live)
 
-Once you confirm, I'll start with Phase 1 (the most impactful for daily UX).
+1. **Platform revenue** — sum(`payments.platform_fee`) MTD, +% vs previous month
+2. **Gross marketplace value** — sum(`payments.amount`) where status succeeded, MTD
+3. **Escrow balance** — sum(`project_milestones.amount`) where status = `funded`/`in_progress`
+4. **Active projects** — `projects` where status in (`in_progress`, `pending`)
+5. **Active artists** — `profiles` where role in (`artist`, `premium`) and `last_active_at` ≥ 30d
+6. **Active clients** — `profiles` where role = `client` and `last_active_at` ≥ 30d
+7. **Pending withdrawals** — sum + count from `withdrawals` where status = `pending`
+8. **Pending disputes** — count `disputes` where status = `open`; urgent = open > 48h
+9. **Portfolio reviews** — count `artworks` where status = `private` (awaiting approval)
+10. **Pro subscribers** — count `subscribers` where `is_active` and `subscription_tier` = pro
+11. **Platform health** — uptime derived from `function_logs` success ratio last 24h
+
+All numbers currency-formatted with the existing `useCurrencyFormat` hook (₹ shown to match design; user's currency preference respected).
+
+## Charts
+
+- **Revenue trend** (line, 12 months) — monthly sum of `payments.platform_fee`
+- **Escrow volume** (grouped bars) — held vs released per month from `payments` + `project_milestones`
+- **User growth** (line) — weekly signup count from `profiles.created_at` (reuses `useSignupTrend`)
+- **Subscription growth** (line) — monthly count of active `subscribers`
+- **Top categories** (horizontal bars) — sum of `payments.amount` grouped by artwork category
+
+Recharts (already installed) for all charts. Skeletons while loading.
+
+## Recent activity feed
+
+Union of:
+- `admin_audit_logs` (existing)
+- `disputes` opened
+- `withdrawals` requested
+- `milestone_submissions` created
+- `artworks` flagged / reported
+
+Ordered by created_at, top 8, live via a single realtime channel subscribing to those tables.
+
+## Platform health panel
+
+- Razorpay — ping `function_logs` for `verify-razorpay-payment` success rate 24h
+- Supabase DB — `postgres_logs` error count (via edge fn) or fallback ok
+- AI moderation — `function_logs` for `report-content`
+- Storage — heartbeat via a tiny signed-url probe (client-side)
+- Email delivery — `function_logs` for `send-*` (degraded if fail-rate > 5%)
+
+Each row: green/amber/red dot + label + status text.
+
+## Realtime strategy
+
+One shared realtime provider hook `useAdminRealtime()` subscribes to: `payments`, `withdrawals`, `disputes`, `projects`, `subscribers`, `artworks`, `admin_audit_logs`. On any event it invalidates the relevant react-query keys — cards, charts and activity feed refresh without polling. Cleanup on unmount.
+
+## Files
+
+New:
+- `src/components/admin/shell/AdminShell.tsx` — sidebar + top bar layout
+- `src/components/admin/shell/AdminSidebar.tsx`
+- `src/components/admin/shell/AdminTopBar.tsx` (search, systems pill, notif, avatar)
+- `src/components/admin/overview/OverviewKpis.tsx` (11-card grid)
+- `src/components/admin/overview/RevenueTrendChart.tsx`
+- `src/components/admin/overview/EscrowVolumeChart.tsx`
+- `src/components/admin/overview/UserGrowthChart.tsx`
+- `src/components/admin/overview/SubscriptionGrowthChart.tsx`
+- `src/components/admin/overview/TopCategoriesChart.tsx`
+- `src/components/admin/overview/RecentActivityFeed.tsx`
+- `src/components/admin/overview/PlatformHealthPanel.tsx`
+- `src/components/admin/hooks/useAdminOverview.ts` (all overview queries)
+- `src/components/admin/hooks/useAdminRealtime.ts`
+
+Rewritten:
+- `src/components/admin/AdminDashboard.tsx` — thin router that renders `<AdminShell><section/></AdminShell>` based on active sidebar section (state, not URL — keeps existing route working).
+
+Unchanged (reused inside the shell):
+- `UserGovernance`, `DisputeSettlement`, `ContentModeration`, `AuditLog`, `AdminRevenue`, `AdminOperations`, `AdminFinance`, `AdminEngagement`, `AdminSystem`, `AdminContent`.
+
+No DB migrations required — every query hits existing tables.
+
+## Design tokens
+
+Match uploaded design:
+- Sidebar bg `hsl(var(--card))`, 256px wide, collapsible to 64px
+- Active nav item: light violet fill `hsl(var(--primary)/0.08)` + primary text
+- KPI cards: white/card, 1px border, soft shadow, `p-5 rounded-2xl`
+- Numbers: `text-3xl font-semibold tracking-tight`
+- Positive delta: emerald-500; negative: rose-500
+- Charts: primary violet + secondary lavender fills, no gridlines, minimal axes
+
+All colors via existing semantic tokens — no hex in components.
+
+## Out of scope (ask before adding)
+
+- Global command palette (⌘K) — visual only in v1; behaviour later
+- "+" quick-create menu — visual only in v1
+- Notifications bell dropdown — links to existing `/notifications`
