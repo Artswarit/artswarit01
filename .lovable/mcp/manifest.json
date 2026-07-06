@@ -22,7 +22,6 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "query": {
@@ -31,15 +30,17 @@
               "description": "Search text: name, category, city, or skill."
             },
             "limit": {
-              "description": "Max results (default 10).",
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "description": "Max results (default 10)."
             }
           },
           "required": [
             "query"
-          ]
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -53,19 +54,19 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
               "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "description": "Artist profile id (uuid)."
             }
           },
           "required": [
             "id"
-          ]
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -79,30 +80,30 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "artist_id": {
-              "description": "Filter by artist id.",
               "type": "string",
               "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              "description": "Filter by artist id."
             },
             "category": {
-              "description": "Filter by category.",
-              "type": "string"
+              "type": "string",
+              "description": "Filter by category."
             },
             "query": {
-              "description": "Search title/description.",
-              "type": "string"
+              "type": "string",
+              "description": "Search title/description."
             },
             "limit": {
-              "description": "Max results (default 12).",
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "description": "Max results (default 12)."
             }
-          }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -116,19 +117,19 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
               "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "description": "Artwork id."
             }
           },
           "required": [
             "id"
-          ]
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       }
