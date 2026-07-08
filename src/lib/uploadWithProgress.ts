@@ -96,6 +96,8 @@ async function uploadViaSdkFallback(
     .upload(path, file, {
       contentType: contentType || file.type || undefined,
       upsert: !!upsert,
+      // 1-year CDN cache — reduces repeat Storage egress dramatically.
+      cacheControl: '31536000',
     });
   if (error) throw error;
   onProgress?.({ loaded: file.size, total: file.size, percent: 100 });

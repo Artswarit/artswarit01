@@ -91,45 +91,24 @@ const ArtistCard = ({
   };
 
 
-  // Check initial follow state and handle subscriptions
+  // Check initial follow state once. We intentionally do NOT open a per-card
+  // Realtime subscription — with N cards on Explore that produced N channels
+  // per page load and dominated the Realtime message count. Local optimistic
+  // updates in handleFollow keep the button state correct for this tab.
   useEffect(() => {
+    if (!user?.id) return;
     let isCancelled = false;
-
-    const checkFollowStatus = async () => {
-      if (!user?.id) return;
-      const {
-        data
-      } = await supabase.from('follows').select('id').eq('follower_id', user.id).eq('following_id', artist.id).maybeSingle();
+    (async () => {
+      const { data } = await supabase
+        .from('follows')
+        .select('id')
+        .eq('follower_id', user.id)
+        .eq('following_id', artist.id)
+        .maybeSingle();
       if (!isCancelled) setIsFollowing(!!data);
-    };
-    checkFollowStatus();
-
-    // Subscribe to follows to handle realtime cross-tab and cross-component sync
-    const instanceId = Math.random().toString(36).substring(7);
-    const followsChannel = supabase.channel(`artist-card-follows-${artist.id}-${instanceId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'follows',
-        filter: `following_id=eq.${artist.id}`
-      }, async () => {
-        if (isCancelled) return;
-        
-        // Refetch followers count globally
-        const { data: followers } = await supabase.from('follows').select('id').eq('following_id', artist.id);
-        if (!isCancelled) setCurrentFollowers(followers?.length || 0);
-
-        // SYNC CROSS TAB
-        if (user?.id) {
-          const { data: following } = await supabase.from('follows').select('id').eq('follower_id', user.id).eq('following_id', artist.id).maybeSingle();
-          if (!isCancelled) setIsFollowing(!!following);
-        }
-      })
-      .subscribe();
-
+    })();
     return () => {
       isCancelled = true;
-      supabase.removeChannel(followsChannel);
     };
   }, [user?.id, artist.id]);
   const handleFollow = async (e: React.MouseEvent) => {
@@ -147,6 +126,7 @@ const ArtistCard = ({
         } = await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', artist.id);
         if (error) throw error;
         setIsFollowing(false);
+        setCurrentFollowers((c) => Math.max(0, c - 1));
         toast.success('Unfollowed artist');
         track('artist_unfollowed', { artist_id: artist.id, surface });
       } else {
@@ -158,6 +138,7 @@ const ArtistCard = ({
         });
         if (error) throw error;
         setIsFollowing(true);
+        setCurrentFollowers((c) => c + 1);
         toast.success('Following artist!');
         track('artist_followed', { artist_id: artist.id, surface });
       }

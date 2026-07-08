@@ -2,16 +2,15 @@ import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+// Only the tables that MUST feel instant on the admin overview stay wired to
+// Realtime. Lower-signal tables (artworks, projects, project_milestones,
+// subscribers, admin_audit_logs, milestone_submissions) are refreshed via
+// react-query's polling / invalidation on tab focus instead — they don't
+// justify a persistent postgres_changes stream each admin page open.
 const TABLES = [
   "payments",
   "withdrawals",
   "disputes",
-  "projects",
-  "project_milestones",
-  "subscribers",
-  "artworks",
-  "admin_audit_logs",
-  "milestone_submissions",
 ] as const;
 
 /**
