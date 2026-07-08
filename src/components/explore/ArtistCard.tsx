@@ -126,6 +126,7 @@ const ArtistCard = ({
         } = await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', artist.id);
         if (error) throw error;
         setIsFollowing(false);
+        setCurrentFollowers((c) => Math.max(0, c - 1));
         toast.success('Unfollowed artist');
         track('artist_unfollowed', { artist_id: artist.id, surface });
       } else {
@@ -137,6 +138,7 @@ const ArtistCard = ({
         });
         if (error) throw error;
         setIsFollowing(true);
+        setCurrentFollowers((c) => c + 1);
         toast.success('Following artist!');
         track('artist_followed', { artist_id: artist.id, surface });
       }
