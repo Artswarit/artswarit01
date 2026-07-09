@@ -495,6 +495,9 @@ export default function UserGovernance() {
                   <SelectValue placeholder="Select action..." />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="approve"><div className="flex items-center gap-2 font-medium"><CheckCircle className="h-4 w-4 text-green-500" /> Approve Account</div></SelectItem>
+                  <SelectItem value="needs_update"><div className="flex items-center gap-2 font-medium"><AlertTriangle className="h-4 w-4 text-amber-500" /> Request Profile Update</div></SelectItem>
+                  <SelectItem value="reject"><div className="flex items-center gap-2 font-medium"><X className="h-4 w-4 text-destructive" /> Reject Account</div></SelectItem>
                   <SelectItem value="notify"><div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4 text-primary" /> Direct System Message</div></SelectItem>
                   <SelectItem value="warn"><div className="flex items-center gap-2 font-medium"><AlertTriangle className="h-4 w-4 text-amber-500" /> Formal Warning</div></SelectItem>
                   <SelectItem value="suspend"><div className="flex items-center gap-2 font-medium"><Clock className="h-4 w-4 text-orange-500" /> Temporary Suspension</div></SelectItem>
