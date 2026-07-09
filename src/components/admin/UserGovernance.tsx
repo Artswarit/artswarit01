@@ -193,6 +193,21 @@ export default function UserGovernance() {
             await supabase.from('user_warnings').update({ is_active: false }).eq('user_id', tid).eq('is_active', true);
             await writeAuditLog(user?.id || 'system', 'USER_RESTRICTION_LIFTED', tid, reason);
             break;
+          case 'approve':
+            await supabase.from('profiles').update({ account_status: 'approved' }).eq('id', tid);
+            await writeAuditLog(user?.id || 'system', 'ACCOUNT_APPROVED', tid, reason);
+            await supabase.from('notifications').insert({ user_id: tid, title: 'Account Approved', message: 'Your artist account has been approved. Welcome aboard!', type: 'success' });
+            break;
+          case 'reject':
+            await supabase.from('profiles').update({ account_status: 'rejected' }).eq('id', tid);
+            await writeAuditLog(user?.id || 'system', 'ACCOUNT_REJECTED', tid, reason);
+            await supabase.from('notifications').insert({ user_id: tid, title: 'Account Update', message: `Your account submission was not approved: ${reason}`, type: 'error' });
+            break;
+          case 'needs_update':
+            await supabase.from('profiles').update({ account_status: 'needs_update' }).eq('id', tid);
+            await writeAuditLog(user?.id || 'system', 'ACCOUNT_NEEDS_UPDATE', tid, reason);
+            await supabase.from('notifications').insert({ user_id: tid, title: 'Profile Update Required', message: reason, type: 'warning' });
+            break;
         }
       }
       toast.success(selectedUser ? 'Action complete' : `Action applied to ${targetIds.length} users`);
