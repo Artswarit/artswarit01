@@ -134,16 +134,20 @@ export function DisputeManagement() {
       if (disputeError) throw disputeError;
 
       // Update milestone status based on resolution
+      // NOTE: milestone status vocabulary is UPPERCASE across the app
+      // (see MilestoneWorkflow.tsx statusConfig). Do NOT write lowercase.
       if (selectedDispute.milestone_id) {
-        let newStatus = 'pending' as string;
-        if (resolutionType === 'approved') newStatus = 'approved';
-        if (resolutionType === 'revision') newStatus = 'revision_requested';
-        if (resolutionType === 'cancelled') newStatus = 'pending';
+        let newStatus: string | null = null;
+        if (resolutionType === 'approved') newStatus = 'APPROVED';
+        else if (resolutionType === 'revision') newStatus = 'REVISION_REQUESTED';
+        else if (resolutionType === 'cancelled') newStatus = 'REVIEW_PENDING';
 
-        await supabase
-          .from('project_milestones')
-          .update({ status: newStatus })
-          .eq('id', selectedDispute.milestone_id);
+        if (newStatus) {
+          await supabase
+            .from('project_milestones')
+            .update({ status: newStatus })
+            .eq('id', selectedDispute.milestone_id);
+        }
       }
 
       // Log activity

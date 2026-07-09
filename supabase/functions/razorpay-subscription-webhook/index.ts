@@ -59,14 +59,21 @@ serve(async (req) => {
     const body = await req.text();
     const signature = req.headers.get("x-razorpay-signature");
 
-    // Verify signature (optional but recommended for production)
-    if (signature) {
-      const isValid = await verifyWebhookSignature(body, signature, razorpayKeySecret);
-      if (!isValid) {
-        console.warn("Invalid webhook signature - processing anyway for testing");
-        // In production, you might want to reject invalid signatures:
-        // return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 401 });
-      }
+    // Signature is REQUIRED. Missing OR invalid → reject.
+    if (!signature) {
+      console.error("Webhook rejected: missing x-razorpay-signature header");
+      return new Response(JSON.stringify({ error: "Missing signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const isValid = await verifyWebhookSignature(body, signature, razorpayKeySecret);
+    if (!isValid) {
+      console.error("Webhook rejected: invalid signature");
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const event = JSON.parse(body);

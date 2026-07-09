@@ -193,6 +193,21 @@ export default function UserGovernance() {
             await supabase.from('user_warnings').update({ is_active: false }).eq('user_id', tid).eq('is_active', true);
             await writeAuditLog(user?.id || 'system', 'USER_RESTRICTION_LIFTED', tid, reason);
             break;
+          case 'approve':
+            await supabase.from('profiles').update({ account_status: 'approved' }).eq('id', tid);
+            await writeAuditLog(user?.id || 'system', 'ACCOUNT_APPROVED', tid, reason);
+            await supabase.from('notifications').insert({ user_id: tid, title: 'Account Approved', message: 'Your artist account has been approved. Welcome aboard!', type: 'success' });
+            break;
+          case 'reject':
+            await supabase.from('profiles').update({ account_status: 'rejected' }).eq('id', tid);
+            await writeAuditLog(user?.id || 'system', 'ACCOUNT_REJECTED', tid, reason);
+            await supabase.from('notifications').insert({ user_id: tid, title: 'Account Update', message: `Your account submission was not approved: ${reason}`, type: 'error' });
+            break;
+          case 'needs_update':
+            await supabase.from('profiles').update({ account_status: 'needs_update' }).eq('id', tid);
+            await writeAuditLog(user?.id || 'system', 'ACCOUNT_NEEDS_UPDATE', tid, reason);
+            await supabase.from('notifications').insert({ user_id: tid, title: 'Profile Update Required', message: reason, type: 'warning' });
+            break;
         }
       }
       toast.success(selectedUser ? 'Action complete' : `Action applied to ${targetIds.length} users`);
@@ -480,6 +495,9 @@ export default function UserGovernance() {
                   <SelectValue placeholder="Select action..." />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="approve"><div className="flex items-center gap-2 font-medium"><CheckCircle className="h-4 w-4 text-green-500" /> Approve Account</div></SelectItem>
+                  <SelectItem value="needs_update"><div className="flex items-center gap-2 font-medium"><AlertTriangle className="h-4 w-4 text-amber-500" /> Request Profile Update</div></SelectItem>
+                  <SelectItem value="reject"><div className="flex items-center gap-2 font-medium"><X className="h-4 w-4 text-destructive" /> Reject Account</div></SelectItem>
                   <SelectItem value="notify"><div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4 text-primary" /> Direct System Message</div></SelectItem>
                   <SelectItem value="warn"><div className="flex items-center gap-2 font-medium"><AlertTriangle className="h-4 w-4 text-amber-500" /> Formal Warning</div></SelectItem>
                   <SelectItem value="suspend"><div className="flex items-center gap-2 font-medium"><Clock className="h-4 w-4 text-orange-500" /> Temporary Suspension</div></SelectItem>

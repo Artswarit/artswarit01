@@ -21,34 +21,40 @@ serve(async (req) => {
   try {
     const signature = req.headers.get('x-razorpay-signature');
     const body = await req.text();
-    
-    // Verify webhook signature
-    if (signature) {
-      const encoder = new TextEncoder();
-      const key = encoder.encode(RAZORPAY_KEY_SECRET);
-      const data = encoder.encode(body);
-      
-      const cryptoKey = await crypto.subtle.importKey(
-        "raw",
-        key,
-        { name: "HMAC", hash: "SHA-256" },
-        false,
-        ["sign"]
-      );
-      
-      const expectedSignature = await crypto.subtle.sign("HMAC", cryptoKey, data);
-      const expectedHex = Array.from(new Uint8Array(expectedSignature))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
 
-      if (expectedHex !== signature) {
-        console.error('Webhook signature verification failed');
-        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      // console.log('Webhook signature verified');
+    // Signature is REQUIRED. Missing header = reject (prevents forged events).
+    if (!signature) {
+      console.error('Webhook rejected: missing x-razorpay-signature header');
+      return new Response(JSON.stringify({ error: 'Missing signature' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Verify webhook signature
+    const encoder = new TextEncoder();
+    const key = encoder.encode(RAZORPAY_KEY_SECRET);
+    const data = encoder.encode(body);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      key,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const expectedSignature = await crypto.subtle.sign("HMAC", cryptoKey, data);
+    const expectedHex = Array.from(new Uint8Array(expectedSignature))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    if (expectedHex !== signature) {
+      console.error('Webhook signature verification failed');
+      return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const payload = JSON.parse(body);

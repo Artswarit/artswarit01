@@ -64,6 +64,13 @@ const ArtworkManagementCard = ({
 
   const [pendingStatus, setPendingStatus] = useState<'public' | 'private' | 'archived' | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+
+  const requestDelete = () => setConfirmDeleteOpen(true);
+  const confirmDelete = () => {
+    setConfirmDeleteOpen(false);
+    onDelete();
+  };
 
   const getStatusLabel = (status: string) => {
     if (artwork.metadata?.admin_banned) return 'Banned';
@@ -237,8 +244,33 @@ const ArtworkManagementCard = ({
   const statusConfig = getStatusConfig(artwork.status);
   const accessConfig = getAccessConfig(accessType);
 
+  const deleteConfirmDialog = (
+    <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete this artwork?</AlertDialogTitle>
+          <AlertDialogDescription>
+            <span className="font-semibold text-foreground">{artwork.title}</span> will be permanently removed
+            along with its media files. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={confirmDelete}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Delete artwork
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   if (viewMode === 'list') {
     return (
+      <>
+      {deleteConfirmDialog}
       <div className={cn(
         'group relative flex items-center gap-2 sm:gap-4 p-2 sm:p-4 rounded-xl border bg-card transition-all duration-200 overflow-hidden',
         isSelected ? 'border-primary bg-primary/5 ring-1 ring-primary/20' : 'border-border hover:border-primary/30 hover:bg-accent/50'
@@ -350,17 +382,20 @@ const ArtworkManagementCard = ({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onDelete} className="gap-2 text-destructive focus:text-destructive min-h-[44px] sm:min-h-[40px]">
+              <DropdownMenuItem onClick={requestDelete} className="gap-2 text-destructive focus:text-destructive min-h-[44px] sm:min-h-[40px]">
                 <Trash2 className="h-4 w-4" /> Delete Artwork
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
+      </>
     );
   }
 
   return (
+    <>
+    {deleteConfirmDialog}
     <div
       className={cn(
         'group relative flex flex-col rounded-xl border bg-card transition-all duration-300',
@@ -436,7 +471,7 @@ const ArtworkManagementCard = ({
             variant="destructive"
             className="h-9 w-9 rounded-full"
             disabled={isDeleting}
-            onClick={onDelete}
+            onClick={requestDelete}
            aria-label="Delete artwork">
             {isDeleting
               ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -510,7 +545,7 @@ const ArtworkManagementCard = ({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onDelete} className="gap-2 text-destructive focus:text-destructive min-h-[44px] sm:min-h-[40px]">
+              <DropdownMenuItem onClick={requestDelete} className="gap-2 text-destructive focus:text-destructive min-h-[44px] sm:min-h-[40px]">
                 <Trash2 className="h-4 w-4" /> Delete Artwork
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -518,6 +553,7 @@ const ArtworkManagementCard = ({
         </div>
       </div>
     </div>
+    </>
   );
 };
 

@@ -107,89 +107,23 @@ const ArtworkCard = ({
     checkLikeStatus();
   }, [id, user?.id]);
 
-  // Fetch current counts and subscribe to real-time updates
+  // Fetch initial counts once. Per-card realtime channels were removed —
+  // they created 40–80 concurrent sockets on any grid page, driving huge
+  // Realtime egress. The user's own like/view updates locally via
+  // optimistic UI in handleLike; cross-user changes appear on next fetch.
   useEffect(() => {
-    async function fetchCounts() {
-      const [likesResult, viewsResult] = await Promise.all([
-        supabase.from('artwork_likes').select('id').eq('artwork_id', id),
-        supabase.from('artwork_views').select('id').eq('artwork_id', id)
-      ]);
-      
-      setCurrentLikes(likesResult.data?.length || 0);
-      setCurrentViews(viewsResult.data?.length || 0);
-    }
-    
-    fetchCounts();
-
     let isCancelled = false;
-    const instanceId = Math.random().toString(36).substring(7);
-
-    // Subscribe to real-time like updates (skip updates from other users only)
-    const likesChannel = supabase
-      .channel(`artwork-likes-${id}-${instanceId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'artwork_likes',
-          filter: `artwork_id=eq.${id}`
-        },
-        async (payload) => {
-          if (isCancelled) return;
-          
-          // Refetch to sync cross-component AND cross-tab state perfectly
-          const { data } = await supabase
-            .from('artwork_likes')
-            .select('id')
-            .eq('artwork_id', id);
-          
-          if (!isCancelled) {
-            setCurrentLikes(data?.length || 0);
-          }
-
-          // If the interaction might be ours (cross-tab sync), refetch isLiked
-          if (user?.id) {
-            const { data: userLike } = await supabase
-              .from('artwork_likes')
-              .select('id')
-              .eq('artwork_id', id)
-              .eq('user_id', user.id)
-              .maybeSingle();
-
-            if (!isCancelled) {
-              setIsLiked(!!userLike);
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    // Subscribe to real-time view updates
-    const viewsChannel = supabase
-      .channel(`artwork-views-${id}-${instanceId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'artwork_views',
-          filter: `artwork_id=eq.${id}`
-        },
-        () => {
-          if (!isCancelled) {
-            setCurrentViews(prev => prev + 1);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      isCancelled = true;
-      supabase.removeChannel(likesChannel);
-      supabase.removeChannel(viewsChannel);
-    };
-  }, [id, user?.id]);
+    (async () => {
+      const [likesResult, viewsResult] = await Promise.all([
+        supabase.from('artwork_likes').select('id', { count: 'exact', head: true }).eq('artwork_id', id),
+        supabase.from('artwork_views').select('id', { count: 'exact', head: true }).eq('artwork_id', id),
+      ]);
+      if (isCancelled) return;
+      setCurrentLikes(likesResult.count ?? 0);
+      setCurrentViews(viewsResult.count ?? 0);
+    })();
+    return () => { isCancelled = true; };
+  }, [id]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
