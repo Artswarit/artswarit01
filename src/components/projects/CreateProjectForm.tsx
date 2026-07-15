@@ -192,11 +192,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
     setSubmitting(true);
 
     try {
-      // 1. Check which columns exist in the projects table to avoid "column does not exist" errors
-      const { data: colCheck } = await supabase.from('projects').select('*').limit(1);
-      const existingCols = colCheck && colCheck.length > 0 ? Object.keys(colCheck[0]) : [];
-      
-      const projectInsert: any = {
+      const projectInsert: Record<string, unknown> = {
         title,
         description,
         budget: budgetUSD,
@@ -205,13 +201,12 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         artist_id: artistId || null,
         status: 'pending',
         is_locked: artistId ? true : false,
-        reference_files: []
+        reference_files: [],
+        amount_usd: budgetUSD,
+        currency: userCurrency,
+        exchange_rate: currentRate,
       };
 
-      // Use the higher precision budget but only insert into columns that actually exist
-      if (existingCols.includes('amount_usd')) projectInsert.amount_usd = budgetUSD;
-      if (existingCols.includes('currency')) projectInsert.currency = userCurrency;
-      if (existingCols.includes('exchange_rate')) projectInsert.exchange_rate = currentRate;
 
       const { data: project, error: projectError } = await supabase
         .from('projects')
