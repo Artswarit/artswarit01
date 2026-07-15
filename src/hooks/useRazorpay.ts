@@ -127,8 +127,12 @@ export function useRazorpay() {
             console.error('Verification error:', err);
             toast.error(err.message || 'Payment verification failed');
             onFailure?.(err.message);
+          } finally {
+            document.body.classList.remove('razorpay-active');
+            setLoading(false);
           }
         },
+
         prefill: {
           email: session.user.email,
         },
