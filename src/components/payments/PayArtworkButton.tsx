@@ -58,6 +58,13 @@ export function PayArtworkButton({
     // before React commits the `disabled` re-render.
     if (stripeProcessing || loading) return;
 
+    track('artwork_purchase_initiated', {
+      artwork_id: artworkId,
+      amount,
+      currency: gatewayCurrency,
+      provider,
+    });
+
     if (provider === 'stripe') {
       setStripeError(null);
       setStripeProcessing(true);
@@ -73,6 +80,11 @@ export function PayArtworkButton({
             logContext: { kind: 'artwork', targetId: artworkId },
           },
         );
+        track('artwork_checkout_redirect', {
+          artwork_id: artworkId,
+          provider: 'stripe',
+          duration_ms: Date.now() - startedAt,
+        });
         // Leave stripeProcessing=true through the navigation so the button
         // stays disabled while the browser tears down the page.
         window.location.href = url;
@@ -92,6 +104,12 @@ export function PayArtworkButton({
             message,
           });
         }
+        track('artwork_purchase_failed', {
+          artwork_id: artworkId,
+          provider: 'stripe',
+          reason: 'checkout_session',
+          message,
+        });
         toast.error(message);
         setStripeError(message);
         setStripeProcessing(false);
@@ -105,12 +123,25 @@ export function PayArtworkButton({
     setTimeout(() => {
       initiatePayment({
         artworkId,
-        onSuccess: () => {
+        onSuccess: (paymentId) => {
+          track('artwork_purchase_succeeded', {
+            artwork_id: artworkId,
+            provider: 'razorpay',
+            payment_id: paymentId,
+          });
           onSuccess?.();
+        },
+        onFailure: (reason) => {
+          track('artwork_purchase_failed', {
+            artwork_id: artworkId,
+            provider: 'razorpay',
+            reason: reason || 'unknown',
+          });
         },
       });
     }, 350);
   };
+
 
 
   return (
