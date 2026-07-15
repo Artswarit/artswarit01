@@ -17,6 +17,8 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createStripeCheckoutSession } from '@/lib/payments/createStripeCheckoutSession';
 import { logPaymentFailure } from '@/lib/payments/logPaymentEvent';
+import { track } from '@/lib/analytics';
+
 
 interface PayArtworkButtonProps {
   artworkId: string;
