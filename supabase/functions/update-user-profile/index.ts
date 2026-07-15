@@ -55,46 +55,77 @@ serve(async (req) => {
     }
 
     const formData = await req.formData()
-    const name = formData.get('name') as string
-    const bio = formData.get('bio') as string
-    const profilePic = formData.get('profile_pic') as File
-    const coverPhoto = formData.get('cover_photo') as File
+    const rawName = formData.get('name')
+    const rawBio = formData.get('bio')
+    const profilePic = formData.get('profile_pic')
+    const coverPhoto = formData.get('cover_photo')
 
-    let profilePicUrl = null
-    let coverPhotoUrl = null
+    // Validate text fields
+    const parsed = TextSchema.safeParse({
+      name: typeof rawName === 'string' ? rawName : undefined,
+      bio: typeof rawBio === 'string' ? rawBio : undefined,
+    })
+    if (!parsed.success) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten().fieldErrors }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    const { name, bio } = parsed.data
+
+    // Validate uploaded files (mime/size) up-front
+    const validateFile = (f: unknown, label: string): File | null => {
+      if (!(f instanceof File) || f.size === 0) return null
+      if (!ALLOWED_MIME.has(f.type)) {
+        throw new Error(`${label} must be a JPEG, PNG, WEBP, or GIF image`)
+      }
+      if (f.size > MAX_IMAGE_BYTES) {
+        throw new Error(`${label} must be smaller than 5 MB`)
+      }
+      return f
+    }
+
+    let profilePicFile: File | null = null
+    let coverPhotoFile: File | null = null
+    try {
+      profilePicFile = validateFile(profilePic, 'Profile picture')
+      coverPhotoFile = validateFile(coverPhoto, 'Cover photo')
+    } catch (e: any) {
+      return new Response(
+        JSON.stringify({ error: e.message || 'Invalid file' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    let profilePicUrl: string | null = null
+    let coverPhotoUrl: string | null = null
 
     // Handle profile picture upload
-    if (profilePic) {
-      const profilePicPath = `image/${user.id}/profile_${Date.now()}.${profilePic.name.split('.').pop()}`
-      
+    if (profilePicFile) {
+      const ext = (profilePicFile.name.split('.').pop() || 'jpg').replace(/[^a-z0-9]/gi, '').slice(0, 5)
+      const profilePicPath = `image/${user.id}/profile_${Date.now()}.${ext}`
       const { error: uploadError } = await supabase.storage
         .from('media')
-        .upload(profilePicPath, profilePic)
-
+        .upload(profilePicPath, profilePicFile, { contentType: profilePicFile.type })
       if (uploadError) {
         console.error('Profile pic upload error:', uploadError)
       } else {
-        const { data } = supabase.storage
-          .from('media')
-          .getPublicUrl(profilePicPath)
+        const { data } = supabase.storage.from('media').getPublicUrl(profilePicPath)
         profilePicUrl = data.publicUrl
       }
     }
 
     // Handle cover photo upload
-    if (coverPhoto) {
-      const coverPhotoPath = `image/${user.id}/cover_${Date.now()}.${coverPhoto.name.split('.').pop()}`
-      
+    if (coverPhotoFile) {
+      const ext = (coverPhotoFile.name.split('.').pop() || 'jpg').replace(/[^a-z0-9]/gi, '').slice(0, 5)
+      const coverPhotoPath = `image/${user.id}/cover_${Date.now()}.${ext}`
       const { error: uploadError } = await supabase.storage
         .from('media')
-        .upload(coverPhotoPath, coverPhoto)
-
+        .upload(coverPhotoPath, coverPhotoFile, { contentType: coverPhotoFile.type })
       if (uploadError) {
         console.error('Cover photo upload error:', uploadError)
       } else {
-        const { data } = supabase.storage
-          .from('media')
-          .getPublicUrl(coverPhotoPath)
+        const { data } = supabase.storage.from('media').getPublicUrl(coverPhotoPath)
         coverPhotoUrl = data.publicUrl
       }
     }
@@ -111,6 +142,14 @@ serve(async (req) => {
     if (bio !== undefined) updateData.bio = bio
     if (profilePicUrl) updateData.profile_pic_url = profilePicUrl
     if (coverPhotoUrl) updateData.cover_photo_url = coverPhotoUrl
+
+    if (Object.keys(updateData).length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'No fields to update' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
 
     const { data: updatedUser, error: updateError } = await supabase
       .from('users')
