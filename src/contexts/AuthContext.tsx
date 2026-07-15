@@ -343,19 +343,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
-      // 1. Clear application state immediately for UI feedback
+      // 1. Ask the auth server to revoke the session BEFORE clearing local state,
+      //    so a network failure doesn't leave the UI signed out while the server
+      //    still has a live refresh token.
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Signout error:', error);
+        toast({
+          title: "Sign out failed",
+          description: error.message || "Could not sign out. Please check your connection and try again.",
+          variant: "destructive"
+        });
+        return { error };
+      }
+
+      // 2. Clear application state only after the server confirms.
       setUser(null);
       setSession(null);
       setSubscription(null);
       setProfile(null);
-      
-      // 2. Perform the actual Supabase sign out
-      // We await this to ensure the session is invalidated in the database/storage
-      // Revoke the refresh token on the auth server across all devices, not just this tab
-      await supabase.auth.signOut({ scope: 'global' });
 
-      // 3. Clear storage keys related to Supabase to prevent ghost sessions
-      // This is a safety measure if signOut didn't clean everything
+      // 3. Belt-and-suspenders: clear any stale Supabase keys left in localStorage.
       const keys = Object.keys(localStorage);
       for (const key of keys) {
         if (key.includes('supabase.auth.token') || key.startsWith('sb-')) {
@@ -363,23 +371,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      // 4. Force a hard refresh to home page to clear any remaining in-memory state
-      // Use replace to avoid the "back button" logging them back in
-      window.location.replace('/');
-
       toast({
         title: "Signed out",
         description: "You've been successfully signed out."
       });
 
+      // 4. Hard-redirect home to drop any in-memory state.
+      window.location.replace('/');
+
       return { error: null };
     } catch (error: any) {
       console.error('Signout error:', error);
-      // Even if it fails, try to force a redirect to home for safety
-      window.location.replace('/');
+      toast({
+        title: "Sign out failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
       return { error };
     }
   };
+
 
   const signInWithGoogle = async () => {
     try {
