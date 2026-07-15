@@ -116,6 +116,11 @@ export type AnalyticsEvent =
   // Payments
   | "payment_success"
   | "payment_failed"
+  | "artwork_purchase_initiated"
+  | "artwork_purchase_succeeded"
+  | "artwork_purchase_failed"
+  | "artwork_checkout_redirect"
+
   // Subscriptions
   | "pricing_viewed"
   | "upgrade_clicked"
