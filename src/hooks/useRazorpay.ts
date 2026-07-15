@@ -127,8 +127,12 @@ export function useRazorpay() {
             console.error('Verification error:', err);
             toast.error(err.message || 'Payment verification failed');
             onFailure?.(err.message);
+          } finally {
+            document.body.classList.remove('razorpay-active');
+            setLoading(false);
           }
         },
+
         prefill: {
           email: session.user.email,
         },
@@ -162,15 +166,18 @@ export function useRazorpay() {
         document.body.classList.remove('razorpay-active');
         setLoading(false);
       });
-      
+
       razorpay.open();
+      // NOTE: do NOT clear loading here — payment verification runs later
+      // inside handler/modal.ondismiss. Clearing here would let the caller
+      // re-fire and double-submit a real payment.
     } catch (error: any) {
       document.body.classList.remove('razorpay-active');
       toast.error(error.message || 'Payment failed');
       onFailure?.(error.message);
-    } finally {
       setLoading(false);
     }
+
   }, [loadRazorpayScript]);
 
   return { initiatePayment, loading };
