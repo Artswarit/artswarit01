@@ -192,7 +192,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
     setSubmitting(true);
 
     try {
-      const projectInsert: Record<string, unknown> = {
+      const projectInsert = {
         title,
         description,
         budget: budgetUSD,
@@ -206,6 +206,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         currency: userCurrency,
         exchange_rate: currentRate,
       };
+
 
 
       const { data: project, error: projectError } = await supabase
