@@ -166,7 +166,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 
         {/* Right Form Panel */}
         <div className="w-full md:w-[55%] lg:w-1/2 xl:w-[480px] xl:min-w-[480px] flex flex-col">
-          <div className="flex-1 flex items-center justify-center px-5 sm:px-8 md:px-6 lg:px-10 py-10 md:py-6 lg:py-8 bg-white">
+          <div className="flex-1 flex items-center justify-center px-5 sm:px-8 md:px-6 lg:px-10 py-10 md:py-6 lg:py-8 bg-white dark:bg-background">
             <div className="w-full max-w-[400px] mx-auto">
               {/* Logo */}
               <div className="flex justify-center mb-6 md:mb-8 lg:mb-10">
@@ -175,10 +175,10 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 
               {/* Heading */}
               <div className="mb-8 text-center">
-                <h1 className="text-2xl sm:text-[28px] font-heading font-bold text-gray-900 tracking-tight">
+                <h1 className="text-2xl sm:text-[28px] font-heading font-bold text-gray-900 dark:text-white tracking-tight">
                   Welcome back
                 </h1>
-                <p className="text-gray-500 text-sm mt-2">
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
                   Sign in to continue to your creative space.
                 </p>
               </div>
@@ -188,7 +188,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading || isSubmitting}
-                className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -202,24 +202,24 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
               {/* Divider */}
               <div className="relative my-7">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-200" />
+                  <span className="w-full border-t border-gray-200 dark:border-zinc-800" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-white px-4 text-xs text-gray-400 uppercase tracking-wider">or</span>
+                  <span className="bg-white dark:bg-background px-4 text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">or</span>
                 </div>
               </div>
 
               {/* Email Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-1.5">
-                  <Label htmlFor="login-email" className="text-[13px] font-medium text-gray-700">
+                  <Label htmlFor="login-email" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
                     Email address
                   </Label>
                   <div className={cn(
                     "relative rounded-xl border transition-all duration-200",
                     focusedField === 'email' 
                       ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" 
-                      : "border-gray-200 hover:border-gray-300"
+                      : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700"
                   )}>
                     <Input
                       id="login-email"
@@ -237,7 +237,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="login-password" className="text-[13px] font-medium text-gray-700">
+                    <Label htmlFor="login-password" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
                       Password
                     </Label>
                   </div>
@@ -245,7 +245,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                     "relative rounded-xl border transition-all duration-200",
                     focusedField === 'password' 
                       ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" 
-                      : "border-gray-200 hover:border-gray-300"
+                      : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700"
                   )}>
                     <Input
                       id="login-password"
@@ -260,7 +260,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-350 transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -298,7 +298,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
               </form>
 
               {/* Sign up link */}
-              <div className="text-center mt-8 text-sm text-gray-500">
+              <div className="text-center mt-8 text-sm text-gray-500 dark:text-gray-400">
                 Don't have an account?{" "}
                 <Link
                   to="/signup"
@@ -311,11 +311,11 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
           </div>
 
           {/* Minimal footer inside the form panel */}
-          <div className="px-6 py-4 text-center text-xs text-gray-400 bg-white border-t border-gray-100">
+          <div className="px-6 py-4 text-center text-xs text-gray-400 dark:text-gray-500 bg-white dark:bg-background border-t border-gray-100 dark:border-zinc-900">
             By signing in, you agree to our{" "}
-            <Link to="/terms-of-service" className="text-gray-500 hover:text-violet-600 underline">Terms</Link>
+            <Link to="/terms-of-service" className="text-gray-500 dark:text-gray-400 hover:text-violet-600 underline">Terms</Link>
             {" "}and{" "}
-            <Link to="/privacy-policy" className="text-gray-500 hover:text-violet-600 underline">Privacy Policy</Link>
+            <Link to="/privacy-policy" className="text-gray-500 dark:text-gray-400 hover:text-violet-600 underline">Privacy Policy</Link>
           </div>
         </div>
       </div>

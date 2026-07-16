@@ -89,15 +89,15 @@ const Events = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-background dark:via-background/50 dark:to-background">
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 pt-24">
         <div className="space-y-8">
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Art Events & Exhibitions</h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Art Events & Exhibitions</h1>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Discover art events, exhibitions, workshops, and galleries near you
             </p>
           </div>
@@ -107,7 +107,7 @@ const Events = () => {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
                   <Input
                     placeholder="Search events, locations, organizers..."
                     value={searchTerm}
@@ -119,7 +119,7 @@ const Events = () => {
                 <select
                   value={selectedType}
                   onChange={(e) => handleTypeFilter(e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-2"
+                  className="border border-gray-300 dark:border-zinc-800 rounded-md px-3 py-2 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
                 >
                   {eventTypes.map(type => (
                     <option key={type} value={type}>{type}</option>
@@ -184,7 +184,7 @@ const Events = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Upcoming Events</h2>
-              <span className="text-sm text-gray-600">{filteredEvents.length} events found</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{filteredEvents.length} events found</span>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -205,22 +205,22 @@ const Events = () => {
                   
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
-                    <p className="text-sm text-gray-600 mb-3">{event.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{event.description}</p>
                     
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <Calendar className="h-3 w-3" />
                         <span>{event.date}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <Clock className="h-3 w-3" />
                         <span>{event.time}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <MapPin className="h-3 w-3" />
                         <span>{event.location}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <Users className="h-3 w-3" />
                         <span>{event.attendees} attending</span>
                       </div>
@@ -259,10 +259,10 @@ const Events = () => {
           </Card>
 
           {/* Create Event CTA */}
-          <Card className="bg-gray-50">
+          <Card className="bg-gray-50 dark:bg-zinc-900/50">
             <CardContent className="p-8 text-center">
               <h3 className="text-2xl font-bold mb-4">Host Your Own Event</h3>
-              <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
                 Whether it's an exhibition, workshop, or art fair, our platform helps you reach the right audience and manage your event.
               </p>
               <Button size="lg">Create Event</Button>

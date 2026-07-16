@@ -6,6 +6,8 @@ export type PaymentProvider = 'razorpay' | 'stripe';
 // Exchange rate for USD to INR (should match backend)
 export const USD_TO_INR_RATE = 83.5;
 
+export const INDIAN_COUNTRY_CODES = ['IN', 'IND', 'India'];
+
 export interface PaymentGatewayInfo {
   provider: PaymentProvider;
   isIndian: boolean;
@@ -43,7 +45,7 @@ export function usePaymentGateway(customExchangeRate?: number): PaymentGatewayIn
 
   return useMemo(() => {
     // Determine if user is in India
-    const isIndian = userCountry === 'IN' || userCountry === 'India';
+    const isIndian = INDIAN_COUNTRY_CODES.includes(userCountry || '');
     
     // Check if Stripe is available (true for international)
     const stripeAvailable = !isIndian; 
@@ -114,8 +116,7 @@ export function usePaymentGateway(customExchangeRate?: number): PaymentGatewayIn
  * Get payment info for a specific country (used in backend/edge functions)
  */
 export function getPaymentProviderForCountry(countryCode: string): PaymentProvider {
-  const indianCodes = ['IN', 'IND', 'India'];
-  if (indianCodes.includes(countryCode)) {
+  if (INDIAN_COUNTRY_CODES.includes(countryCode)) {
     return 'razorpay';
   }
   return 'stripe';

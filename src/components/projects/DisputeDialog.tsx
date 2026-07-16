@@ -24,6 +24,16 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Upload, X, FileText, AlertCircle, Sparkles } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Milestone {
   id: string;
@@ -62,6 +72,7 @@ export function DisputeDialog({
   const [description, setDescription] = useState('');
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showWithdrawConfirm, setShowWithdrawConfirm] = useState(false);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -93,7 +104,8 @@ export function DisputeDialog({
           raised_by: user?.id,
           reason,
           description,
-          status: 'open'
+          status: 'open',
+          previous_status: milestone.status
         })
         .select()
         .single();
@@ -167,16 +179,17 @@ export function DisputeDialog({
     }
   };
 
-  const handleWithdraw = async () => {
-    const confirmed = window.confirm('Are you sure you want to withdraw this dispute? The milestone will return to Review Pending status.');
-    if (!confirmed) return;
+  const handleWithdraw = () => {
+    setShowWithdrawConfirm(true);
+  };
 
+  const executeWithdraw = async () => {
     setSubmitting(true);
     try {
       // Find the open dispute
       const { data: activeDispute } = await supabase
         .from('disputes')
-        .select('id')
+        .select('id, previous_status')
         .eq('milestone_id', milestone.id)
         .eq('status', 'open')
         .maybeSingle();
@@ -189,11 +202,11 @@ export function DisputeDialog({
           .eq('id', activeDispute.id);
       }
 
-      // Revert milestone status to REVIEW_PENDING (assuming that's where it came from)
-      // or at least out of DISPUTED
+      // Revert milestone status to pre-dispute status (fallback to REVIEW_PENDING)
+      const targetStatus = activeDispute?.previous_status || 'REVIEW_PENDING';
       await supabase
         .from('project_milestones')
-        .update({ status: 'REVIEW_PENDING' })
+        .update({ status: targetStatus })
         .eq('id', milestone.id);
 
       // Log activity
@@ -222,7 +235,8 @@ export function DisputeDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] rounded-[2.5rem] border-none shadow-2xl overflow-hidden p-0 bg-white dark:bg-card">
         <div className="bg-gradient-to-r from-red-500/10 to-orange-500/10 p-8 pb-6 border-b border-border/40">
           <DialogHeader className="sm:text-left">
@@ -374,5 +388,29 @@ export function DisputeDialog({
         </div>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={showWithdrawConfirm} onOpenChange={setShowWithdrawConfirm}>
+      <AlertDialogContent className="w-[92vw] max-w-md rounded-[2.5rem] border-none shadow-2xl backdrop-blur-xl bg-background/95 p-8">
+        <AlertDialogHeader className="space-y-4">
+          <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-2">
+            <AlertTriangle className="h-8 w-8 text-amber-500" />
+          </div>
+          <AlertDialogTitle className="text-2xl font-black text-center uppercase tracking-tight">Withdraw Dispute?</AlertDialogTitle>
+          <AlertDialogDescription className="text-center text-muted-foreground text-base font-medium leading-relaxed">
+            Are you sure you want to withdraw this dispute? The milestone will return to its previous status.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
+          <AlertDialogCancel className="h-14 flex-1 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] border-border/50 hover:bg-muted transition-all">Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={executeWithdraw}
+            className="h-14 flex-1 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] bg-emerald-600 text-white hover:bg-emerald-700 shadow-xl shadow-emerald-500/20 transition-all border-none"
+          >
+            Confirm Withdrawal
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 }

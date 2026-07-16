@@ -23,6 +23,7 @@ import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
 import { RefreshCw } from "lucide-react";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import { uploadFileWithProgress } from "@/lib/uploadWithProgress";
+import MessageBubble from "@/components/shared/MessageBubble";
 interface ProjectDetailModalProps {
   projectId: string | null;
   open: boolean;
@@ -1120,31 +1121,18 @@ const ProjectDetailModal = ({
                                   </div>
                                 )}
                                 <div className={`flex gap-2 items-end ${isMe ? 'flex-row-reverse' : ''} ${prevSame ? 'mt-0.5' : 'mt-3'}`}>
-                                  <div className="w-7 shrink-0">
-                                    {!nextSame && (
-                                      <Avatar className="h-7 w-7">
-                                        <AvatarImage src={senderAvatar || ''} />
-                                        <AvatarFallback className="bg-primary/10 text-primary text-[11px] font-semibold">{senderName?.charAt(0) || 'U'}</AvatarFallback>
-                                      </Avatar>
-                                    )}
-                                  </div>
                                   <div className={`flex flex-col max-w-[78%] ${isMe ? 'items-end' : 'items-start'}`}>
-                                    <div
-                                      className={`bubble-in ${isMe ? 'bubble-in-right' : ''} px-3.5 py-2 text-[15px] leading-snug ${
-                                        isMe
-                                          ? 'bg-primary text-primary-foreground'
-                                          : 'bg-muted/60 dark:bg-card border border-border/40 text-foreground'
-                                      }`}
-                                      style={{
-                                        borderRadius: 18,
-                                        borderBottomRightRadius: isMe && nextSame ? 6 : 18,
-                                        borderTopRightRadius: isMe && prevSame ? 6 : 18,
-                                        borderBottomLeftRadius: !isMe && nextSame ? 6 : 18,
-                                        borderTopLeftRadius: !isMe && prevSame ? 6 : 18,
+                                    <MessageBubble
+                                      message={{
+                                        id: msg.id,
+                                        content: msg.text || ""
                                       }}
-                                    >
-                                      <p className="whitespace-pre-wrap break-words">{msg.text}</p>
-                                    </div>
+                                      isOwn={isMe}
+                                      nextSame={nextSame}
+                                      prevSame={prevSame}
+                                      avatarUrl={senderAvatar}
+                                      senderName={senderName}
+                                    />
                                     {!nextSame && (
                                       <span className="text-[10px] text-muted-foreground/60 mt-1 px-1">
                                         {formatDate(msg.timestamp, 'h:mm a')}

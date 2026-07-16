@@ -229,22 +229,21 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
       )}>
         {/* Left Visual Panel — Tablet & Desktop */}
         {!isModal && <ArtisticVisualPanel />}
-
         {/* Right Form Panel */}
         <div className="w-full md:w-[55%] lg:w-1/2 xl:w-[520px] xl:min-w-[520px] flex flex-col">
-          <div className="flex-1 flex items-start md:items-center justify-center px-5 sm:px-8 md:px-6 lg:px-10 py-8 md:py-4 lg:py-6 bg-white overflow-y-auto">
+          <div className="flex-1 flex items-start md:items-center justify-center px-5 sm:px-8 md:px-6 lg:px-10 py-8 md:py-4 lg:py-6 bg-white dark:bg-background overflow-y-auto">
             <div className="w-full max-w-[420px] mx-auto">
               {/* Logo */}
               <div className="flex justify-center mb-6 lg:mb-8">
                 <LogoWithName size="lg" />
               </div>
-
+ 
               {/* Heading */}
               <div className="mb-8 text-center">
-                <h1 className="text-2xl sm:text-[28px] font-heading font-bold text-gray-900 tracking-tight">
+                <h1 className="text-2xl sm:text-[28px] font-heading font-bold text-gray-900 dark:text-white tracking-tight">
                   Create your account
                 </h1>
-                <p className="text-gray-500 text-sm mt-2">
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
                   Already have an account?{" "}
                   <Link to="/login" className="font-semibold text-violet-600 hover:text-violet-700 transition-colors">
                     Sign in
@@ -254,7 +253,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
 
               {/* Role Selection */}
               <div className="mb-6">
-                <Label className="text-[13px] font-medium text-gray-700 mb-3 block">
+                <Label className="text-[13px] font-medium text-gray-700 dark:text-gray-300 mb-3 block">
                   I want to join as <span className="text-red-500">*</span>
                 </Label>
                 <div className="grid grid-cols-2 gap-3">
@@ -266,19 +265,19 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                     className={cn(
                       "relative p-4 sm:p-5 rounded-xl border-2 text-left transition-all duration-200 group",
                       formData.role === 'artist'
-                        ? "border-violet-500 bg-violet-50/80 shadow-md shadow-violet-500/10"
-                        : "border-gray-200 hover:border-violet-300 hover:bg-gray-50",
+                        ? "border-violet-500 bg-violet-50/80 dark:bg-violet-950/20 shadow-md shadow-violet-500/10"
+                        : "border-gray-200 dark:border-zinc-800 hover:border-violet-300 hover:bg-gray-50 dark:hover:bg-zinc-900/50",
                       loading && "opacity-50 cursor-not-allowed"
                     )}
                   >
                     <div className={cn(
                       "w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors",
-                      formData.role === 'artist' ? "bg-violet-500 text-white" : "bg-gray-100 text-gray-500 group-hover:bg-violet-100 group-hover:text-violet-600"
+                      formData.role === 'artist' ? "bg-violet-500 text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 group-hover:bg-violet-100 dark:group-hover:bg-violet-950/30 group-hover:text-violet-600"
                     )}>
                       <Palette className="h-5 w-5" />
                     </div>
-                    <div className="font-semibold text-gray-900 text-[15px]">Artist</div>
-                    <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">Showcase & earn from your creativity</div>
+                    <div className="font-semibold text-gray-900 dark:text-white text-[15px]">Artist</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-450 mt-0.5 leading-relaxed">Showcase & earn from your creativity</div>
                     {formData.role === 'artist' && (
                       <div className="absolute top-3 right-3">
                         <CheckCircle2 className="h-5 w-5 text-violet-500" />
@@ -294,19 +293,19 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                     className={cn(
                       "relative p-4 sm:p-5 rounded-xl border-2 text-left transition-all duration-200 group",
                       formData.role === 'client'
-                        ? "border-violet-500 bg-violet-50/80 shadow-md shadow-violet-500/10"
-                        : "border-gray-200 hover:border-violet-300 hover:bg-gray-50",
+                        ? "border-violet-500 bg-violet-50/80 dark:bg-violet-950/20 shadow-md shadow-violet-500/10"
+                        : "border-gray-200 dark:border-zinc-800 hover:border-violet-300 hover:bg-gray-50 dark:hover:bg-zinc-900/50",
                       loading && "opacity-50 cursor-not-allowed"
                     )}
                   >
                     <div className={cn(
                       "w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors",
-                      formData.role === 'client' ? "bg-violet-500 text-white" : "bg-gray-100 text-gray-500 group-hover:bg-violet-100 group-hover:text-violet-600"
+                      formData.role === 'client' ? "bg-violet-500 text-white" : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-gray-400 group-hover:bg-violet-100 dark:group-hover:bg-violet-950/30 group-hover:text-violet-600"
                     )}>
                       <Users className="h-5 w-5" />
                     </div>
-                    <div className="font-semibold text-gray-900 text-[15px]">Client</div>
-                    <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">Find & hire talented artists</div>
+                    <div className="font-semibold text-gray-900 dark:text-white text-[15px]">Client</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-450 mt-0.5 leading-relaxed">Find & hire talented artists</div>
                     {formData.role === 'client' && (
                       <div className="absolute top-3 right-3">
                         <CheckCircle2 className="h-5 w-5 text-violet-500" />
@@ -315,13 +314,12 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                   </button>
                 </div>
               </div>
-
               {/* Google Sign Up */}
               <button
                 type="button"
                 onClick={() => handleSocialSignup("Google")}
                 disabled={loading || isSubmitting}
-                className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -331,25 +329,24 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                 </svg>
                 <span>Sign up with Google</span>
               </button>
-
+ 
               {/* Divider */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-200" />
+                  <span className="w-full border-t border-gray-200 dark:border-zinc-800" />
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="bg-white px-4 text-xs text-gray-400 uppercase tracking-wider">or sign up with email</span>
+                  <span className="bg-white dark:bg-background px-4 text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">or sign up with email</span>
                 </div>
               </div>
-
               {/* Email Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Full Name */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="signup-name" className="text-[13px] font-medium text-gray-700">Full name</Label>
+                  <Label htmlFor="signup-name" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">Full name</Label>
                   <div className={cn(
                     "relative rounded-xl border transition-all duration-200",
-                    focusedField === 'name' ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" : "border-gray-200 hover:border-gray-300"
+                    focusedField === 'name' ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700"
                   )}>
                     <Input
                       id="signup-name"
@@ -366,13 +363,13 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                     />
                   </div>
                 </div>
-
+ 
                 {/* Email */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="signup-email" className="text-[13px] font-medium text-gray-700">Email address</Label>
+                  <Label htmlFor="signup-email" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">Email address</Label>
                   <div className={cn(
                     "relative rounded-xl border transition-all duration-200",
-                    focusedField === 'email' ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" : "border-gray-200 hover:border-gray-300"
+                    focusedField === 'email' ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700"
                   )}>
                     <Input
                       id="signup-email"
@@ -389,13 +386,13 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                     />
                   </div>
                 </div>
-
+ 
                 {/* Password */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="signup-password" className="text-[13px] font-medium text-gray-700">Password</Label>
+                  <Label htmlFor="signup-password" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">Password</Label>
                   <div className={cn(
                     "relative rounded-xl border transition-all duration-200",
-                    focusedField === 'password' ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" : "border-gray-200 hover:border-gray-300"
+                    focusedField === 'password' ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700"
                   )}>
                     <Input
                       id="signup-password"
@@ -412,20 +409,20 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-350 transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
                     </button>
                   </div>
                 </div>
-
+ 
                 {/* Confirm Password */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="signup-confirm-password" className="text-[13px] font-medium text-gray-700">Confirm password</Label>
+                  <Label htmlFor="signup-confirm-password" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">Confirm password</Label>
                   <div className={cn(
                     "relative rounded-xl border transition-all duration-200",
-                    focusedField === 'confirmPassword' ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" : "border-gray-200 hover:border-gray-300"
+                    focusedField === 'confirmPassword' ? "border-violet-500 ring-2 ring-violet-500/20 shadow-sm" : "border-gray-200 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700"
                   )}>
                     <Input
                       id="signup-confirm-password"
@@ -442,7 +439,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-350 transition-colors"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
                       {showConfirmPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
@@ -477,7 +474,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                     disabled={loading}
                     className="mt-0.5 data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
                   />
-                  <Label htmlFor="signup-terms" className="text-xs text-gray-500 leading-relaxed cursor-pointer">
+                  <Label htmlFor="signup-terms" className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed cursor-pointer">
                     I accept the{" "}
                     <Link to="/terms-of-service" className="text-violet-600 hover:text-violet-700 font-medium underline">Terms of Service</Link>
                     {" "}and{" "}
@@ -506,7 +503,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
           </div>
 
           {/* Minimal footer */}
-          <div className="px-6 py-4 text-center text-xs text-gray-400 bg-white border-t border-gray-100">
+          <div className="px-6 py-4 text-center text-xs text-gray-400 bg-white dark:bg-background border-t border-gray-100 dark:border-zinc-900">
             Protected by industry-standard encryption
           </div>
         </div>

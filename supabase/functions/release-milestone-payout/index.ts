@@ -205,6 +205,24 @@ serve(async (req) => {
       },
     };
 
+    // 1. Atomic status transition: REVIEW_PENDING -> PROCESSING_PAYOUT
+    // to prevent concurrent double-release payout races.
+    const { data: lockedMilestone, error: updateError } = await supabaseAdmin
+      .from('project_milestones')
+      .update({ status: 'PROCESSING_PAYOUT' })
+      .eq('id', milestoneId)
+      .eq('status', 'REVIEW_PENDING')
+      .select('id')
+      .maybeSingle();
+
+    if (updateError || !lockedMilestone) {
+      console.error('Milestone failed to lock (either not in REVIEW_PENDING or already locked):', updateError);
+      return new Response(JSON.stringify({ error: 'Payout is already in progress or milestone state has changed.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const payoutResponse = await fetch('https://api.razorpayx.com/v1/payouts', {
       method: 'POST',
       headers: {
@@ -217,6 +235,12 @@ serve(async (req) => {
     if (!payoutResponse.ok) {
       const errorText = await payoutResponse.text();
       console.error('RazorpayX payout failed:', errorText);
+      // Revert status to REVIEW_PENDING so client can retry
+      await supabaseAdmin
+        .from('project_milestones')
+        .update({ status: 'REVIEW_PENDING' })
+        .eq('id', milestoneId);
+
       return new Response(JSON.stringify({ error: 'Failed to create payout' }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -306,6 +330,16 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error releasing milestone payout:', error);
+    // Revert locked status to REVIEW_PENDING if currently processing
+    try {
+      await supabaseAdmin
+        .from('project_milestones')
+        .update({ status: 'REVIEW_PENDING' })
+        .eq('id', milestoneId)
+        .eq('status', 'PROCESSING_PAYOUT');
+    } catch (e) {
+      console.error('Failed to rollback status:', e);
+    }
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,

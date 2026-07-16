@@ -3,6 +3,7 @@ import { X, Loader2, Send, MessageCircle } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import MessageBubble from "@/components/shared/MessageBubble";
 
 type Message = {
   sender: "user" | "bot";
@@ -220,31 +221,17 @@ const UniversalChatbot: React.FC = () => {
               ref={chatRef}
             >
               {messages.map((msg, i) => (
-                <div
+                <MessageBubble
                   key={i}
-                  className={`flex items-end gap-1.5 animate-in slide-in-from-bottom-2 fade-in duration-300 ease-out ${
-                    msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {msg.sender === "bot" && (
-                    <div className="h-8 w-8 flex items-center justify-center shrink-0 mb-0.5 z-10">
-                      <img
-                        src="/icons/artswarit-logo-96.png"
-                        alt=""
-                        className="h-7 w-7 object-contain drop-shadow-sm"
-                      />
-                    </div>
-                  )}
-                  <div
-                    className={`rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed max-w-[85%] whitespace-pre-line break-words shadow-sm border ${
-                      msg.sender === "user"
-                        ? "bg-white text-primary font-bold rounded-br-sm shadow-primary/5 border-primary/10"
-                        : "bg-white text-foreground rounded-bl-sm shadow-md border-white/20"
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
-                </div>
+                  message={{
+                    id: String(i),
+                    content: msg.text,
+                    sender: msg.sender,
+                  }}
+                  isOwn={msg.sender === "user"}
+                  avatarUrl={msg.sender === "bot" ? "/icons/artswarit-logo-96.png" : null}
+                  senderName={msg.sender === "user" ? "You" : "Artswarit Bot"}
+                />
               ))}
               {isLoading && (
                 <div className="flex items-end gap-1.5 justify-start animate-in slide-in-from-bottom-2 fade-in duration-300 ease-out">

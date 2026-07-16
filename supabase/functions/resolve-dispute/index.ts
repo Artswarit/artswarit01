@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import Stripe from "https://esm.sh/stripe@14.21.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,75 +87,118 @@ serve(async (req) => {
 
         const exchangeRate = dispute.milestone.exchange_rate || 83.5;
 
-        // Process Artist Payout via RazorpayX
-        if (totalPayoutUsd > 0) {
-            const { data: artistAccount } = await supabaseAdmin
-              .from('razorpay_accounts')
-              .select('*')
-              .eq('user_id', dispute.project.artist_id)
-              .single();
+        const isStripe = !!payment.stripe_session_id || payment.payment_method === 'stripe';
 
-            if (!artistAccount || !artistAccount.razorpay_account_id) {
-              throw new Error('Artist has no initialized payout account.');
+        if (isStripe) {
+            // Process Artist Payout via Stripe (logged for manual payout)
+            if (totalPayoutUsd > 0) {
+                console.log(`Stripe-funded payout of $${totalPayoutUsd} for artist ${dispute.project.artist_id} must be completed manually.`);
             }
 
-            const amountINR = Math.round(totalPayoutUsd * exchangeRate * 100) / 100;
-            const amountInPaise = Math.round(amountINR * 100);
-            const razorpayxAuth = btoa(`${RAZORPAYX_KEY_ID}:${RAZORPAYX_KEY_SECRET}`);
+            // Process Client Refund via Stripe Refunds API
+            if (totalRefundUsd > 0) {
+                const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+                if (!stripeSecretKey) {
+                    throw new Error('Stripe secret key not configured.');
+                }
+                const stripeSessionId = payment.stripe_session_id;
+                if (!stripeSessionId) {
+                    throw new Error('Payment record is missing a Stripe checkout session ID to refund against.');
+                }
 
-            const payoutBody = {
-              account_number: RAZORPAYX_ACCOUNT_NUMBER,
-              fund_account_id: artistAccount.razorpay_account_id,
-              amount: amountInPaise,
-              currency: 'INR',
-              mode: 'IMPS',
-              purpose: 'payout',
-              queue_if_low_balance: true,
-              reference_id: `disp_${dispute.id.slice(0, 8)}`,
-              narration: `Dispute settlement - ${dispute.milestone?.title || 'Project'}`,
-              notes: { dispute_id: dispute.id, type: 'dispute_arbitration' }
-            };
+                const stripe = new Stripe(stripeSecretKey, {
+                    apiVersion: '2023-10-16',
+                });
 
-            const payoutRes = await fetch('https://api.razorpayx.com/v1/payouts', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Basic ${razorpayxAuth}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(payoutBody),
-            });
+                // Retrieve the session to find the payment intent ID
+                const session = await stripe.checkout.sessions.retrieve(stripeSessionId);
+                const paymentIntentId = session.payment_intent as string;
+                if (!paymentIntentId) {
+                    throw new Error('Stripe Payment Intent ID not found on the checkout session.');
+                }
 
-            if (!payoutRes.ok) {
-              const errTxt = await payoutRes.text();
-              throw new Error(`Artist Payout Failed: ${errTxt}`);
+                // Refund the specified amount in cents
+                const amountInCents = Math.round(totalRefundUsd * 100);
+                const refund = await stripe.refunds.create({
+                    payment_intent: paymentIntentId,
+                    amount: amountInCents,
+                    metadata: { dispute_id: dispute.id }
+                });
+
+                console.log('Stripe refund processed successfully:', refund.id);
             }
-        }
+        } else {
+            // Process Artist Payout via RazorpayX
+            if (totalPayoutUsd > 0) {
+                const { data: artistAccount } = await supabaseAdmin
+                  .from('razorpay_accounts')
+                  .select('*')
+                  .eq('user_id', dispute.project.artist_id)
+                  .single();
 
-        // Process Client Refund via Razorpay standard Refunds API
-        if (totalRefundUsd > 0) {
-            if (!payment.payment_id) {
-              throw new Error('Payment record is missing a Razorpay Payment ID to refund against.');
+                if (!artistAccount || !artistAccount.razorpay_account_id) {
+                  throw new Error('Artist has no initialized payout account.');
+                }
+
+                const amountINR = Math.round(totalPayoutUsd * exchangeRate * 100) / 100;
+                const amountInPaise = Math.round(amountINR * 100);
+                const razorpayxAuth = btoa(`${RAZORPAYX_KEY_ID}:${RAZORPAYX_KEY_SECRET}`);
+
+                const payoutBody = {
+                  account_number: RAZORPAYX_ACCOUNT_NUMBER,
+                  fund_account_id: artistAccount.razorpay_account_id,
+                  amount: amountInPaise,
+                  currency: 'INR',
+                  mode: 'IMPS',
+                  purpose: 'payout',
+                  queue_if_low_balance: true,
+                  reference_id: `disp_${dispute.id.slice(0, 8)}`,
+                  narration: `Dispute settlement - ${dispute.milestone?.title || 'Project'}`,
+                  notes: { dispute_id: dispute.id, type: 'dispute_arbitration' }
+                };
+
+                const payoutRes = await fetch('https://api.razorpayx.com/v1/payouts', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Basic ${razorpayxAuth}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(payoutBody),
+                });
+
+                if (!payoutRes.ok) {
+                  const errTxt = await payoutRes.text();
+                  throw new Error(`Artist Payout Failed: ${errTxt}`);
+                }
             }
-            
-            const amountINR = Math.round(totalRefundUsd * exchangeRate * 100) / 100;
-            const amountInPaise = Math.round(amountINR * 100);
-            const razorpayAuth = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
 
-            const refundRes = await fetch(`https://api.razorpay.com/v1/payments/${payment.payment_id}/refund`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Basic ${razorpayAuth}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                amount: amountInPaise,
-                notes: { dispute_id: dispute.id, reason: 'arbitration_refund' }
-              }),
-            });
+            // Process Client Refund via Razorpay standard Refunds API
+            if (totalRefundUsd > 0) {
+                if (!payment.razorpay_payment_id && !payment.payment_id) {
+                  throw new Error('Payment record is missing a Razorpay Payment ID to refund against.');
+                }
+                const paymentId = payment.razorpay_payment_id || payment.payment_id;
+                
+                const amountINR = Math.round(totalRefundUsd * exchangeRate * 100) / 100;
+                const amountInPaise = Math.round(amountINR * 100);
+                const razorpayAuth = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
 
-            if (!refundRes.ok) {
-              const errTxt = await refundRes.text();
-              throw new Error(`Client Refund Failed: ${errTxt}`);
+                const refundRes = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}/refund`, {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Basic ${razorpayAuth}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    amount: amountInPaise,
+                    notes: { dispute_id: dispute.id, reason: 'arbitration_refund' }
+                  }),
+                });
+
+                if (!refundRes.ok) {
+                  const errTxt = await refundRes.text();
+                  throw new Error(`Client Refund Failed: ${errTxt}`);
+                }
             }
         }
     }

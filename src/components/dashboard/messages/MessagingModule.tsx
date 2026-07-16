@@ -13,6 +13,17 @@ import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRealtime } from "@/providers/RealtimeProvider";
 import { AttachmentInput, AttachmentPreview, AttachmentDisplay, Attachment } from "@/components/messages/MessageAttachments";
+import MessageBubble from "@/components/shared/MessageBubble";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -51,6 +62,8 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
   const [isSearchingMessages, setIsSearchingMessages] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   const [showConversationList, setShowConversationList] = useState(true);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
   const messagesViewportRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -232,11 +245,13 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
 
 
 
-  const handleClearChat = async () => {
+  const handleClearChat = () => {
+    setShowClearConfirm(true);
+  };
+
+  const executeClearChat = async () => {
+    setShowClearConfirm(false);
     if (!activeConversationId || isClearing || !user?.id) return;
-    
-    const confirmed = window.confirm("Are you sure you want to clear this chat? This will hide all previous messages for you.");
-    if (!confirmed) return;
 
     setIsClearing(true);
     try {
@@ -277,11 +292,13 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
     }
   };
 
-  const handleBlockUser = async () => {
+  const handleBlockUser = () => {
+    setShowBlockConfirm(true);
+  };
+
+  const executeBlockUser = async () => {
+    setShowBlockConfirm(false);
     if (!activeConversation?.otherUser?.id || !user?.id) return;
-    
-    const confirmed = window.confirm(`Are you sure you want to block ${activeConversation.otherUser.name}? You won't receive messages from them.`);
-    if (!confirmed) return;
 
     try {
       const { error } = await supabase
@@ -327,12 +344,13 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
   }
 
   return (
-    <div className={cn(
-      "flex flex-col bg-white dark:bg-card overflow-hidden animate-fade-in relative mx-auto w-full overscroll-contain",
-      activeConversationId
-        ? "fixed inset-0 z-[170] h-[100dvh] max-w-none rounded-none border-0 shadow-none pt-[var(--safe-top)] pb-[var(--safe-bottom)]"
-        : "h-[calc(100dvh-10rem)] sm:h-[calc(100dvh-12rem)] min-h-[460px] max-h-[900px] rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-muted/20 max-w-[1400px]"
-    )}>
+    <>
+      <div className={cn(
+        "flex flex-col bg-white dark:bg-card overflow-hidden animate-fade-in relative mx-auto w-full overscroll-contain",
+        activeConversationId
+          ? "fixed inset-0 z-[170] h-[100dvh] max-w-none rounded-none border-0 shadow-none pt-[var(--safe-top)] pb-[var(--safe-bottom)]"
+          : "h-[calc(100dvh-10rem)] sm:h-[calc(100dvh-12rem)] min-h-[460px] max-h-[900px] rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-muted/20 max-w-[1400px]"
+      )}>
       <div className="flex flex-1 overflow-hidden relative">
 
         {/* Conversations Sidebar */}
@@ -621,26 +639,21 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                             )}
                             <div className={cn("flex group", isOwn ? "justify-end" : "justify-start", prevSame ? "mt-0.5" : "mt-2")}>
                               <div className={cn("flex flex-col max-w-[80%] sm:max-w-[68%]", isOwn ? "items-end" : "items-start")}>
-                                <div
-                                  className={cn(
-                                    "bubble-in px-3.5 py-2 text-[15px] leading-snug",
-                                    isOwn
-                                      ? "bubble-in-right bg-primary text-primary-foreground"
-                                      : "bg-white dark:bg-card text-foreground border border-muted/30"
-                                  )}
-                                  style={{
-                                    borderRadius: 20,
-                                    borderBottomRightRadius: isOwn && nextSame ? 6 : 20,
-                                    borderTopRightRadius: isOwn && prevSame ? 6 : 20,
-                                    borderBottomLeftRadius: !isOwn && nextSame ? 6 : 20,
-                                    borderTopLeftRadius: !isOwn && prevSame ? 6 : 20,
+                                <MessageBubble
+                                  message={{
+                                    id: msg.id,
+                                    content: msg.text || ""
                                   }}
+                                  isOwn={isOwn}
+                                  nextSame={nextSame}
+                                  prevSame={prevSame}
+                                  avatarUrl={activeConversation?.participantAvatar}
+                                  senderName={activeConversation?.participantName}
                                 >
-                                  <span className="whitespace-pre-wrap break-words">{msg.text}</span>
                                   {msg.attachments && msg.attachments.length > 0 && (
                                     <AttachmentDisplay attachments={msg.attachments} isOwnMessage={isOwn} />
                                   )}
-                                </div>
+                                </MessageBubble>
                                 {!nextSame && (
                                   <div className="flex items-center gap-1.5 mt-1 px-1">
                                     <span className="text-[10px] text-muted-foreground/60">
@@ -764,6 +777,53 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
         </main>
       </div>
     </div>
+
+    <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+      <AlertDialogContent className="w-[92vw] max-w-md rounded-[2.5rem] border-none shadow-2xl backdrop-blur-xl bg-background/95 p-8">
+        <AlertDialogHeader className="space-y-4">
+          <div className="mx-auto w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-2">
+            <Trash2 className="h-8 w-8 text-red-500" />
+          </div>
+          <AlertDialogTitle className="text-2xl font-black text-center uppercase tracking-tight">Clear Chat History?</AlertDialogTitle>
+          <AlertDialogDescription className="text-center text-muted-foreground text-base font-medium leading-relaxed">
+            Are you sure you want to clear this chat? This will hide all previous messages for you.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
+          <AlertDialogCancel className="h-14 flex-1 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] border-border/50 hover:bg-muted transition-all">Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={executeClearChat}
+            className="h-14 flex-1 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] bg-red-600 text-white hover:bg-red-700 shadow-xl shadow-red-500/20 transition-all border-none"
+          >
+            Clear History
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    <AlertDialog open={showBlockConfirm} onOpenChange={setShowBlockConfirm}>
+      <AlertDialogContent className="w-[92vw] max-w-md rounded-[2.5rem] border-none shadow-2xl backdrop-blur-xl bg-background/95 p-8">
+        <AlertDialogHeader className="space-y-4">
+          <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-2">
+            <Ban className="h-8 w-8 text-amber-500" />
+          </div>
+          <AlertDialogTitle className="text-2xl font-black text-center uppercase tracking-tight">Block User?</AlertDialogTitle>
+          <AlertDialogDescription className="text-center text-muted-foreground text-base font-medium leading-relaxed">
+            Are you sure you want to block {activeConversation?.otherUser?.name}? You won't receive messages from them.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex flex-col sm:flex-row gap-3 mt-8">
+          <AlertDialogCancel className="h-14 flex-1 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] border-border/50 hover:bg-muted transition-all">Cancel</AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={executeBlockUser}
+            className="h-14 flex-1 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] bg-amber-600 text-white hover:bg-amber-700 shadow-xl shadow-amber-500/20 transition-all border-none"
+          >
+            Block User
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 };
 

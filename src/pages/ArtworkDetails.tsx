@@ -43,6 +43,14 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
   const [commentsOpen, setCommentsOpen] = useState(false);
 
   useEffect(() => {
+    // Reset state before loading new artwork
+    setArtwork(null);
+    setViewCount(0);
+    setLikeCount(0);
+    setIsLiked(false);
+    setIsBookmarked(false);
+    setAccessDenied(false);
+
     async function init() {
       if (!id) return;
 
