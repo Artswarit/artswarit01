@@ -231,6 +231,100 @@ serve(async (req) => {
       }
     }
 
+    // Stripe dispute (chargeback) lifecycle. When a buyer disputes a charge,
+    // mark the related transaction as disputed, notify the seller, log an
+    // admin audit event, and emit analytics so finance can react.
+    if (
+      event.type === 'charge.dispute.created' ||
+      event.type === 'charge.dispute.closed' ||
+      event.type === 'charge.dispute.funds_withdrawn' ||
+      event.type === 'charge.dispute.funds_reinstated'
+    ) {
+      const dispute: any = event.data.object;
+      const paymentIntentId: string | undefined = dispute.payment_intent;
+      const chargeId: string | undefined = dispute.charge;
+      const amount = (dispute.amount ?? 0) / 100;
+      const currency = (dispute.currency ?? 'usd').toUpperCase();
+
+      // Map dispute status to a transaction status we care about.
+      let txStatus: string | null = null;
+      if (event.type === 'charge.dispute.created' || event.type === 'charge.dispute.funds_withdrawn') {
+        txStatus = 'disputed';
+      } else if (event.type === 'charge.dispute.closed') {
+        txStatus = dispute.status === 'won' ? 'success' : dispute.status === 'lost' ? 'refunded' : 'disputed';
+      } else if (event.type === 'charge.dispute.funds_reinstated') {
+        txStatus = 'success';
+      }
+
+      // Find the transaction by payment intent id (matches what checkout stores).
+      let tx: any = null;
+      if (paymentIntentId) {
+        const { data } = await supabase
+          .from('transactions')
+          .select('id, buyer_id, seller_id, artwork_id')
+          .eq('stripe_payment_intent_id', paymentIntentId)
+          .maybeSingle();
+        tx = data;
+      }
+
+      if (tx && txStatus) {
+        await supabase.from('transactions').update({ status: txStatus }).eq('id', tx.id);
+      }
+
+      // Notify the seller so they know a chargeback is in progress / resolved.
+      if (tx?.seller_id) {
+        const title =
+          event.type === 'charge.dispute.created' ? 'Payment Disputed'
+          : event.type === 'charge.dispute.closed' ? `Dispute ${dispute.status ?? 'closed'}`
+          : event.type === 'charge.dispute.funds_withdrawn' ? 'Disputed Funds Held'
+          : 'Disputed Funds Restored';
+        await supabase.from('notifications').insert({
+          user_id: tx.seller_id,
+          type: 'dispute',
+          title,
+          message: `${currency} ${amount.toFixed(2)} — ${dispute.reason ?? 'chargeback'}.`,
+          metadata: { dispute_id: dispute.id, charge_id: chargeId, payment_intent_id: paymentIntentId },
+        });
+      }
+
+      // Admin audit log so finance/admin dashboards surface the event.
+      try {
+        await supabase.from('admin_audit_logs').insert({
+          action: event.type,
+          target_type: 'stripe_dispute',
+          target_id: dispute.id,
+          metadata: {
+            reason: dispute.reason,
+            status: dispute.status,
+            amount,
+            currency,
+            charge_id: chargeId,
+            payment_intent_id: paymentIntentId,
+            transaction_id: tx?.id ?? null,
+            buyer_id: tx?.buyer_id ?? null,
+            seller_id: tx?.seller_id ?? null,
+          },
+        });
+      } catch (err) {
+        console.error('admin_audit_logs insert failed:', err);
+      }
+
+      // Analytics — surface the chargeback lifecycle for funnels/alerts.
+      const analyticsUser = tx?.buyer_id ?? tx?.seller_id;
+      if (analyticsUser) {
+        await phCapture('payment_disputed', analyticsUser, {
+          provider: 'stripe',
+          event: event.type,
+          dispute_id: dispute.id,
+          reason: dispute.reason,
+          status: dispute.status,
+          amount,
+          currency,
+          charge_id: chargeId,
+          payment_intent_id: paymentIntentId,
+        });
+      }
+    }
 
     return new Response(
       JSON.stringify({ received: true }),
