@@ -29,14 +29,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
     const isGoogleUser = user.app_metadata?.provider === 'google';
     if (!user.email_confirmed_at && !isGoogleUser) {
       if (window.location.pathname !== '/verify-email') {
-        console.log("🔒 ProtectedRoute: Email not verified, redirecting to /verify-email");
         navigate('/verify-email', { replace: true });
       }
       return;
     }
 
     if (adminOnly && !isAdmin && !adminLoading) {
-      console.log("🔒 ProtectedRoute: Admin access denied");
       navigate('/login', { replace: true });
       return;
     }
@@ -56,11 +54,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole,
         const targetPath = profile.role === 'artist' 
           ? '/artist-dashboard' 
           : profile.role === 'client' 
-            ? '/client-dashboard' 
-            : '/';
+          ? '/client-dashboard' 
+          : '/';
         
         if (window.location.pathname !== targetPath) {
-          console.log(`🔒 ProtectedRoute: Role mismatch (${profile.role} != ${requiredRole}), redirecting to ${targetPath}`);
           navigate(targetPath, { replace: true });
           return;
         }

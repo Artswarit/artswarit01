@@ -94,8 +94,6 @@ export function useRazorpay() {
         name: 'Artswarit',
         description: artworkId ? `Artwork Purchase: ${data.artworkTitle}` : `Milestone Payment`,
         handler: async (response: any) => {
-          console.log('Payment response:', response);
-          
           try {
             // Verify payment
             const verifyResp = await fetch(`${SUPABASE_URL}/functions/v1/${verifyFunction}`, {
@@ -143,7 +141,6 @@ export function useRazorpay() {
           ondismiss: () => {
             document.body.classList.remove('razorpay-active');
             setLoading(false);
-            console.log('Payment modal closed');
           },
         },
       };

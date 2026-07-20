@@ -423,7 +423,7 @@ export const useRealtimeMessages = () => {
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
     } catch (error) {
-      console.log('Could not play notification sound:', error);
+      console.warn('Could not play notification sound:', error);
     }
   }, []);
 

@@ -54,7 +54,6 @@ export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
     const handleMessage = (event: MessageEvent) => {
       const { type: eventType } = event.data;
       if (eventType === type || type === 'all' || eventType === 'all') {
-        console.log(`[RealtimeSync] Received refresh trigger for: ${eventType}`);
         debouncedRefetch();
       }
     };
@@ -64,7 +63,6 @@ export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
     // Also refetch when page becomes visible (handles mobile/PWA backgrounding)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log(`[RealtimeSync] Page visible, triggering refresh for: ${type}`);
         debouncedRefetch();
       }
     };

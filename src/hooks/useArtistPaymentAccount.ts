@@ -77,7 +77,6 @@ export function useArtistPaymentAccount() {
           table: 'razorpay_accounts',
           filter: `user_id=eq.${user.id}`,
         }, (payload) => {
-          console.log('Account update:', payload);
           if (payload.new) {
             setAccount(payload.new as RazorpayAccount);
           }

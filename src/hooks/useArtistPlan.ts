@@ -136,7 +136,6 @@ export const useArtistPlan = (userId: string | undefined | null) => {
           filter: `user_id=eq.${userId}`
         },
         () => {
-          console.log('Plan update received');
           fetchPlan();
         }
       )

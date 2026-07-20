@@ -15,6 +15,16 @@ import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { toast } from "sonner";
 import ProjectDetailModal from "./ProjectDetailModal";
 import ReviewClientDialog from "./ReviewClientDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 interface Project {
   id: string;
   title: string;
@@ -58,6 +68,7 @@ const ProjectManagement = () => {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedProjectForReview, setSelectedProjectForReview] = useState<Project | null>(null);
   const [clientReviews, setClientReviews] = useState<Record<string, ClientReview>>({});
+  const [projectToDecline, setProjectToDecline] = useState<Project | null>(null);
   const [readyMap, setReadyMap] = useState<Record<string, boolean>>({});
   const autoCompletingRef = useRef<Record<string, boolean>>({});
   const fetchProjects = useCallback(async () => {
@@ -286,9 +297,13 @@ const ProjectManagement = () => {
     }
     if (!project.client_id) return;
 
-    // Confirmation before irreversible rejection
-    const confirmed = window.confirm(`Are you sure you want to decline "${project.title}"? This action cannot be undone.`);
-    if (!confirmed) return;
+    setProjectToDecline(project);
+  };
+
+  const executeDecline = async () => {
+    const project = projectToDecline;
+    if (!project || !project.client_id) return;
+    setProjectToDecline(null);
 
     setActionLoading(project.id);
     try {
@@ -683,6 +698,23 @@ const ProjectManagement = () => {
 
       {/* Review Client Dialog */}
       {selectedProjectForReview && user && <ReviewClientDialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen} project={selectedProjectForReview} artistId={user.id} existingReview={getProjectReview(selectedProjectForReview.id)} onReviewSubmitted={fetchClientReviews} />}
+      {/* Decline Project Confirmation */}
+      <AlertDialog open={!!projectToDecline} onOpenChange={(open) => !open && setProjectToDecline(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Decline Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to decline "{projectToDecline?.title}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeDecline} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Decline
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };
 export default ProjectManagement;

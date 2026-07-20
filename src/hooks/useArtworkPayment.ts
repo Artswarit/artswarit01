@@ -92,8 +92,6 @@ export function useArtworkPayment() {
         throw new Error(data?.error || 'Failed to create payment order');
       }
 
-      console.log('Artwork order created:', data);
-
       // Configure Razorpay options
       const options = {
         key: data.keyId,
@@ -103,8 +101,6 @@ export function useArtworkPayment() {
         name: 'Artswarit',
         description: `Unlock: ${data.artworkTitle}`,
         handler: async (response: any) => {
-          console.log('Payment response:', response);
-          
           try {
             // Verify payment
             const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-artwork-payment', {
@@ -137,7 +133,6 @@ export function useArtworkPayment() {
         modal: {
           ondismiss: () => {
             setLoading(false);
-            console.log('Payment modal closed');
           },
         },
       };

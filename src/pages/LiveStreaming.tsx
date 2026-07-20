@@ -48,15 +48,15 @@ const LiveStreaming = () => {
   const [selectedStream, setSelectedStream] = useState(activeStreams[0]);
 
   const handleLike = () => {
-    console.log('Liked stream');
+    // Like event handler stub
   };
 
   const handleComment = (comment: string) => {
-    console.log('New comment:', comment);
+    // Comment event handler stub
   };
 
   const startStream = () => {
-    console.log('Starting stream...');
+    // Stream initiation handler stub
   };
 
   return (

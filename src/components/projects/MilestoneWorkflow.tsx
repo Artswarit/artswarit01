@@ -129,7 +129,6 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
         table: 'project_milestones',
         filter: `project_id=eq.${projectId}`
       }, (payload) => {
-        console.log('Milestone update:', payload);
         fetchMilestones();
       })
       .subscribe();
@@ -143,7 +142,6 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
         table: 'payments',
         filter: `project_id=eq.${projectId}`
       }, (payload) => {
-        console.log('Payment update:', payload);
         if ((payload.new as any)?.status === 'success') {
           toast.success('Payment confirmed!');
           fetchMilestones();
@@ -160,7 +158,6 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
         table: 'transactions',
         filter: `seller_id=eq.${project?.artist_id}` // Use artist_id as filter
       }, (payload) => {
-        console.log('Transaction update:', payload);
         const newTx = payload.new as any;
         // If this transaction is a successful milestone payment for this project
         if (newTx?.status === 'success' && newTx?.milestone_id) {

@@ -117,8 +117,6 @@ export function usePremiumPayment() {
         throw new Error(data?.error || 'Failed to create subscription');
       }
 
-      console.log('Subscription/Order created:', data);
-
       // Configure Razorpay options
       const options: any = {
         key: data.keyId,
@@ -133,7 +131,6 @@ export function usePremiumPayment() {
         modal: {
           ondismiss: () => {
             setLoading(false);
-            console.log('Payment modal closed');
           },
         },
       };
@@ -142,7 +139,6 @@ export function usePremiumPayment() {
       if (data.subscriptionId) {
         options.subscription_id = data.subscriptionId;
         options.handler = async (response: any) => {
-          console.log('Subscription response:', response);
           toast.success('Premium subscription activated!');
           onSuccess?.();
         };
@@ -152,7 +148,6 @@ export function usePremiumPayment() {
         options.amount = data.amount;
         options.currency = data.currency;
         options.handler = async (response: any) => {
-          console.log('Payment response:', response);
           
           try {
             // Verify payment

@@ -26,7 +26,6 @@ interface TopFiltersProps {
 }
 
 const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount, initialCategory, initialSearch }: TopFiltersProps) => {
-  console.log('TopFilters rendering with resultsCount:', resultsCount);
   const { format, userCurrencySymbol } = useCurrencyFormat();
   
   const [filters, setFilters] = useState<FilterState>({
@@ -60,7 +59,6 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
   ].filter(Boolean).length;
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
-    console.log('Filter change:', key, value);
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFiltersChange({ 
@@ -111,7 +109,6 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
   }, [initialSearch, initialCategory]);
 
   const resetFilters = () => {
-    console.log('Resetting filters');
     const resetF = {
       search: '',
       category: 'all',

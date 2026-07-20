@@ -286,7 +286,6 @@ export const useArtworks = () => {
           filter: `artist_id=eq.${userId}`
         },
         () => {
-          console.log('Artworks realtime update received');
           fetchArtworks();
         }
       )

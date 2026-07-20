@@ -212,7 +212,6 @@ const ServicesManagement: React.FC = () => {
         console.error("[ServicesManagement] Create error:", error);
         toast({ variant: "destructive", title: "Failed to create service" });
       } else {
-        console.log("[ServicesManagement] Service created successfully");
         toast({ title: "Service created" });
         localStorage.removeItem("draft_service_form"); // clear draft on success
         setIsDialogOpen(false);
@@ -232,7 +231,6 @@ const ServicesManagement: React.FC = () => {
     if (!serviceToDelete) return;
 
     setLoading(true); // Show loading state during deletion
-    console.log(`[ServicesManagement] Deleting service ${serviceToDelete}...`);
     
     const { error } = await supabase
       .from("artist_services")
@@ -244,14 +242,12 @@ const ServicesManagement: React.FC = () => {
       toast({ variant: "destructive", title: "Failed to delete service" });
       setLoading(false);
     } else {
-      console.log("[ServicesManagement] Service deleted successfully from DB");
       toast({ title: "Service deleted" });
       
       // Update UI immediately by removing from local state
       setServices(prev => prev.filter(s => s.id !== serviceToDelete));
       
       // Call refresh first to update limits immediately
-      console.log("[ServicesManagement] Triggering manual gating refresh...");
       await refreshGating();
       
       // Fetch fresh list to be absolutely sure

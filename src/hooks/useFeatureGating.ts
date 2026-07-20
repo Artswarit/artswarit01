@@ -29,8 +29,6 @@ export const useFeatureGating = (userId: string | undefined | null) => {
       return;
     }
 
-    console.log(`[useFeatureGating] Fetching counts for ${userId}...`);
-    
     // Fetch portfolio (artworks) count
     const { count: artworkCount, error: artError } = await supabase
       .from("artworks")
@@ -45,8 +43,6 @@ export const useFeatureGating = (userId: string | undefined | null) => {
 
     if (artError) console.error("[useFeatureGating] Artworks count error:", artError);
     if (svcError) console.error("[useFeatureGating] Services count error:", svcError);
-
-    console.log(`[useFeatureGating] Counts fetched: artworks=${artworkCount}, services=${servicesCount}`);
 
     setPortfolioCount(artworkCount || 0);
     setServiceCount(servicesCount || 0);
@@ -68,8 +64,6 @@ export const useFeatureGating = (userId: string | undefined | null) => {
   useEffect(() => {
     if (!userId) return;
 
-    console.log(`[useFeatureGating] Setting up real-time for ${userId}`);
-
     // Listen to both tables in a single channel
     const channel = supabase
       .channel(`gating-updates-${userId}`)
@@ -82,7 +76,6 @@ export const useFeatureGating = (userId: string | undefined | null) => {
           filter: `artist_id=eq.${userId}`
         },
         (payload) => {
-          console.log('[useFeatureGating] Real-time artwork change:', payload.eventType);
           // Small delay to ensure DB consistency before re-fetching counts
           setTimeout(fetchCounts, 150);
         }
@@ -96,17 +89,13 @@ export const useFeatureGating = (userId: string | undefined | null) => {
           filter: `artist_id=eq.${userId}`
         },
         (payload) => {
-          console.log('[useFeatureGating] Real-time service change:', payload.eventType);
           // Small delay to ensure DB consistency before re-fetching counts
           setTimeout(fetchCounts, 150);
         }
       )
-      .subscribe((status) => {
-        console.log(`[useFeatureGating] Subscription status for ${userId}:`, status);
-      });
+      .subscribe();
 
     return () => {
-      console.log(`[useFeatureGating] Cleaning up real-time for ${userId}`);
       supabase.removeChannel(channel);
     };
   }, [userId]);

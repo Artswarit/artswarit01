@@ -24,6 +24,16 @@ import { RefreshCw } from "lucide-react";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import { uploadFileWithProgress } from "@/lib/uploadWithProgress";
 import MessageBubble from "@/components/shared/MessageBubble";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 interface ProjectDetailModalProps {
   projectId: string | null;
   open: boolean;
@@ -116,6 +126,11 @@ const ProjectDetailModal = ({
   const [addingMilestone, setAddingMilestone] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("workflow");
+  const [confirmAction, setConfirmAction] = useState<{
+    type: 'toggle_status' | 'delete_milestone';
+    milestone: Milestone;
+    nextStatus?: string;
+  } | null>(null);
   const modalViewportRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToTab = (tabId: string) => {
@@ -396,35 +411,9 @@ const ProjectDetailModal = ({
     }
 
     const nextStatus = milestone.status === 'COMPLETED' ? 'ACTIVE' : 'COMPLETED';
-    const confirmed = window.confirm(`Are you sure you want to mark this milestone as ${nextStatus}? This bypasses the normal review workflow.`);
-    if (!confirmed) return;
-
-    try {
-      const {
-        error
-      } = await supabase.from('project_milestones').update({
-        status: nextStatus as any,
-        approved_at: nextStatus === 'COMPLETED' ? new Date().toISOString() : null
-      }).eq('id', milestone.id);
-      
-      if (error) throw error;
-      
-      // Log activity
-      await supabase.from('project_activity_logs').insert({
-        project_id: project!.id,
-        milestone_id: milestone.id,
-        user_id: user?.id,
-        action: nextStatus === 'COMPLETED' ? 'milestone_approved' : 'milestone_started',
-        details: { note: "Manually toggled status in detail modal" }
-      });
-
-      broadcastRefresh('milestones');
-      fetchProjectData(undefined, true);
-      toast.success(`Milestone marked as ${nextStatus}`);
-    } catch (err: any) {
-      toast.error("Failed to update milestone");
-    }
+    setConfirmAction({ type: 'toggle_status', milestone, nextStatus });
   };
+
   const handleDeleteMilestone = async (milestone: Milestone) => {
     // P2 Fix: Add confirmation and state checks
     if (milestone.status !== 'LOCKED' && milestone.status !== 'WAITING_FUNDS') {
@@ -432,18 +421,51 @@ const ProjectDetailModal = ({
       return;
     }
 
-    const confirmed = window.confirm(`Are you sure you want to delete the milestone "${milestone.title}"?`);
-    if (!confirmed) return;
+    setConfirmAction({ type: 'delete_milestone', milestone });
+  };
 
-    try {
-      const {
-        error
-      } = await supabase.from('project_milestones').delete().eq('id', milestone.id);
-      if (error) throw error;
-      toast.success("Milestone deleted");
-      fetchProjectData(undefined, true);
-    } catch (err: any) {
-      toast.error("Failed to delete milestone");
+  const executeConfirmAction = async () => {
+    if (!confirmAction) return;
+    const { type, milestone, nextStatus } = confirmAction;
+    setConfirmAction(null);
+
+    if (type === 'toggle_status' && nextStatus) {
+      try {
+        const {
+          error
+        } = await supabase.from('project_milestones').update({
+          status: nextStatus as any,
+          approved_at: nextStatus === 'COMPLETED' ? new Date().toISOString() : null
+        }).eq('id', milestone.id);
+        
+        if (error) throw error;
+        
+        // Log activity
+        await supabase.from('project_activity_logs').insert({
+          project_id: project!.id,
+          milestone_id: milestone.id,
+          user_id: user?.id,
+          action: nextStatus === 'COMPLETED' ? 'milestone_approved' : 'milestone_started',
+          details: { note: "Manually toggled status in detail modal" }
+        });
+
+        broadcastRefresh('milestones');
+        fetchProjectData(undefined, true);
+        toast.success(`Milestone marked as ${nextStatus}`);
+      } catch (err: any) {
+        toast.error("Failed to update milestone");
+      }
+    } else if (type === 'delete_milestone') {
+      try {
+        const {
+          error
+        } = await supabase.from('project_milestones').delete().eq('id', milestone.id);
+        if (error) throw error;
+        toast.success("Milestone deleted");
+        fetchProjectData(undefined, true);
+      } catch (err: any) {
+        toast.error("Failed to delete milestone");
+      }
     }
   };
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1180,6 +1202,26 @@ const ProjectDetailModal = ({
         </ScrollArea>
       </DialogContent>
       )}
+      <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction?.type === 'delete_milestone' ? 'Delete Milestone' : 'Change Milestone Status'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction?.type === 'delete_milestone'
+                ? `Are you sure you want to delete the milestone "${confirmAction?.milestone?.title}"?`
+                : `Are you sure you want to mark this milestone as ${confirmAction?.nextStatus}? This bypasses the normal review workflow.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeConfirmAction}>
+              {confirmAction?.type === 'delete_milestone' ? 'Delete' : 'Confirm'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
