@@ -503,7 +503,7 @@ const ClientSettings = () => {
 
   return (
     <div className="space-y-6 sm:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-7xl mx-auto px-2 sm:px-0">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/40 backdrop-blur-md p-6 rounded-[2rem] border border-primary/5 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/40 dark:bg-card/40 backdrop-blur-md p-6 rounded-[2rem] border border-primary/5 shadow-sm">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">Settings</h2>
           <p className="text-sm font-medium text-muted-foreground/80 mt-1">Manage your account preferences and privacy</p>

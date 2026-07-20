@@ -584,6 +584,17 @@ const ClientDashboard = () => {
       )
     : completedProjects;
 
+  if (loading || profileLoading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <LogoLoader text="Loading your dashboard..." />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
       <Navbar />
