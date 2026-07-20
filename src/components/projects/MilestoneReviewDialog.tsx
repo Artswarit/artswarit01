@@ -174,41 +174,8 @@ export function MilestoneReviewDialog({
         throw new Error(data?.error || error?.message || 'Failed to release payout');
       }
 
-      // P0 FIX: Unlock the next sequential milestone (LOCKED → WAITING_FUNDS)
-      // This is critical for multi-milestone project progression.
-      try {
-        // Get all milestones for this project to find the next one
-        const { data: allMilestones } = await supabase
-          .from('project_milestones')
-          .select('id, sort_order, status')
-          .eq('project_id', projectId)
-          .order('sort_order');
-
-        if (allMilestones) {
-          // Find the current milestone's position
-          const currentIndex = allMilestones.findIndex(m => m.id === milestone.id);
-          const nextMilestone = currentIndex >= 0 ? allMilestones[currentIndex + 1] : null;
-
-          if (nextMilestone && nextMilestone.status === 'LOCKED') {
-            await supabase
-              .from('project_milestones')
-              .update({ status: 'WAITING_FUNDS' })
-              .eq('id', nextMilestone.id);
-
-            // Log the unlock
-            await supabase.from('project_activity_logs').insert({
-              project_id: projectId,
-              milestone_id: nextMilestone.id,
-              user_id: user?.id,
-              action: 'milestone_unlocked',
-              details: { previousMilestoneId: milestone.id }
-            });
-          }
-        }
-      } catch (unlockErr) {
-        // Non-fatal: log but don't block the approval success
-        console.error('Failed to unlock next milestone:', unlockErr);
-      }
+      // Next-milestone unlock (LOCKED → WAITING_FUNDS) and project completion
+      // are handled atomically by the release-milestone-payout edge function.
 
       // Log activity
       await supabase.from('project_activity_logs').insert({

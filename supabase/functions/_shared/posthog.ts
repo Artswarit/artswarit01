@@ -1,8 +1,5 @@
 // Server-side PostHog capture for webhook handlers.
-// The project API key is publishable — safe to embed. Override with the
-// POSTHOG_KEY / POSTHOG_HOST env vars if the project ever rotates keys.
-const DEFAULT_KEY = "phc_DiWvXLe6jhHPib3VNvodaQyybusp44pR69B3Rrp2shTw";
-const DEFAULT_HOST = "https://us.i.posthog.com";
+// Requires POSTHOG_KEY env var. Override the host with POSTHOG_HOST if needed.
 
 export type PHProps = Record<string, unknown>;
 
@@ -16,8 +13,8 @@ export async function phCapture(
   properties: PHProps = {},
 ): Promise<void> {
   try {
-    const key = Deno.env.get("POSTHOG_KEY") ?? DEFAULT_KEY;
-    const host = Deno.env.get("POSTHOG_HOST") ?? DEFAULT_HOST;
+    const key = Deno.env.get("POSTHOG_KEY");
+    const host = Deno.env.get("POSTHOG_HOST") || "https://us.i.posthog.com";
     if (!key || !distinctId) return;
 
     const env = Deno.env.get("ENVIRONMENT") ?? "production";
@@ -41,3 +38,4 @@ export async function phCapture(
     console.error("[posthog] capture failed", event, err);
   }
 }
+

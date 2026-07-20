@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -18,6 +18,9 @@ import { EnablePaymentsDialog } from '@/components/payments/EnablePaymentsDialog
 import { useArtistPaymentAccount } from '@/hooks/useArtistPaymentAccount';
 import LogoLoader from '@/components/ui/LogoLoader';
 import { broadcastRefresh, useRealtimeSync } from '@/lib/realtime-sync';
+
+// Keep a stable ref to milestones for use inside realtime callbacks,
+// avoiding stale closures when the subscription outlives a render.
 
 interface Milestone {
   id: string;
@@ -61,6 +64,8 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   const { format: formatCurrency } = useCurrencyFormat();
   const [project, setProject] = useState<Project | null>(null);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const milestonesRef = useRef<Milestone[]>([]);
+  milestonesRef.current = milestones; // keep ref in sync every render
   const [loading, setLoading] = useState(true);
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
   const [submissionDialogOpen, setSubmissionDialogOpen] = useState(false);
@@ -160,7 +165,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
         // If this transaction is a successful milestone payment for this project
         if (newTx?.status === 'success' && newTx?.milestone_id) {
           // Verify if the milestone belongs to this project
-          const isOurMilestone = milestones.some(m => m.id === newTx.milestone_id);
+          const isOurMilestone = milestonesRef.current.some(m => m.id === newTx.milestone_id);
           if (isOurMilestone) {
             toast.success('Stripe payment confirmed!');
             fetchMilestones();
@@ -174,7 +179,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
       supabase.removeChannel(paymentChannel);
       supabase.removeChannel(transactionChannel);
     };
-  }, [projectId, project?.artist_id, milestones.length]);
+  }, [projectId, project?.artist_id]);
 
   const fetchProjectData = async () => {
     try {
