@@ -153,14 +153,14 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
               "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300",
               step > i + 1 ? "bg-emerald-500 text-white" : 
               step === i + 1 ? "bg-violet-600 text-white ring-4 ring-violet-500/20 shadow-lg shadow-violet-500/20" : 
-              "bg-gray-100 text-gray-400"
+              "bg-gray-100 dark:bg-muted text-gray-400 dark:text-muted-foreground"
             )}
           >
             {step > i + 1 ? <Check className="h-4 w-4" /> : i + 1}
           </div>
           {i < totalSteps - 1 && (
             <div className={cn(
-              "w-full h-1 mx-2 sm:mx-4 rounded-full bg-gray-100 min-w-[20px] sm:min-w-[40px]",
+              "w-full h-1 mx-2 sm:mx-4 rounded-full bg-gray-100 dark:bg-muted min-w-[20px] sm:min-w-[40px]",
               step > i + 1 && "bg-emerald-500"
             )} />
           )}
@@ -199,7 +199,7 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
           </div>
         </div>
 
-        <div className="p-8 bg-white max-h-[70vh] overflow-y-auto">
+        <div className="p-8 bg-white dark:bg-card max-h-[70vh] overflow-y-auto">
           <StepIndicator />
 
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -207,15 +207,15 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
               <div className="space-y-6">
                 <div className="flex flex-col items-center justify-center space-y-4 mb-4">
                   <div className="relative group">
-                    <Avatar className="h-24 w-24 border-4 border-violet-100 shadow-xl transition-transform duration-300 group-hover:scale-105">
+                    <Avatar className="h-24 w-24 border-4 border-violet-100 dark:border-violet-950 shadow-xl transition-transform duration-300 group-hover:scale-105">
                       <AvatarImage src={profile?.avatar_url || ""} />
-                      <AvatarFallback className="bg-violet-50 text-violet-600 font-bold text-2xl">
+                      <AvatarFallback className="bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-300 font-bold text-2xl">
                         {formData.full_name?.charAt(0) || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <label 
                       htmlFor="avatar-upload" 
-                      className="absolute bottom-0 right-0 p-2 bg-violet-600 text-white rounded-full cursor-pointer shadow-lg hover:bg-violet-700 transition-colors border-2 border-white"
+                      className="absolute bottom-0 right-0 p-2 bg-violet-600 text-white rounded-full cursor-pointer shadow-lg hover:bg-violet-700 transition-colors border-2 border-white dark:border-card"
                     >
                       {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
                       <input type="file" id="avatar-upload" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
@@ -234,7 +234,7 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
                       placeholder="e.g. Leonardo da Vinci"
                       value={formData.full_name}
                       onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-                      className="pl-10 h-11 rounded-xl border-gray-200 focus-visible:ring-violet-500"
+                      className="pl-10 h-11 rounded-xl border-gray-200 dark:border-border focus-visible:ring-violet-500 bg-transparent"
                     />
                   </div>
                 </div>
@@ -244,13 +244,13 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
             {step === 2 && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="bio" className="text-xs font-black uppercase tracking-wider text-gray-500">Professional Bio</Label>
+                  <Label htmlFor="bio" className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-muted-foreground">Professional Bio</Label>
                   <Textarea 
                     id="bio"
                     placeholder="Briefly describe your creative background and style..."
                     value={formData.bio}
                     onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                    className="min-h-[150px] rounded-2xl border-gray-200 focus-visible:ring-violet-500 resize-none p-4"
+                    className="min-h-[150px] rounded-2xl border-gray-200 dark:border-border focus-visible:ring-violet-500 resize-none p-4 bg-transparent"
                   />
                   <p className="text-[10px] text-muted-foreground text-right italic font-semibold">Step 2: Bio (1 min) • Helps people find you</p>
                 </div>
@@ -260,7 +260,7 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
             {step === 3 && (
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="country" className="text-xs font-black uppercase tracking-wider text-gray-500">Country</Label>
+                  <Label htmlFor="country" className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-muted-foreground">Country</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 h-4 w-4 text-violet-400" />
                     <Input 
@@ -268,12 +268,12 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
                       placeholder="e.g. Italy"
                       value={formData.country}
                       onChange={(e) => setFormData({...formData, country: e.target.value})}
-                      className="pl-10 h-11 rounded-xl border-gray-200 focus-visible:ring-violet-500"
+                      className="pl-10 h-11 rounded-xl border-gray-200 dark:border-border focus-visible:ring-violet-500 bg-transparent"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-xs font-black uppercase tracking-wider text-gray-500">City (Optional)</Label>
+                  <Label htmlFor="city" className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-muted-foreground">City (Optional)</Label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-3 h-4 w-4 text-violet-400" />
                     <Input 
@@ -281,7 +281,7 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
                       placeholder="e.g. Florence"
                       value={formData.city}
                       onChange={(e) => setFormData({...formData, city: e.target.value})}
-                      className="pl-10 h-11 rounded-xl border-gray-200 focus-visible:ring-violet-500"
+                      className="pl-10 h-11 rounded-xl border-gray-200 dark:border-border focus-visible:ring-violet-500 bg-transparent"
                     />
                   </div>
                 </div>
@@ -291,7 +291,7 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
             {step === 4 && isArtist && (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-xs font-black uppercase tracking-wider text-gray-500">Skills & Specializations</Label>
+                  <Label className="text-xs font-black uppercase tracking-wider text-gray-500 dark:text-muted-foreground">Skills & Specializations</Label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Tag className="absolute left-3 top-3 h-4 w-4 text-violet-400" />
@@ -300,10 +300,10 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
                         value={formData.newTag}
                         onChange={(e) => setFormData({...formData, newTag: e.target.value})}
                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                        className="pl-10 h-11 rounded-xl border-gray-200 focus-visible:ring-violet-500"
+                        className="pl-10 h-11 rounded-xl border-gray-200 dark:border-border focus-visible:ring-violet-500 bg-transparent"
                       />
                     </div>
-                    <Button onClick={addTag} type="button" size="sm" className="bg-violet-100 text-violet-700 hover:bg-violet-200 h-11 rounded-xl px-4">
+                    <Button onClick={addTag} type="button" size="sm" className="bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 hover:bg-violet-200 dark:hover:bg-violet-800 h-11 rounded-xl px-4">
                       Add
                     </Button>
                   </div>
@@ -313,7 +313,7 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
                   {formData.tags.map((tag) => (
                     <span 
                       key={tag} 
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 text-xs font-bold border border-violet-100 group transition-all hover:bg-violet-600 hover:text-white"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-50 dark:bg-violet-950 text-violet-700 dark:text-violet-300 text-xs font-bold border border-violet-100 dark:border-violet-900 group transition-all hover:bg-violet-600 hover:text-white"
                     >
                       {tag}
                       <button onClick={() => removeTag(tag)} className="opacity-50 hover:opacity-100">
@@ -322,7 +322,7 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
                     </span>
                   ))}
                   {formData.tags.length === 0 && (
-                    <p className="text-sm text-muted-foreground italic w-full text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <p className="text-sm text-muted-foreground italic w-full text-center py-4 bg-gray-50 dark:bg-muted/30 rounded-2xl border border-dashed border-gray-200 dark:border-border">
                       Add at least one skill to stand out!
                     </p>
                   )}
@@ -332,13 +332,13 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
           </div>
         </div>
 
-        <DialogFooter className="p-8 pt-4 bg-gray-50 flex-col sm:flex-row gap-3 border-t border-gray-100">
+        <DialogFooter className="p-8 pt-4 bg-gray-50 dark:bg-muted/10 flex-col sm:flex-row gap-3 border-t border-gray-100 dark:border-border/10">
           {step > 1 && (
             <Button
               variant="outline"
               disabled={isSubmitting}
               onClick={() => setStep(step - 1)}
-              className="flex-1 sm:flex-none h-12 rounded-2xl border-gray-200 font-bold text-gray-600"
+              className="flex-1 sm:flex-none h-12 rounded-2xl border-gray-200 dark:border-border font-bold text-gray-600 dark:text-muted-foreground"
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Back
