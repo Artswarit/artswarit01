@@ -43,7 +43,7 @@ export default function AdminEscrow() {
 
   const totalHeld = rows.reduce((sum, r) => sum + Number(r.amount_paid ?? 0), 0);
 
-  if (error) return <RetryableError message={error} onRetry={load} />;
+  if (error) return <RetryableError title="Couldn't load escrow" description={error} onRetry={load} />;
 
   return (
     <div className="space-y-4">
