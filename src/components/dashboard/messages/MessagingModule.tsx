@@ -647,8 +647,8 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                                   isOwn={isOwn}
                                   nextSame={nextSame}
                                   prevSame={prevSame}
-                                  avatarUrl={activeConversation?.participantAvatar}
-                                  senderName={activeConversation?.participantName}
+                                  avatarUrl={activeConversation?.otherUser?.avatar}
+                                  senderName={activeConversation?.otherUser?.name}
                                 >
                                   {msg.attachments && msg.attachments.length > 0 && (
                                     <AttachmentDisplay attachments={msg.attachments} isOwnMessage={isOwn} />
