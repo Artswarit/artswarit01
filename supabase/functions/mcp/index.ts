@@ -2,7 +2,150 @@
 // To take ownership, delete this banner line; the plugin then leaves the file alone.
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
+// src/lib/mcp/index.ts
+import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
+
+// src/lib/mcp/tools/search-artists.ts
+import { createClient } from "npm:@supabase/supabase-js@^2.49.8";
+import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z } from "npm:zod@^3.23.8";
+function supa() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+}
+var search_artists_default = defineTool({
+  name: "search_artists",
+  title: "Search artists",
+  description: "Search Artswarit artists by keyword (matches name, category, city, bio). Returns approved, publicly visible artists only.",
+  inputSchema: {
+    query: z.string().trim().min(1).describe("Search text: name, category, city, or skill."),
+    limit: z.number().int().min(1).max(50).optional().describe("Max results (default 10).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ query, limit }) => {
+    const client = supa();
+    const max = limit ?? 10;
+    const like = `%${query}%`;
+    const { data, error } = await client.from("public_profiles").select("id, full_name, category, city, bio, avatar_url, role").or(
+      `full_name.ilike.${like},category.ilike.${like},city.ilike.${like},bio.ilike.${like}`
+    ).limit(max);
+    if (error) {
+      return { content: [{ type: "text", text: `Search failed: ${error.message}` }], isError: true };
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(data ?? [], null, 2) }],
+      structuredContent: { artists: data ?? [] }
+    };
+  }
+});
+
+// src/lib/mcp/tools/get-artist.ts
+import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.49.8";
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z2 } from "npm:zod@^3.23.8";
+function supa2() {
+  return createClient2(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+}
+var get_artist_default = defineTool2({
+  name: "get_artist",
+  title: "Get artist profile",
+  description: "Fetch a single Artswarit artist's public profile by id.",
+  inputSchema: { id: z2.string().uuid().describe("Artist profile id (uuid).") },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ id }) => {
+    const { data, error } = await supa2().from("public_profiles").select("*").eq("id", id).maybeSingle();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (!data) return { content: [{ type: "text", text: "Artist not found" }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+      structuredContent: { artist: data }
+    };
+  }
+});
+
+// src/lib/mcp/tools/list-artworks.ts
+import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.49.8";
+import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z3 } from "npm:zod@^3.23.8";
+function supa3() {
+  return createClient3(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+}
+var list_artworks_default = defineTool3({
+  name: "list_artworks",
+  title: "List artworks",
+  description: "List public artworks on Artswarit. Optionally filter by artist id, category, or search text.",
+  inputSchema: {
+    artist_id: z3.string().uuid().optional().describe("Filter by artist id."),
+    category: z3.string().optional().describe("Filter by category."),
+    query: z3.string().optional().describe("Search title/description."),
+    limit: z3.number().int().min(1).max(50).optional().describe("Max results (default 12).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ artist_id, category, query, limit }) => {
+    let q = supa3().from("artworks").select("id, title, description, category, price, thumbnail_url, artist_id, created_at, visibility").eq("visibility", "public").order("created_at", { ascending: false }).limit(limit ?? 12);
+    if (artist_id) q = q.eq("artist_id", artist_id);
+    if (category) q = q.eq("category", category);
+    if (query) {
+      const like = `%${query}%`;
+      q = q.or(`title.ilike.${like},description.ilike.${like}`);
+    }
+    const { data, error } = await q;
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data ?? [], null, 2) }],
+      structuredContent: { artworks: data ?? [] }
+    };
+  }
+});
+
+// src/lib/mcp/tools/get-artwork.ts
+import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.49.8";
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z4 } from "npm:zod@^3.23.8";
+function supa4() {
+  return createClient4(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+}
+var get_artwork_default = defineTool4({
+  name: "get_artwork",
+  title: "Get artwork",
+  description: "Fetch a single public artwork by id.",
+  inputSchema: { id: z4.string().uuid().describe("Artwork id.") },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ id }) => {
+    const { data, error } = await supa4().from("artworks").select("*").eq("id", id).eq("visibility", "public").maybeSingle();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (!data) return { content: [{ type: "text", text: "Artwork not found or not public" }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+      structuredContent: { artwork: data }
+    };
+  }
+});
+
+// src/lib/mcp/index.ts
+var mcp_default = defineMcp({
+  name: "artswarit-mcp",
+  title: "Artswarit MCP",
+  version: "0.1.0",
+  instructions: "Public read-only tools for Artswarit \u2014 a marketplace connecting freelance artists and clients. Use `search_artists` to discover artists, `get_artist` for a full profile, `list_artworks` to browse artworks (optionally filtered by artist/category/query), and `get_artwork` for one artwork's details.",
+  tools: [search_artists_default, get_artist_default, list_artworks_default, get_artwork_default]
+});
+
 // lovable-mcp-supabase-entry.ts
-import mcp from "npm:C:\\Users\\91731\\.gemini\\antigravity\\scratch\\artswarit01\\src\\lib\\mcp\\index.ts";
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.1/stacks/supabase";
-Deno.serve(createSupabaseHandler(mcp, { functionName: "mcp" }));
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.0/stacks/supabase";
+Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
