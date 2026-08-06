@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Users, Briefcase, Wallet, Scale,
-  Banknote, ImageIcon, CreditCard, LineChart, Settings,
+  Banknote, ImageIcon, CreditCard, LineChart, Settings, ScrollText,
   ChevronLeft,
 } from "lucide-react";
 import {
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 export type AdminSection =
   | "overview" | "users" | "projects" | "escrow" | "disputes"
-  | "withdrawals" | "portfolio" | "payments" | "analytics" | "settings";
+  | "withdrawals" | "portfolio" | "payments" | "analytics" | "audit" | "settings";
 
 export interface AdminSidebarProps {
   active: AdminSection;
@@ -30,6 +30,7 @@ const ITEMS: { key: AdminSection; label: string; icon: typeof LayoutDashboard }[
   { key: "portfolio",   label: "Portfolio review",icon: ImageIcon },
   { key: "payments",    label: "Payments",        icon: CreditCard },
   { key: "analytics",   label: "Analytics",       icon: LineChart },
+  { key: "audit",       label: "Audit log",       icon: ScrollText },
   { key: "settings",    label: "Settings",        icon: Settings },
 ];
 

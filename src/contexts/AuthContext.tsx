@@ -342,53 +342,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    // Always sign out locally, even if the server call fails (expired session,
+    // offline, or account just deleted). Leaving the user "signed in" on the
+    // device is worse than a stale server-side refresh token.
+    let serverError: any = null;
     try {
-      // 1. Ask the auth server to revoke the session BEFORE clearing local state,
-      //    so a network failure doesn't leave the UI signed out while the server
-      //    still has a live refresh token.
       const { error } = await supabase.auth.signOut({ scope: 'global' });
-      if (error) {
-        console.error('Signout error:', error);
-        toast({
-          title: "Sign out failed",
-          description: error.message || "Could not sign out. Please check your connection and try again.",
-          variant: "destructive"
-        });
-        return { error };
-      }
+      serverError = error ?? null;
+      if (error) console.error('Signout error (continuing with local sign out):', error);
+    } catch (error: any) {
+      serverError = error;
+      console.error('Signout error (continuing with local sign out):', error);
+    }
 
-      // 2. Clear application state only after the server confirms.
-      setUser(null);
-      setSession(null);
-      setSubscription(null);
-      setProfile(null);
+    // Clear application state.
+    setUser(null);
+    setSession(null);
+    setSubscription(null);
+    setProfile(null);
 
-      // 3. Belt-and-suspenders: clear any stale Supabase keys left in localStorage.
-      const keys = Object.keys(localStorage);
-      for (const key of keys) {
+    // Belt-and-suspenders: clear any stale Supabase keys left in localStorage.
+    try {
+      for (const key of Object.keys(localStorage)) {
         if (key.includes('supabase.auth.token') || key.startsWith('sb-')) {
           localStorage.removeItem(key);
         }
       }
-
-      toast({
-        title: "Signed out",
-        description: "You've been successfully signed out."
-      });
-
-      // 4. Hard-redirect home to drop any in-memory state.
-      window.location.replace('/');
-
-      return { error: null };
-    } catch (error: any) {
-      console.error('Signout error:', error);
-      toast({
-        title: "Sign out failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive"
-      });
-      return { error };
+    } catch {
+      // storage may be unavailable (private mode) — ignore
     }
+
+    toast({
+      title: "Signed out",
+      description: "You've been successfully signed out."
+    });
+
+    // Hard-redirect home to drop any in-memory state.
+    window.location.replace('/');
+
+    return { error: serverError };
   };
 
 

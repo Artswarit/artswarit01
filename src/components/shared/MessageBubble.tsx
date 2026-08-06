@@ -52,7 +52,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 <img
                   src={avatarUrl}
                   alt={senderName || "User"}
-                  className="object-cover"
+                  className="h-full w-full rounded-xl object-cover aspect-square"
                 />
               ) : (
                 <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs uppercase rounded-xl">

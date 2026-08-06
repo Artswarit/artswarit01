@@ -21,7 +21,7 @@ export default defineTool({
       .from("artworks")
       .select("*")
       .eq("id", id)
-      .eq("visibility", "public")
+      .eq("status", "public")
       .maybeSingle();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     if (!data) return { content: [{ type: "text", text: "Artwork not found or not public" }], isError: true };

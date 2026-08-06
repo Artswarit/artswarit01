@@ -189,7 +189,7 @@ export function DisputeDialog({
       // Find the open dispute
       const { data: activeDispute } = await supabase
         .from('disputes')
-        .select('id, previous_status')
+        .select('id')
         .eq('milestone_id', milestone.id)
         .eq('status', 'open')
         .maybeSingle();
@@ -202,8 +202,8 @@ export function DisputeDialog({
           .eq('id', activeDispute.id);
       }
 
-      // Revert milestone status to pre-dispute status (fallback to REVIEW_PENDING)
-      const targetStatus = activeDispute?.previous_status || 'REVIEW_PENDING';
+      // Revert milestone status to the pre-dispute review state
+      const targetStatus = 'REVIEW_PENDING';
       await supabase
         .from('project_milestones')
         .update({ status: targetStatus })

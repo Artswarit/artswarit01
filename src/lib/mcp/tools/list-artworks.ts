@@ -25,8 +25,8 @@ export default defineTool({
   handler: async ({ artist_id, category, query, limit }) => {
     let q = supa()
       .from("artworks")
-      .select("id, title, description, category, price, thumbnail_url, artist_id, created_at, visibility")
-      .eq("visibility", "public")
+      .select("id, title, description, category, price, media_url, artist_id, created_at, status")
+      .eq("status", "public")
       .order("created_at", { ascending: false })
       .limit(limit ?? 12);
     if (artist_id) q = q.eq("artist_id", artist_id);
