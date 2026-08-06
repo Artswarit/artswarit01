@@ -19,9 +19,9 @@ function supa() {
 var search_artists_default = defineTool({
   name: "search_artists",
   title: "Search artists",
-  description: "Search Artswarit artists by keyword (matches name, category, city, bio). Returns approved, publicly visible artists only.",
+  description: "Search Artswarit artists by keyword (matches name, city, bio). Returns approved, publicly visible artists only.",
   inputSchema: {
-    query: z.string().trim().min(1).describe("Search text: name, category, city, or skill."),
+    query: z.string().trim().min(1).describe("Search text: name, city, or skill."),
     limit: z.number().int().min(1).max(50).optional().describe("Max results (default 10).")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
@@ -29,8 +29,8 @@ var search_artists_default = defineTool({
     const client = supa();
     const max = limit ?? 10;
     const like = `%${query}%`;
-    const { data, error } = await client.from("public_profiles").select("id, full_name, category, city, bio, avatar_url, role").or(
-      `full_name.ilike.${like},category.ilike.${like},city.ilike.${like},bio.ilike.${like}`
+    const { data, error } = await client.from("public_profiles").select("id, full_name, city, bio, avatar_url, role, tags").or(
+      `full_name.ilike.${like},city.ilike.${like},bio.ilike.${like}`
     ).limit(max);
     if (error) {
       return { content: [{ type: "text", text: `Search failed: ${error.message}` }], isError: true };
@@ -93,7 +93,7 @@ var list_artworks_default = defineTool3({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ artist_id, category, query, limit }) => {
-    let q = supa3().from("artworks").select("id, title, description, category, price, thumbnail_url, artist_id, created_at, visibility").eq("visibility", "public").order("created_at", { ascending: false }).limit(limit ?? 12);
+    let q = supa3().from("artworks").select("id, title, description, category, price, media_url, artist_id, created_at, status").eq("status", "public").order("created_at", { ascending: false }).limit(limit ?? 12);
     if (artist_id) q = q.eq("artist_id", artist_id);
     if (category) q = q.eq("category", category);
     if (query) {
@@ -127,7 +127,7 @@ var get_artwork_default = defineTool4({
   inputSchema: { id: z4.string().uuid().describe("Artwork id.") },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ id }) => {
-    const { data, error } = await supa4().from("artworks").select("*").eq("id", id).eq("visibility", "public").maybeSingle();
+    const { data, error } = await supa4().from("artworks").select("*").eq("id", id).eq("status", "public").maybeSingle();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     if (!data) return { content: [{ type: "text", text: "Artwork not found or not public" }], isError: true };
     return {

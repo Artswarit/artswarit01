@@ -15,7 +15,7 @@
       {
         "name": "search_artists",
         "title": "Search artists",
-        "description": "Search Artswarit artists by keyword (matches name, category, city, bio). Returns approved, publicly visible artists only.",
+        "description": "Search Artswarit artists by keyword (matches name, city, bio). Returns approved, publicly visible artists only.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -27,7 +27,7 @@
             "query": {
               "type": "string",
               "minLength": 1,
-              "description": "Search text: name, category, city, or skill."
+              "description": "Search text: name, city, or skill."
             },
             "limit": {
               "type": "integer",
