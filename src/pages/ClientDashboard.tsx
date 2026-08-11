@@ -963,16 +963,15 @@ const ClientDashboard = () => {
                           }} />
                               </div>
                               <span className="text-[11px] font-medium text-muted-foreground">{project.progress}%</span>
-
-                              <span className="text-[10px] sm:text-xs font-medium">{project.progress}%</span>
                             </div>
-                            <div className="mt-2 sm:mt-3 flex justify-between items-center">
+                            <div className="mt-3 flex items-center justify-between">
                               <div className="flex items-center gap-3">
-                                <span className="text-[10px] sm:text-xs text-gray-500">Due: {project.dueDate}</span>
-                                {project.budget > 0 && <span className="text-[10px] sm:text-xs text-green-600 font-medium">
+                                <span className="text-[11px] text-muted-foreground">Due {project.dueDate}</span>
+                                {project.budget > 0 && <span className="text-[11px] font-medium text-success">
                                     {format(project.budget, 'USD', project.exchangeRate)}
                                   </span>}
                               </div>
+
                               <div className="flex flex-wrap gap-2">
                                   <Button size="sm" variant="outline" className="h-7 sm:h-8 text-xs" onClick={() => {
                                     setSelectedProjectId(project.id);
