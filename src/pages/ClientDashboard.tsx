@@ -597,49 +597,38 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
 
       <div className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pb-[calc(7rem+var(--safe-bottom))] sm:pb-12 pt-[calc(4.75rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))] lg:pt-[calc(6.5rem+var(--safe-top))]">
         {/* Dashboard Header */}
         {selectedTab === 'overview' && (
-          <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
-            <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black mb-1 sm:mb-2">Client Dashboard</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
-              Welcome back, <span className="font-black text-foreground">{userName}</span>! Manage your projects and discover new artists.
-            </p>
+          <div className="mb-5 sm:mb-6 animate-fade-in">
+            <PageHeader
+              title="Client Dashboard"
+              size="lg"
+              description={
+                <>
+                  Welcome back, <span className="font-semibold text-foreground">{userName}</span> — manage your
+                  projects and discover new artists.
+                </>
+              }
+              actions={
+                <Button className="h-11 rounded-xl" onClick={() => setCreateProjectOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  New project
+                </Button>
+              }
+            />
           </div>
         )}
 
-        {/* Dashboard Navigation - Optimized for all screens */}
+        {/* Dashboard Navigation */}
         <Tabs value={selectedTab} className="mb-4 sm:mb-6 lg:mb-8" onValueChange={handleTabChange}>
-          <div className="hidden sm:block relative mb-4 sm:mb-6 sticky top-[calc(4rem+var(--safe-top,0px))] z-30 bg-gray-50/80 dark:bg-background/80 backdrop-blur-md py-2 -mx-3 px-3">
-              <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
-                  {clientDashboardTabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                      <TabsTrigger
-                        key={tab.value}
-                        value={tab.value}
-                        className={cn(
-                          "flex flex-col items-center gap-1.5 text-[10px] px-3.5 py-3 rounded-xl transition-all duration-300 snap-center min-w-[90px]",
-                          "sm:flex-row sm:gap-2 sm:text-xs sm:px-4 sm:py-2.5 sm:rounded-2xl sm:min-w-[100px]",
-                          "lg:text-sm lg:px-5 lg:py-3",
-                          "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:shadow-primary/30",
-                          "hover:bg-primary/5 hover:text-primary"
-                        )}
-                      >
-                        <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px] shrink-0" />
-                        <span className="font-bold sm:font-medium whitespace-nowrap tracking-tight">
-                          {tab.label}
-                        </span>
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-              </div>
-            </div>
+          <div className="sticky top-[calc(4rem+var(--safe-top,0px))] z-30 -mx-3 mb-6 hidden bg-background/85 px-3 py-2.5 backdrop-blur-xl sm:block">
+            <DashboardTabBar tabs={clientDashboardTabs} />
+          </div>
+
 
           {/* Overview Tab Content */}
           <TabsContent value="overview" className="space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in outline-none focus-visible:ring-0" forceMount>
