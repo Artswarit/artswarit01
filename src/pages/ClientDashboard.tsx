@@ -650,80 +650,37 @@ const ClientDashboard = () => {
 
                   {/* Profile Completion Alert - Realtime & Auto-disappearing */}
                   <ProfileCompletionBanner />
-            {/* Stats Row - Modernized & Clickable Grid */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
-              <div 
+            {/* Stats row */}
+            <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-3 sm:gap-4">
+              <StatTile
+                label="Active"
+                value={activeProjects.length}
+                hint="Projects in progress"
+                icon={Clock}
+                tone="info"
                 onClick={() => handleTabChange('projects')}
-                className="group relative bg-white/80 dark:bg-card/80 backdrop-blur-sm p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm border border-blue-100/50 dark:border-border overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-              >
-                <div className="absolute -top-2 -right-2 p-4 opacity-5 sm:opacity-10 transition-opacity group-hover:opacity-20">
-                  <Clock className="h-12 w-12 sm:h-16 sm:w-16 text-blue-600" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-transparent to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 transition-all duration-500" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-1.5 sm:gap-3 mb-1 sm:mb-3">
-                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                      <Clock className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
-                    </div>
-                    <h3 className="font-semibold text-[10px] sm:text-xs lg:text-sm text-muted-foreground uppercase tracking-tight sm:tracking-wider truncate">Active</h3>
-                  </div>
-                  <div className="flex items-baseline gap-1 sm:gap-2">
-                    <p className="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                      {activeProjects.length}
-                    </p>
-                    <span className="hidden xs:inline text-[8px] sm:text-xs text-muted-foreground font-medium">Projects</span>
-                  </div>
-                </div>
-              </div>
-
-              <div 
+                actionLabel="View active projects"
+              />
+              <StatTile
+                label="Done"
+                value={completedProjects.length}
+                hint="Completed projects"
+                icon={CheckCircle}
+                tone="success"
                 onClick={() => handleTabChange('projects')}
-                className="group relative bg-white/80 dark:bg-card/80 backdrop-blur-sm p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm border border-emerald-100/50 dark:border-border overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-              >
-                <div className="absolute -top-2 -right-2 p-4 opacity-5 sm:opacity-10 transition-opacity group-hover:opacity-20">
-                  <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 text-emerald-600" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-transparent to-emerald-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-500" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-1.5 sm:gap-3 mb-1 sm:mb-3">
-                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
-                      <CheckCircle className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
-                    </div>
-                    <h3 className="font-semibold text-[10px] sm:text-xs lg:text-sm text-muted-foreground uppercase tracking-tight sm:tracking-wider truncate">Done</h3>
-                  </div>
-                  <div className="flex items-baseline gap-1 sm:gap-2">
-                    <p className="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                      {completedProjects.length}
-                    </p>
-                    <span className="hidden xs:inline text-[8px] sm:text-xs text-muted-foreground font-medium">Projects</span>
-                  </div>
-                </div>
-              </div>
-
-              <div 
+                actionLabel="View completed projects"
+              />
+              <StatTile
+                label="Saved"
+                value={savedArtistsCount}
+                hint="Artists you follow"
+                icon={Users}
+                tone="primary"
                 onClick={() => handleTabChange('artists')}
-                className="group relative bg-white/80 dark:bg-card/80 backdrop-blur-sm p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm border border-purple-100/50 dark:border-border overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-              >
-                <div className="absolute -top-2 -right-2 p-4 opacity-5 sm:opacity-10 transition-opacity group-hover:opacity-20">
-                  <Users className="h-12 w-12 sm:h-16 sm:w-16 text-purple-600" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-transparent to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-fuchsia-500/5 transition-all duration-500" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-1.5 sm:gap-3 mb-1 sm:mb-3">
-                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
-                      <Users className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
-                    </div>
-                    <h3 className="font-semibold text-[10px] sm:text-xs lg:text-sm text-muted-foreground uppercase tracking-tight sm:tracking-wider truncate">Saved</h3>
-                  </div>
-                  <div className="flex items-baseline gap-1 sm:gap-2">
-                    <p className="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-br from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-                      {savedArtistsCount}
-                    </p>
-                    <span className="hidden xs:inline text-[8px] sm:text-xs text-muted-foreground font-medium">Artists</span>
-                  </div>
-                </div>
-              </div>
+                actionLabel="View saved artists"
+              />
             </div>
+
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
