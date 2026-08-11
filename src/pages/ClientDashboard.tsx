@@ -926,45 +926,44 @@ const ClientDashboard = () => {
                         {projectSearch && <span className="text-xs font-normal text-muted-foreground">({searchedActiveProjects.length} result{searchedActiveProjects.length !== 1 ? 's' : ''})</span>}
                       </h3>
 
-                      {/* Projects list will follow */}
-                <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-3">
                   {searchedActiveProjects.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 px-4 rounded-[2rem] border-2 border-dashed border-border/30 bg-muted/10">
-                      <div className="rounded-2xl bg-muted/40 p-4 mb-4">
-                        <Clock className="h-6 w-6 text-muted-foreground/40" />
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 px-4 py-10">
+                      <div className="mb-3 grid h-10 w-10 place-items-center rounded-lg bg-muted">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <p className="text-sm font-black text-foreground mb-1">{projectSearch ? 'No matches' : 'No active projects'}</p>
-                      <p className="text-xs text-muted-foreground text-center mb-4">{projectSearch ? 'Try a different search term.' : 'Create a project to get started.'}</p>
+                      <p className="mb-1 text-sm font-semibold text-foreground">{projectSearch ? 'No matches' : 'No active projects'}</p>
+                      <p className="mb-4 text-center text-xs text-muted-foreground">{projectSearch ? 'Try a different search term.' : 'Create a project to get started.'}</p>
                       {!projectSearch && (
-                        <Button size="sm" onClick={() => setCreateProjectOpen(true)} className="h-9 px-5 rounded-xl font-black text-xs shadow-sm shadow-primary/20">
-                          <PlusCircle className="h-3.5 w-3.5 mr-1.5" /> New Project
+                        <Button size="sm" onClick={() => setCreateProjectOpen(true)} className="h-10 rounded-xl px-4 text-xs">
+                          <PlusCircle className="mr-1.5 h-3.5 w-3.5" /> New project
                         </Button>
                       )}
                     </div>
                   ) : (
                     <>
-                      {searchedActiveProjects.slice(0, visibleActive).map((project, index) => <div key={project.id} className="p-3 sm:p-4 border border-gray-100 dark:border-border rounded-lg bg-white/70 dark:bg-card/70 transition-all duration-300 hover:shadow-md animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                            <div className="flex justify-between items-start gap-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-8 w-8 rounded-full object-cover shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-sm sm:text-base truncate">{project.title}</h4>
-                                  <Link to={`/artist/${project.artistId}`} className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">
+                      {searchedActiveProjects.slice(0, visibleActive).map((project) => <div key={project.id} className="rounded-xl border border-border/60 bg-background p-3 transition-all duration-300 ease-apple hover:border-primary/30 hover:shadow-token-xs sm:p-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                                <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="truncate text-sm font-semibold tracking-tight">{project.title}</h4>
+                                  <Link to={`/artist/${project.artistId}`} className="text-xs text-muted-foreground transition-colors hover:text-primary">
                                     {project.artist}
                                   </Link>
                                 </div>
                               </div>
-                              <span className={cn("px-2 py-0.5 text-[10px] sm:text-xs rounded-full shrink-0", project.status === "In Progress" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300")}>
-                                {project.status}
-                              </span>
+                              <StatusPill tone={statusTone(project.status)} className="shrink-0">{project.status}</StatusPill>
                             </div>
-                            {project.description && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{project.description}</p>}
-                            <div className="flex items-center gap-2 mt-2 sm:mt-3">
-                              <div className="flex-1 bg-gray-200 dark:bg-muted rounded-full h-1.5 sm:h-2">
-                                <div className="bg-gradient-to-r from-artswarit-purple to-blue-500 h-full rounded-full transition-all duration-500" style={{
+                            {project.description && <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{project.description}</p>}
+                            <div className="mt-3 flex items-center gap-2">
+                              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                <div className="h-full rounded-full bg-primary transition-all duration-700 ease-apple" style={{
                             width: `${project.progress}%`
                           }} />
                               </div>
+                              <span className="text-[11px] font-medium text-muted-foreground">{project.progress}%</span>
+
                               <span className="text-[10px] sm:text-xs font-medium">{project.progress}%</span>
                             </div>
                             <div className="mt-2 sm:mt-3 flex justify-between items-center">
