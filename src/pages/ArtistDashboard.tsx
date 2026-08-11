@@ -30,6 +30,8 @@ import ProfileCompletionBanner from '@/components/dashboard/ProfileCompletionBan
 import DashboardAttentionRequired from '@/components/dashboard/DashboardAttentionRequired';
 import TabErrorBoundary from '@/components/dashboard/TabErrorBoundary';
 import DashboardMobileNav from '@/components/dashboard/DashboardMobileNav';
+import DashboardTabBar from '@/components/dashboard/ui/DashboardTabBar';
+
 
 const ArtistDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
