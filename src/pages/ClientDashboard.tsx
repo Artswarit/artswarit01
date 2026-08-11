@@ -898,35 +898,34 @@ const ClientDashboard = () => {
               {visitedTabs.has('projects') && (
                 <TabErrorBoundary tabLabel="Projects">
                 <>
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                    <h2 className="font-heading text-base sm:text-lg lg:text-xl font-black uppercase tracking-tight">All Projects</h2>
-                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                    <h2 className="text-lg font-semibold tracking-tight sm:text-xl">All projects</h2>
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                       <div className="relative flex-1 sm:flex-initial">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input
                           type="text"
-                          placeholder="Search projects..."
+                          placeholder="Search projects"
                           value={projectSearch}
                           onChange={e => setProjectSearch(e.target.value)}
-                          className="w-full sm:w-48 lg:w-64 pl-9 pr-4 py-2.5 border border-gray-200 dark:border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-transparent bg-white/80 dark:bg-card/80 min-h-[44px]"
+                          className="h-11 w-full rounded-xl border border-input bg-background pl-9 pr-4 text-sm transition-shadow placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-56 lg:w-64"
                         />
-                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                          <Search size={16} />
-                        </div>
                       </div>
-                      <Button className="w-full sm:w-auto text-sm min-h-[44px]" onClick={() => setCreateProjectOpen(true)}>
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        New Project
+                      <Button className="h-11 w-full rounded-xl sm:w-auto" onClick={() => setCreateProjectOpen(true)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        New project
                       </Button>
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    <div className="bg-white/60 dark:bg-card/60 backdrop-blur-sm p-4 sm:p-6 rounded-lg sm:rounded-xl shadow-sm border border-blue-100 dark:border-border">
-                      <h3 className="font-heading text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center">
-                        <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-amber-600" />
-                        In Progress
-                        {projectSearch && <span className="ml-2 text-xs font-normal text-muted-foreground">({searchedActiveProjects.length} result{searchedActiveProjects.length !== 1 ? 's' : ''})</span>}
+
+                  <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
+                    <div className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5">
+                      <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold tracking-tight">
+                        <Clock className="h-4 w-4 text-warning" />
+                        In progress
+                        {projectSearch && <span className="text-xs font-normal text-muted-foreground">({searchedActiveProjects.length} result{searchedActiveProjects.length !== 1 ? 's' : ''})</span>}
                       </h3>
+
                       {/* Projects list will follow */}
                 <div className="space-y-3 sm:space-y-4">
                   {searchedActiveProjects.length === 0 ? (
