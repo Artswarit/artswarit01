@@ -38,6 +38,7 @@ html, body {
   --shadow-brand: 0 10px 30px -10px hsl(var(--primary) / 0.3);
 }
 
+
 /* Smooth, Apple-feel transitions on common interactive primitives */
 @layer utilities {
   .ease-apple { transition-timing-function: var(--ease-apple); }
