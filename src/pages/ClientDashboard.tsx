@@ -703,65 +703,75 @@ const ClientDashboard = () => {
                 />
 
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-3">
                   {activeProjects.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-14 px-6 rounded-[2.5rem] border-2 border-dashed border-border/40 bg-muted/20 backdrop-blur-sm">
-                      <div className="rounded-3xl bg-muted/50 p-5 mb-5 shadow-inner">
-                        <FileText className="h-8 w-8 text-muted-foreground/40" />
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-12">
+                      <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-muted">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      <h3 className="text-lg font-black text-foreground mb-1.5 tracking-tight">No active projects yet</h3>
-                      <p className="text-sm text-muted-foreground text-center max-w-xs mb-6 font-medium leading-relaxed opacity-70">
-                        Bring your vision to life. Create a project and connect with talented artists.
+                      <h3 className="mb-1 text-base font-semibold tracking-tight text-foreground">No active projects yet</h3>
+                      <p className="mb-5 max-w-xs text-center text-sm text-muted-foreground">
+                        Create a project and we'll help you match with the right artist.
                       </p>
-                      <Button onClick={() => setCreateProjectOpen(true)} className="gap-2 h-11 px-7 rounded-2xl font-black shadow-lg shadow-primary/20">
+                      <Button onClick={() => setCreateProjectOpen(true)} className="h-11 gap-2 rounded-xl">
                         <PlusCircle className="h-4 w-4" />
-                        Create Project
+                        Create project
                       </Button>
                     </div>
                   ) : (
-                    activeProjects.slice(0, 3).map((project, index) => (
-                      <div key={project.id} className="group bg-white/80 dark:bg-card/80 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-muted/30 hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className={cn(
-                                "px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm",
-                                project.status === "In Progress" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" :
-                                project.status === "Pending Artist" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" :
-                                project.status === "Pending Confirm" ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" :
-                                "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                              )}>
-                                {project.status}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                    activeProjects.slice(0, 3).map((project) => (
+                      <div
+                        key={project.id}
+                        className="group rounded-2xl border border-border/60 bg-card p-4 shadow-token-xs transition-all duration-300 ease-apple hover:border-primary/40 hover:shadow-token-sm sm:p-5"
+                      >
+                        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2 flex flex-wrap items-center gap-2">
+                              <StatusPill tone={statusTone(project.status)}>{project.status}</StatusPill>
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3" /> Due {project.dueDate}
                               </span>
                             </div>
-                            <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate mb-1">{project.title}</h3>
-                            <div className="flex items-center gap-2 mb-4">
-                              <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-5 w-5 rounded-full object-cover" />
-                              <span className="text-sm text-muted-foreground">Artist: <span className="text-foreground font-medium">{project.artist}</span></span>
+                            <h3 className="mb-1.5 truncate text-base font-semibold tracking-tight transition-colors group-hover:text-primary">
+                              {project.title}
+                            </h3>
+                            <div className="mb-4 flex items-center gap-2">
+                              <img
+                                loading="lazy"
+                                decoding="async"
+                                src={project.artistAvatar}
+                                alt={project.artist}
+                                className="h-5 w-5 rounded-full object-cover"
+                              />
+                              <span className="text-sm text-muted-foreground">
+                                <span className="font-medium text-foreground">{project.artist}</span>
+                              </span>
                             </div>
-                            
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="font-semibold text-muted-foreground">Progress</span>
-                                <span className="font-bold text-primary">{project.progress}%</span>
+
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground">Progress</span>
+                                <span className="font-medium text-foreground">{project.progress}%</span>
                               </div>
-                              <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-primary to-indigo-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(var(--primary),0.3)]"
-                                  style={{ width: `${project.progress}%` }} 
+                              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                                <div
+                                  className="h-full rounded-full bg-primary transition-all duration-700 ease-apple"
+                                  style={{ width: `${project.progress}%` }}
                                 />
                               </div>
                             </div>
                           </div>
-                          <div className="flex sm:flex-col gap-2 shrink-0 self-end sm:self-center">
-                            <Button size="sm" variant="outline" className="rounded-xl px-4 hover:bg-primary hover:text-white transition-all shadow-sm" onClick={() => {
-                              setSelectedProjectId(project.id);
-                              setProjectModalOpen(true);
-                            }}>
-                              View Details
+                          <div className="flex shrink-0 gap-2 self-end sm:self-center">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-10 rounded-xl px-4"
+                              onClick={() => {
+                                setSelectedProjectId(project.id);
+                                setProjectModalOpen(true);
+                              }}
+                            >
+                              View details
                             </Button>
                           </div>
                         </div>
@@ -769,6 +779,7 @@ const ClientDashboard = () => {
                     ))
                   )}
                 </div>
+
               </div>
 
               {/* Sidebar: Recommendations & Notifications */}
