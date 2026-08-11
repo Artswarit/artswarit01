@@ -41,6 +41,12 @@ import { useToast } from "@/hooks/use-toast";
 import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
 import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 import LogoLoader from "@/components/ui/LogoLoader";
+import PageHeader from "@/components/shared/PageHeader";
+import DashboardTabBar from "@/components/dashboard/ui/DashboardTabBar";
+import StatTile from "@/components/dashboard/ui/StatTile";
+import SectionHeading from "@/components/dashboard/ui/SectionHeading";
+import StatusPill, { statusTone } from "@/components/dashboard/ui/StatusPill";
+
 interface Project {
   id: string;
   title: string;
