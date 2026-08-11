@@ -686,15 +686,22 @@ const ClientDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Active Projects Section - Larger */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h2 className="font-heading text-lg lg:text-xl font-bold flex items-center gap-2">
-                    <LayoutDashboard className="h-5 w-5 text-primary" />
-                    Active Projects
-                  </h2>
-                  <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10 transition-colors" onClick={() => setSelectedTab('projects')}>
-                    View All <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
+                <SectionHeading
+                  title="Active projects"
+                  icon={LayoutDashboard}
+                  meta={activeProjects.length || undefined}
+                  actions={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 rounded-lg text-primary hover:bg-primary/10"
+                      onClick={() => handleTabChange('projects')}
+                    >
+                      View all <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  }
+                />
+
 
                 <div className="grid grid-cols-1 gap-4">
                   {activeProjects.length === 0 ? (
