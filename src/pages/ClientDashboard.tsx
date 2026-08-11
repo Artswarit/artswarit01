@@ -785,31 +785,44 @@ const ClientDashboard = () => {
               {/* Sidebar: Recommendations & Notifications */}
               <div className="space-y-6 lg:space-y-8">
                 {/* Recommended Section */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h2 className="font-heading text-lg font-bold flex items-center gap-2">
-                      <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                      Artists
-                    </h2>
-                    <Link to="/explore" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-                      Explore <ChevronRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 gap-3">
-                    {recommendedArtists.slice(0, 3).map((artist, index) => (
-                      <Link key={artist.id} to={`/artist/${artist.id}`} className="group bg-white/70 dark:bg-card/70 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-muted/20 hover:shadow-md hover:border-primary/20 transition-all duration-300 animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+                <div className="space-y-3">
+                  <SectionHeading
+                    title="Artists for you"
+                    icon={Star}
+                    actions={
+                      <Link
+                        to="/explore"
+                        className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      >
+                        Explore <ChevronRight className="h-3 w-3" />
+                      </Link>
+                    }
+                  />
+
+                  <div className="grid grid-cols-1 gap-2">
+                    {recommendedArtists.slice(0, 3).map((artist) => (
+                      <Link
+                        key={artist.id}
+                        to={`/artist/${artist.id}`}
+                        className="group rounded-xl border border-border/60 bg-card p-3 transition-all duration-300 ease-apple hover:border-primary/40 hover:shadow-token-xs active:scale-[0.99]"
+                      >
                         <div className="flex items-center gap-3">
-                          <div className="relative shrink-0">
-                            <img loading="lazy" decoding="async" src={artist.profileImage} alt={artist.name} className="h-12 w-12 rounded-2xl object-cover ring-2 ring-white dark:ring-border group-hover:ring-primary/50 transition-all" />
-                            <div className="absolute -bottom-1 -right-1 bg-yellow-500 text-[8px] font-bold text-white px-1 rounded flex items-center gap-0.5 shadow-sm">
-                              <Star className="h-2 w-2 fill-white" /> {artist.rating}
-                            </div>
+                          <img
+                            loading="lazy"
+                            decoding="async"
+                            src={artist.profileImage}
+                            alt={artist.name}
+                            className="h-11 w-11 shrink-0 rounded-xl object-cover"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <h3 className="truncate text-sm font-semibold transition-colors group-hover:text-primary">
+                              {artist.name}
+                            </h3>
+                            <p className="truncate text-xs text-muted-foreground">{artist.profession}</p>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-sm truncate group-hover:text-primary transition-colors">{artist.name}</h3>
-                            <p className="text-xs text-muted-foreground truncate font-medium">{artist.profession}</p>
-                          </div>
+                          <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground">
+                            <Star className="h-3 w-3 fill-warning text-warning" /> {artist.rating}
+                          </span>
                         </div>
                       </Link>
                     ))}
@@ -817,48 +830,59 @@ const ClientDashboard = () => {
                 </div>
 
                 {/* Notifications Section */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h2 className="font-heading text-lg font-bold flex items-center gap-2">
-                      <Bell className="h-5 w-5 text-blue-500" />
-                      Activity
-                    </h2>
-                    <Button variant="ghost" size="sm" className="h-8 text-xs font-semibold text-muted-foreground" onClick={() => setSelectedTab('account')}>
-                      Manage
-                    </Button>
-                  </div>
-                  
-                  <div className="bg-white/70 dark:bg-card/70 backdrop-blur-sm rounded-2xl shadow-sm border border-muted/20 overflow-hidden">
-                    <div className="divide-y divide-muted/10">
+                <div className="space-y-3">
+                  <SectionHeading
+                    title="Activity"
+                    icon={Bell}
+                    actions={
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 rounded-lg text-xs text-muted-foreground"
+                        onClick={() => handleTabChange('account')}
+                      >
+                        Manage
+                      </Button>
+                    }
+                  />
+
+                  <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+                    <div className="divide-y divide-border/50">
                       {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-muted-foreground text-sm flex flex-col items-center gap-2">
-                          <Bell className="h-6 w-6 opacity-20" />
+                        <div className="flex flex-col items-center gap-2 p-8 text-center text-sm text-muted-foreground">
+                          <Bell className="h-5 w-5 opacity-40" />
                           <p>No new updates</p>
                         </div>
                       ) : (
-                        notifications.slice(0, 4).map((notification, index) => (
-                          <div 
-                            key={notification.id} 
+                        notifications.slice(0, 4).map((notification) => (
+                          <button
+                            key={notification.id}
+                            type="button"
                             onClick={() => handleNotificationClick(notification)}
                             className={cn(
-                              "p-4 flex items-start gap-3 transition-colors hover:bg-muted/5 animate-fade-in cursor-pointer",
-                              !notification.read && "bg-blue-50/30 dark:bg-blue-900/10"
-                            )} 
-                            style={{ animationDelay: `${index * 30}ms` }}
+                              "flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-muted/40",
+                              !notification.read && "bg-primary/[0.04]"
+                            )}
                           >
-                            {!notification.read && <div className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0" />}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium leading-relaxed line-clamp-2">{notification.content}</p>
-                              <p className="text-[10px] text-muted-foreground mt-1 font-semibold flex items-center gap-1">
+                            <span
+                              className={cn(
+                                "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                                notification.read ? "bg-transparent" : "bg-primary"
+                              )}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="line-clamp-2 text-xs leading-relaxed text-foreground">{notification.content}</p>
+                              <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
                                 <Clock className="h-3 w-3" /> {notification.time}
                               </p>
                             </div>
-                          </div>
+                          </button>
                         ))
                       )}
                   </div>
                 </div>
               </div>
+
             </div>
                 </div>
               </div>
