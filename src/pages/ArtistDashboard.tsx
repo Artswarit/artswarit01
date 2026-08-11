@@ -115,7 +115,7 @@ const ArtistDashboard = () => {
 
   if (profileLoading && !profile) {
     return (
-      <div className="min-h-screen bg-gray-50/50 dark:bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LogoLoader text="Loading dashboard…" />
       </div>
     );
@@ -130,7 +130,7 @@ const ArtistDashboard = () => {
 
 
   return (
-      <div className="min-h-screen bg-gray-50/50 dark:bg-background">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <main className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pt-[calc(4.75rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))] pb-[calc(7rem+var(--safe-bottom))] sm:pb-20">
           {activeTab === 'overview' && (
