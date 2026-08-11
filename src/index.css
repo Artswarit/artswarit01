@@ -38,6 +38,7 @@ html, body {
   --shadow-brand: 0 10px 30px -10px hsl(var(--primary) / 0.3);
 }
 
+
 /* Smooth, Apple-feel transitions on common interactive primitives */
 @layer utilities {
   .ease-apple { transition-timing-function: var(--ease-apple); }
@@ -137,6 +138,22 @@ html, body {
 
     --radius: 0.75rem;
 
+    /* ── Semantic status tokens (derived from the existing palette) ── */
+    --success: 152 60% 38%;
+    --success-foreground: 0 0% 100%;
+    --success-muted: 152 60% 95%;
+    --warning: 34 90% 48%;
+    --warning-foreground: 0 0% 100%;
+    --warning-muted: 34 90% 95%;
+    --info: 217 85% 55%;
+    --info-foreground: 0 0% 100%;
+    --info-muted: 217 85% 96%;
+
+    /* ── Dashboard surfaces ── */
+    --surface: 0 0% 100%;
+    --surface-muted: 220 30% 97%;
+
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 247 83% 69%;
@@ -175,7 +192,21 @@ html, body {
     --border: 220 20% 20%;
     --input: 220 20% 20%;
     --ring: 250 70% 60%;
+
+    --success: 152 55% 45%;
+    --success-foreground: 220 30% 10%;
+    --success-muted: 152 40% 18%;
+    --warning: 34 90% 55%;
+    --warning-foreground: 220 30% 10%;
+    --warning-muted: 34 50% 20%;
+    --info: 217 85% 62%;
+    --info-foreground: 220 30% 10%;
+    --info-muted: 217 45% 22%;
+
+    --surface: 220 30% 12%;
+    --surface-muted: 220 28% 15%;
   }
+
 }
 
 @layer base {
