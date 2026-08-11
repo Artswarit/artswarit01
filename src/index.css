@@ -138,6 +138,22 @@ html, body {
 
     --radius: 0.75rem;
 
+    /* ── Semantic status tokens (derived from the existing palette) ── */
+    --success: 152 60% 38%;
+    --success-foreground: 0 0% 100%;
+    --success-muted: 152 60% 95%;
+    --warning: 34 90% 48%;
+    --warning-foreground: 0 0% 100%;
+    --warning-muted: 34 90% 95%;
+    --info: 217 85% 55%;
+    --info-foreground: 0 0% 100%;
+    --info-muted: 217 85% 96%;
+
+    /* ── Dashboard surfaces ── */
+    --surface: 0 0% 100%;
+    --surface-muted: 220 30% 97%;
+
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 247 83% 69%;
