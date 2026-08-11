@@ -151,106 +151,74 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
     };
   }, [user?.id, fetchStats]);
 
+  const showEarnings =
+    profile?.show_earnings ?? (profile?.social_links?.settings?.showEarnings ?? true);
+
   return (
-    <div className="space-y-5 sm:space-y-7 py-2 sm:py-4 my-0 sm:my-4">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6 px-1">
-        <div className="space-y-2 sm:space-y-3 max-w-2xl">
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-left-4 duration-500">{title}</h1>
-          <p className="text-muted-foreground text-xs sm:text-base lg:text-lg leading-relaxed font-medium opacity-80 animate-in fade-in slide-in-from-left-6 duration-700">{subtitle}</p>
-        </div>
-      </div>
+    <div className="space-y-5 sm:space-y-6 pb-1">
+      <PageHeader title={title} description={subtitle} size="lg" />
 
-      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         {profile && (
-          <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
-            <CardContent className="flex items-center p-5 sm:p-6">
-              <div className="mr-4 sm:mr-5 bg-indigo-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">
-                <div className="h-6 w-6 sm:h-6 sm:w-6 text-indigo-600 flex items-center justify-center font-black text-xs">
-                  {completion.completionPercentage}%
-                </div>
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Profile</p>
-                <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">
-                    {completion.isComplete ? 'Verified' : 'Incomplete'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <StatTile
+            label="Profile"
+            value={completion.isComplete ? "Verified" : "Incomplete"}
+            hint={
+              completion.isComplete
+                ? "All set — you're discoverable"
+                : `${completion.completionPercentage}% complete`
+            }
+            tone={completion.isComplete ? "success" : "warning"}
+            iconSlot={
+              <span className="text-[11px] font-semibold">{completion.completionPercentage}%</span>
+            }
+          />
         )}
 
-        <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
-          <CardContent className="flex items-center p-5 sm:p-6">
-            <div className="mr-4 sm:mr-5 bg-purple-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">
-              <Eye className="h-6 w-6 sm:h-6 sm:w-6 text-purple-600" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Total Views</p>
-              <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">{artistStats.totalViews.toLocaleString()}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <StatTile
+          label="Total views"
+          value={artistStats.totalViews.toLocaleString()}
+          hint="Across your portfolio"
+          icon={Eye}
+          tone="info"
+        />
 
-        {(profile?.show_earnings ?? (profile?.social_links?.settings?.showEarnings ?? true)) && (
-          <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
-            <CardContent className="flex items-center p-5 sm:p-6">
-              <div className="mr-4 sm:mr-5 bg-green-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">
-                <TrendingUp className="h-6 w-6 sm:h-6 sm:w-6 text-green-600" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Earnings</p>
-                <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">{format(artistStats.monthlyEarnings)}</p>
-              </div>
-            </CardContent>
-          </Card>
+        {showEarnings && (
+          <StatTile
+            label="Earnings"
+            value={format(artistStats.monthlyEarnings)}
+            hint="This month"
+            icon={TrendingUp}
+            tone="success"
+          />
         )}
 
-        <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
-          <CardContent className="flex items-center p-5 sm:p-6">
-            <div className="mr-4 sm:mr-5 bg-blue-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">
-              <Calendar className="h-6 w-6 sm:h-6 sm:w-6 text-blue-600" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Artworks</p>
-              <p className="text-xl sm:text-2xl font-black text-foreground truncate tracking-tight">{artistStats.totalArtworks}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <StatTile
+          label="Artworks"
+          value={artistStats.totalArtworks}
+          hint="Published pieces"
+          icon={Calendar}
+          tone="primary"
+        />
 
-        <Card className="overflow-hidden border-border/40 shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300 group bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-2xl">
-          <CardContent className="flex items-center p-5 sm:p-6">
-            <div className="mr-4 sm:mr-5 bg-amber-500/10 p-3.5 sm:p-3.5 rounded-2xl sm:rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-300">
-              <svg
-                className="h-6 w-6 sm:h-6 sm:w-6 text-amber-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.1em] mb-1 sm:mb-1 opacity-70">Followers</p>
-              <button
-                className="text-xl sm:text-2xl font-black text-primary cursor-pointer hover:underline underline-offset-4 decoration-2 truncate tracking-tight min-h-[48px] flex items-center px-2 -ml-2"
-                onClick={() => setOpenFollowers(true)}
-              >
-                {artistStats.followers}
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+        <StatTile
+          label="Followers"
+          value={artistStats.followers}
+          hint="Tap to view list"
+          icon={Users}
+          tone="primary"
+          onClick={() => setOpenFollowers(true)}
+          actionLabel="View followers"
+        />
       </div>
+
       <Dialog open={openFollowers} onOpenChange={setOpenFollowers}>
         <DialogContent className="max-w-2xl w-[95vw] sm:w-full p-4 sm:p-6">
           <DialogHeader className="mb-4">
-            <DialogTitle className="text-xl font-bold">Followers</DialogTitle>
+            <DialogTitle className="text-lg font-semibold tracking-tight">Followers</DialogTitle>
+            <DialogDescription className="text-sm">
+              People following your work on Artswarit.
+            </DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
             <FollowersList />
@@ -260,5 +228,6 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
     </div>
   );
 };
+
 
 export default DashboardHeader;
