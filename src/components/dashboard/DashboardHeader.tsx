@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, Calendar, Eye } from "lucide-react";
+import { TrendingUp, Calendar, Eye, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
@@ -8,6 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { FollowersList } from "@/components/dashboard/FollowersList";
 import { useRealtimeSync } from "@/lib/realtime-sync";
 import { computeProfileCompletion } from "@/hooks/useProfileCompletion";
+import PageHeader from "@/components/shared/PageHeader";
+import StatTile from "@/components/dashboard/ui/StatTile";
+
 
 interface DashboardHeaderProps {
   user?: any;
