@@ -189,7 +189,7 @@ export function DisputeDialog({
       // Find the open dispute
       const { data: activeDispute } = await supabase
         .from('disputes')
-        .select('id')
+        .select('id, previous_status')
         .eq('milestone_id', milestone.id)
         .eq('status', 'open')
         .maybeSingle();
@@ -202,12 +202,13 @@ export function DisputeDialog({
           .eq('id', activeDispute.id);
       }
 
-      // Revert milestone status to the pre-dispute review state
-      const targetStatus = 'REVIEW_PENDING';
+      // Revert milestone to its exact pre-dispute state (e.g. REVISION_REQUESTED)
+      const targetStatus = (activeDispute as any)?.previous_status || 'REVIEW_PENDING';
       await supabase
         .from('project_milestones')
         .update({ status: targetStatus })
         .eq('id', milestone.id);
+
 
       // Log activity
       await supabase.from('project_activity_logs').insert({
