@@ -282,46 +282,45 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
 
         {/* Advanced Filters (Collapsible) */}
         {showAdvanced && (
-          <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
-            <GlassCard className="p-5 border-primary/10 bg-white/40 dark:bg-card/40 backdrop-blur-2xl shadow-xl rounded-3xl">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="space-y-2.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/80 ml-1">Search by Tags</label>
-                  <div className="relative group">
-                    <Input 
-                      placeholder="e.g. abstract, blue, digital" 
-                      value={advancedFilters.tags}
-                      onChange={(e) => handleAdvancedFilterChange('tags', e.target.value)}
-                      className="bg-white/60 dark:bg-background/60 border-border/20 rounded-2xl pl-4 h-11 focus-visible:ring-primary/20 transition-all group-hover:border-primary/30"
-                    />
-                  </div>
-                  <p className="text-[9px] font-bold text-muted-foreground/40 ml-1 uppercase tracking-wider">Separate tags with commas</p>
+          <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-5 bg-card border border-border/60 shadow-sm rounded-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Search by tags</label>
+                  <Input 
+                    placeholder="e.g. abstract, blue, digital" 
+                    value={advancedFilters.tags}
+                    onChange={(e) => handleAdvancedFilterChange('tags', e.target.value)}
+                    className="bg-muted/50 border-transparent rounded-xl h-11 focus-visible:ring-primary/20 focus-visible:bg-background transition-all duration-300 ease-apple"
+                  />
+                  <p className="text-[11px] text-muted-foreground">Separate tags with commas</p>
                 </div>
                 
-                <div className="space-y-2.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/80 ml-1">Artist Location</label>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Artist location</label>
                   <Input 
                     placeholder="e.g. New York, London" 
                     value={advancedFilters.location}
                     onChange={(e) => handleAdvancedFilterChange('location', e.target.value)}
-                    className="bg-white/60 dark:bg-background/60 border-border/20 rounded-2xl h-11 focus-visible:ring-primary/20 transition-all hover:border-primary/30"
+                    className="bg-muted/50 border-transparent rounded-xl h-11 focus-visible:ring-primary/20 focus-visible:bg-background transition-all duration-300 ease-apple"
                   />
                 </div>
 
-                <div className="space-y-2.5 flex flex-col justify-end">
+                <div className="space-y-2 flex flex-col justify-end">
                   <Button 
                     variant="outline" 
                     size="sm" 
                     onClick={resetFilters}
-                    className="w-full bg-white/40 dark:bg-background/40 border-border/20 rounded-2xl h-11 text-xs font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all active:scale-[0.98]"
+                    className="w-full rounded-xl h-11 text-sm font-medium transition-all duration-300 ease-apple active:scale-[0.98]"
                   >
-                    Clear All Filters
+                    Clear all filters
                   </Button>
                 </div>
               </div>
-            </GlassCard>
+            </div>
           </div>
         )}
+
       </div>
     </div>
   );
