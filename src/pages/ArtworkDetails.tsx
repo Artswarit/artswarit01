@@ -350,12 +350,13 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
         </button>
       )}
 
-      <main className={cn("flex-1 pb-4", isModal ? "pt-[var(--safe-top)]" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+1rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+1.5rem)]")}>
+      <main className={cn("flex-1 pb-6", isModal ? "pt-[var(--safe-top)]" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+1rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+1.5rem)]")}>
         <div className={cn("max-w-6xl mx-auto px-0", !isModal && "sm:px-4 lg:px-8")}>
-          <div className={cn("bg-card overflow-hidden", !isModal ? "sm:rounded-2xl border-x-0 sm:border border-border/40 shadow-sm" : "border-none")}>
+          <div className={cn("bg-card overflow-hidden flex flex-col", !isModal ? "sm:rounded-3xl border-x-0 sm:border border-border/60 shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]" : "border-none")}>
 
-          {/* ── ARTIST HEADER (Instagram-style post header) ─────────── */}
-          <div className="flex items-center gap-3 px-3 sm:px-4 py-3">
+          {/* ── ARTIST HEADER ─────────── */}
+          <div className="flex items-center gap-3 px-4 sm:px-5 py-3.5 border-b border-border/40">
+
             <button onClick={() => navigate(-1)} className="mr-1 text-muted-foreground hover:text-foreground transition-colors sm:hidden">
               <ArrowLeft className="h-5 w-5" />
             </button>
