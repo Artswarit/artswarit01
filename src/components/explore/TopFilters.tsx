@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import GlassCard from '@/components/ui/glass-card';
 import { Search, Filter, Grid, List, SlidersHorizontal, X } from 'lucide-react';
 import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { cn } from '@/lib/utils';
