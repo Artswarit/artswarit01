@@ -398,11 +398,14 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
             )}
           </div>
 
-          {/* ── MEDIA (Full-width Instagram style) ─────────────────── */}
+          <div className={cn("lg:grid lg:items-start", !isModal && "lg:grid-cols-[minmax(0,1.45fr)_minmax(340px,1fr)] lg:divide-x lg:divide-border/40")}>
+
+          {/* ── MEDIA ─────────────────── */}
           <div
-            className="relative w-full select-none"
+            className="relative w-full select-none lg:sticky lg:top-0"
             onClick={handleDoubleTap}
           >
+
             {/* IMAGE */}
             {artwork.type === "image" && artwork.imageUrl && (
               <>
