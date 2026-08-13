@@ -268,12 +268,14 @@ const ArtworkCard = ({
               />
             )}
             
-            {/* Media type indicator */}
+            {/* Media type indicator (non-image only) */}
+            {type !== 'image' && (
             <div className="absolute top-3 right-3">
               <div className="bg-background/70 backdrop-blur-xl p-1.5 rounded-full border border-border/40 text-foreground/80 shadow-sm">
                 {getTypeIcon()}
               </div>
             </div>
+            )}
           
           {/* Subtle gradient on hover only */}
           <div className={`absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent transition-opacity duration-500 ease-apple flex items-end justify-center p-4 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
@@ -292,7 +294,7 @@ const ArtworkCard = ({
         </div>
 
         {/* Content */}
-        <div className="p-4 flex flex-col flex-1 gap-2">
+        <div className="p-3 sm:p-4 flex flex-col flex-1 gap-2">
           <div className="flex justify-between items-start gap-3">
             <div className="flex flex-col min-w-0">
               <h3 className="font-semibold text-[15px] leading-snug text-foreground line-clamp-1 tracking-tight">
@@ -335,7 +337,7 @@ const ArtworkCard = ({
                 disabled={isLiking}
                 aria-label={isLiked ? 'Unlike' : 'Like'}
                 className={cn(
-                  "flex items-center gap-1.5 h-9 px-2 -ml-2 rounded-full transition-all duration-300 ease-apple hover:bg-muted/60 active:scale-95",
+                  "flex items-center gap-1.5 h-9 px-1.5 sm:px-2 -ml-1.5 rounded-full transition-all duration-300 ease-apple hover:bg-muted/60 active:scale-95",
                   isLiked ? "text-primary" : "hover:text-foreground"
                 )}
               >
@@ -346,7 +348,7 @@ const ArtworkCard = ({
                 )} />
                 <span className="text-xs font-medium tabular-nums">{currentLikes}</span>
               </button>
-              <div className="flex items-center gap-1.5 h-9 px-2">
+              <div className="flex items-center gap-1.5 h-9 px-1.5 sm:px-2">
                 <Eye className="w-[18px] h-[18px] opacity-70" />
                 <span className="text-xs font-medium tabular-nums">{currentViews}</span>
               </div>
@@ -357,7 +359,7 @@ const ArtworkCard = ({
                 onClick={handleSave}
                 disabled={isSaveLoading}
                 className={cn(
-                  "h-9 w-9 flex items-center justify-center rounded-full transition-all duration-300 ease-apple active:scale-95",
+                  "h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-full transition-all duration-300 ease-apple active:scale-95",
                   isSaved 
                     ? "text-primary bg-primary/10" 
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -371,7 +373,7 @@ const ArtworkCard = ({
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
-                  <button className="h-9 w-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-300 ease-apple active:scale-95">
+                  <button className="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-300 ease-apple active:scale-95">
                     <MoreVertical className="w-[18px] h-[18px]" />
                   </button>
                 </DropdownMenuTrigger>
