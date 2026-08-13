@@ -328,54 +328,55 @@ const ArtworkCard = ({
 
           
           {/* Stats Row */}
-          <div className="flex items-center justify-between pt-2.5 mt-auto border-t border-border/10">
-            <div className="flex items-center gap-3 text-muted-foreground">
+          <div className="flex items-center justify-between pt-2 mt-auto border-t border-border/40">
+            <div className="flex items-center gap-1 text-muted-foreground">
               <button 
                 onClick={handleLike}
                 disabled={isLiking}
+                aria-label={isLiked ? 'Unlike' : 'Like'}
                 className={cn(
-                  "flex items-center gap-1.5 transition-colors hover:text-red-500",
-                  isLiked ? "text-red-500" : ""
+                  "flex items-center gap-1.5 h-9 px-2 -ml-2 rounded-full transition-all duration-300 ease-apple hover:bg-muted/60 active:scale-95",
+                  isLiked ? "text-primary" : "hover:text-foreground"
                 )}
               >
                 <Heart className={cn(
-                  "w-4 h-4 transition-transform",
+                  "w-[18px] h-[18px] transition-transform duration-300 ease-apple",
                   isLiked ? "fill-current" : "",
                   animateLike ? "scale-125" : ""
                 )} />
-                <span className="text-xs font-semibold">{currentLikes}</span>
+                <span className="text-xs font-medium tabular-nums">{currentLikes}</span>
               </button>
-              <div className="flex items-center gap-1.5">
-                <Eye className="w-4 h-4 opacity-70" />
-                <span className="text-xs font-semibold">{currentViews}</span>
+              <div className="flex items-center gap-1.5 h-9 px-2">
+                <Eye className="w-[18px] h-[18px] opacity-70" />
+                <span className="text-xs font-medium tabular-nums">{currentViews}</span>
               </div>
             </div>
             
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <button
                 onClick={handleSave}
                 disabled={isSaveLoading}
                 className={cn(
-                  "p-1.5 rounded-md transition-colors",
+                  "h-9 w-9 flex items-center justify-center rounded-full transition-all duration-300 ease-apple active:scale-95",
                   isSaved 
                     ? "text-primary bg-primary/10" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 )}
                 title={isSaved ? 'Remove from saved' : 'Save artwork'}
               >
                 <Bookmark className={cn(
-                  "w-4 h-4",
+                  "w-[18px] h-[18px]",
                   isSaved ? "fill-current" : ""
                 )} />
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
-                  <button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                    <MoreVertical className="w-4 h-4" />
+                  <button className="h-9 w-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-300 ease-apple active:scale-95">
+                    <MoreVertical className="w-[18px] h-[18px]" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[140px]" onClick={(e) => e.stopPropagation()}>
-                  <DropdownMenuItem onClick={handleReportClick} className="text-destructive text-xs font-medium cursor-pointer">
+                <DropdownMenuContent align="end" className="min-w-[160px] rounded-xl" onClick={(e) => e.stopPropagation()}>
+                  <DropdownMenuItem onClick={handleReportClick} className="text-destructive text-xs font-medium cursor-pointer rounded-lg">
                     <Flag className="w-3.5 h-3.5 mr-2" />
                     Report
                   </DropdownMenuItem>
@@ -383,6 +384,7 @@ const ArtworkCard = ({
               </DropdownMenu>
             </div>
           </div>
+
         </div>
         </GlassCard>
       </div>
