@@ -350,12 +350,13 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
         </button>
       )}
 
-      <main className={cn("flex-1 pb-4", isModal ? "pt-[var(--safe-top)]" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+1rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+1.5rem)]")}>
+      <main className={cn("flex-1 pb-6", isModal ? "pt-[var(--safe-top)]" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+1rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+1.5rem)]")}>
         <div className={cn("max-w-6xl mx-auto px-0", !isModal && "sm:px-4 lg:px-8")}>
-          <div className={cn("bg-card overflow-hidden", !isModal ? "sm:rounded-2xl border-x-0 sm:border border-border/40 shadow-sm" : "border-none")}>
+          <div className={cn("bg-card overflow-hidden flex flex-col", !isModal ? "sm:rounded-3xl border-x-0 sm:border border-border/60 shadow-[0_1px_2px_hsl(var(--foreground)/0.04)]" : "border-none")}>
 
-          {/* ── ARTIST HEADER (Instagram-style post header) ─────────── */}
-          <div className="flex items-center gap-3 px-3 sm:px-4 py-3">
+          {/* ── ARTIST HEADER ─────────── */}
+          <div className="flex items-center gap-3 px-4 sm:px-5 py-3.5 border-b border-border/40">
+
             <button onClick={() => navigate(-1)} className="mr-1 text-muted-foreground hover:text-foreground transition-colors sm:hidden">
               <ArrowLeft className="h-5 w-5" />
             </button>
@@ -397,11 +398,14 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
             )}
           </div>
 
-          {/* ── MEDIA (Full-width Instagram style) ─────────────────── */}
+          <div className={cn("lg:grid lg:items-start", !isModal && "lg:grid-cols-[minmax(0,1.45fr)_minmax(340px,1fr)] lg:divide-x lg:divide-border/40")}>
+
+          {/* ── MEDIA ─────────────────── */}
           <div
-            className="relative w-full select-none"
+            className="relative w-full select-none lg:sticky lg:top-0"
             onClick={handleDoubleTap}
           >
+
             {/* IMAGE */}
             {artwork.type === "image" && artwork.imageUrl && (
               <>
@@ -462,8 +466,12 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
             )}
           </div>
 
-          {/* ── ACTION BAR (Instagram-style) ────────────────────────── */}
-          <div className="flex items-center px-3 sm:px-4 py-3 border-t border-border/20 bg-card/95 backdrop-blur-sm">
+          {/* ── DETAILS COLUMN ────────────────────────── */}
+          <div className="flex flex-col lg:max-h-[calc(100dvh-var(--navbar-height-desktop)-6rem)] lg:overflow-y-auto">
+
+          {/* ── ACTION BAR ────────────────────────── */}
+          <div className="flex items-center px-4 sm:px-5 py-3 border-t border-border/40 lg:border-t-0 bg-card/95 backdrop-blur-sm">
+
             {/* Left actions */}
             <div className="flex items-center gap-1.5">
               {/* Like */}
@@ -526,22 +534,22 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
           </div>
 
           {/* ── LIKES COUNT ─────────────────────────────────────────── */}
-          <div className="px-3 sm:px-4">
-            <p className="text-sm font-semibold text-foreground">
+          <div className="px-4 sm:px-5">
+            <p className="text-sm font-medium text-foreground tabular-nums">
               {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
             </p>
           </div>
 
-          {/* ── TITLE & DESCRIPTION (Instagram caption style) ──────── */}
-          <div className="px-3 sm:px-4 pt-1.5 pb-1 space-y-1">
-            <p className="text-sm">
-              <Link to={`/artist/${artwork.artistId}`} className="font-semibold text-foreground hover:text-muted-foreground transition-colors mr-1.5">
-                {artwork.artist}
-              </Link>
-              <span className="font-medium text-foreground">{artwork.title}</span>
-            </p>
+          {/* ── TITLE & DESCRIPTION ──────── */}
+          <div className="px-4 sm:px-5 pt-2 pb-1 space-y-2">
+            <h1 className="text-lg sm:text-xl font-semibold tracking-[-0.02em] text-foreground leading-snug">
+              {artwork.title}
+            </h1>
+            <Link to={`/artist/${artwork.artistId}`} className="inline-block text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+              {artwork.artist}
+            </Link>
             {artwork.description && (
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap pt-1">
                 {artwork.description}
               </p>
             )}
@@ -549,35 +557,46 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
 
           {/* ── TAGS ────────────────────────────────────────────────── */}
           {artwork.tags?.length > 0 && (
-            <div className="px-3 sm:px-4 pb-1">
-              <p className="text-sm text-primary/80">
-                {artwork.tags.map((tag: string) => `#${tag}`).join(' ')}
-              </p>
+            <div className="px-4 sm:px-5 pt-2 pb-1 flex flex-wrap gap-1.5">
+              {artwork.tags.map((tag: string) => (
+                <span key={tag} className="text-[11px] font-medium text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-full">
+                  #{tag}
+                </span>
+              ))}
             </div>
           )}
 
           {/* ── VIEWS ───────────────────────────────────────────────── */}
-          <div className="px-3 sm:px-4 pb-2">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-              <Eye className="h-3 w-3" />
+          <div className="px-4 sm:px-5 pt-2 pb-3">
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5 tabular-nums">
+              <Eye className="h-3.5 w-3.5" />
               {viewCount.toLocaleString()} views
             </p>
           </div>
 
           {/* ── PRICE / PURCHASE CTA ────────────────────────────────── */}
           {artwork.price > 0 && (artwork.accessType === "premium" || artwork.accessType === "exclusive") && (
-            <div className="px-3 sm:px-4 pb-3">
+            <div className="px-4 sm:px-5 pb-4 mt-auto">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground">Price</span>
+                <span className="text-base font-semibold tracking-tight">{format(artwork.price, artwork.currency)}</span>
+              </div>
               <PayArtworkButton 
                 artworkId={id!} 
                 amount={artwork.price} 
                 artworkTitle={artwork.title}
-                className="w-full h-11 rounded-xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-md transition-all active:scale-95"
+                className="w-full h-12 rounded-full font-semibold tracking-tight shadow-sm transition-all duration-300 ease-apple active:scale-[0.98]"
                 onSuccess={() => window.location.reload()}
               />
             </div>
           )}
 
           </div>
+          </div>
+          </div>
+
+
+
 
           {/* ── COMMENT BOTTOM SHEET ───────────────────────────────── */}
           {id && <ArtworkFeedback artworkId={id} isOpen={commentsOpen} onClose={() => setCommentsOpen(false)} />}

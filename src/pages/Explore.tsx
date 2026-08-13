@@ -375,55 +375,52 @@ const Explore = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative pt-[calc(6rem+var(--safe-top))] sm:pt-[calc(8rem+var(--safe-top))] pb-12 sm:pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(120,119,198,0.1),transparent)] pointer-events-none" />
+      <section className="relative pt-[calc(5rem+var(--safe-top))] sm:pt-[calc(7rem+var(--safe-top))] pb-8 sm:pb-12 overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.07),transparent_65%)] pointer-events-none" />
         
         <div className="container-responsive relative mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-xs font-black uppercase tracking-widest mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted/60 text-muted-foreground text-[11px] font-medium tracking-wide mb-5 animate-in fade-in slide-in-from-bottom-3 duration-700">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
             </span>
-            Discover the Future of Art
+            Discover new work, daily
           </div>
           
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 tracking-tighter leading-tight sm:leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1000">
-            EXPLORE THE <br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase">COLLECTION</span>
+          <h1 className="text-[2rem] sm:text-5xl lg:text-6xl font-semibold mb-4 tracking-[-0.03em] leading-[1.05] text-foreground animate-in fade-in slide-in-from-bottom-4 duration-700">
+            Explore the collection
           </h1>
           
-          <p className="text-sm sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed opacity-80 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-            Curated masterpieces from visionaries worldwide. 
-            Filter by medium, style, or artist to find your next obsession.
+          <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto font-normal leading-relaxed animate-in fade-in slide-in-from-bottom-5 duration-700 delay-100">
+            Curated work from artists worldwide. Filter by medium, style, or artist to find your next favourite.
           </p>
         </div>
       </section>
 
       {/* Recently Viewed */}
-      <div className="relative z-10 -mt-8 mb-12 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
+      <div className="relative z-10 mb-10 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
         <RecentlyViewed />
       </div>
 
       {/* Trending Section */}
       {(trendingArtworks.length > 0 || loading) && (
-        <section className="container-responsive mx-auto py-8 animate-in fade-in duration-1000 delay-500">
-          <div className="flex items-center justify-between mb-8 sm:mb-12">
+        <section className="container-responsive mx-auto py-4 animate-in fade-in duration-700 delay-300">
+          <div className="flex items-end justify-between mb-6 sm:mb-8">
             <div>
-              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground uppercase">Trending Now</h2>
-              <div className="h-1.5 w-12 bg-primary rounded-full mt-2" />
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-[-0.02em] text-foreground">Trending now</h2>
+              <p className="text-sm text-muted-foreground mt-1">The most viewed and loved pieces this week</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             {loading ? (
               [...Array(4)].map((_, idx) => <ArtworkSkeleton key={`trend-skeleton-${idx}`} />)
             ) : (
               trendingArtworks.map((artwork, idx) => (
                 <div 
                   key={`trending-${artwork.id}`} 
-                  className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-                  style={{ animationDelay: `${idx * 100}ms` }}
+                  className="animate-in fade-in slide-in-from-bottom-3 duration-700"
+                  style={{ animationDelay: `${idx * 80}ms` }}
                 >
                   <ArtworkCard
                     {...artwork}
@@ -434,13 +431,13 @@ const Explore = () => {
               ))
             )}
           </div>
-          <div className="h-px bg-gradient-to-r from-transparent via-border/10 to-transparent my-4" />
+          <div className="h-px bg-border/60 mt-10" />
         </section>
       )}
 
       {/* Filters & Content */}
       <div className="relative pb-24">
-        <div className="relative z-30 bg-background/50 backdrop-blur-sm border-y border-border/10 mb-2 transition-all duration-300">
+        <div className="sticky top-[calc(var(--navbar-height-mobile)+var(--safe-top))] sm:top-[calc(var(--navbar-height-desktop)+var(--safe-top))] z-30 bg-background/80 backdrop-blur-xl border-b border-border/60 mb-6 transition-all duration-300 ease-apple">
           <TopFilters
             onFiltersChange={handleFiltersChange}
             onViewModeChange={setViewMode}
@@ -451,14 +448,15 @@ const Explore = () => {
           />
         </div>
 
-        <main className="container-responsive mx-auto relative z-0 mt-4">
+
+        <main className="container-responsive mx-auto relative z-0 mt-2">
           {(filteredArtworks && filteredArtworks.length > 0) || loading ? (
-            <div className="space-y-12">
+            <div className="space-y-10">
               <div className={cn(
-                "transition-all duration-500",
+                "transition-all duration-500 ease-apple",
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8'
-                  : 'flex flex-col gap-4 sm:gap-6 max-w-4xl mx-auto'
+                  ? 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 md:gap-6'
+                  : 'flex flex-col gap-4 max-w-3xl mx-auto'
               )}>
                 {loading ? (
                   [...Array(8)].map((_, idx) => <ArtworkSkeleton key={`skeleton-${idx}`} />)
@@ -466,8 +464,8 @@ const Explore = () => {
                   filteredArtworks.map((artwork, idx) => (
                     <div 
                       key={artwork.id}
-                      className="animate-in fade-in zoom-in-95 duration-500"
-                      style={{ animationDelay: `${(idx % 12) * 50}ms` }}
+                      className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+                      style={{ animationDelay: `${(idx % 12) * 40}ms` }}
                     >
                       <ArtworkCard
                         {...artwork}
@@ -481,37 +479,37 @@ const Explore = () => {
               </div>
 
               {hasMore && (
-                <div className="flex flex-col items-center justify-center py-12 border-t border-border/10">
+                <div className="flex flex-col items-center justify-center py-10 border-t border-border/60">
                   <Button
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="rounded-2xl px-10 h-12 font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                    variant="outline"
+                    className="rounded-full px-8 h-11 font-medium tracking-tight bg-card hover:bg-muted/60 transition-all duration-300 ease-apple active:scale-[0.98]"
                   >
                     {loadingMore ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading More
+                        Loading
                       </>
                     ) : (
-                      'Load More'
+                      'Load more'
                     )}
                   </Button>
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-center py-24 sm:py-32">
-              <div className="max-w-md mx-auto space-y-8">
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-                  <div className="relative text-7xl sm:text-8xl animate-bounce">🎨</div>
+            <div className="text-center py-20 sm:py-28">
+              <div className="max-w-sm mx-auto space-y-6">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-muted/60 flex items-center justify-center text-2xl">
+                  🎨
                 </div>
-                <div className="space-y-4">
-                  <h3 className="text-2xl sm:text-3xl font-black tracking-tight">SILENCE IN THE GALLERY</h3>
-                  <p className="text-muted-foreground font-medium leading-relaxed">
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold tracking-tight">Nothing here yet</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {currentCategory !== 'all' 
-                      ? 'Currently not found — coming soon' 
-                      : "We couldn't find any artworks matching your current filters. Try broadening your search or exploring new categories."}
+                      ? 'No artworks in this category yet — check back soon.' 
+                      : "We couldn't find any artworks matching your filters. Try broadening your search."}
                   </p>
                   <Button 
                     variant="outline" 
@@ -519,15 +517,16 @@ const Explore = () => {
                       search: '', category: 'all', artworkType: 'all', priceRange: 'all', 
                       tags: [], sortBy: 'most_recent', location: ''
                     })}
-                    className="rounded-2xl px-8 h-12 font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all"
+                    className="rounded-full px-6 h-11 font-medium tracking-tight transition-all duration-300 ease-apple active:scale-[0.98]"
                   >
-                    Reset All Filters
+                    Reset filters
                   </Button>
                 </div>
               </div>
             </div>
           )}
         </main>
+
       </div>
 
       <Footer />
