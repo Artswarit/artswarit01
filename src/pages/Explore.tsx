@@ -449,14 +449,14 @@ const Explore = () => {
         </div>
 
 
-        <main className="container-responsive mx-auto relative z-0 mt-4">
+        <main className="container-responsive mx-auto relative z-0 mt-2">
           {(filteredArtworks && filteredArtworks.length > 0) || loading ? (
-            <div className="space-y-12">
+            <div className="space-y-10">
               <div className={cn(
-                "transition-all duration-500",
+                "transition-all duration-500 ease-apple",
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8'
-                  : 'flex flex-col gap-4 sm:gap-6 max-w-4xl mx-auto'
+                  ? 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 md:gap-6'
+                  : 'flex flex-col gap-4 max-w-3xl mx-auto'
               )}>
                 {loading ? (
                   [...Array(8)].map((_, idx) => <ArtworkSkeleton key={`skeleton-${idx}`} />)
@@ -464,8 +464,8 @@ const Explore = () => {
                   filteredArtworks.map((artwork, idx) => (
                     <div 
                       key={artwork.id}
-                      className="animate-in fade-in zoom-in-95 duration-500"
-                      style={{ animationDelay: `${(idx % 12) * 50}ms` }}
+                      className="animate-in fade-in slide-in-from-bottom-2 duration-500"
+                      style={{ animationDelay: `${(idx % 12) * 40}ms` }}
                     >
                       <ArtworkCard
                         {...artwork}
@@ -479,37 +479,37 @@ const Explore = () => {
               </div>
 
               {hasMore && (
-                <div className="flex flex-col items-center justify-center py-12 border-t border-border/10">
+                <div className="flex flex-col items-center justify-center py-10 border-t border-border/60">
                   <Button
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="rounded-2xl px-10 h-12 font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                    variant="outline"
+                    className="rounded-full px-8 h-11 font-medium tracking-tight bg-card hover:bg-muted/60 transition-all duration-300 ease-apple active:scale-[0.98]"
                   >
                     {loadingMore ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading More
+                        Loading
                       </>
                     ) : (
-                      'Load More'
+                      'Load more'
                     )}
                   </Button>
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-center py-24 sm:py-32">
-              <div className="max-w-md mx-auto space-y-8">
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-                  <div className="relative text-7xl sm:text-8xl animate-bounce">🎨</div>
+            <div className="text-center py-20 sm:py-28">
+              <div className="max-w-sm mx-auto space-y-6">
+                <div className="mx-auto w-14 h-14 rounded-2xl bg-muted/60 flex items-center justify-center text-2xl">
+                  🎨
                 </div>
-                <div className="space-y-4">
-                  <h3 className="text-2xl sm:text-3xl font-black tracking-tight">SILENCE IN THE GALLERY</h3>
-                  <p className="text-muted-foreground font-medium leading-relaxed">
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold tracking-tight">Nothing here yet</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {currentCategory !== 'all' 
-                      ? 'Currently not found — coming soon' 
-                      : "We couldn't find any artworks matching your current filters. Try broadening your search or exploring new categories."}
+                      ? 'No artworks in this category yet — check back soon.' 
+                      : "We couldn't find any artworks matching your filters. Try broadening your search."}
                   </p>
                   <Button 
                     variant="outline" 
@@ -517,15 +517,16 @@ const Explore = () => {
                       search: '', category: 'all', artworkType: 'all', priceRange: 'all', 
                       tags: [], sortBy: 'most_recent', location: ''
                     })}
-                    className="rounded-2xl px-8 h-12 font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all"
+                    className="rounded-full px-6 h-11 font-medium tracking-tight transition-all duration-300 ease-apple active:scale-[0.98]"
                   >
-                    Reset All Filters
+                    Reset filters
                   </Button>
                 </div>
               </div>
             </div>
           )}
         </main>
+
       </div>
 
       <Footer />
