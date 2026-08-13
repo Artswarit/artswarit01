@@ -534,22 +534,22 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
           </div>
 
           {/* ── LIKES COUNT ─────────────────────────────────────────── */}
-          <div className="px-3 sm:px-4">
-            <p className="text-sm font-semibold text-foreground">
+          <div className="px-4 sm:px-5">
+            <p className="text-sm font-medium text-foreground tabular-nums">
               {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
             </p>
           </div>
 
-          {/* ── TITLE & DESCRIPTION (Instagram caption style) ──────── */}
-          <div className="px-3 sm:px-4 pt-1.5 pb-1 space-y-1">
-            <p className="text-sm">
-              <Link to={`/artist/${artwork.artistId}`} className="font-semibold text-foreground hover:text-muted-foreground transition-colors mr-1.5">
-                {artwork.artist}
-              </Link>
-              <span className="font-medium text-foreground">{artwork.title}</span>
-            </p>
+          {/* ── TITLE & DESCRIPTION ──────── */}
+          <div className="px-4 sm:px-5 pt-2 pb-1 space-y-2">
+            <h1 className="text-lg sm:text-xl font-semibold tracking-[-0.02em] text-foreground leading-snug">
+              {artwork.title}
+            </h1>
+            <Link to={`/artist/${artwork.artistId}`} className="inline-block text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+              {artwork.artist}
+            </Link>
             {artwork.description && (
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap pt-1">
                 {artwork.description}
               </p>
             )}
@@ -557,35 +557,43 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
 
           {/* ── TAGS ────────────────────────────────────────────────── */}
           {artwork.tags?.length > 0 && (
-            <div className="px-3 sm:px-4 pb-1">
-              <p className="text-sm text-primary/80">
-                {artwork.tags.map((tag: string) => `#${tag}`).join(' ')}
-              </p>
+            <div className="px-4 sm:px-5 pt-2 pb-1 flex flex-wrap gap-1.5">
+              {artwork.tags.map((tag: string) => (
+                <span key={tag} className="text-[11px] font-medium text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-full">
+                  #{tag}
+                </span>
+              ))}
             </div>
           )}
 
           {/* ── VIEWS ───────────────────────────────────────────────── */}
-          <div className="px-3 sm:px-4 pb-2">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-              <Eye className="h-3 w-3" />
+          <div className="px-4 sm:px-5 pt-2 pb-3">
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5 tabular-nums">
+              <Eye className="h-3.5 w-3.5" />
               {viewCount.toLocaleString()} views
             </p>
           </div>
 
           {/* ── PRICE / PURCHASE CTA ────────────────────────────────── */}
           {artwork.price > 0 && (artwork.accessType === "premium" || artwork.accessType === "exclusive") && (
-            <div className="px-3 sm:px-4 pb-3">
+            <div className="px-4 sm:px-5 pb-4 mt-auto">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground">Price</span>
+                <span className="text-base font-semibold tracking-tight">{format(artwork.price, artwork.currency)}</span>
+              </div>
               <PayArtworkButton 
                 artworkId={id!} 
                 amount={artwork.price} 
                 artworkTitle={artwork.title}
-                className="w-full h-11 rounded-xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-md transition-all active:scale-95"
+                className="w-full h-12 rounded-full font-semibold tracking-tight shadow-sm transition-all duration-300 ease-apple active:scale-[0.98]"
                 onSuccess={() => window.location.reload()}
               />
             </div>
           )}
 
           </div>
+          </div>
+
 
           {/* ── COMMENT BOTTOM SHEET ───────────────────────────────── */}
           {id && <ArtworkFeedback artworkId={id} isOpen={commentsOpen} onClose={() => setCommentsOpen(false)} />}
