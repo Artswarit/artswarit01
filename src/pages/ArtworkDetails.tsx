@@ -466,8 +466,12 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
             )}
           </div>
 
-          {/* ── ACTION BAR (Instagram-style) ────────────────────────── */}
-          <div className="flex items-center px-3 sm:px-4 py-3 border-t border-border/20 bg-card/95 backdrop-blur-sm">
+          {/* ── DETAILS COLUMN ────────────────────────── */}
+          <div className="flex flex-col lg:max-h-[calc(100dvh-var(--navbar-height-desktop)-6rem)] lg:overflow-y-auto">
+
+          {/* ── ACTION BAR ────────────────────────── */}
+          <div className="flex items-center px-4 sm:px-5 py-3 border-t border-border/40 lg:border-t-0 bg-card/95 backdrop-blur-sm">
+
             {/* Left actions */}
             <div className="flex items-center gap-1.5">
               {/* Like */}
