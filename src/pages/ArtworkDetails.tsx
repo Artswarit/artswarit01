@@ -593,6 +593,9 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
 
           </div>
           </div>
+          </div>
+
+
 
 
           {/* ── COMMENT BOTTOM SHEET ───────────────────────────────── */}
