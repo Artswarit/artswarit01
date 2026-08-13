@@ -243,12 +243,12 @@ const ArtworkCard = ({
         className="block"
       >
         <GlassCard 
-          className="group p-0 flex flex-col overflow-hidden hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer rounded-2xl sm:rounded-3xl border-border/20 shadow-sm hover:shadow-xl hover:shadow-primary/5 bg-background/50"
+          className="group p-0 flex flex-col overflow-hidden hover:-translate-y-1 active:scale-[0.99] transition-all duration-500 ease-apple cursor-pointer rounded-2xl border-border/40 shadow-[0_1px_2px_hsl(var(--foreground)/0.04)] hover:shadow-[0_20px_40px_-20px_hsl(var(--foreground)/0.18)] bg-card"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
           {/* Image/Video Container */}
-          <div className="relative w-full aspect-[3/4] overflow-hidden bg-muted shrink-0">
+          <div className="relative w-full aspect-[4/5] overflow-hidden bg-muted shrink-0">
             {type === 'video' ? (
               <video
                 src={imageUrl}
@@ -256,7 +256,7 @@ const ArtworkCard = ({
                 loop
                 muted
                 playsInline
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-[900ms] ease-apple group-hover:scale-[1.04]"
               />
             ) : (
               <img
@@ -264,26 +264,26 @@ const ArtworkCard = ({
                 alt={title}
                 loading="lazy"
                 decoding="async"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform duration-[900ms] ease-apple group-hover:scale-[1.04]"
               />
             )}
             
-            {/* Visual type indicator for mobile */}
-            <div className="absolute top-4 right-4 sm:hidden">
-              <div className="bg-black/20 backdrop-blur-md p-2 rounded-full border border-white/10 text-white">
+            {/* Media type indicator */}
+            <div className="absolute top-3 right-3">
+              <div className="bg-background/70 backdrop-blur-xl p-1.5 rounded-full border border-border/40 text-foreground/80 shadow-sm">
                 {getTypeIcon()}
               </div>
             </div>
           
           {/* Subtle gradient on hover only */}
-          <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent transition-opacity duration-500 flex items-center justify-center ${isHovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'}`}>
+          <div className={`absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent transition-opacity duration-500 ease-apple flex items-end justify-center p-4 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
             {!alreadyUnlocked && price && price > 0 && (
-              <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+              <div className="w-full translate-y-2 group-hover:translate-y-0 transition-transform duration-500 ease-apple">
                 <PayArtworkButton 
                   artworkId={id}
                   amount={price}
                   artworkTitle={title}
-                  className="rounded-full px-6 font-black bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20 scale-110"
+                  className="w-full rounded-full h-10 font-semibold tracking-tight bg-background/90 backdrop-blur-xl text-foreground hover:bg-background shadow-lg"
                   size="default"
                 />
               </div>
@@ -292,39 +292,40 @@ const ArtworkCard = ({
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-5 flex flex-col flex-1 gap-3">
+        <div className="p-4 flex flex-col flex-1 gap-2">
           <div className="flex justify-between items-start gap-3">
             <div className="flex flex-col min-w-0">
-              <h3 className="font-black text-sm sm:text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors duration-300 tracking-tight uppercase leading-none">
+              <h3 className="font-semibold text-[15px] leading-snug text-foreground line-clamp-1 tracking-tight">
                 {title}
               </h3>
               <Link 
                 to={`/artist/${artistId}`}
-                className="text-[10px] sm:text-xs text-muted-foreground hover:text-primary transition-colors duration-300 font-bold uppercase tracking-widest mt-1.5"
+                className="text-xs text-muted-foreground hover:text-primary transition-colors duration-300 font-medium mt-0.5 truncate"
                 onClick={e => e.stopPropagation()}
               >
-                by {artist}
+                {artist}
               </Link>
             </div>
             {formattedPrice && (
-              <span className="shrink-0 text-[10px] sm:text-xs font-black text-primary bg-primary/5 px-2.5 py-1.5 rounded-lg border border-primary/10 tracking-widest uppercase">
+              <span className="shrink-0 text-xs font-semibold text-foreground bg-muted/60 px-2.5 py-1 rounded-full border border-border/40 tracking-tight">
                 {formattedPrice}
               </span>
             )}
           </div>
           
-          <div className="flex flex-wrap gap-1.5 mt-0.5">
+          <div className="flex flex-wrap gap-1.5">
             {category && !['image', 'video', 'audio'].includes(category.toLowerCase()) && (
-              <span className="inline-flex items-center text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-sm bg-muted/30 border border-border/40">
+              <span className="inline-flex items-center text-muted-foreground text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted/50">
                 {category}
               </span>
             )}
             {tags && tags.slice(0, 1).map((tag, idx) => (
-              <span key={idx} className="inline-flex items-center text-muted-foreground text-[10px] font-medium px-2 py-0.5 rounded-sm bg-muted/30 border border-border/40">
+              <span key={idx} className="inline-flex items-center text-muted-foreground text-[11px] font-medium px-2 py-0.5 rounded-full bg-muted/50">
                 {tag}
               </span>
             ))}
           </div>
+
           
           {/* Stats Row */}
           <div className="flex items-center justify-between pt-2.5 mt-auto border-t border-border/10">
