@@ -49,6 +49,8 @@ export const usePublicArtworks = () => {
         setLoading(true);
       }
       
+      setError(null);
+
       const from = pageIndex * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 

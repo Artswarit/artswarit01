@@ -30,6 +30,8 @@ import ProfileCompletionBanner from '@/components/dashboard/ProfileCompletionBan
 import DashboardAttentionRequired from '@/components/dashboard/DashboardAttentionRequired';
 import TabErrorBoundary from '@/components/dashboard/TabErrorBoundary';
 import DashboardMobileNav from '@/components/dashboard/DashboardMobileNav';
+import DashboardTabBar from '@/components/dashboard/ui/DashboardTabBar';
+
 
 const ArtistDashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -113,7 +115,7 @@ const ArtistDashboard = () => {
 
   if (profileLoading && !profile) {
     return (
-      <div className="min-h-screen bg-gray-50/50 dark:bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LogoLoader text="Loading dashboard…" />
       </div>
     );
@@ -128,7 +130,7 @@ const ArtistDashboard = () => {
 
 
   return (
-      <div className="min-h-screen bg-gray-50/50 dark:bg-background">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <main className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pt-[calc(4.75rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))] pb-[calc(7rem+var(--safe-bottom))] sm:pb-20">
           {activeTab === 'overview' && (
@@ -144,34 +146,10 @@ const ArtistDashboard = () => {
           )}
 
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <div className="relative mb-6 sm:mb-8 lg:mb-12 sticky top-[calc(4rem+var(--safe-top,0px))] z-30 bg-gray-50/80 dark:bg-background/80 backdrop-blur-md py-2">
-              <div className="hidden sm:block overflow-x-auto pb-3 -mx-3 px-3 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
-                  {tabs.map((tabItem) => {
-                    const Icon = tabItem.icon;
-                    
-                    return (
-                      <TabsTrigger
-                        key={tabItem.value}
-                        value={tabItem.value}
-                        className={cn(
-                          "flex flex-col items-center gap-1.5 text-[10px] px-3.5 py-3 rounded-xl transition-all duration-300 snap-center",
-                          "sm:flex-row sm:gap-2 sm:text-xs sm:px-4 sm:py-2.5 sm:rounded-2xl",
-                          "lg:text-sm lg:px-5 lg:py-3",
-                          "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:shadow-primary/30", 
-                          "hover:bg-primary/5 hover:text-primary"
-                        )}
-                      >
-                        <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px] shrink-0" />
-                        <span className="font-bold sm:font-medium whitespace-nowrap tracking-tight">
-                          {tabItem.label}
-                        </span>
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-              </div>
+            <div className="sticky top-[calc(4rem+var(--safe-top,0px))] z-30 -mx-3 mb-6 hidden bg-background/85 px-3 py-2.5 backdrop-blur-xl sm:block sm:mb-8">
+              <DashboardTabBar tabs={tabs} />
             </div>
+
 
             <div className="flex-1 pt-1 sm:pt-2 scrollbar-hide pb-6">
               <TabsContent value="overview" className="outline-none focus-visible:ring-0" forceMount>

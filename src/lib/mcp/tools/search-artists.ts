@@ -14,9 +14,9 @@ export default defineTool({
   name: "search_artists",
   title: "Search artists",
   description:
-    "Search Artswarit artists by keyword (matches name, category, city, bio). Returns approved, publicly visible artists only.",
+    "Search Artswarit artists by keyword (matches name, city, bio). Returns approved, publicly visible artists only.",
   inputSchema: {
-    query: z.string().trim().min(1).describe("Search text: name, category, city, or skill."),
+    query: z.string().trim().min(1).describe("Search text: name, city, or skill."),
     limit: z.number().int().min(1).max(50).optional().describe("Max results (default 10)."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
@@ -26,9 +26,9 @@ export default defineTool({
     const like = `%${query}%`;
     const { data, error } = await client
       .from("public_profiles")
-      .select("id, full_name, category, city, bio, avatar_url, role")
+      .select("id, full_name, city, bio, avatar_url, role, tags")
       .or(
-        `full_name.ilike.${like},category.ilike.${like},city.ilike.${like},bio.ilike.${like}`,
+        `full_name.ilike.${like},city.ilike.${like},bio.ilike.${like}`,
       )
       .limit(max);
 

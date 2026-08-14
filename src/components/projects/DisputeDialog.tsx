@@ -229,12 +229,13 @@ export function DisputeDialog({
           .eq('id', activeDispute.id);
       }
 
-      // Revert milestone status to pre-dispute status (fallback to REVIEW_PENDING)
-      const targetStatus = activeDispute?.previous_status || 'REVIEW_PENDING';
+      // Revert milestone to its exact pre-dispute state (e.g. REVISION_REQUESTED)
+      const targetStatus = (activeDispute as any)?.previous_status || 'REVIEW_PENDING';
       await supabase
         .from('project_milestones')
         .update({ status: targetStatus })
         .eq('id', milestone.id);
+
 
       // Log activity
       await supabase.from('project_activity_logs').insert({

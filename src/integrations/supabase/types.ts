@@ -59,6 +59,24 @@ export type Database = {
           },
         ]
       }
+      api_rate_limits: {
+        Row: {
+          bucket_key: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          request_count?: number
+          window_start: string
+        }
+        Update: {
+          bucket_key?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       artist_availability: {
         Row: {
           artist_id: string
@@ -2671,6 +2689,14 @@ export type Database = {
       }
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          _bucket_key: string
+          _max_requests: number
+          _window_seconds: number
+        }
+        Returns: boolean
+      }
       cleanup_old_notifications: { Args: never; Returns: undefined }
       delete_user_account: { Args: never; Returns: undefined }
       get_artist_dashboard_stats: {
@@ -2701,6 +2727,7 @@ export type Database = {
         Args: { project_uuid: string; user_uuid: string }
         Returns: boolean
       }
+      prune_api_rate_limits: { Args: never; Returns: undefined }
       record_artwork_sale: {
         Args: { artwork_uuid: string; buyer_uuid: string; sale_amount: number }
         Returns: string

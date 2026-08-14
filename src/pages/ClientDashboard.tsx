@@ -41,6 +41,12 @@ import { useToast } from "@/hooks/use-toast";
 import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
 import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
 import LogoLoader from "@/components/ui/LogoLoader";
+import PageHeader from "@/components/shared/PageHeader";
+import DashboardTabBar from "@/components/dashboard/ui/DashboardTabBar";
+import StatTile from "@/components/dashboard/ui/StatTile";
+import SectionHeading from "@/components/dashboard/ui/SectionHeading";
+import StatusPill, { statusTone } from "@/components/dashboard/ui/StatusPill";
+
 interface Project {
   id: string;
   title: string;
@@ -336,25 +342,8 @@ const ClientDashboard = () => {
       }
 
       // 2. Restore UI State (Dialogs, etc.)
-      //
-      // These dialogs are all Projects-tab concepts (create project, a specific
-      // project's detail modal, artist assignment for a project). Restoring
-      // them was previously unconditional, with no check against the URL's
-      // `tab` param -- unlike the tab-restore just above, which correctly
-      // skips itself when the URL already specifies a tab. That mismatch meant
-      // an unrelated leftover dialog (e.g. from an earlier session that ended
-      // with "New Project" open and was never explicitly closed) would pop up
-      // on top of a completely different tab -- reproduced by navigating
-      // straight to `?tab=artists` and seeing the Create Project dialog
-      // floating over the Saved Artists list. Only restore when the URL either
-      // has no tab (a bare reload of "wherever I was") or explicitly points at
-      // Projects.
-      const tabParam = searchParams.get('tab');
-      const uiStateBelongsToCurrentTab = !tabParam || tabParam === 'projects';
       try {
-        const savedUIState = uiStateBelongsToCurrentTab
-          ? sessionStorage.getItem('client_dashboard_ui_state')
-          : null;
+        const savedUIState = sessionStorage.getItem('client_dashboard_ui_state');
         if (savedUIState) {
           const parsed = JSON.parse(savedUIState);
           if (parsed.createProjectOpen) setCreateProjectOpen(true);
@@ -366,11 +355,6 @@ const ClientDashboard = () => {
             setAssigningProjectId(parsed.assigningProjectId);
             setArtistSelectionOpen(true);
           }
-        } else if (!uiStateBelongsToCurrentTab) {
-          // Landing explicitly on a different tab supersedes any stale dialog
-          // state from a prior session -- clear it so it can't resurface later
-          // on a bare reload either.
-          sessionStorage.removeItem('client_dashboard_ui_state');
         }
       } catch (e) {
         console.error("Failed to restore UI state", e);
@@ -609,7 +593,7 @@ const ClientDashboard = () => {
 
   if (loading || profileLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <LogoLoader text="Loading your dashboard..." />
@@ -619,50 +603,38 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Navbar />
 
       <div className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pb-[calc(7rem+var(--safe-bottom))] sm:pb-12 pt-[calc(4.75rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))] lg:pt-[calc(6.5rem+var(--safe-top))]">
         {/* Dashboard Header */}
         {selectedTab === 'overview' && (
-          <div className="space-y-2 sm:space-y-3 max-w-2xl mb-6 sm:mb-8 lg:mb-10">
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-left-4 duration-500">Client Dashboard</h1>
-            <p className="text-muted-foreground text-xs sm:text-base lg:text-lg leading-relaxed font-medium opacity-80 animate-in fade-in slide-in-from-left-6 duration-700">
-              Welcome back, <span className="text-foreground font-bold">{userName}</span>! Manage your projects and discover new artists.
-            </p>
+          <div className="mb-5 sm:mb-6 animate-fade-in">
+            <PageHeader
+              title="Client Dashboard"
+              size="lg"
+              description={
+                <>
+                  Welcome back, <span className="font-semibold text-foreground">{userName}</span> — manage your
+                  projects and discover new artists.
+                </>
+              }
+              actions={
+                <Button className="h-11 rounded-xl" onClick={() => setCreateProjectOpen(true)}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  New project
+                </Button>
+              }
+            />
           </div>
         )}
 
-        {/* Dashboard Navigation - Optimized for all screens */}
+        {/* Dashboard Navigation */}
         <Tabs value={selectedTab} className="mb-4 sm:mb-6 lg:mb-8" onValueChange={handleTabChange}>
-          <div className="hidden sm:block relative mb-4 sm:mb-6 sticky top-[calc(4rem+var(--safe-top,0px))] z-30 bg-gray-50/80 dark:bg-background/80 backdrop-blur-md py-2 -mx-3 px-3">
-              <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide snap-x snap-mandatory scroll-smooth">
-                <TabsList className="bg-white/80 dark:bg-card/80 backdrop-blur-md p-1.5 rounded-2xl sm:rounded-3xl shadow-xl border border-border/40 h-auto w-full grid grid-cols-6 items-stretch">
-                  {clientDashboardTabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                      <TabsTrigger
-                        key={tab.value}
-                        value={tab.value}
-                        data-testid={`dashboard-tab-${tab.value}`}
-                        className={cn(
-                          "flex flex-col items-center gap-1.5 text-[10px] px-3.5 py-3 rounded-xl transition-all duration-300 snap-center min-w-[90px]",
-                          "sm:flex-row sm:gap-2 sm:text-xs sm:px-4 sm:py-2.5 sm:rounded-2xl sm:min-w-[100px]",
-                          "lg:text-sm lg:px-5 lg:py-3",
-                          "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-xl data-[state=active]:shadow-primary/30",
-                          "hover:bg-primary/5 hover:text-primary"
-                        )}
-                      >
-                        <Icon className="h-4 w-4 sm:h-[18px] sm:w-[18px] shrink-0" />
-                        <span className="font-bold sm:font-medium whitespace-nowrap tracking-tight">
-                          {tab.label}
-                        </span>
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-              </div>
-            </div>
+          <div className="sticky top-[calc(4rem+var(--safe-top,0px))] z-30 -mx-3 mb-6 hidden bg-background/85 px-3 py-2.5 backdrop-blur-xl sm:block">
+            <DashboardTabBar tabs={clientDashboardTabs} />
+          </div>
+
 
           {/* Overview Tab Content */}
           <TabsContent value="overview" className="space-y-4 sm:space-y-6 lg:space-y-8 animate-fade-in outline-none focus-visible:ring-0" forceMount>
@@ -678,154 +650,128 @@ const ClientDashboard = () => {
 
                   {/* Profile Completion Alert - Realtime & Auto-disappearing */}
                   <ProfileCompletionBanner />
-            {/* Stats Row - Modernized & Clickable Grid */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6">
-              <div 
+            {/* Stats row */}
+            <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-3 sm:gap-4">
+              <StatTile
+                label="Active"
+                value={activeProjects.length}
+                hint="Projects in progress"
+                icon={Clock}
+                tone="info"
                 onClick={() => handleTabChange('projects')}
-                className="group relative bg-white/80 dark:bg-card/80 backdrop-blur-sm p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm border border-blue-100/50 dark:border-border overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-              >
-                <div className="absolute -top-2 -right-2 p-4 opacity-5 sm:opacity-10 transition-opacity group-hover:opacity-20">
-                  <Clock className="h-12 w-12 sm:h-16 sm:w-16 text-blue-600" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-transparent to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-indigo-500/5 transition-all duration-500" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-1.5 sm:gap-3 mb-1 sm:mb-3">
-                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                      <Clock className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
-                    </div>
-                    <h3 className="font-semibold text-[10px] sm:text-xs lg:text-sm text-muted-foreground uppercase tracking-tight sm:tracking-wider truncate">Active</h3>
-                  </div>
-                  <div className="flex items-baseline gap-1 sm:gap-2">
-                    <p className="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                      {activeProjects.length}
-                    </p>
-                    <span className="hidden xs:inline text-[8px] sm:text-xs text-muted-foreground font-medium">Projects</span>
-                  </div>
-                </div>
-              </div>
-
-              <div 
+                actionLabel="View active projects"
+              />
+              <StatTile
+                label="Done"
+                value={completedProjects.length}
+                hint="Completed projects"
+                icon={CheckCircle}
+                tone="success"
                 onClick={() => handleTabChange('projects')}
-                className="group relative bg-white/80 dark:bg-card/80 backdrop-blur-sm p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm border border-emerald-100/50 dark:border-border overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-              >
-                <div className="absolute -top-2 -right-2 p-4 opacity-5 sm:opacity-10 transition-opacity group-hover:opacity-20">
-                  <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 text-emerald-600" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-transparent to-emerald-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-500" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-1.5 sm:gap-3 mb-1 sm:mb-3">
-                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
-                      <CheckCircle className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
-                    </div>
-                    <h3 className="font-semibold text-[10px] sm:text-xs lg:text-sm text-muted-foreground uppercase tracking-tight sm:tracking-wider truncate">Done</h3>
-                  </div>
-                  <div className="flex items-baseline gap-1 sm:gap-2">
-                    <p className="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                      {completedProjects.length}
-                    </p>
-                    <span className="hidden xs:inline text-[8px] sm:text-xs text-muted-foreground font-medium">Projects</span>
-                  </div>
-                </div>
-              </div>
-
-              <div 
+                actionLabel="View completed projects"
+              />
+              <StatTile
+                label="Saved"
+                value={savedArtistsCount}
+                hint="Artists you follow"
+                icon={Users}
+                tone="primary"
                 onClick={() => handleTabChange('artists')}
-                className="group relative bg-white/80 dark:bg-card/80 backdrop-blur-sm p-3 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm border border-purple-100/50 dark:border-border overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer"
-              >
-                <div className="absolute -top-2 -right-2 p-4 opacity-5 sm:opacity-10 transition-opacity group-hover:opacity-20">
-                  <Users className="h-12 w-12 sm:h-16 sm:w-16 text-purple-600" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-transparent to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-fuchsia-500/5 transition-all duration-500" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-1.5 sm:gap-3 mb-1 sm:mb-3">
-                    <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
-                      <Users className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
-                    </div>
-                    <h3 className="font-semibold text-[10px] sm:text-xs lg:text-sm text-muted-foreground uppercase tracking-tight sm:tracking-wider truncate">Saved</h3>
-                  </div>
-                  <div className="flex items-baseline gap-1 sm:gap-2">
-                    <p className="text-xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-br from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">
-                      {savedArtistsCount}
-                    </p>
-                    <span className="hidden xs:inline text-[8px] sm:text-xs text-muted-foreground font-medium">Artists</span>
-                  </div>
-                </div>
-              </div>
+                actionLabel="View saved artists"
+              />
             </div>
+
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
               {/* Active Projects Section - Larger */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h2 className="font-heading text-lg lg:text-xl font-bold flex items-center gap-2">
-                    <LayoutDashboard className="h-5 w-5 text-primary" />
-                    Active Projects
-                  </h2>
-                  <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10 transition-colors" onClick={() => setSelectedTab('projects')}>
-                    View All <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
+                <SectionHeading
+                  title="Active projects"
+                  icon={LayoutDashboard}
+                  meta={activeProjects.length || undefined}
+                  actions={
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 rounded-lg text-primary hover:bg-primary/10"
+                      onClick={() => handleTabChange('projects')}
+                    >
+                      View all <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  }
+                />
 
-                <div className="grid grid-cols-1 gap-4">
+
+                <div className="grid grid-cols-1 gap-3">
                   {activeProjects.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-14 px-6 rounded-[2.5rem] border-2 border-dashed border-border/40 bg-muted/20 backdrop-blur-sm">
-                      <div className="rounded-3xl bg-muted/50 p-5 mb-5 shadow-inner">
-                        <FileText className="h-8 w-8 text-muted-foreground/40" />
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20 px-6 py-12">
+                      <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl bg-muted">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      <h3 className="text-lg font-black text-foreground mb-1.5 tracking-tight">No active projects yet</h3>
-                      <p className="text-sm text-muted-foreground text-center max-w-xs mb-6 font-medium leading-relaxed opacity-70">
-                        Bring your vision to life. Create a project and connect with talented artists.
+                      <h3 className="mb-1 text-base font-semibold tracking-tight text-foreground">No active projects yet</h3>
+                      <p className="mb-5 max-w-xs text-center text-sm text-muted-foreground">
+                        Create a project and we'll help you match with the right artist.
                       </p>
-                      <Button onClick={() => setCreateProjectOpen(true)} className="gap-2 h-11 px-7 rounded-2xl font-black shadow-lg shadow-primary/20">
+                      <Button onClick={() => setCreateProjectOpen(true)} className="h-11 gap-2 rounded-xl">
                         <PlusCircle className="h-4 w-4" />
-                        Create Project
+                        Create project
                       </Button>
                     </div>
                   ) : (
-                    activeProjects.slice(0, 3).map((project, index) => (
-                      <div key={project.id} className="group bg-white/80 dark:bg-card/80 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-muted/30 hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className={cn(
-                                "px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm",
-                                project.status === "In Progress" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" :
-                                project.status === "Pending Artist" ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" :
-                                project.status === "Pending Confirm" ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" :
-                                "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                              )}>
-                                {project.status}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
+                    activeProjects.slice(0, 3).map((project) => (
+                      <div
+                        key={project.id}
+                        className="group rounded-2xl border border-border/60 bg-card p-4 shadow-token-xs transition-all duration-300 ease-apple hover:border-primary/40 hover:shadow-token-sm sm:p-5"
+                      >
+                        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                          <div className="min-w-0 flex-1">
+                            <div className="mb-2 flex flex-wrap items-center gap-2">
+                              <StatusPill tone={statusTone(project.status)}>{project.status}</StatusPill>
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3" /> Due {project.dueDate}
                               </span>
                             </div>
-                            <h3 className="font-bold text-lg group-hover:text-primary transition-colors truncate mb-1">{project.title}</h3>
-                            <div className="flex items-center gap-2 mb-4">
-                              <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-5 w-5 rounded-full object-cover" />
-                              <span className="text-sm text-muted-foreground">Artist: <span className="text-foreground font-medium">{project.artist}</span></span>
+                            <h3 className="mb-1.5 truncate text-base font-semibold tracking-tight transition-colors group-hover:text-primary">
+                              {project.title}
+                            </h3>
+                            <div className="mb-4 flex items-center gap-2">
+                              <img
+                                loading="lazy"
+                                decoding="async"
+                                src={project.artistAvatar}
+                                alt={project.artist}
+                                className="h-5 w-5 rounded-full object-cover"
+                              />
+                              <span className="text-sm text-muted-foreground">
+                                <span className="font-medium text-foreground">{project.artist}</span>
+                              </span>
                             </div>
-                            
-                            <div className="space-y-2">
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="font-semibold text-muted-foreground">Progress</span>
-                                <span className="font-bold text-primary">{project.progress}%</span>
+
+                            <div className="space-y-1.5">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground">Progress</span>
+                                <span className="font-medium text-foreground">{project.progress}%</span>
                               </div>
-                              <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-primary to-indigo-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(var(--primary),0.3)]"
-                                  style={{ width: `${project.progress}%` }} 
+                              <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                                <div
+                                  className="h-full rounded-full bg-primary transition-all duration-700 ease-apple"
+                                  style={{ width: `${project.progress}%` }}
                                 />
                               </div>
                             </div>
                           </div>
-                          <div className="flex sm:flex-col gap-2 shrink-0 self-end sm:self-center">
-                            <Button size="sm" variant="outline" className="rounded-xl px-4 hover:bg-primary hover:text-primary-foreground transition-all shadow-sm" onClick={() => {
-                              setSelectedProjectId(project.id);
-                              setProjectModalOpen(true);
-                            }}>
-                              View Details
+                          <div className="flex shrink-0 gap-2 self-end sm:self-center">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-10 rounded-xl px-4"
+                              onClick={() => {
+                                setSelectedProjectId(project.id);
+                                setProjectModalOpen(true);
+                              }}
+                            >
+                              View details
                             </Button>
                           </div>
                         </div>
@@ -833,36 +779,50 @@ const ClientDashboard = () => {
                     ))
                   )}
                 </div>
+
               </div>
 
               {/* Sidebar: Recommendations & Notifications */}
               <div className="space-y-6 lg:space-y-8">
                 {/* Recommended Section */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h2 className="font-heading text-lg font-bold flex items-center gap-2">
-                      <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                      Artists
-                    </h2>
-                    <Link to="/explore" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-                      Explore <ChevronRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 gap-3">
-                    {recommendedArtists.slice(0, 3).map((artist, index) => (
-                      <Link key={artist.id} to={`/artist/${artist.id}`} className="group bg-white/70 dark:bg-card/70 backdrop-blur-sm p-4 rounded-2xl shadow-sm border border-muted/20 hover:shadow-md hover:border-primary/20 transition-all duration-300 animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
+                <div className="space-y-3">
+                  <SectionHeading
+                    title="Artists for you"
+                    icon={Star}
+                    actions={
+                      <Link
+                        to="/explore"
+                        className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      >
+                        Explore <ChevronRight className="h-3 w-3" />
+                      </Link>
+                    }
+                  />
+
+                  <div className="grid grid-cols-1 gap-2">
+                    {recommendedArtists.slice(0, 3).map((artist) => (
+                      <Link
+                        key={artist.id}
+                        to={`/artist/${artist.id}`}
+                        className="group rounded-xl border border-border/60 bg-card p-3 transition-all duration-300 ease-apple hover:border-primary/40 hover:shadow-token-xs active:scale-[0.99]"
+                      >
                         <div className="flex items-center gap-3">
-                          <div className="relative shrink-0">
-                            <img loading="lazy" decoding="async" src={artist.profileImage} alt={artist.name} className="h-12 w-12 rounded-2xl object-cover ring-2 ring-white dark:ring-border group-hover:ring-primary/50 transition-all" />
-                            <div className="absolute -bottom-1 -right-1 bg-yellow-500 text-[8px] font-bold text-white px-1 rounded flex items-center gap-0.5 shadow-sm">
-                              <Star className="h-2 w-2 fill-white" /> {artist.rating}
-                            </div>
+                          <img
+                            loading="lazy"
+                            decoding="async"
+                            src={artist.profileImage}
+                            alt={artist.name}
+                            className="h-11 w-11 shrink-0 rounded-xl object-cover"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <h3 className="truncate text-sm font-semibold transition-colors group-hover:text-primary">
+                              {artist.name}
+                            </h3>
+                            <p className="truncate text-xs text-muted-foreground">{artist.profession}</p>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-sm truncate group-hover:text-primary transition-colors">{artist.name}</h3>
-                            <p className="text-xs text-muted-foreground truncate font-medium">{artist.profession}</p>
-                          </div>
+                          <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground">
+                            <Star className="h-3 w-3 fill-warning text-warning" /> {artist.rating}
+                          </span>
                         </div>
                       </Link>
                     ))}
@@ -870,48 +830,59 @@ const ClientDashboard = () => {
                 </div>
 
                 {/* Notifications Section */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h2 className="font-heading text-lg font-bold flex items-center gap-2">
-                      <Bell className="h-5 w-5 text-blue-500" />
-                      Activity
-                    </h2>
-                    <Button variant="ghost" size="sm" className="h-8 text-xs font-semibold text-muted-foreground" onClick={() => setSelectedTab('account')}>
-                      Manage
-                    </Button>
-                  </div>
-                  
-                  <div className="bg-white/70 dark:bg-card/70 backdrop-blur-sm rounded-2xl shadow-sm border border-muted/20 overflow-hidden">
-                    <div className="divide-y divide-muted/10">
+                <div className="space-y-3">
+                  <SectionHeading
+                    title="Activity"
+                    icon={Bell}
+                    actions={
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 rounded-lg text-xs text-muted-foreground"
+                        onClick={() => handleTabChange('account')}
+                      >
+                        Manage
+                      </Button>
+                    }
+                  />
+
+                  <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+                    <div className="divide-y divide-border/50">
                       {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-muted-foreground text-sm flex flex-col items-center gap-2">
-                          <Bell className="h-6 w-6 opacity-20" />
+                        <div className="flex flex-col items-center gap-2 p-8 text-center text-sm text-muted-foreground">
+                          <Bell className="h-5 w-5 opacity-40" />
                           <p>No new updates</p>
                         </div>
                       ) : (
-                        notifications.slice(0, 4).map((notification, index) => (
-                          <div 
-                            key={notification.id} 
+                        notifications.slice(0, 4).map((notification) => (
+                          <button
+                            key={notification.id}
+                            type="button"
                             onClick={() => handleNotificationClick(notification)}
                             className={cn(
-                              "p-4 flex items-start gap-3 transition-colors hover:bg-muted/5 animate-fade-in cursor-pointer",
-                              !notification.read && "bg-blue-50/30 dark:bg-blue-900/10"
-                            )} 
-                            style={{ animationDelay: `${index * 30}ms` }}
+                              "flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-muted/40",
+                              !notification.read && "bg-primary/[0.04]"
+                            )}
                           >
-                            {!notification.read && <div className="mt-1.5 h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] shrink-0" />}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium leading-relaxed line-clamp-2">{notification.content}</p>
-                              <p className="text-[10px] text-muted-foreground mt-1 font-semibold flex items-center gap-1">
+                            <span
+                              className={cn(
+                                "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                                notification.read ? "bg-transparent" : "bg-primary"
+                              )}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="line-clamp-2 text-xs leading-relaxed text-foreground">{notification.content}</p>
+                              <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
                                 <Clock className="h-3 w-3" /> {notification.time}
                               </p>
                             </div>
-                          </div>
+                          </button>
                         ))
                       )}
                   </div>
                 </div>
               </div>
+
             </div>
                 </div>
               </div>
@@ -927,83 +898,80 @@ const ClientDashboard = () => {
               {visitedTabs.has('projects') && (
                 <TabErrorBoundary tabLabel="Projects">
                 <>
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                    <h2 className="font-heading text-base sm:text-lg lg:text-xl font-black uppercase tracking-tight">All Projects</h2>
-                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                    <h2 className="text-lg font-semibold tracking-tight sm:text-xl">All projects</h2>
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                       <div className="relative flex-1 sm:flex-initial">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input
                           type="text"
-                          placeholder="Search projects..."
+                          placeholder="Search projects"
                           value={projectSearch}
                           onChange={e => setProjectSearch(e.target.value)}
-                          className="w-full sm:w-48 lg:w-64 pl-9 pr-4 py-2.5 border border-gray-200 dark:border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/70 focus:border-transparent bg-white/80 dark:bg-card/80 min-h-[44px]"
+                          className="h-11 w-full rounded-xl border border-input bg-background pl-9 pr-4 text-sm transition-shadow placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:w-56 lg:w-64"
                         />
-                        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                          <Search size={16} />
-                        </div>
                       </div>
-                      <Button className="w-full sm:w-auto text-sm min-h-[44px]" onClick={() => setCreateProjectOpen(true)}>
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        New Project
+                      <Button className="h-11 w-full rounded-xl sm:w-auto" onClick={() => setCreateProjectOpen(true)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        New project
                       </Button>
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    <div className="bg-white/60 dark:bg-card/60 backdrop-blur-sm p-4 sm:p-6 rounded-lg sm:rounded-xl shadow-sm border border-blue-100 dark:border-border">
-                      <h3 className="font-heading text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center">
-                        <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-amber-600" />
-                        In Progress
-                        {projectSearch && <span className="ml-2 text-xs font-normal text-muted-foreground">({searchedActiveProjects.length} result{searchedActiveProjects.length !== 1 ? 's' : ''})</span>}
+
+                  <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2">
+                    <div className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5">
+                      <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold tracking-tight">
+                        <Clock className="h-4 w-4 text-warning" />
+                        In progress
+                        {projectSearch && <span className="text-xs font-normal text-muted-foreground">({searchedActiveProjects.length} result{searchedActiveProjects.length !== 1 ? 's' : ''})</span>}
                       </h3>
-                      {/* Projects list will follow */}
-                <div className="space-y-3 sm:space-y-4">
+
+                <div className="space-y-3">
                   {searchedActiveProjects.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 px-4 rounded-[2rem] border-2 border-dashed border-border/30 bg-muted/10">
-                      <div className="rounded-2xl bg-muted/40 p-4 mb-4">
-                        <Clock className="h-6 w-6 text-muted-foreground/40" />
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 px-4 py-10">
+                      <div className="mb-3 grid h-10 w-10 place-items-center rounded-lg bg-muted">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <p className="text-sm font-black text-foreground mb-1">{projectSearch ? 'No matches' : 'No active projects'}</p>
-                      <p className="text-xs text-muted-foreground text-center mb-4">{projectSearch ? 'Try a different search term.' : 'Create a project to get started.'}</p>
+                      <p className="mb-1 text-sm font-semibold text-foreground">{projectSearch ? 'No matches' : 'No active projects'}</p>
+                      <p className="mb-4 text-center text-xs text-muted-foreground">{projectSearch ? 'Try a different search term.' : 'Create a project to get started.'}</p>
                       {!projectSearch && (
-                        <Button size="sm" onClick={() => setCreateProjectOpen(true)} className="h-9 px-5 rounded-xl font-black text-xs shadow-sm shadow-primary/20">
-                          <PlusCircle className="h-3.5 w-3.5 mr-1.5" /> New Project
+                        <Button size="sm" onClick={() => setCreateProjectOpen(true)} className="h-10 rounded-xl px-4 text-xs">
+                          <PlusCircle className="mr-1.5 h-3.5 w-3.5" /> New project
                         </Button>
                       )}
                     </div>
                   ) : (
                     <>
-                      {searchedActiveProjects.slice(0, visibleActive).map((project, index) => <div key={project.id} className="p-3 sm:p-4 border border-gray-100 dark:border-border rounded-lg bg-white/70 dark:bg-card/70 transition-all duration-300 hover:shadow-md animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                            <div className="flex justify-between items-start gap-2">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-8 w-8 rounded-full object-cover shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-sm sm:text-base truncate">{project.title}</h4>
-                                  <Link to={`/artist/${project.artistId}`} className="text-xs sm:text-sm text-muted-foreground hover:text-primary transition-colors">
+                      {searchedActiveProjects.slice(0, visibleActive).map((project) => <div key={project.id} className="rounded-xl border border-border/60 bg-background p-3 transition-all duration-300 ease-apple hover:border-primary/30 hover:shadow-token-xs sm:p-4">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                                <img loading="lazy" decoding="async" src={project.artistAvatar} alt={project.artist} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+                                <div className="min-w-0 flex-1">
+                                  <h4 className="truncate text-sm font-semibold tracking-tight">{project.title}</h4>
+                                  <Link to={`/artist/${project.artistId}`} className="text-xs text-muted-foreground transition-colors hover:text-primary">
                                     {project.artist}
                                   </Link>
                                 </div>
                               </div>
-                              <span className={cn("px-2 py-0.5 text-[10px] sm:text-xs rounded-full shrink-0", project.status === "In Progress" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300")}>
-                                {project.status}
-                              </span>
+                              <StatusPill tone={statusTone(project.status)} className="shrink-0">{project.status}</StatusPill>
                             </div>
-                            {project.description && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{project.description}</p>}
-                            <div className="flex items-center gap-2 mt-2 sm:mt-3">
-                              <div className="flex-1 bg-gray-200 dark:bg-muted rounded-full h-1.5 sm:h-2">
-                                <div className="bg-brand-gradient h-full rounded-full transition-all duration-500" style={{
+                            {project.description && <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">{project.description}</p>}
+                            <div className="mt-3 flex items-center gap-2">
+                              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                <div className="h-full rounded-full bg-primary transition-all duration-700 ease-apple" style={{
                             width: `${project.progress}%`
                           }} />
                               </div>
-                              <span className="text-[10px] sm:text-xs font-medium">{project.progress}%</span>
+                              <span className="text-[11px] font-medium text-muted-foreground">{project.progress}%</span>
                             </div>
-                            <div className="mt-2 sm:mt-3 flex justify-between items-center">
+                            <div className="mt-3 flex items-center justify-between">
                               <div className="flex items-center gap-3">
-                                <span className="text-[10px] sm:text-xs text-gray-500">Due: {project.dueDate}</span>
-                                {project.budget > 0 && <span className="text-[10px] sm:text-xs text-green-600 font-medium">
+                                <span className="text-[11px] text-muted-foreground">Due {project.dueDate}</span>
+                                {project.budget > 0 && <span className="text-[11px] font-medium text-success">
                                     {format(project.budget, 'USD', project.exchangeRate)}
                                   </span>}
                               </div>
+
                               <div className="flex flex-wrap gap-2">
                                   <Button size="sm" variant="outline" className="h-7 sm:h-8 text-xs" onClick={() => {
                                     setSelectedProjectId(project.id);
@@ -1028,21 +996,10 @@ const ClientDashboard = () => {
                                   
                                   {(project.status === 'Draft' || project.status === 'Pending Confirm') && (
                                     <>
-                                      {/* On a Draft, assigning an artist is the
-                                          only way forward, so it gets primary
-                                          weight -- it previously matched
-                                          View/Delete and nothing signalled the
-                                          required next step. On Pending Confirm
-                                          it stays secondary, because "Confirm"
-                                          is the primary action there. */}
-                                      <Button
-                                        size="sm"
-                                        variant={project.status === 'Draft' ? 'default' : 'outline'}
-                                        className={
-                                          project.status === 'Draft'
-                                            ? "h-9 sm:h-10 min-w-[44px] text-xs bg-primary text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-                                            : "h-9 sm:h-10 min-w-[44px] text-xs border-primary text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-                                        }
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline" 
+                                        className="h-9 sm:h-10 min-w-[44px] text-xs border-primary text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                                         disabled={!!buttonLoading[`assign-${project.id}`]}
                                         onClick={() => {
                                           setAssigningProjectId(project.id);
@@ -1050,10 +1007,7 @@ const ClientDashboard = () => {
                                         }}
                                       >
                                         {buttonLoading[`assign-${project.id}`] ? (
-                                          <span className={cn(
-                                            "h-3 w-3 animate-spin rounded-full border-2 border-t-transparent",
-                                            project.status === 'Draft' ? "border-primary-foreground" : "border-primary"
-                                          )} />
+                                          <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                                         ) : (
                                           project.status === 'Draft' ? 'Assign Artist' : 'Reassign'
                                         )}
@@ -1189,8 +1143,8 @@ const ClientDashboard = () => {
                 <TabErrorBoundary tabLabel="My Works">
                 <Tabs defaultValue="purchased" className="w-full">
                   <TabsList className="bg-muted/50 p-1 rounded-xl mb-4 inline-flex w-auto">
-                    <TabsTrigger value="purchased" data-testid="mywork-tab-purchased" className="rounded-lg text-xs px-4 py-2">Purchased</TabsTrigger>
-                    <TabsTrigger value="saved" data-testid="mywork-tab-saved" className="rounded-lg text-xs px-4 py-2">Wishlist</TabsTrigger>
+                    <TabsTrigger value="purchased" className="rounded-lg text-xs px-4 py-2">Purchased</TabsTrigger>
+                    <TabsTrigger value="saved" className="rounded-lg text-xs px-4 py-2">Wishlist</TabsTrigger>
                   </TabsList>
                   <TabsContent value="purchased" className="mt-0">
                     <PurchasedArtworks />
@@ -1226,9 +1180,9 @@ const ClientDashboard = () => {
                 <Tabs defaultValue="profile" className="w-full">
                   <div className="flex overflow-x-auto pb-2 mb-6 -mx-1 px-1 scrollbar-hide">
                     <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-3 h-auto overflow-x-auto">
-                      <TabsTrigger value="profile" data-testid="account-tab-profile" className="rounded-lg text-xs px-4 py-2 shrink-0">Profile</TabsTrigger>
-                      <TabsTrigger value="payments" data-testid="account-tab-payments" className="rounded-lg text-xs px-4 py-2 shrink-0">Payments</TabsTrigger>
-                      <TabsTrigger value="settings" data-testid="account-tab-settings" className="rounded-lg text-xs px-4 py-2 shrink-0">Settings</TabsTrigger>
+                      <TabsTrigger value="profile" className="rounded-lg text-xs px-4 py-2 shrink-0">Profile</TabsTrigger>
+                      <TabsTrigger value="payments" className="rounded-lg text-xs px-4 py-2 shrink-0">Payments</TabsTrigger>
+                      <TabsTrigger value="settings" className="rounded-lg text-xs px-4 py-2 shrink-0">Settings</TabsTrigger>
                     </TabsList>
                   </div>
                   

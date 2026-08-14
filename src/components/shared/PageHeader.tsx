@@ -48,7 +48,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             {eyebrow}
           </div>
         ) : null}
-        <h1 className={cn("font-black tracking-tight text-foreground", sizeMap[size])}>
+        <h1 className={cn("font-semibold tracking-tight text-foreground", sizeMap[size])}>
           {title}
         </h1>
         {description ? (
