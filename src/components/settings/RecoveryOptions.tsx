@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Phone, Key, Loader2, Copy, RefreshCw, CheckCircle } from 'lucide-react';
+import { Phone, Key, Copy, RefreshCw, CheckCircle } from 'lucide-react';
 
 // Generate random recovery codes
 const generateRecoveryCodes = (): string[] => {
@@ -170,10 +170,10 @@ const RecoveryOptions = () => {
             />
             <Button
               onClick={savePhone}
-              disabled={savingPhone || phone === savedPhone}
+              disabled={phone === savedPhone}
+              loading={savingPhone}
               size="sm"
             >
-              {savingPhone && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Save
             </Button>
           </div>
@@ -215,7 +215,7 @@ const RecoveryOptions = () => {
                         variant="ghost"
                         size="icon"
                         className="h-6 w-6"
-                        onClick={() => copyCode(code, index)}
+                        aria-label="Copy recovery code" onClick={() => copyCode(code, index)}
                       >
                         {copiedIndex === index ? (
                           <CheckCircle className="h-3 w-3 text-green-500" />
@@ -255,9 +255,8 @@ const RecoveryOptions = () => {
               )}
               <Button
                 onClick={generateNewCodes}
-                disabled={loading}
+                loading={loading}
               >
-                {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {hasRecoveryCodes ? 'Regenerate Codes' : 'Generate Recovery Codes'}
               </Button>
               {hasRecoveryCodes && (

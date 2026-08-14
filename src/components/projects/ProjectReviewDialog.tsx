@@ -82,8 +82,8 @@ export function ProjectReviewDialog({
 
         <div className="py-8 space-y-8">
           <div className="flex flex-col items-center gap-4">
-            <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Your Rating</Label>
-            <div className="flex gap-2">
+            <Label id="project-review-rating-label" className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">Your Rating</Label>
+            <div className="flex gap-2" role="radiogroup" aria-labelledby="project-review-rating-label">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -92,9 +92,12 @@ export function ProjectReviewDialog({
                   onMouseLeave={() => setHoveredRating(0)}
                   onClick={() => setRating(star)}
                   className={cn(
-                    "p-1 transition-all duration-300 hover:scale-125 active:scale-95",
+                    "p-1 rounded-md transition-all duration-300 hover:scale-125 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                     (hoveredRating || rating) >= star ? "text-amber-400" : "text-muted/20"
                   )}
+                  aria-label={`${star} star${star === 1 ? '' : 's'}`}
+                  aria-checked={rating === star}
+                  role="radio"
                 >
                   <Star className={cn("w-10 h-10", (hoveredRating || rating) >= star ? "fill-current" : "fill-none")} />
                 </button>
@@ -106,8 +109,9 @@ export function ProjectReviewDialog({
           </div>
 
           <div className="space-y-3">
-            <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Tell us more (Optional)</Label>
+            <Label htmlFor="project-review-text" className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 ml-2">Tell us more (Optional)</Label>
             <Textarea
+              id="project-review-text"
               placeholder="The artist was very professional and delivered on time..."
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}

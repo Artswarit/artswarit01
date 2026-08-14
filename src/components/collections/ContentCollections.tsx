@@ -194,7 +194,7 @@ const ContentCollections = () => {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8 text-red-600"
-                    onClick={() => deleteCollection(collection.id)}
+                    aria-label="Delete collection" onClick={() => deleteCollection(collection.id)}
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

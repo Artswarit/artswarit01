@@ -25,7 +25,7 @@ interface AuthContextType {
   isPremium: boolean;
   profile: UserProfile | null;
   refreshProfile: () => Promise<void>;
-  signUp: (email: string, password: string, userData: { full_name: string; role: string; country?: string }) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, userData: { full_name: string; role: string; country?: string }) => Promise<{ error: any; needsEmailConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
@@ -281,13 +281,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error: { message: 'Account already exists' } };
       }
 
-      toast({
-        title: "Account created successfully!",
-        description: "Please check your email to verify your account."
-      });
       track('sign_up', { role: userData.role, source: 'email', country: userData.country });
 
-      return { error: null };
+      // When email confirmation is enabled Supabase returns a user with no
+      // session. The caller needs to know, otherwise it sits waiting for an
+      // auth-state change that will never arrive until the user clicks the link.
+      const needsEmailConfirmation = !data?.session;
+
+      if (needsEmailConfirmation) {
+        toast({
+          title: "Account created successfully!",
+          description: "Please check your email to verify your account."
+        });
+      }
+
+      return { error: null, needsEmailConfirmation };
     } catch (error: any) {
       return { error };
     } finally {

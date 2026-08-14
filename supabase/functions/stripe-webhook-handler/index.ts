@@ -76,28 +76,58 @@ serve(async (req) => {
         const buyerId = metadata?.buyer_id;
         const sellerId = metadata?.seller_id;
 
-        // 1. Update transaction
-        await supabase
-          .from('transactions')
-          .update({ status: 'success' })
-          .eq('stripe_payment_intent_id', session.id);
+        if (!artworkId || !buyerId) {
+          console.error('artwork_purchase webhook missing metadata', { artworkId, buyerId, session: session.id });
+          throw new Error('Missing artwork or buyer reference on checkout session');
+        }
 
-        // 2. Clear price and archive artwork
-        await supabase
-          .from('artworks')
-          .update({ price: null, status: 'archived' })
-          .eq('id', artworkId);
-
-        // 3. Insert into artwork_unlocks
-        await supabase
+        // Idempotency: Stripe delivers at-least-once, so a retry must not
+        // re-notify or re-archive. The unlock row is the marker of completion.
+        const { data: alreadyUnlocked } = await supabase
           .from('artwork_unlocks')
-          .insert({ artwork_id: artworkId, user_id: buyerId });
+          .select('id')
+          .eq('artwork_id', artworkId)
+          .eq('user_id', buyerId)
+          .maybeSingle();
 
-        // 4. Notifications
-        await supabase.from('notifications').insert([
-          { user_id: sellerId, type: 'sale', title: 'Artwork Sold!', message: `Your artwork has been sold.` },
-          { user_id: buyerId, type: 'purchase', title: 'Purchase Confirmed', message: `You have unlocked new artwork.` }
-        ]);
+        if (alreadyUnlocked) {
+          console.log('Artwork already unlocked, skipping duplicate webhook', { artworkId, buyerId });
+        } else {
+          // Every write below was previously unchecked, so a failure anywhere
+          // left the buyer charged with no unlock and no signal.
+
+          // 1. Update transaction
+          const { error: txError } = await supabase
+            .from('transactions')
+            .update({ status: 'success' })
+            .eq('stripe_payment_intent_id', session.id);
+          if (txError) console.error('Failed to mark transaction success:', txError);
+
+          // 2. Insert the unlock FIRST -- it is what the buyer actually paid
+          //    for. Archiving the artwork before this meant a failure here left
+          //    the artwork unavailable AND unowned.
+          const { error: unlockError } = await supabase
+            .from('artwork_unlocks')
+            .insert({ artwork_id: artworkId, user_id: buyerId });
+          if (unlockError) {
+            console.error('Failed to record artwork unlock:', unlockError);
+            throw new Error('Could not record artwork unlock');
+          }
+
+          // 3. Clear price and archive artwork
+          const { error: archiveError } = await supabase
+            .from('artworks')
+            .update({ price: null, status: 'archived' })
+            .eq('id', artworkId);
+          if (archiveError) console.error('Failed to archive artwork:', archiveError);
+
+          // 4. Notifications
+          const { error: notifyError } = await supabase.from('notifications').insert([
+            { user_id: sellerId, type: 'sale', title: 'Artwork Sold!', message: `Your artwork has been sold.` },
+            { user_id: buyerId, type: 'purchase', title: 'Purchase Confirmed', message: `You have unlocked new artwork.` }
+          ]);
+          if (notifyError) console.error('Failed to send purchase notifications:', notifyError);
+        }
       } else if (type === 'milestone_payment') {
         const milestoneId = metadata?.milestone_id;
         const projectId = metadata?.project_id;
@@ -105,28 +135,45 @@ serve(async (req) => {
         const artistId = metadata?.seller_id;
 
         // 1. Update transaction
-        await supabase
+        const { error: txError } = await supabase
           .from('transactions')
           .update({ status: 'success' })
           .eq('stripe_payment_intent_id', session.id);
+        if (txError) console.error('Failed to mark milestone transaction success:', txError);
 
-        // 2. Update milestone status to PAID (escrow)
-        await supabase
+        // 2. Move the milestone into escrow.
+        //    This previously wrote 'PAID', which is not a member of the
+        //    milestone_status_v2 enum ('LOCKED' | 'WAITING_FUNDS' | 'ACTIVE' |
+        //    'REVIEW_PENDING' | 'REVISION_REQUESTED' | 'COMPLETED' |
+        //    'DISPUTED'), so the write always failed -- silently, because the
+        //    result was never checked. Stripe-funded milestones therefore never
+        //    activated after payment. 'ACTIVE' is the funded state, matching
+        //    what the Razorpay path sets.
+        //    Scoped to WAITING_FUNDS so a retry cannot regress a milestone that
+        //    has already progressed.
+        const { error: milestoneError } = await supabase
           .from('project_milestones')
-          .update({ status: 'PAID' })
-          .eq('id', milestoneId);
+          .update({ status: 'ACTIVE', paid_at: new Date().toISOString() })
+          .eq('id', milestoneId)
+          .eq('status', 'WAITING_FUNDS');
+        if (milestoneError) {
+          console.error('Failed to activate milestone after payment:', milestoneError);
+          throw new Error('Could not activate milestone after payment');
+        }
 
         // 3. Update payment record
-        await supabase
+        const { error: paymentError } = await supabase
           .from('payments')
           .update({ status: 'success', stripe_session_id: session.id })
           .eq('milestone_id', milestoneId);
+        if (paymentError) console.error('Failed to mark payment success:', paymentError);
 
         // 4. Notifications
-        await supabase.from('notifications').insert([
+        const { error: notifyError } = await supabase.from('notifications').insert([
           { user_id: artistId, type: 'milestone_paid', title: 'Milestone Funded', message: `A milestone for your project has been funded.` },
           { user_id: clientId, type: 'payment_success', title: 'Payment Successful', message: `Milestone payment was successful.` }
         ]);
+        if (notifyError) console.error('Failed to send milestone funding notifications:', notifyError);
 
         // Analytics — server-confirmed escrow funding.
         const amount = (session.amount_total ?? 0) / 100;
@@ -148,17 +195,42 @@ serve(async (req) => {
         const userId = metadata?.user_id;
         const plan = metadata?.plan;
 
-        // Update user's subscriber status
+        // `subscribers` has no `plan` column -- the tier lives in the
+        // `subscription_tier` enum ('monthly' | 'yearly' | 'lifetime'). The
+        // checkout plan keys are 'pro' | 'monthly' | 'yearly', and 'pro' bills
+        // monthly. Writing `plan` previously made this insert fail outright, so
+        // Stripe subscribers were charged but never actually marked premium.
+        const subscriptionTier = plan === 'yearly' ? 'yearly' : 'monthly';
+
+        // useArtistPlan treats renew_at IS NULL as a never-expiring plan, so an
+        // explicit period end is required for recurring tiers.
+        const periodDays = subscriptionTier === 'yearly' ? 365 : 30;
+        const renewAt = new Date(Date.now() + periodDays * 24 * 60 * 60 * 1000).toISOString();
+
+        const subscriberEmail =
+          session.customer_details?.email ?? session.customer_email ?? '';
+
+        // Upsert (not insert) so Stripe's at-least-once webhook delivery cannot
+        // create duplicate subscriber rows on retry. Mirrors the Razorpay path.
+        // NOTE: stripe_customer_id stores the *subscription* id here, matching
+        // the existing convention the lifecycle handler below looks up by.
         const { error: subError } = await supabase
           .from('subscribers')
-          .insert({
+          .upsert({
             user_id: userId,
-            plan: plan,
+            email: subscriberEmail,
+            subscription_tier: subscriptionTier,
             is_active: true,
             started_at: new Date().toISOString(),
+            renew_at: renewAt,
+            stripe_customer_id: session.subscription ?? session.id,
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id,subscription_tier',
+            ignoreDuplicates: false,
           });
 
-        if (subError) console.error('Subscription insert error:', subError);
+        if (subError) console.error('Subscription upsert error:', subError);
 
         // Notification
         await supabase.from('notifications').insert({
@@ -211,16 +283,44 @@ serve(async (req) => {
       }
 
       if (analyticsEvent && subscriptionId) {
+        // `plan` is not a column on subscribers -- selecting it made this query
+        // fail, so no lifecycle event ever resolved a user.
         const { data: sub } = await supabase
           .from('subscribers')
-          .select('user_id, plan, subscription_tier, email')
+          .select('id, user_id, subscription_tier, email')
           .eq('stripe_customer_id', subscriptionId)
           .maybeSingle();
 
         if (sub?.user_id) {
+          // Revoke access when the subscription actually ends. Without this a
+          // cancelled Stripe subscriber kept 0% platform fees indefinitely
+          // (the Razorpay path already did this).
+          if (analyticsEvent === 'subscription_cancelled' || analyticsEvent === 'subscription_expired') {
+            const { error: revokeError } = await supabase
+              .from('subscribers')
+              .update({ is_active: false, updated_at: new Date().toISOString() })
+              .eq('id', sub.id);
+            if (revokeError) console.error('Failed to revoke subscription:', revokeError);
+          }
+
+          // Extend the access window on a successful renewal, otherwise an
+          // actively-paying subscriber lapses when the initial renew_at passes.
+          if (event.type === 'invoice.paid' || event.type === 'invoice.payment_succeeded') {
+            const periodDays = sub.subscription_tier === 'yearly' ? 365 : 30;
+            const nextRenewAt = obj.lines?.data?.[0]?.period?.end
+              ? new Date(obj.lines.data[0].period.end * 1000).toISOString()
+              : new Date(Date.now() + periodDays * 24 * 60 * 60 * 1000).toISOString();
+
+            const { error: renewError } = await supabase
+              .from('subscribers')
+              .update({ is_active: true, renew_at: nextRenewAt, updated_at: new Date().toISOString() })
+              .eq('id', sub.id);
+            if (renewError) console.error('Failed to extend subscription:', renewError);
+          }
+
           await phCapture(analyticsEvent as string, sub.user_id, {
             provider: 'stripe',
-            plan: sub.plan ?? sub.subscription_tier ?? null,
+            plan: sub.subscription_tier ?? null,
             subscription_id: subscriptionId,
             invoice_id: obj.id ?? null,
             amount: obj.amount_paid ? obj.amount_paid / 100 : (obj.amount_due ?? 0) / 100,

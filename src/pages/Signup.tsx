@@ -51,7 +51,11 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  // Set once the account is created but the user still has to click the link in
+  // their inbox. Without this the page had no terminal state and the submit
+  // button span forever.
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(null);
+
   // Pre-select role from URL parameter
   useEffect(() => {
     const role = searchParams.get('role');
@@ -106,16 +110,24 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
     }
 
     setIsSubmitting(true);
-    
-    const { error } = await signUp(formData.email, formData.password, {
+
+    const { error, needsEmailConfirmation } = await signUp(formData.email, formData.password, {
       full_name: formData.name,
       role: formData.role
     });
-    
-    if (error) {
-      setIsSubmitting(false);
+
+    // Always clear the in-flight flag. When confirmation is required there is no
+    // session and therefore no auth-state change to redirect on, so leaving it
+    // set stranded the user on a spinning button.
+    setIsSubmitting(false);
+
+    if (error) return;
+
+    if (needsEmailConfirmation) {
+      setConfirmationEmail(formData.email);
+      return;
     }
-    // If no error, the useEffect above will handle redirection when profile updates
+    // Otherwise the redirect effect above takes over once the profile loads.
   };
 
   // Password strength indicators
@@ -241,16 +253,58 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
               {/* Heading */}
               <div className="mb-8 text-center">
                 <h1 className="text-2xl sm:text-[28px] font-heading font-bold text-gray-900 dark:text-white tracking-tight">
-                  Create your account
+                  {confirmationEmail ? "Check your email" : "Create your account"}
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-                  Already have an account?{" "}
-                  <Link to="/login" className="font-semibold text-violet-600 hover:text-violet-700 transition-colors">
-                    Sign in
-                  </Link>
+                  {confirmationEmail ? (
+                    <>We sent a verification link to <span className="font-semibold text-gray-900 dark:text-white">{confirmationEmail}</span></>
+                  ) : (
+                    <>
+                      Already have an account?{" "}
+                      <Link to="/login" className="font-semibold text-violet-600 hover:text-violet-700 transition-colors">
+                        Sign in
+                      </Link>
+                    </>
+                  )}
                 </p>
               </div>
 
+              {confirmationEmail ? (
+                <div className="space-y-5">
+                  <div className="flex items-start gap-3 p-4 rounded-xl border border-violet-200 dark:border-violet-900/50 bg-violet-50/70 dark:bg-violet-950/20">
+                    <CheckCircle2 className="h-5 w-5 text-violet-600 dark:text-violet-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                      Click the link in that email to activate your account. You can close this tab — the link works from anywhere.
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
+                    Didn't get it? Check your spam folder,{" "}
+                    <Link
+                      to={`/verify-email?email=${encodeURIComponent(confirmationEmail)}`}
+                      className="font-semibold text-violet-600 hover:text-violet-700 transition-colors"
+                    >
+                      resend the link
+                    </Link>
+                    , or{" "}
+                    <button
+                      type="button"
+                      onClick={() => setConfirmationEmail(null)}
+                      className="font-semibold text-violet-600 hover:text-violet-700 transition-colors"
+                    >
+                      use a different email address
+                    </button>
+                    .
+                  </p>
+                  <Button
+                    type="button"
+                    onClick={() => navigate('/login')}
+                    className="w-full h-12 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-medium text-[15px] shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-300"
+                  >
+                    Go to sign in
+                  </Button>
+                </div>
+              ) : (
+              <>
               {/* Role Selection */}
               <div className="mb-6">
                 <Label className="text-[13px] font-medium text-gray-700 dark:text-gray-300 mb-3 block">
@@ -340,7 +394,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                 </div>
               </div>
               {/* Email Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" data-testid="signup-form">
                 {/* Full Name */}
                 <div className="space-y-1.5">
                   <Label htmlFor="signup-name" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">Full name</Label>
@@ -359,11 +413,12 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                       onBlur={() => setFocusedField(null)}
                       required
                       disabled={loading}
+                      data-testid="signup-name-input"
                       className="h-12 text-[15px] border-0 rounded-xl bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-4 placeholder:text-gray-400"
                     />
                   </div>
                 </div>
- 
+
                 {/* Email */}
                 <div className="space-y-1.5">
                   <Label htmlFor="signup-email" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">Email address</Label>
@@ -382,6 +437,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                       onBlur={() => setFocusedField(null)}
                       required
                       disabled={loading}
+                      data-testid="signup-email-input"
                       className="h-12 text-[15px] border-0 rounded-xl bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-4 placeholder:text-gray-400"
                     />
                   </div>
@@ -405,14 +461,17 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                       onBlur={() => setFocusedField(null)}
                       required
                       disabled={loading}
+                      data-testid="signup-password-input"
                       className="h-12 text-[15px] border-0 rounded-xl bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-4 pr-12 placeholder:text-gray-400"
                     />
                     <button
                       type="button"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      data-testid="signup-password-toggle"
                       className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-350 transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                      {showPassword ? <EyeOff className="h-[18px] w-[18px]" aria-hidden="true" /> : <Eye className="h-[18px] w-[18px]" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>
@@ -435,14 +494,17 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                       onBlur={() => setFocusedField(null)}
                       required
                       disabled={loading}
+                      data-testid="signup-confirm-password-input"
                       className="h-12 text-[15px] border-0 rounded-xl bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-4 pr-12 placeholder:text-gray-400"
                     />
                     <button
                       type="button"
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      data-testid="signup-confirm-password-toggle"
                       className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-350 transition-colors"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
-                      {showConfirmPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                      {showConfirmPassword ? <EyeOff className="h-[18px] w-[18px]" aria-hidden="true" /> : <Eye className="h-[18px] w-[18px]" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>
@@ -486,6 +548,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                 {/* Submit */}
                 <Button
                   type="submit"
+                  data-testid="signup-submit-button"
                   className="w-full h-12 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-medium text-[15px] shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-300 group mt-2"
                   loading={isSubmitting || loading}
                 >
@@ -499,6 +562,8 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                   )}
                 </Button>
               </form>
+              </>
+              )}
             </div>
           </div>
 

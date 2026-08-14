@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -360,7 +360,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
         )}>
           <div className="p-4 sm:p-7 space-y-4 sm:space-y-6">
             <div className="flex items-center justify-between px-1">
-              <h2 className="text-2xl sm:text-3xl font-black bg-gradient-to-br from-primary via-primary/90 to-purple-600 bg-clip-text text-transparent tracking-tighter">Messages</h2>
+              <h2 className="text-2xl sm:text-3xl font-black text-brand-gradient tracking-tighter">Messages</h2>
               <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 sm:h-14 sm:w-14 hover:bg-primary/10 hover:text-primary transition-all duration-300 min-h-[48px]" aria-label="Conversation options">
                 <MoreVertical className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>
@@ -432,14 +432,14 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                             {conv.lastMessage || "Start a conversation..."}
                           </p>
                           {conv.unreadCount > 0 && (
-                            <Badge className="bg-primary text-primary-foreground text-[9px] sm:text-xs h-5 sm:h-7 min-w-[20px] sm:min-w-[28px] px-1.5 sm:px-2 rounded-full border-none shadow-xl shadow-primary/30 flex items-center justify-center animate-bounce font-black">
+                            <Badge className="bg-primary text-primary-foreground text-[9px] sm:text-xs h-5 sm:h-7 min-w-[20px] sm:min-w-[28px] px-1.5 sm:px-2 rounded-full border-none shadow-xl shadow-primary/30 flex items-center justify-center font-black">
                               {conv.unreadCount}
                             </Badge>
                           )}
                         </div>
                         {conv.projectTitle && (
                           <div className="mt-2 sm:mt-3">
-                            <Badge variant="outline" className="text-[8px] sm:text-[10px] py-0.5 sm:py-1 px-2 sm:px-3 font-black border-primary/10 bg-primary/5 text-primary/60 uppercase tracking-widest rounded-xl transition-all group-hover:bg-primary group-hover:text-white group-hover:border-primary">
+                            <Badge variant="outline" className="text-[8px] sm:text-[10px] py-0.5 sm:py-1 px-2 sm:px-3 font-black border-primary/10 bg-primary/5 text-primary/60 uppercase tracking-widest rounded-xl transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary">
                               {conv.projectTitle}
                             </Badge>
                           </div>
@@ -466,10 +466,11 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label="Back to conversations"
                     className="rounded-full h-10 w-10 hover:bg-primary/10 text-primary transition-all shrink-0"
                     onClick={() => setActiveConversationId(null)}
                   >
-                    <ArrowLeft className="h-5 w-5" />
+                    <ArrowLeft className="h-5 w-5" aria-hidden="true" />
                   </Button>
                   <div className="relative group cursor-pointer" onClick={handleViewProfile}>
                     <Avatar className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl shadow-lg transition-transform group-hover:scale-105 duration-300">
@@ -527,9 +528,11 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                       autoFocus
                     />
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={isSearchingMessages ? "Close message search" : "Search messages"}
+                    aria-expanded={isSearchingMessages}
                     className={cn(
                       "rounded-xl h-12 w-12 sm:h-12 sm:w-12 transition-all duration-300 min-h-[48px]",
                       isSearchingMessages ? "text-primary bg-primary/10 shadow-inner" : "text-muted-foreground hover:text-primary hover:bg-primary/5"
@@ -539,7 +542,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                       if (isSearchingMessages) setMessageSearchQuery("");
                     }}
                   >
-                    {isSearchingMessages ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Search className="h-5 w-5 sm:h-6 sm:w-6" />}
+                    {isSearchingMessages ? <X className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" /> : <Search className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />}
                   </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -587,7 +590,7 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                       <div className="relative">
                         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
                         <div className="relative p-7 sm:p-10 rounded-[2.5rem] bg-white dark:bg-card shadow-2xl border border-primary/5">
-                          <MessageSquare className="h-10 w-10 sm:h-16 sm:w-16 text-primary/40 animate-pulse" />
+                          <MessageSquare className="h-10 w-10 sm:h-16 sm:w-16 text-primary/40" />
                         </div>
                       </div>
                       <div className="space-y-3 px-8">
@@ -607,14 +610,10 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                             variant="ghost"
                             size="sm"
                             onClick={handleLoadOlder}
-                            disabled={loadingOlderMessages}
+                            loading={loadingOlderMessages}
                             className="rounded-full px-4 h-8 text-xs font-semibold text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
                           >
-                            {loadingOlderMessages ? (
-                              <><Loader2 className="h-3 w-3 mr-2 animate-spin" />Loading…</>
-                            ) : (
-                              'Load older messages'
-                            )}
+                            {loadingOlderMessages ? 'Loading…' : 'Load older messages'}
                           </Button>
                         </div>
                       )}
@@ -647,8 +646,8 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                                   isOwn={isOwn}
                                   nextSame={nextSame}
                                   prevSame={prevSame}
-                                  avatarUrl={activeConversation?.participantAvatar}
-                                  senderName={activeConversation?.participantName}
+                                  avatarUrl={activeConversation?.otherUser?.avatar}
+                                  senderName={activeConversation?.otherUser?.name}
                                 >
                                   {msg.attachments && msg.attachments.length > 0 && (
                                     <AttachmentDisplay attachments={msg.attachments} isOwnMessage={isOwn} />
@@ -750,11 +749,12 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
                   </div>
                   <Button
                     onClick={handleSendMessage}
-                    disabled={(!messageInput.trim() && pendingAttachments.length === 0) || loading}
+                    disabled={!messageInput.trim() && pendingAttachments.length === 0}
+                    loading={loading}
                     size="icon"
                     className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 shadow-md shadow-primary/20 transition-all shrink-0 active:scale-90 disabled:opacity-40 disabled:scale-90"
                    aria-label="Send message">
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {!loading && <Send className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
@@ -772,6 +772,17 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
               <p className="text-xs sm:text-base text-muted-foreground/70 max-w-[240px] sm:max-w-md mx-auto leading-relaxed font-medium">
                 {emptyStateText}
               </p>
+              {/* Only shown when the inbox is genuinely empty -- the same panel
+                  also covers "you have conversations but haven't picked one
+                  yet", where this CTA would be redundant clutter rather than
+                  helpful. Previously the client-facing copy told the user to
+                  "start a conversation with an artist" with no way to actually
+                  do that from here. */}
+              {isClient && conversations.length === 0 && (
+                <Button asChild className="mt-6 rounded-full font-black text-xs uppercase tracking-widest h-11 px-6">
+                  <Link to="/explore-artists">Explore Artists</Link>
+                </Button>
+              )}
             </div>
           )}
         </main>

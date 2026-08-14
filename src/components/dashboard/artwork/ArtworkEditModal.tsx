@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus, Save, Loader2, Eye } from "lucide-react";
+import { X, Plus, Save, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -399,12 +399,8 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
             <Button variant="outline" onClick={onClose} disabled={saving} className="h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95 order-2 sm:order-1">
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={saving} className="h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all gap-3 order-1 sm:order-2">
-              {saving ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Save className="h-5 w-5" />
-              )}
+            <Button onClick={handleSave} loading={saving} className="h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all gap-3 order-1 sm:order-2">
+              {!saving && <Save className="h-5 w-5" />}
               {saving ? "Saving Changes..." : "Save Changes"}
             </Button>
           </div>

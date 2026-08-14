@@ -236,8 +236,8 @@ const ArtistProfile = ({
   return <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
         <h2 className="text-xl sm:text-2xl font-black tracking-tight uppercase">Artist Profile</h2>
-        {isEditing ? <Button onClick={saveProfile} disabled={isSaving} className="w-full sm:w-auto flex items-center justify-center gap-2 h-12 rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 min-h-[48px]">
-            {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />}
+        {isEditing ? <Button onClick={saveProfile} loading={isSaving} className="w-full sm:w-auto flex items-center justify-center gap-2 h-12 rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 min-h-[48px]">
+            {!isSaving && <Save className="h-5 w-5" />}
             Save All Changes
           </Button> : <Button onClick={toggleEdit} className="w-full sm:w-auto flex items-center justify-center gap-2 h-12 rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 min-h-[48px]">
             <Edit className="h-5 w-5" />
@@ -424,7 +424,7 @@ const ArtistProfile = ({
                 handleAddTag(newTag);
               }
             }} />
-                <Button type="button" onClick={() => handleAddTag(newTag)} size="icon" className="h-12 w-12 rounded-xl shrink-0 shadow-lg shadow-primary/10 min-h-[48px] min-w-[48px]">
+                <Button type="button" onClick={() => handleAddTag(newTag)} aria-label="Add tag" size="icon" className="h-12 w-12 rounded-xl shrink-0 shadow-lg shadow-primary/10 min-h-[48px] min-w-[48px]">
                   <Plus className="h-5 w-5" />
                 </Button>
               </div>

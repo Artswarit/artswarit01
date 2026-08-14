@@ -151,11 +151,18 @@ serve(async (req) => {
     }
 
 
+    // Explicit column list rather than a bare .select() (which is SELECT *).
+    // This function runs with the anon key in caller context, so a bare select
+    // requires the `authenticated` role to hold SELECT on every column --
+    // including `email`. Naming the columns lets that privilege be revoked
+    // (see 20260810160000_restrict_public_email_exposure.sql) without breaking
+    // profile updates. It only ever reads the caller's own row, so no
+    // information is being withheld from them here.
     const { data: updatedUser, error: updateError } = await supabase
       .from('users')
       .update(updateData)
       .eq('id', user.id)
-      .select()
+      .select('id, name, bio, cover_photo_url, profile_pic_url, role, social_links, created_at, updated_at')
       .single()
 
     if (updateError) {

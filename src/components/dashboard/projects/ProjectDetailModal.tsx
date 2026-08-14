@@ -398,10 +398,9 @@ const ProjectDetailModal = ({
     }
   };
   const handleToggleMilestoneStatus = async (milestone: Milestone) => {
-    // P1 Fix: Only clients should be able to mark a milestone as COMPLETED manually,
-    // and only if it was already ACTIVE. Artists should use the submission workflow.
+    // Only clients approve milestones. Artists use the submission workflow.
     if (!isClient) {
-      toast.error("Only the client can manually approve milestones.");
+      toast.error("Only the client can approve milestones.");
       return;
     }
 
@@ -410,8 +409,17 @@ const ProjectDetailModal = ({
       return;
     }
 
-    const nextStatus = milestone.status === 'COMPLETED' ? 'ACTIVE' : 'COMPLETED';
-    setConfirmAction({ type: 'toggle_status', milestone, nextStatus });
+    // Completing a milestone means releasing escrowed funds to the artist, so it
+    // has to go through release-milestone-payout. This previously wrote
+    // status='COMPLETED' straight to the table, which marked the milestone paid
+    // without any payout actually happening -- and it is not reversible, so the
+    // old COMPLETED -> ACTIVE "un-approve" direction is gone too.
+    if (milestone.status === 'COMPLETED') {
+      toast.error("A completed milestone has already been paid out and cannot be reopened.");
+      return;
+    }
+
+    setConfirmAction({ type: 'toggle_status', milestone, nextStatus: 'COMPLETED' });
   };
 
   const handleDeleteMilestone = async (milestone: Milestone) => {
@@ -431,29 +439,32 @@ const ProjectDetailModal = ({
 
     if (type === 'toggle_status' && nextStatus) {
       try {
-        const {
-          error
-        } = await supabase.from('project_milestones').update({
-          status: nextStatus as any,
-          approved_at: nextStatus === 'COMPLETED' ? new Date().toISOString() : null
-        }).eq('id', milestone.id);
-        
-        if (error) throw error;
-        
+        // Release escrow through the secure edge function, which validates the
+        // caller is the project's client, requires REVIEW_PENDING, takes an
+        // atomic lock, pays the artist, and only then marks it COMPLETED.
+        const { data, error } = await supabase.functions.invoke('release-milestone-payout', {
+          body: { milestoneId: milestone.id },
+        });
+
+        if (error || !data?.success) {
+          throw new Error(data?.error || error?.message || 'Failed to release payout');
+        }
+
         // Log activity
         await supabase.from('project_activity_logs').insert({
           project_id: project!.id,
           milestone_id: milestone.id,
           user_id: user?.id,
-          action: nextStatus === 'COMPLETED' ? 'milestone_approved' : 'milestone_started',
-          details: { note: "Manually toggled status in detail modal" }
+          action: 'milestone_approved',
+          details: { note: "Approved from project detail modal" }
         });
 
         broadcastRefresh('milestones');
         fetchProjectData(undefined, true);
-        toast.success(`Milestone marked as ${nextStatus}`);
+        toast.success('Milestone approved and payout released');
       } catch (err: any) {
-        toast.error("Failed to update milestone");
+        console.error('Failed to approve milestone:', err);
+        toast.error(err?.message || "Failed to approve milestone");
       }
     } else if (type === 'delete_milestone') {
       try {
@@ -626,16 +637,17 @@ const ProjectDetailModal = ({
                     <Badge variant="outline" className="px-3 py-1 rounded-full bg-background/50 backdrop-blur-md border-primary/20 text-primary font-bold tracking-wide uppercase text-[10px]">
                       Project ID: #{project.id.slice(0, 8)}
                     </Badge>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Refresh project"
                       className="h-8 w-8 rounded-full hover:bg-primary/10 text-primary/60 hover:text-primary transition-all ml-auto"
                       onClick={() => {
                         toast.info('Syncing latest updates...');
                         fetchProjectData(undefined, false);
                       }}
                     >
-                      <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+                      <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} aria-hidden="true" />
                     </Button>
                   </div>
                   
@@ -649,7 +661,7 @@ const ProjectDetailModal = ({
                           "px-4 py-1.5 rounded-full font-bold text-[11px] uppercase tracking-wider shadow-lg shadow-primary/5 transition-all duration-500",
                           project.status === 'accepted' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 
                           project.status === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' : 
-                          'bg-primary text-white hover:bg-primary/90'
+                          'bg-primary text-primary-foreground hover:bg-primary/90'
                         )}
                       >
                         {project.status}
@@ -731,9 +743,17 @@ const ProjectDetailModal = ({
                     </h3>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock className="h-3 w-3 text-amber-500" />
+                    <Clock className="h-3 w-3 text-amber-500" aria-hidden="true" />
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                      {project.deadline ? `${Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} Days Remaining` : 'No set deadline'}
+                      {project.deadline ? (() => {
+                        const daysLeft = Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                        // A past deadline previously rendered as e.g. "-222 Days
+                        // Remaining", which reads as a countdown glitch rather
+                        // than what it actually means: the deadline has passed.
+                        if (daysLeft < 0) return `${Math.abs(daysLeft)} Days Overdue`;
+                        if (daysLeft === 0) return 'Due Today';
+                        return `${daysLeft} Days Remaining`;
+                      })() : 'No set deadline'}
                     </span>
                   </div>
                 </div>
@@ -939,7 +959,7 @@ const ProjectDetailModal = ({
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => handleDeleteMilestone(milestone)}
+                                    aria-label="Delete milestone" onClick={() => handleDeleteMilestone(milestone)}
                                     className="text-muted-foreground hover:text-destructive transition-colors h-10 w-10"
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -980,12 +1000,13 @@ const ProjectDetailModal = ({
                             onChange={e => setNewMilestone(prev => ({ ...prev, due_date: e.target.value }))} 
                             className="h-12 rounded-xl bg-background border-border/40"
                           />
-                          <Button 
-                            onClick={handleAddMilestone} 
-                            disabled={addingMilestone || !newMilestone.title.trim()}
+                          <Button
+                            onClick={handleAddMilestone}
+                            disabled={!newMilestone.title.trim()}
+                            loading={addingMilestone}
                             className="h-12 rounded-xl bg-primary hover:bg-primary/90 font-bold uppercase tracking-wider shadow-lg shadow-primary/20"
                           >
-                            {addingMilestone ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Milestone'}
+                            {!addingMilestone && 'Create Milestone'}
                           </Button>
                         </div>
                         <Textarea 
@@ -1013,7 +1034,7 @@ const ProjectDetailModal = ({
                       </div>
                       
                       <label className="cursor-pointer group w-full sm:w-auto">
-                        <div className="flex h-11 w-full sm:w-auto items-center justify-center gap-2.5 px-5 rounded-2xl bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all duration-300 font-bold shadow-sm active:scale-95">
+                        <div className="flex h-11 w-full sm:w-auto items-center justify-center gap-2.5 px-5 rounded-2xl bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-bold shadow-sm active:scale-95">
                           {uploading ? (
                             <>
                               <Loader2 className="h-5 w-5 animate-spin" />
@@ -1059,7 +1080,7 @@ const ProjectDetailModal = ({
                                 {file.size_bytes ? `${(file.size_bytes / 1024).toFixed(1)} KB` : '?? KB'} • {formatDate(new Date(file.created_at), 'MMM d')}
                               </p>
                               <div className="flex gap-2 mt-4">
-                                <Button variant="secondary" size="sm" className="h-10 rounded-xl px-4 font-bold text-[10px] uppercase tracking-wider hover:bg-primary hover:text-white transition-all" onClick={() => handleDownloadFile(file)}>
+                                <Button variant="secondary" size="sm" className="h-10 rounded-xl px-4 font-bold text-[10px] uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-all" onClick={() => handleDownloadFile(file)}>
                                   Download
                                 </Button>
                                 {file.uploader_id === user?.id && (
@@ -1185,11 +1206,12 @@ const ProjectDetailModal = ({
                         />
                         <Button
                           onClick={handleSendMessage}
-                          disabled={sendingMessage || !newMessage.trim()}
+                          disabled={!newMessage.trim()}
+                          loading={sendingMessage}
                           className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 shadow-md shadow-primary/20 transition-all ease-apple active:scale-90 disabled:opacity-40 disabled:scale-90 shrink-0"
                           size="icon"
                          aria-label="Send message">
-                          {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
+                          {!sendingMessage && <SendHorizontal className="h-4 w-4" />}
                         </Button>
                       </div>
                     </div>

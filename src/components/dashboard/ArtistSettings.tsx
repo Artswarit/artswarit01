@@ -30,6 +30,8 @@ import ChangeEmailForm from "@/components/settings/ChangeEmailForm";
 import AvailabilityCalendar from "@/components/dashboard/AvailabilityCalendar";
 import { useArtistPlan } from "@/hooks/useArtistPlan";
 import { FeatureLimitBanner } from "@/components/premium/FeatureLimitBanner";
+import { PageHeader } from "@/components/shared";
+import { useAsyncAction } from "@/hooks/useAsyncAction";
 
 interface ArtistSettingsProps {
   isLoading: boolean;
@@ -41,7 +43,6 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -236,48 +237,37 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
     }));
   };
 
-  const saveSettings = async (e?: React.MouseEvent) => {
-    // Prevent default to fix mobile refresh issue
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
+  // Each settings toggle persists itself immediately via handleSettingChange
+  // (optimistic update + Supabase write + cross-tab broadcast, see above) —
+  // there is no separate "save" step for this section.
+
+  const changePasswordAction = useAsyncAction(async () => {
+    // P0: Verify current password first for security
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: user.email!,
+      password: passwordData.currentPassword
+    });
+
+    if (authError) {
+      throw new Error("Incorrect current password. Please try again.");
     }
-    if (!user?.id) return;
 
-    setSaving(true);
-    try {
-      // Get current social_links and merge with settings
-      const currentSocialLinks = (profile?.social_links as Record<string, unknown>) || {};
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          social_links: {
-            ...currentSocialLinks,
-            settings
-          },
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+    const { error } = await supabase.auth.updateUser({
+      password: passwordData.newPassword
+    });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      broadcastRefresh('profile');
-
-      toast({
-        title: "Settings saved",
-        description: "Your settings have been updated successfully."
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+    toast({
+      title: "Password updated",
+      description: "Your password has been changed successfully."
+    });
+    setPasswordData({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    });
+  });
 
   const changePassword = async (e?: React.MouseEvent) => {
     // Prevent default to fix mobile refresh issue
@@ -285,7 +275,7 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
         variant: "destructive",
@@ -304,41 +294,14 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
       return;
     }
 
-    setSaving(true);
     try {
-      // P0: Verify current password first for security
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: user.email!,
-        password: passwordData.currentPassword
-      });
-      
-      if (authError) {
-        throw new Error("Incorrect current password. Please try again.");
-      }
-
-      const { error } = await supabase.auth.updateUser({
-        password: passwordData.newPassword
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Password updated",
-        description: "Your password has been changed successfully."
-      });
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-      });
+      await changePasswordAction.run();
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
         description: error.message
       });
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -431,21 +394,21 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
 
   return (
     <div className="space-y-6 sm:space-y-10 max-w-7xl mx-auto px-2 sm:px-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/40 backdrop-blur-md p-6 rounded-[2rem] border border-primary/5 shadow-sm">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">Settings</h2>
-          <p className="text-sm font-medium text-muted-foreground/80 mt-1">Manage your account, privacy and preferences</p>
-        </div>
-        {!isProArtist && !planLoading && (
+      <PageHeader
+        title="Settings"
+        description="Manage your account, privacy, and preferences."
+        size="sm"
+        className="bg-card/40 backdrop-blur-md p-6 rounded-[2rem] border border-primary/5 shadow-sm"
+        actions={!isProArtist && !planLoading && (
           <Button 
             onClick={() => navigate('/artist-dashboard?tab=membership')}
-            className="w-full sm:w-auto bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-none shadow-lg shadow-indigo-500/20 rounded-xl h-12 px-6 font-bold transition-all active:scale-95"
+            className="w-full sm:w-auto bg-brand-gradient hover:bg-brand-gradient-hover text-primary-foreground border-none shadow-lg shadow-indigo-500/20 rounded-xl h-12 px-6 font-bold transition-all active:scale-95"
           >
             <Crown className="h-4 w-4 mr-2" />
             Upgrade to Pro
           </Button>
         )}
-      </div>
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10">
         <div className="space-y-6 sm:space-y-10">
@@ -591,6 +554,18 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
             </CardHeader>
             <CardContent className="space-y-6 pt-6 sm:pt-8">
               <div className="space-y-2">
+                <Label htmlFor="current-password" className="text-sm font-bold ml-1">Current Password</Label>
+                <PasswordInput
+                  id="current-password"
+                  name="currentPassword"
+                  value={passwordData.currentPassword}
+                  onChange={handlePasswordChange}
+                  className="h-12 sm:h-14 bg-muted/50 border-none focus-visible:ring-primary/20 rounded-2xl px-6 font-medium min-h-[48px]"
+                  placeholder="Enter your current password"
+                  autoComplete="current-password"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="new-password" className="text-sm font-bold ml-1">New Password</Label>
                 <PasswordInput
                   id="new-password"
@@ -616,12 +591,12 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
                 />
               </div>
               
-              <Button 
-                onClick={changePassword} 
-                disabled={saving || !passwordData.newPassword} 
+              <Button
+                onClick={changePassword}
+                disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                loading={changePasswordAction.loading}
                 className="w-full h-12 sm:h-14 font-black text-lg rounded-2xl transition-all active:scale-[0.98] shadow-lg shadow-primary/20 min-h-[48px] mt-2"
               >
-                {saving ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : null}
                 Update Password
               </Button>
             </CardContent>
@@ -668,12 +643,12 @@ const ArtistSettings = ({ isLoading: propLoading }: ArtistSettingsProps) => {
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel disabled={deleting} className="h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={deleteAccount} 
+            <AlertDialogAction
+              onClick={deleteAccount}
               disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md gap-2"
             >
-              {deleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
               Delete Forever
             </AlertDialogAction>
           </AlertDialogFooter>

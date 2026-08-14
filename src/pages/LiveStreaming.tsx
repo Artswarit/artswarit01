@@ -67,7 +67,7 @@ const LiveStreaming = () => {
         <div className="space-y-8">
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Live Streaming</h1>
+            <h1 className="text-4xl font-bold text-foreground mb-4">Live Streaming</h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Watch artists create in real-time and interact with the creative process
             </p>

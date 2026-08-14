@@ -148,12 +148,12 @@ const AdvancedVideoPlayer = ({ src, poster, title, autoPlay = false }: AdvancedV
               {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
             </Button>
             
-            <Button variant="ghost" size="icon" onClick={() => skipTime(-10)} className="text-white hover:bg-white/20">
-              <SkipBack className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={() => skipTime(-10)} aria-label="Rewind 10 seconds" className="text-white hover:bg-white/20">
+              <SkipBack className="h-4 w-4" aria-hidden="true" />
             </Button>
             
-            <Button variant="ghost" size="icon" onClick={() => skipTime(10)} className="text-white hover:bg-white/20">
-              <SkipForward className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={() => skipTime(10)} aria-label="Forward 10 seconds" className="text-white hover:bg-white/20">
+              <SkipForward className="h-4 w-4" aria-hidden="true" />
             </Button>
 
             <div className="flex items-center gap-2 ml-4">

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Crown, Loader2, Lock, AlertCircle } from 'lucide-react';
+import { Crown, Lock, AlertCircle } from 'lucide-react';
 import { useRazorpay } from '@/hooks/useRazorpay';
 import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { usePaymentGateway } from '@/hooks/usePaymentGateway';
@@ -151,13 +151,9 @@ export function PayArtworkButton({
         variant={variant}
         className={className}
         onClick={() => setConfirmOpen(true)}
-        disabled={loading || stripeProcessing}
+        loading={loading || stripeProcessing}
       >
-        {loading || stripeProcessing ? (
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-        ) : (
-          <Crown className="h-4 w-4 mr-2" />
-        )}
+        {!(loading || stripeProcessing) && <Crown className="h-4 w-4 mr-2" />}
         Unlock Artwork ({gatewayDisplayAmount})
       </Button>
 
@@ -205,12 +201,11 @@ export function PayArtworkButton({
             <Button variant="ghost" className="rounded-xl font-bold" onClick={() => setConfirmOpen(false)} disabled={stripeProcessing || loading}>
               Discard
             </Button>
-            <Button 
+            <Button
               className="flex-1 rounded-xl h-12 font-black transition-all active:scale-95 shadow-lg shadow-primary/20"
               onClick={handlePayment}
-              disabled={loading || stripeProcessing}
+              loading={loading || stripeProcessing}
             >
-              {(loading || stripeProcessing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {stripeError && !stripeProcessing ? 'Retry Payment' : 'Confirm Purchase'}
             </Button>
           </DialogFooter>

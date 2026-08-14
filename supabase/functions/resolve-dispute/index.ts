@@ -25,6 +25,12 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Tracks the resolution lock so a failure mid-settlement can release it
+  // instead of leaving the dispute stuck in 'resolving' forever.
+  let lockedDisputeId: string | null = null;
+  let lockedPreviousStatus: string | null = null;
+  let lockReleaseClient: ReturnType<typeof createClient> | null = null;
+
   try {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -70,6 +76,45 @@ serve(async (req) => {
     const totalPayoutUsd = Number(artistPayout) || 0;
     const totalRefundUsd = Number(clientRefund) || 0;
 
+    if (totalPayoutUsd < 0 || totalRefundUsd < 0) {
+      return new Response(JSON.stringify({ error: 'Payout and refund amounts cannot be negative' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Idempotency guard: claim the dispute before moving any money. Without
+    // this, a retried or double-submitted request re-ran the refund/payout and
+    // moved funds twice. Mirrors the conditional-update lock that
+    // release-milestone-payout already uses.
+    if (dispute.status === 'resolved') {
+      return new Response(JSON.stringify({ status: 'success', message: 'Dispute already resolved.' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data: claimed, error: claimErr } = await supabaseAdmin
+      .from('disputes')
+      .update({ status: 'resolving', updated_at: new Date().toISOString() })
+      .eq('id', disputeId)
+      .neq('status', 'resolving')
+      .neq('status', 'resolved')
+      .select('id')
+      .maybeSingle();
+
+    if (claimErr) throw new Error('Failed to lock dispute for resolution');
+    if (!claimed) {
+      return new Response(JSON.stringify({ error: 'This dispute is already being resolved' }), {
+        status: 409,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    lockedDisputeId = disputeId;
+    lockedPreviousStatus = dispute.status;
+    lockReleaseClient = supabaseAdmin;
+
     const successResponse = { status: 'success', message: 'Dispute resolved seamlessly.' };
 
     if (dispute.milestone_id && (totalPayoutUsd > 0 || totalRefundUsd > 0)) {
@@ -83,6 +128,19 @@ serve(async (req) => {
 
         if (paymentError || !payment) {
           throw new Error('Could not find successful escrow payment to refund/payout from');
+        }
+
+        // Never disburse more than what is actually held in escrow for this
+        // milestone. The admin UI disables the submit button past this limit,
+        // but that is a client-side guard only -- a direct call to this
+        // function could authorize an arbitrary payout/refund.
+        const escrowedUsd = Number(payment.amount) || 0;
+        const requestedUsd = totalPayoutUsd + totalRefundUsd;
+        // Allow a cent of float tolerance for split-percentage rounding.
+        if (requestedUsd > escrowedUsd + 0.01) {
+          throw new Error(
+            `Requested settlement (${requestedUsd.toFixed(2)}) exceeds the escrowed amount (${escrowedUsd.toFixed(2)})`
+          );
         }
 
         const exchangeRate = dispute.milestone.exchange_rate || 83.5;
@@ -252,6 +310,22 @@ serve(async (req) => {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error('Resolve-Dispute Error:', message);
+
+    // Release the resolution lock so an admin can retry. Note: if the failure
+    // happened *after* a refund/payout call already succeeded, the money has
+    // moved -- releasing the lock allows a retry, so the escrow cap check above
+    // is what keeps a retry from over-disbursing.
+    if (lockedDisputeId && lockReleaseClient) {
+      const { error: releaseError } = await lockReleaseClient
+        .from('disputes')
+        .update({ status: lockedPreviousStatus ?? 'open', updated_at: new Date().toISOString() })
+        .eq('id', lockedDisputeId)
+        .eq('status', 'resolving');
+      if (releaseError) {
+        console.error('Failed to release dispute lock:', releaseError, 'dispute:', lockedDisputeId);
+      }
+    }
+
     return new Response(JSON.stringify({ error: message }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

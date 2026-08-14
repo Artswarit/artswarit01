@@ -295,6 +295,24 @@ export function MilestoneReviewDialog({
         revision_no: newRevisionCount,
         reason: revisionReason,
       });
+
+      // The toast below promises the artist is notified; nothing actually sent
+      // a notification before this. Best-effort so a notification failure
+      // doesn't fail the revision request that already succeeded.
+      if (projectData?.artist_id) {
+        try {
+          await supabase.from('notifications').insert({
+            user_id: projectData.artist_id,
+            type: 'revision_requested',
+            title: 'Revision requested',
+            message: `The client requested changes to "${milestone.title}".`,
+            metadata: { milestone_id: milestone.id, project_id: projectId }
+          });
+        } catch (notifyError) {
+          console.error('Failed to notify artist of revision request:', notifyError);
+        }
+      }
+
       toast.success('Revision requested. The artist will be notified.');
       onSuccess();
       onOpenChange(false);

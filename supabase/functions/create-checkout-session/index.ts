@@ -61,6 +61,11 @@ serve(async (req) => {
     let itemTitle = '';
     let itemDescription = '';
     let itemPrice = 0;
+    // The currency `itemPrice` is denominated in. Artwork prices may be stored
+    // in INR (see create-artwork-order, which reads the same metadata field),
+    // and Stripe charges in USD, so the price has to be converted rather than
+    // passed through as if it were already dollars.
+    let itemCurrency = 'USD';
     let sellerId = '';
     let metadata: Record<string, string | number | null> = { buyer_id: user.id };
 
@@ -81,9 +86,26 @@ serve(async (req) => {
         return new Response(JSON.stringify({ error: 'Artwork is not for sale' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
 
+      // Availability check, matching create-artwork-order. Without it a buyer
+      // could start a second checkout for something they already own.
+      const { data: existingUnlock } = await supabase
+        .from('artwork_unlocks')
+        .select('id')
+        .eq('artwork_id', artworkId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingUnlock) {
+        return new Response(
+          JSON.stringify({ error: 'You have already unlocked this artwork' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       itemTitle = artwork.title;
       itemDescription = `Artwork purchase by ${user.email}`;
       itemPrice = artwork.price;
+      itemCurrency = (artwork.metadata as { currency?: string } | null)?.currency ?? 'USD';
       sellerId = artwork.artist_id;
       metadata = { ...metadata, artwork_id: artworkId, seller_id: sellerId, type: 'artwork_purchase' };
     } else if (milestoneId) {
@@ -99,9 +121,21 @@ serve(async (req) => {
         return new Response(JSON.stringify({ error: 'Milestone not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
 
+      // Only the project's client funds its milestones. The Razorpay
+      // equivalent (create-milestone-order) already enforced this; without it
+      // any authenticated user could open a checkout against someone else's
+      // milestone.
+      if (milestone.projects?.client_id !== user.id) {
+        console.error('Milestone client mismatch', { caller: user.id, milestoneId });
+        return new Response(
+          JSON.stringify({ error: 'You are not the client for this project' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       itemTitle = `Milestone: ${milestone.title}`;
       itemDescription = `Project: ${milestone.projects.title}`;
-      itemPrice = milestone.amount; // Wahrheit is USD
+      itemPrice = milestone.amount; // milestone amounts are stored in USD
       sellerId = milestone.projects.artist_id;
       metadata = { ...metadata, milestone_id: milestoneId, project_id: milestone.project_id, seller_id: sellerId, type: 'milestone_payment' };
     }
@@ -122,6 +156,19 @@ serve(async (req) => {
     // But for consistency with Razorpay, we'll use USD as base for Stripe.
     const currency = 'usd';
 
+    // Convert the stored price into USD before charging. Without this an
+    // INR-priced artwork was billed as the same numeric value in dollars
+    // (e.g. a 5000 rupee artwork charged $5000 instead of ~$60).
+    const itemPriceUsd = itemCurrency === 'INR' ? itemPrice / currentRate : itemPrice;
+
+    if (!Number.isFinite(itemPriceUsd) || itemPriceUsd <= 0) {
+      console.error('Invalid computed price', { itemPrice, itemCurrency, currentRate });
+      return new Response(
+        JSON.stringify({ error: 'Could not determine a valid price for this item' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Set up Stripe
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
@@ -138,7 +185,7 @@ serve(async (req) => {
               name: itemTitle,
               description: itemDescription,
             },
-            unit_amount: Math.round(itemPrice * 100), // Stripe expects cents
+            unit_amount: Math.round(itemPriceUsd * 100), // Stripe expects cents
           },
           quantity: 1,
         },
@@ -161,8 +208,8 @@ serve(async (req) => {
         milestone_id: milestoneId || null,
         buyer_id: user.id,
         seller_id: sellerId,
-        amount: itemPrice,
-        amount_usd: itemPrice,
+        amount: itemPriceUsd,
+        amount_usd: itemPriceUsd,
         currency: 'USD',
         exchange_rate: currentRate,
         stripe_payment_intent_id: stripeSession.id,

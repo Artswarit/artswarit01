@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import ChangeEmailForm from "@/components/settings/ChangeEmailForm";
+import { PageHeader } from "@/components/shared";
 
 interface LoginSession {
   id: string;
@@ -503,20 +504,20 @@ const ClientSettings = () => {
 
   return (
     <div className="space-y-6 sm:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 max-w-7xl mx-auto px-2 sm:px-0">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/40 dark:bg-card/40 backdrop-blur-md p-6 rounded-[2rem] border border-primary/5 shadow-sm">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">Settings</h2>
-          <p className="text-sm font-medium text-muted-foreground/80 mt-1">Manage your account preferences and privacy</p>
-        </div>
-        <Button 
-          onClick={saveSettings} 
-          disabled={saving} 
+      <PageHeader
+        title="Settings"
+        description="Manage your account preferences and privacy."
+        size="sm"
+        className="bg-white/40 dark:bg-card/40 backdrop-blur-md p-6 rounded-[2rem] border border-primary/5 shadow-sm"
+        actions={<Button
+          onClick={saveSettings}
+          loading={saving}
           className="w-full sm:w-auto bg-primary text-primary-foreground shadow-lg shadow-primary/20 rounded-xl h-12 px-6 font-bold transition-all active:scale-95"
         >
-          {saving ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <Save className="h-5 w-5 mr-2" />}
+          {!saving && <Save className="h-5 w-5 mr-2" />}
           Save Changes
-        </Button>
-      </div>
+        </Button>}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10">
         {/* Profile Overview */}
@@ -787,7 +788,7 @@ const ClientSettings = () => {
                 <p className="text-xs text-muted-foreground">Notify for new messages</p>
               </div>
               <Switch
-                id="chat-messages"
+                id="message-notifications"
                 checked={notificationSettings.messageNotifications}
                 onCheckedChange={async (checked) => {
                   setNotificationSettings(prev => ({ ...prev, messageNotifications: checked }));
@@ -813,8 +814,9 @@ const ClientSettings = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-sm font-bold">Current Password</Label>
+              <Label htmlFor="current-password" className="text-sm font-bold">Current Password</Label>
               <PasswordInput
+                id="current-password"
                 value={passwordData.currentPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                 placeholder="Enter current password"
@@ -823,8 +825,9 @@ const ClientSettings = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-bold">New Password</Label>
+              <Label htmlFor="new-password" className="text-sm font-bold">New Password</Label>
               <PasswordInput
+                id="new-password"
                 value={passwordData.newPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                 placeholder="Min 6 characters"
@@ -833,8 +836,9 @@ const ClientSettings = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-bold">Confirm New Password</Label>
+              <Label htmlFor="confirm-new-password" className="text-sm font-bold">Confirm New Password</Label>
               <PasswordInput
+                id="confirm-new-password"
                 value={passwordData.confirmPassword}
                 onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                 placeholder="Repeat new password"
@@ -966,12 +970,12 @@ const ClientSettings = () => {
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel disabled={deleting} className="h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md">Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={deleteAccount} 
+            <AlertDialogAction
+              onClick={deleteAccount}
               disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-12 sm:h-10 min-h-[48px] sm:min-h-[40px] rounded-xl sm:rounded-md gap-2"
             >
-              {deleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
               Delete Forever
             </AlertDialogAction>
           </AlertDialogFooter>

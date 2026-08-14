@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Calendar, Clock, CheckCircle, Loader2, X, Trophy, Eye, User, Star, Edit } from "lucide-react";
+import { PlusCircle, Calendar, Clock, CheckCircle, Loader2, Inbox, X, Trophy, Eye, User, Star, Edit } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,16 +15,7 @@ import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { toast } from "sonner";
 import ProjectDetailModal from "./ProjectDetailModal";
 import ReviewClientDialog from "./ReviewClientDialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDialog, EmptyState, PageHeader } from "@/components/shared";
 interface Project {
   id: string;
   title: string;
@@ -462,13 +453,11 @@ const ProjectManagement = () => {
     );
   }
   return <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-black tracking-tight text-foreground/90">Project Management</h2>
-          <p className="text-sm font-medium text-muted-foreground leading-relaxed">Manage client projects and track their progress</p>
-        </div>
-        
-      </div>
+      <PageHeader
+        title="Project Management"
+        description="Manage client projects and track their progress."
+        size="sm"
+      />
 
       <Tabs defaultValue="active" className="w-full">
         <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -478,7 +467,7 @@ const ProjectManagement = () => {
               <span className="truncate">Active ({activeProjects.length})</span>
             </TabsTrigger>
             <TabsTrigger value="pending" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-widest min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
-              <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0 animate-spin" />
+              <Inbox className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
               <span className="truncate">Pending ({pendingProjects.length})</span>
             </TabsTrigger>
             <TabsTrigger value="completed" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-widest min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
@@ -551,13 +540,12 @@ const ProjectManagement = () => {
                     )}
                   </CardFooter>
                 </Card>)}
-            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto">
-              <div className="w-16 h-16 bg-muted/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-muted-foreground/40" />
-              </div>
-              <h3 className="text-lg font-black text-foreground mb-1">No active projects</h3>
-              <p className="text-sm font-medium text-muted-foreground/60 px-6">Once you accept a project proposal, it will appear here for you to track and manage.</p>
-            </div>}
+            </div> : <EmptyState
+              icon={Clock}
+              title="No active projects"
+              description="Once you accept a project proposal, it will appear here for you to track and manage."
+              className="bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto"
+            />}
         </TabsContent>
 
         <TabsContent value="pending">
@@ -611,13 +599,12 @@ const ProjectManagement = () => {
                     </Button>
                   </CardFooter>
                 </Card>)}
-            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto">
-              <div className="w-16 h-16 bg-muted/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Loader2 className="w-8 h-8 text-muted-foreground/40" />
-              </div>
-              <h3 className="text-lg font-black text-foreground mb-1">Quiet in here...</h3>
-              <p className="text-sm font-medium text-muted-foreground/60 px-6">New project requests from clients will show up here. Make sure your profile is complete to attract more eyes!</p>
-            </div>}
+            </div> : <EmptyState
+              icon={Inbox}
+              title="No pending projects"
+              description="New project requests from clients will appear here. Keep your profile complete so clients can find and trust your work."
+              className="bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto"
+            />}
         </TabsContent>
 
         <TabsContent value="completed">
@@ -683,13 +670,12 @@ const ProjectManagement = () => {
                     </CardFooter>
                   </Card>;
           })}
-            </div> : <div className="text-center py-20 bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto">
-              <div className="w-16 h-16 bg-muted/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-muted-foreground/40" />
-              </div>
-              <h3 className="text-lg font-black text-foreground mb-1">No completed works yet</h3>
-              <p className="text-sm font-medium text-muted-foreground/60 px-6">Finishing your first project is a huge milestone. Keep up the great work!</p>
-            </div>}
+            </div> : <EmptyState
+              icon={CheckCircle}
+              title="No completed projects yet"
+              description="Completed projects will appear here along with client feedback."
+              className="bg-muted/10 rounded-[2rem] border-2 border-dashed border-border/20 max-w-2xl mx-auto"
+            />}
         </TabsContent>
       </Tabs>
 
@@ -698,23 +684,15 @@ const ProjectManagement = () => {
 
       {/* Review Client Dialog */}
       {selectedProjectForReview && user && <ReviewClientDialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen} project={selectedProjectForReview} artistId={user.id} existingReview={getProjectReview(selectedProjectForReview.id)} onReviewSubmitted={fetchClientReviews} />}
-      {/* Decline Project Confirmation */}
-      <AlertDialog open={!!projectToDecline} onOpenChange={(open) => !open && setProjectToDecline(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Decline Project</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to decline "{projectToDecline?.title}"? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={executeDecline} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Decline
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!projectToDecline}
+        onOpenChange={(open) => !open && setProjectToDecline(null)}
+        title="Decline project"
+        description={<>Are you sure you want to decline “{projectToDecline?.title}”? This action cannot be undone.</>}
+        confirmLabel="Decline project"
+        destructive
+        onConfirm={executeDecline}
+      />
     </div>;
 };
 export default ProjectManagement;

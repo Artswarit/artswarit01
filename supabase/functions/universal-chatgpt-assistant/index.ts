@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { callerBucketKey, checkRateLimit, rateLimitResponse } from "../_shared/rateLimit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,10 @@ const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_MESSAGES = 50;
 const MAX_LOCATION_LENGTH = 200;
+
+// Throttle: generous enough for a real conversation, tight enough to cap spend.
+const CHAT_RATE_LIMIT = 20;
+const CHAT_RATE_WINDOW_SECONDS = 60;
 const VALID_ROLES = ['artist', 'client', 'admin', 'general'] as const;
 
 // Input validation
@@ -125,6 +130,16 @@ serve(async (req) => {
   }
 
   try {
+    // This endpoint is intentionally reachable without a JWT -- the site-wide
+    // chatbot renders on public pages for logged-out visitors. It proxies a
+    // paid LLM API, so throttle per caller (user id when signed in, client IP
+    // otherwise) to stop unbounded cost abuse.
+    const bucket = callerBucketKey(req, "universal-chat");
+    const limit = await checkRateLimit(bucket, CHAT_RATE_LIMIT, CHAT_RATE_WINDOW_SECONDS);
+    if (!limit.allowed) {
+      return rateLimitResponse(limit.retryAfter, corsHeaders);
+    }
+
     // Parse and validate input
     let requestBody: unknown;
     try {

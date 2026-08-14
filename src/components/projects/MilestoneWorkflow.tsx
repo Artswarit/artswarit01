@@ -294,10 +294,16 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
 
   const handleStartMilestone = async (milestoneId: string) => {
     try {
+      // 'ACTIVE' is the escrow-model value for "funded, artist is working".
+      // The Start action is only reachable from ACTIVE (no-op resume) or
+      // REVISION_REQUESTED (resuming after client feedback), so scoping the
+      // update to those two statuses keeps an unfunded milestone from being
+      // moved into a funded state.
       const { error } = await supabase
         .from('project_milestones')
-        .update({ status: 'in_progress' }) // Map to DB enum
-        .eq('id', milestoneId);
+        .update({ status: 'ACTIVE' })
+        .eq('id', milestoneId)
+        .in('status', ['ACTIVE', 'REVISION_REQUESTED']);
 
       if (error) throw error;
 
@@ -306,7 +312,8 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
       broadcastRefresh('milestones');
       fetchMilestones();
     } catch (error: any) {
-      toast.error('Failed to start milestone');
+      console.error('Failed to start milestone:', error);
+      toast.error(error?.message || 'Failed to start milestone');
     }
   };
 
@@ -389,12 +396,17 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* Budget Validation Warning */}
-            {!budgetMatch && (
+            {/* Budget Validation Warning.
+                Only shown while the project is still editable. Once it's
+                completed or cancelled, milestones are locked and there is
+                nothing left to "adjust" -- telling the user to fix a mismatch
+                they can no longer touch was pure dead-end friction on a
+                finished project. */}
+            {!budgetMatch && project.status !== 'completed' && project.status !== 'cancelled' && (
               <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
                 <AlertTriangle className="h-5 w-5 text-destructive" />
                 <p className="text-sm text-destructive">
-                  Milestone total ({formatCurrency(getTotalBudget(), 'USD', project.exchange_rate || undefined)}) doesn't match project budget ({formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}). 
+                  Milestone total ({formatCurrency(getTotalBudget(), 'USD', project.exchange_rate || undefined)}) doesn't match project budget ({formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}).
                   Please adjust milestones before proceeding.
                 </p>
               </div>

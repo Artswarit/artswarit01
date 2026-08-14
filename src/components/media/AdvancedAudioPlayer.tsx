@@ -187,7 +187,7 @@ const AdvancedAudioPlayer = ({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => setShuffle(!shuffle)}
+                aria-label="Toggle shuffle" aria-pressed={shuffle} onClick={() => setShuffle(!shuffle)}
                 className={shuffle ? 'text-blue-600' : ''}
               >
                 <Shuffle className="h-4 w-4" />
@@ -205,9 +205,12 @@ const AdvancedAudioPlayer = ({
                 <SkipForward className="h-5 w-5" />
               </Button>
               
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={
+                  repeat === 'none' ? 'Repeat off' : repeat === 'all' ? 'Repeat all tracks' : 'Repeat current track'
+                }
                 onClick={() => setRepeat(repeat === 'none' ? 'all' : repeat === 'all' ? 'one' : 'none')}
                 className={repeat !== 'none' ? 'text-blue-600' : ''}
               >

@@ -208,7 +208,7 @@ const ArtworkCardModern: React.FC<ArtworkCardProps> = ({
 
       {/* Content */}
       <div className="p-2 sm:p-3 md:p-4 flex flex-col gap-1.5 sm:gap-2">
-        <h4 className="font-medium text-sm sm:text-base text-gray-900 truncate">{title}</h4>
+        <h4 className="font-medium text-sm sm:text-base text-foreground truncate">{title}</h4>
         <div className="flex items-center gap-2 sm:gap-3 text-xs text-gray-500 flex-wrap">
           <span className="flex items-center gap-0.5 sm:gap-1">
             <Eye size={12} className="sm:w-[13px] sm:h-[13px]" /> <span className="text-[10px] sm:text-xs">{views}</span>

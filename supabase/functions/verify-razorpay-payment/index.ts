@@ -69,9 +69,23 @@ serve(async (req) => {
       });
     }
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, milestoneId } = payload;
+    // `milestoneId` from the body is an UNTRUSTED client hint. The authoritative
+    // milestone is read from the payment record keyed by razorpay_order_id below.
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      milestoneId: clientMilestoneIdHint,
+    } = payload;
 
-    console.log(`Verifying payment: order=${razorpay_order_id}, payment=${razorpay_payment_id}, milestone=${milestoneId}`);
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return new Response(JSON.stringify({ success: false, error: 'Missing payment verification parameters' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`Verifying payment: order=${razorpay_order_id}, payment=${razorpay_payment_id}`);
 
     // Verify signature
     const body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -124,9 +138,33 @@ serve(async (req) => {
       });
     }
 
+    // The milestone this payment was actually created for. Never trust the body.
+    const milestoneId = payment.milestone_id;
+    if (!milestoneId) {
+      console.error('Payment record has no milestone_id:', payment.id);
+      return new Response(JSON.stringify({ success: false, error: 'Payment is not linked to a milestone' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // A mismatch means the caller tried to apply this payment to a different
+    // milestone than the one it funded.
+    if (clientMilestoneIdHint && clientMilestoneIdHint !== milestoneId) {
+      console.error('Milestone mismatch on verification', {
+        requested: clientMilestoneIdHint,
+        paidFor: milestoneId,
+        userId,
+      });
+      return new Response(JSON.stringify({ success: false, error: 'Payment does not match the requested milestone' }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Check if already processed
     if (payment.status === 'success') {
-      return new Response(JSON.stringify({ success: true, message: 'Payment already processed' }), {
+      return new Response(JSON.stringify({ success: true, message: 'Payment already processed', milestoneId }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -147,7 +185,9 @@ serve(async (req) => {
       console.error('Failed to update payment:', updatePaymentError);
     }
 
-    // Update milestone status to ACTIVE (funds secured in escrow)
+    // Update milestone status to ACTIVE (funds secured in escrow).
+    // Scoped to WAITING_FUNDS so that a duplicate/late verification racing the
+    // webhook cannot regress a milestone that has already progressed past ACTIVE.
     const { error: updateMilestoneError } = await supabaseAdmin
       .from('project_milestones')
       .update({
@@ -155,7 +195,8 @@ serve(async (req) => {
         paid_at: new Date().toISOString(),
         payment_id: razorpay_payment_id,
       })
-      .eq('id', milestoneId);
+      .eq('id', milestoneId)
+      .eq('status', 'WAITING_FUNDS');
 
     if (updateMilestoneError) {
       console.error('Failed to update milestone:', updateMilestoneError);

@@ -15,6 +15,28 @@ interface Message {
   status?: 'sending' | 'delivered' | 'read' | 'failed';
 }
 
+// Supabase wraps a fetch aborted via AbortSignal inconsistently -- sometimes
+// error.name is 'AbortError', sometimes it surfaces as PostgrestError code 20
+// (DOMException.ABORT_ERR) with "AbortError" only inside the message string.
+// Six call sites in this file each re-implemented a slightly different subset
+// of these checks, and none of them caught the code-20 shape, so navigating
+// away mid-fetch (e.g. leaving the Messages tab) logged a spurious console
+// error on every unmount even though nothing had actually gone wrong.
+const isAbortError = (error: any): boolean => {
+  if (!error) return false;
+  // error.code has been observed as both the number 20 and the string "20"
+  // depending on which layer (raw DOMException vs PostgrestError wrapper)
+  // produced it, so compare loosely rather than to a single type.
+  // eslint-disable-next-line eqeqeq
+  if (error.name === 'AbortError' || error.code === 'ABORT' || error.code == 20) return true;
+  // error.message itself has been observed as a plain string, an Error
+  // instance, or (via some PostgrestError wrapping paths) another object with
+  // its own nested .message -- String() collapses all three to something
+  // searchable instead of throwing when .includes isn't a function on it.
+  const text = String(error.message ?? error);
+  return text.includes('signal is aborted') || text.includes('AbortError');
+};
+
 const parseAttachments = (data: unknown): Attachment[] => {
   if (!Array.isArray(data)) return [];
   return data.filter(
@@ -107,7 +129,7 @@ export const useRealtimeMessages = () => {
         .abortSignal(signal);
 
       if (convError) {
-        if (convError.name === 'AbortError' || (convError as any).code === 'ABORT' || convError.message?.includes('signal is aborted')) return;
+        if (isAbortError(convError)) return;
         throw convError;
       }
 
@@ -171,10 +193,8 @@ export const useRealtimeMessages = () => {
           if (
             unreadError &&
             !signal?.aborted &&
-            unreadError.name !== 'AbortError' &&
-            !unreadError.message?.includes('AbortError') &&
-            !unreadError.message?.includes('Failed to fetch') &&
-            !unreadError.message?.includes('signal is aborted')
+            !isAbortError(unreadError) &&
+            !unreadError.message?.includes('Failed to fetch')
           ) {
             console.error('Error fetching unread count:', unreadError);
           }
@@ -201,7 +221,7 @@ export const useRealtimeMessages = () => {
         setConversations(conversationsWithDetails);
       }
     } catch (error: any) {
-      if (error.name === 'AbortError' || error.message?.includes('AbortError')) return;
+      if (isAbortError(error)) return;
       console.error('Error fetching conversations:', error);
     } finally {
       if (!signal?.aborted) {
@@ -237,7 +257,7 @@ export const useRealtimeMessages = () => {
         .abortSignal(signal);
 
       if (error) {
-        if (error.name === 'AbortError' || (error as any).code === 'ABORT' || error.message?.includes('signal is aborted')) return;
+        if (isAbortError(error)) return;
         throw error;
       }
 
@@ -274,7 +294,7 @@ export const useRealtimeMessages = () => {
         );
       }
     } catch (error: any) {
-      if (error.name === 'AbortError' || (error as any).code === 'ABORT' || error.message?.includes('signal is aborted')) return;
+      if (isAbortError(error)) return;
       console.error('Error fetching messages:', error);
     }
   }, [user, conversations]);
@@ -364,7 +384,7 @@ export const useRealtimeMessages = () => {
         .single();
 
       if (error) {
-        if (error.name === 'AbortError' || (error as any).code === 'ABORT' || error.message?.includes('signal is aborted')) return null;
+        if (isAbortError(error)) return null;
         throw error;
       }
 
@@ -390,14 +410,20 @@ export const useRealtimeMessages = () => {
 
       return data;
     } catch (error: any) {
-      if (error.name === 'AbortError' || (error as any).code === 'ABORT' || error.message?.includes('signal is aborted')) return null;
+      if (isAbortError(error)) return null;
       console.error('Error sending message:', error);
-      
+
       setMessages(prev => prev.map(m => m.id === tempId ? { ...m, status: 'failed' } : m));
-      
+
+      // The DB rejects messages between blocked users (42501). Say so plainly
+      // instead of a generic failure the user can't act on.
+      const isBlocked = error?.code === '42501' || error?.message?.includes('blocked the other');
+
       toast({
-        title: 'Error',
-        description: 'Failed to send message',
+        title: isBlocked ? 'Message not sent' : 'Error',
+        description: isBlocked
+          ? 'This conversation is unavailable because one of you has blocked the other.'
+          : 'Failed to send message',
         variant: 'destructive'
       });
       return null;

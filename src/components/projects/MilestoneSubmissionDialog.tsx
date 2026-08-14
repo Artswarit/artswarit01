@@ -178,7 +178,7 @@ export function MilestoneSubmissionDialog({
       if (!isFinalUpload) {
         const autoApproveAt = new Date();
         autoApproveAt.setDate(autoApproveAt.getDate() + autoApproveDays);
-        await supabase
+        const { error: statusError } = await supabase
           .from('project_milestones')
           .update({
             status: 'REVIEW_PENDING',
@@ -186,6 +186,32 @@ export function MilestoneSubmissionDialog({
             auto_approve_at: autoApproveAt.toISOString()
           })
           .eq('id', milestone.id);
+
+        if (statusError) throw statusError;
+
+        // Tell the client there is work waiting on them. Nothing notified them
+        // before, so a submission could sit unreviewed until the artist chased
+        // it manually. Best-effort: a notification failure must not fail the
+        // submission that already succeeded.
+        try {
+          const { data: project } = await supabase
+            .from('projects')
+            .select('client_id, title')
+            .eq('id', projectId)
+            .maybeSingle();
+
+          if (project?.client_id) {
+            await supabase.from('notifications').insert({
+              user_id: project.client_id,
+              type: 'milestone_submitted',
+              title: 'Milestone ready for review',
+              message: `"${milestone.title}" has been submitted for your review on ${project.title ?? 'your project'}.`,
+              metadata: { milestone_id: milestone.id, project_id: projectId }
+            });
+          }
+        } catch (notifyError) {
+          console.error('Failed to notify client of milestone submission:', notifyError);
+        }
       } else {
         // Final deliverables submitted → mark milestone complete
         await supabase

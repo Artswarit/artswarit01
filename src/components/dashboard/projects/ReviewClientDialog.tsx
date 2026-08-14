@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Loader2 } from "lucide-react";
+import { Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -126,7 +126,11 @@ const ReviewClientDialog: React.FC<ReviewClientDialogProps> = ({
             onClick={() => setRating(star)}
             onMouseEnter={() => setHoverRating(star)}
             onMouseLeave={() => setHoverRating(0)}
-            className="focus:outline-none transition-transform hover:scale-110 p-1.5 sm:p-1"
+            aria-label={`Rate ${star} star${star === 1 ? '' : 's'}`}
+            aria-pressed={star <= rating}
+            // focus:outline-none removed the only focus indicator, so a keyboard
+            // user tabbing the five stars could not tell which was focused.
+            className="rounded-lg transition-transform hover:scale-110 p-1.5 sm:p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <Star
               className={`w-10 h-10 sm:w-8 sm:h-8 transition-colors ${
@@ -215,14 +219,10 @@ const ReviewClientDialog: React.FC<ReviewClientDialogProps> = ({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            loading={isSubmitting}
             className="h-14 flex-1 font-black text-[10px] uppercase tracking-widest rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : (
-              <Star className="h-4 w-4 mr-2" />
-            )}
+            {!isSubmitting && <Star className="h-4 w-4 mr-2" />}
             {existingReview ? "Update Review" : "Submit Review"}
           </Button>
         </DialogFooter>

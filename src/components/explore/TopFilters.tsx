@@ -131,8 +131,8 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
         <div className="flex flex-col lg:flex-row gap-2.5 sm:gap-4 items-stretch lg:items-center">
           {/* Results Count (visible on desktop in row) */}
           <div className="hidden xl:block shrink-0 pr-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/60 bg-muted/30 px-3 py-2 rounded-full border border-border/10 whitespace-nowrap">
-              {resultsCount} Artwork{resultsCount !== 1 ? 's' : ''}
+            <p className="text-xs font-medium text-muted-foreground bg-muted/30 px-3 py-2 rounded-full whitespace-nowrap">
+              {resultsCount} artwork{resultsCount !== 1 ? 's' : ''}
             </p>
           </div>
 
@@ -150,7 +150,7 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
           {/* Quick Filters - Responsive Grid on mobile, flex on desktop */}
           <div className="grid grid-cols-2 xs:grid-cols-3 lg:flex gap-2 items-center flex-1">
             <Select value={filters.category} onValueChange={(value) => handleFilterChange('category', value)}>
-              <SelectTrigger className="w-full lg:w-[160px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-[10px] sm:text-xs font-bold uppercase tracking-tight">
+              <SelectTrigger className="w-full lg:w-[160px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-xs sm:text-sm font-medium">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent className="bg-white/95 dark:bg-card/95 backdrop-blur-md border-border/30 rounded-2xl max-h-[300px]">
@@ -162,7 +162,7 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
             </Select>
 
             <Select value={filters.artworkType} onValueChange={(value) => handleFilterChange('artworkType', value)}>
-              <SelectTrigger className="w-full lg:w-[140px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-[10px] sm:text-xs font-bold uppercase tracking-tight">
+              <SelectTrigger className="w-full lg:w-[140px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-xs sm:text-sm font-medium">
                 <SelectValue placeholder="Media" />
               </SelectTrigger>
               <SelectContent className="bg-white/95 dark:bg-card/95 backdrop-blur-md border-border/30 rounded-xl">
@@ -174,7 +174,7 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
             </Select>
 
             <Select value={filters.sortBy} onValueChange={(value) => handleFilterChange('sortBy', value)}>
-              <SelectTrigger className="w-full lg:w-[160px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-[10px] sm:text-xs font-bold uppercase tracking-tight">
+              <SelectTrigger className="w-full lg:w-[160px] bg-white/50 dark:bg-card/50 border-border/20 rounded-xl h-10 sm:h-11 text-xs sm:text-sm font-medium">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent className="bg-white/95 dark:bg-card/95 backdrop-blur-md border-border/30 rounded-xl">
@@ -201,7 +201,7 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
                 )}
               >
                 <SlidersHorizontal className={cn("w-3.5 h-3.5 mr-2 transition-transform duration-300", showAdvanced && "rotate-180")} />
-                <span className="font-black text-[10px] uppercase tracking-widest">Filters</span>
+                <span className="font-semibold text-xs">Filters</span>
                 {activeFiltersCount > 0 && (
                   <Badge 
                     variant="secondary" 
@@ -220,7 +220,7 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
                 title="Reset Filters"
               >
                 <X className="w-3.5 h-3.5 xs:mr-1.5" />
-                <span className="hidden xs:inline font-black text-[10px] uppercase tracking-widest">Reset</span>
+                <span className="hidden xs:inline font-semibold text-xs">Reset</span>
               </Button>
             </div>
 
@@ -229,23 +229,27 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="icon"
                 onClick={() => onViewModeChange('grid')}
+                aria-label="Grid view"
+                aria-pressed={viewMode === 'grid'}
                 className={cn(
                   "h-8 w-8 rounded-lg transition-all duration-300",
                   viewMode === 'grid' ? "shadow-sm bg-white dark:bg-background text-primary" : "hover:bg-primary/5"
                 )}
               >
-                <Grid className="h-3.5 w-3.5" />
+                <Grid className="h-3.5 w-3.5" aria-hidden="true" />
               </Button>
               <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="icon"
                 onClick={() => onViewModeChange('list')}
+                aria-label="List view"
+                aria-pressed={viewMode === 'list'}
                 className={cn(
                   "h-8 w-8 rounded-lg transition-all duration-300",
                   viewMode === 'list' ? "shadow-sm bg-white dark:bg-background text-primary" : "hover:bg-primary/5"
                 )}
               >
-                <List className="h-3.5 w-3.5" />
+                <List className="h-3.5 w-3.5" aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -253,24 +257,24 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
 
         {/* Desktop results count removed from bottom as it's now in the main row */}
         <div className="mt-2 flex xl:hidden flex-wrap items-center gap-2">
-          <p className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground/60 bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
-            {resultsCount} Artwork{resultsCount !== 1 ? 's' : ''}
+          <p className="text-xs font-medium text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-full">
+            {resultsCount} artwork{resultsCount !== 1 ? 's' : ''}
           </p>
           
           <div className="flex flex-wrap gap-1.5">
             {filters.category !== 'all' && (
               <Badge variant="secondary" className="pl-2.5 pr-0.5 py-0.5 rounded-full bg-primary/5 text-primary border-primary/10 hover:bg-primary/10 transition-colors text-[10px]">
                 {filters.category}
-                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-transparent" onClick={() => handleFilterChange('category', 'all')}>
-                  <X className="h-3 w-3" />
+                <Button variant="ghost" size="icon" aria-label={`Remove ${filters.category} category filter`} className="h-4 w-4 ml-1 hover:bg-transparent" onClick={() => handleFilterChange('category', 'all')}>
+                  <X className="h-3 w-3" aria-hidden="true" />
                 </Button>
               </Badge>
             )}
             {filters.artworkType !== 'all' && (
               <Badge variant="secondary" className="pl-2.5 pr-0.5 py-0.5 rounded-full bg-primary/5 text-primary border-primary/10 hover:bg-primary/10 transition-colors text-[10px]">
                 {filters.artworkType}
-                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-transparent" onClick={() => handleFilterChange('artworkType', 'all')}>
-                  <X className="h-3 w-3" />
+                <Button variant="ghost" size="icon" aria-label={`Remove ${filters.artworkType} type filter`} className="h-4 w-4 ml-1 hover:bg-transparent" onClick={() => handleFilterChange('artworkType', 'all')}>
+                  <X className="h-3 w-3" aria-hidden="true" />
                 </Button>
               </Badge>
             )}
@@ -283,20 +287,20 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
             <GlassCard className="p-5 border-primary/10 bg-white/40 dark:bg-card/40 backdrop-blur-2xl shadow-xl rounded-3xl">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-2.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/80 ml-1">Search by Tags</label>
+                  <label className="text-xs font-semibold text-muted-foreground ml-1">Search by tags</label>
                   <div className="relative group">
-                    <Input 
-                      placeholder="e.g. abstract, blue, digital" 
+                    <Input
+                      placeholder="e.g. abstract, blue, digital"
                       value={advancedFilters.tags}
                       onChange={(e) => handleAdvancedFilterChange('tags', e.target.value)}
                       className="bg-white/60 dark:bg-background/60 border-border/20 rounded-2xl pl-4 h-11 focus-visible:ring-primary/20 transition-all group-hover:border-primary/30"
                     />
                   </div>
-                  <p className="text-[9px] font-bold text-muted-foreground/40 ml-1 uppercase tracking-wider">Separate tags with commas</p>
+                  <p className="text-[11px] text-muted-foreground/70 ml-1">Separate tags with commas</p>
                 </div>
-                
+
                 <div className="space-y-2.5">
-                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/80 ml-1">Artist Location</label>
+                  <label className="text-xs font-semibold text-muted-foreground ml-1">Artist location</label>
                   <Input 
                     placeholder="e.g. New York, London" 
                     value={advancedFilters.location}
@@ -310,9 +314,9 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
                     variant="outline" 
                     size="sm" 
                     onClick={resetFilters}
-                    className="w-full bg-white/40 dark:bg-background/40 border-border/20 rounded-2xl h-11 text-xs font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all active:scale-[0.98]"
+                    className="w-full bg-white/40 dark:bg-background/40 border-border/20 rounded-2xl h-11 text-sm font-semibold hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all active:scale-[0.98]"
                   >
-                    Clear All Filters
+                    Clear all filters
                   </Button>
                 </div>
               </div>

@@ -167,6 +167,33 @@ export function DisputeDialog({
         has_evidence: !!evidenceFile,
       });
 
+      // Notify the other party. Raising a dispute freezes the milestone, so the
+      // counterparty needs to know why work has stopped -- previously nothing
+      // told them at all.
+      try {
+        const { data: project } = await supabase
+          .from('projects')
+          .select('client_id, artist_id, title')
+          .eq('id', projectId)
+          .maybeSingle();
+
+        const counterpartyId = project
+          ? (project.client_id === user?.id ? project.artist_id : project.client_id)
+          : null;
+
+        if (counterpartyId) {
+          await supabase.from('notifications').insert({
+            user_id: counterpartyId,
+            type: 'dispute_raised',
+            title: 'A dispute was raised',
+            message: `A dispute was opened on "${milestone.title}". The milestone is on hold pending review.`,
+            metadata: { dispute_id: dispute.id, milestone_id: milestone.id, project_id: projectId }
+          });
+        }
+      } catch (notifyError) {
+        console.error('Failed to notify counterparty of dispute:', notifyError);
+      }
+
       toast.success('Dispute raised successfully. Our team will review it shortly.');
       onSuccess();
       onOpenChange(false);
@@ -279,9 +306,9 @@ export function DisputeDialog({
           ) : (
             <div className="space-y-6">
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">What is the issue?</Label>
+                <Label htmlFor="dispute-reason" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">What is the issue?</Label>
                 <Select value={reason} onValueChange={setReason}>
-                  <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-border/30 focus:border-primary/50 focus-visible:ring-primary/10 transition-all px-6 text-sm font-medium">
+                  <SelectTrigger id="dispute-reason" className="h-14 rounded-2xl bg-muted/20 border-border/30 focus:border-primary/50 focus-visible:ring-primary/10 transition-all px-6 text-sm font-medium">
                     <SelectValue placeholder="Select primary reason" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border-border/40 shadow-2xl p-2">
@@ -293,8 +320,9 @@ export function DisputeDialog({
               </div>
 
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Provide Detailed Evidence</Label>
+                <Label htmlFor="dispute-description" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Provide Detailed Evidence</Label>
                 <Textarea
+                  id="dispute-description"
                   placeholder="Explain exactly what went wrong... provide as much detail as possible for our review team."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -303,13 +331,23 @@ export function DisputeDialog({
               </div>
 
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Supporting Visual Evidence</Label>
+                <Label htmlFor="dispute-evidence" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-1">Supporting Visual Evidence</Label>
                 <div 
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Upload supporting evidence"
                   onClick={() => fileInputRef.current?.click()}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      fileInputRef.current?.click();
+                    }
+                  }}
                   className="group cursor-pointer border-3 border-dashed border-border/40 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 shadow-inner bg-muted/5"
                 >
                   <input
                     type="file"
+                    id="dispute-evidence"
                     className="hidden"
                     ref={fileInputRef}
                     onChange={handleFileSelect}
@@ -325,6 +363,8 @@ export function DisputeDialog({
                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{(evidenceFile.size / 1024).toFixed(1)} KB</p>
                       </div>
                       <button 
+                        type="button"
+                        aria-label="Remove supporting evidence"
                         onClick={(e) => {
                           e.stopPropagation();
                           setEvidenceFile(null);

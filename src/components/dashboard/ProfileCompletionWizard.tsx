@@ -195,11 +195,11 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
               <span className="text-[10px] font-black uppercase tracking-widest text-white/60">Profile Quality</span>
               <span className="text-xs font-black">{Math.round(progress)}%</span>
             </div>
-            <Progress value={progress} className="h-2 bg-white/20" />
+            <Progress value={progress} className="h-2 bg-card/20" />
           </div>
         </div>
 
-        <div className="p-8 bg-white dark:bg-card max-h-[70vh] overflow-y-auto">
+        <div className="p-8 bg-card dark:bg-card max-h-[70vh] overflow-y-auto">
           <StepIndicator />
 
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -226,7 +226,7 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="full_name" className="text-xs font-black uppercase tracking-wider text-gray-500">Full Name</Label>
+                  <Label htmlFor="full_name" className="text-xs font-black uppercase tracking-wider text-muted-foreground">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-violet-400" />
                     <Input 
@@ -347,11 +347,10 @@ const ProfileCompletionWizard = ({ isOpen, onOpenChange, onComplete }: ProfileCo
           <Button
             className="flex-1 h-12 rounded-2xl bg-violet-600 hover:bg-violet-700 text-white font-bold shadow-lg shadow-violet-500/20 group"
             onClick={handleUpdate}
-            disabled={isSubmitting || (step === 1 && !formData.full_name) || (step === 2 && !formData.bio) || (step === 4 && isArtist && formData.tags.length === 0)}
+            disabled={(step === 1 && !formData.full_name) || (step === 2 && !formData.bio) || (step === 4 && isArtist && formData.tags.length === 0)}
+            loading={isSubmitting}
           >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
+            {!isSubmitting && (
               <>
                 {step === totalSteps ? "Finish Setup" : "Continue"}
                 {step < totalSteps && <ChevronRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-0.5" />}

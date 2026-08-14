@@ -618,6 +618,7 @@ export type Database = {
           description: string | null
           id: string
           milestone_id: string | null
+          previous_status: string | null
           project_id: string
           raised_by: string
           reason: string
@@ -632,6 +633,7 @@ export type Database = {
           description?: string | null
           id?: string
           milestone_id?: string | null
+          previous_status?: string | null
           project_id: string
           raised_by: string
           reason: string
@@ -646,6 +648,7 @@ export type Database = {
           description?: string | null
           id?: string
           milestone_id?: string | null
+          previous_status?: string | null
           project_id?: string
           raised_by?: string
           reason?: string

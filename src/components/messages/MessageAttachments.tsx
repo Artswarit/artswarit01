@@ -108,7 +108,7 @@ export const AttachmentInput = ({ onAttach, disabled }: AttachmentInputProps) =>
         type="button"
         variant="ghost"
         size="icon"
-        onClick={() => fileInputRef.current?.click()}
+        aria-label="Attach a file" onClick={() => fileInputRef.current?.click()}
         disabled={disabled || uploading}
         className="shrink-0 h-11 w-11 sm:h-12 sm:w-12 rounded-xl"
       >

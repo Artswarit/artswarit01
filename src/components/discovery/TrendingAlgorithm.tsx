@@ -312,7 +312,7 @@ const TrendingAlgorithm = () => {
             </div>
             
             <div className="flex flex-col items-end gap-3">
-            <div className="grid grid-cols-4 md:flex items-center gap-1 sm:gap-3 bg-white/50 backdrop-blur-sm border border-white/40 p-1 rounded-2xl shadow-sm w-full md:w-auto">
+            <div className="grid grid-cols-4 md:flex items-center gap-1 sm:gap-3 bg-card/50 backdrop-blur-sm border border-white/40 p-1 rounded-2xl shadow-sm w-full md:w-auto">
               {(['1h', '24h', '7d', '30d'] as const).map((timeframe) => (
                 <button
                   key={timeframe}
@@ -320,7 +320,7 @@ const TrendingAlgorithm = () => {
                   className={cn(
                     "px-1 sm:px-4 py-2 rounded-xl text-[9px] min-[375px]:text-[10px] sm:text-xs font-bold transition-all duration-300 min-h-[40px] flex items-center justify-center",
                     selectedTimeframe === timeframe 
-                      ? "bg-white text-blue-600 shadow-sm scale-105" 
+                      ? "bg-card text-blue-600 shadow-sm scale-105" 
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -349,9 +349,11 @@ const TrendingAlgorithm = () => {
                 onClick={() => setSelectedCategory(category)}
                 className={cn(
                   "px-5 py-2.5 rounded-2xl text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all border snap-start",
-                  selectedCategory === category 
-                    ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-900/10" 
-                    : "bg-white text-slate-600 border-slate-100 hover:border-slate-300 hover:bg-slate-50"
+                  selectedCategory === category
+                    // Was bg-slate-900: a near-black pill that reads strongly in
+                    // light mode but vanishes against the dark background.
+                    ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/10"
+                    : "bg-card text-muted-foreground border-border hover:border-primary/30 hover:bg-muted/40"
                 )}
               >
                 {category === 'all' ? 'All Artworks' : category}
@@ -361,10 +363,10 @@ const TrendingAlgorithm = () => {
           
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             <Select value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="w-[130px] rounded-2xl bg-white border-slate-100 font-bold text-xs h-10">
+              <SelectTrigger className="w-[130px] rounded-2xl bg-card border-border font-bold text-xs h-10">
                 <SelectValue placeholder="Media Type" />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-100">
+              <SelectContent className="rounded-2xl border-border">
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="image">Images</SelectItem>
                 <SelectItem value="video">Videos</SelectItem>
@@ -373,10 +375,10 @@ const TrendingAlgorithm = () => {
             </Select>
 
             <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[140px] rounded-2xl bg-white border-slate-100 font-bold text-xs h-10">
+              <SelectTrigger className="w-[140px] rounded-2xl bg-card border-border font-bold text-xs h-10">
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-100">
+              <SelectContent className="rounded-2xl border-border">
                 <SelectItem value="score">Trending Score</SelectItem>
                 <SelectItem value="velocity">Velocity</SelectItem>
                 <SelectItem value="growth">Highest Growth</SelectItem>
@@ -387,7 +389,7 @@ const TrendingAlgorithm = () => {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-100 h-10 ml-auto sm:ml-0">
+                <button className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-slate-400 hover:text-muted-foreground transition-colors bg-muted/40 px-4 py-2.5 rounded-2xl border border-border h-10 ml-auto sm:ml-0">
                   <Info className="h-4 w-4" />
                   Algorithm
                 </button>
@@ -413,9 +415,9 @@ const TrendingAlgorithm = () => {
                 animate={{ opacity: 1 }}
                 className="col-span-full py-20 text-center"
               >
-                <div className="bg-slate-50 rounded-3xl p-10 inline-block border border-dashed border-slate-200">
+                <div className="bg-muted/40 rounded-3xl p-10 inline-block border border-dashed border-border">
                   <BarChart3 className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-500 font-bold">No trending items found in this category.</p>
+                  <p className="text-muted-foreground font-bold">No trending items found in this category.</p>
                 </div>
               </motion.div>
             ) : (
@@ -451,7 +453,7 @@ const TrendingAlgorithm = () => {
                           
                           {/* Category Badge overlayed on image */}
                           <div className="absolute bottom-4 left-4 z-20 flex gap-2">
-                            <Badge className="bg-white/20 backdrop-blur-md text-white border-white/20 px-2.5 py-0.5 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm">
+                            <Badge className="bg-card/20 backdrop-blur-md text-white border-white/20 px-2.5 py-0.5 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-sm">
                               {item.category}
                             </Badge>
                           </div>

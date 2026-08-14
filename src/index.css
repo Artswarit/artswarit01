@@ -259,13 +259,19 @@ html, body {
       to-indigo-400;
   }
 
+  /* These use bg-card rather than bg-white so glass surfaces follow the theme.
+     --card is pure white in light mode, so light rendering is unchanged; before
+     this, every .glass-* consumer stayed light in dark mode no matter what
+     background token the element itself set. The white border is kept
+     deliberately -- it is the edge highlight that makes the glass read, and it
+     works over both light and dark backgrounds. */
   .glass-effect {
-    @apply bg-white/60 backdrop-blur-md border border-white/20 shadow-lg;
+    @apply bg-card/60 backdrop-blur-md border border-white/20 shadow-lg;
   }
 
   .glass-card {
-    @apply bg-white/40 backdrop-blur-md border border-white/20 shadow-lg
-      hover:shadow-xl hover:bg-white/50 transition-all duration-300;
+    @apply bg-card/40 backdrop-blur-md border border-white/20 shadow-lg
+      hover:shadow-xl hover:bg-card/50 transition-all duration-300;
   }
 
   .animation-delay-300 {
@@ -290,18 +296,6 @@ html, body {
 
   .animation-delay-4000 {
     animation-delay: 4000ms;
-  }
-
-  .neo-blur-sm {
-    box-shadow: 0 10px 50px -20px rgba(0, 0, 0, 0.2);
-  }
-
-  .neo-blur-md {
-    box-shadow: 0 20px 60px -30px rgba(0, 0, 0, 0.3);
-  }
-
-  .neo-blur-lg {
-    box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.4);
   }
 
   .hover-lift {
@@ -485,7 +479,7 @@ html, body {
   }
 
   .badge-primary {
-    @apply bg-primary text-white;
+    @apply bg-primary text-primary-foreground;
   }
 
   .badge-secondary {
@@ -548,7 +542,7 @@ html, body {
 
   /* Mobile-optimized card styles */
   .mobile-card {
-    @apply bg-white/40 backdrop-blur-md border border-white/20 shadow-lg
+    @apply bg-card/40 backdrop-blur-md border border-white/20 shadow-lg
       rounded-xl p-4 sm:p-6;
   }
 

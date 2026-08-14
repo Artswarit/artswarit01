@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Flag, Loader2, AlertTriangle } from 'lucide-react';
+import { Flag, AlertTriangle } from 'lucide-react';
 
 interface ReportDialogProps {
   isOpen: boolean;
@@ -167,8 +167,7 @@ const ReportDialog = ({
           <Button variant="outline" onClick={onClose} disabled={submitting}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting || !reason} className="gap-2">
-            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+          <Button onClick={handleSubmit} disabled={!reason} loading={submitting} className="gap-2">
             Submit Report
           </Button>
         </DialogFooter>

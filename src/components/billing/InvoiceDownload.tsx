@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Download, FileText, Loader2 } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -152,11 +152,9 @@ export function InvoiceDownload({ invoice, variant = 'outline', size = 'sm' }: I
       variant={variant}
       size={size}
       onClick={handleDownload}
-      disabled={downloading}
+      loading={downloading}
     >
-      {downloading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : size === 'icon' ? (
+      {downloading ? null : size === 'icon' ? (
         <Download className="h-4 w-4" />
       ) : (
         <>

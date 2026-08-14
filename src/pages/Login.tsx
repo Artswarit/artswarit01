@@ -188,6 +188,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading || isSubmitting}
+                data-testid="login-google-button"
                 className="w-full flex items-center justify-center gap-3 h-12 px-4 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-300 font-medium text-sm hover:bg-gray-50 dark:hover:bg-zinc-800 hover:border-gray-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24">
@@ -210,7 +211,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
               </div>
 
               {/* Email Form */}
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5" data-testid="login-form">
                 <div className="space-y-1.5">
                   <Label htmlFor="login-email" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
                     Email address
@@ -230,6 +231,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                       onFocus={() => setFocusedField('email')}
                       onBlur={() => setFocusedField(null)}
                       required
+                      data-testid="login-email-input"
                       className="h-12 text-[15px] border-0 rounded-xl bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-4 placeholder:text-gray-400"
                     />
                   </div>
@@ -256,17 +258,20 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
                       onFocus={() => setFocusedField('password')}
                       onBlur={() => setFocusedField(null)}
                       required
+                      data-testid="login-password-input"
                       className="h-12 text-[15px] border-0 rounded-xl bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-4 pr-12 placeholder:text-gray-400"
                     />
                     <button
                       type="button"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      data-testid="login-password-toggle"
                       className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-350 transition-colors"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-[18px] w-[18px]" />
+                        <EyeOff className="h-[18px] w-[18px]" aria-hidden="true" />
                       ) : (
-                        <Eye className="h-[18px] w-[18px]" />
+                        <Eye className="h-[18px] w-[18px]" aria-hidden="true" />
                       )}
                     </button>
                   </div>
@@ -282,6 +287,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 
                 <Button
                   type="submit"
+                  data-testid="login-submit-button"
                   className="w-full h-12 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-medium text-[15px] shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-300 group"
                   disabled={loading}
                   loading={isSubmitting}

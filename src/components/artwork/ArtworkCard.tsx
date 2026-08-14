@@ -283,7 +283,7 @@ const ArtworkCard = ({
                   artworkId={id}
                   amount={price}
                   artworkTitle={title}
-                  className="rounded-full px-6 font-black bg-primary text-white hover:bg-primary/90 shadow-xl shadow-primary/20 scale-110"
+                  className="rounded-full px-6 font-black bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20 scale-110"
                   size="default"
                 />
               </div>
@@ -356,21 +356,22 @@ const ArtworkCard = ({
                 disabled={isSaveLoading}
                 className={cn(
                   "p-1.5 rounded-md transition-colors",
-                  isSaved 
-                    ? "text-primary bg-primary/10" 
+                  isSaved
+                    ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
                 title={isSaved ? 'Remove from saved' : 'Save artwork'}
+                aria-label={isSaved ? 'Remove from saved' : 'Save artwork'}
               >
                 <Bookmark className={cn(
                   "w-4 h-4",
                   isSaved ? "fill-current" : ""
-                )} />
+                )} aria-hidden="true" />
               </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.preventDefault()}>
-                  <button className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-                    <MoreVertical className="w-4 h-4" />
+                  <button aria-label="More options" className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                    <MoreVertical className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-[140px]" onClick={(e) => e.stopPropagation()}>

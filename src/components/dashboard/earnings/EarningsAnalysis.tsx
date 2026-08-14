@@ -95,7 +95,7 @@ const EarningsAnalysis = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-md">
+        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Total Earnings (2025)</CardTitle>
           </CardHeader>
@@ -110,7 +110,7 @@ const EarningsAnalysis = () => {
           </CardContent>
         </Card>
         
-        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-md">
+        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Monthly Average</CardTitle>
           </CardHeader>
@@ -125,7 +125,7 @@ const EarningsAnalysis = () => {
           </CardContent>
         </Card>
         
-        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-md">
+        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Pending Payouts</CardTitle>
           </CardHeader>
@@ -139,7 +139,7 @@ const EarningsAnalysis = () => {
         </Card>
       </div>
 
-      <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-md overflow-hidden">
+      <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md overflow-hidden">
         <CardHeader className="p-6 sm:p-10 border-b border-border/10">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div className="space-y-1">
@@ -151,7 +151,7 @@ const EarningsAnalysis = () => {
                 variant={timeframe === "monthly" ? "default" : "outline"} 
                 size="sm"
                 onClick={() => setTimeframe("monthly")}
-                className={timeframe === "monthly" ? "bg-gradient-to-r from-artswarit-purple to-blue-500 border-none" : ""}
+                className={timeframe === "monthly" ? "bg-brand-gradient border-none" : ""}
               >
                 Monthly
               </Button>
@@ -159,7 +159,7 @@ const EarningsAnalysis = () => {
                 variant={timeframe === "quarterly" ? "default" : "outline"} 
                 size="sm"
                 onClick={() => setTimeframe("quarterly")}
-                className={timeframe === "quarterly" ? "bg-gradient-to-r from-artswarit-purple to-blue-500 border-none" : ""}
+                className={timeframe === "quarterly" ? "bg-brand-gradient border-none" : ""}
               >
                 Quarterly
               </Button>
@@ -167,7 +167,7 @@ const EarningsAnalysis = () => {
                 variant={timeframe === "yearly" ? "default" : "outline"} 
                 size="sm"
                 onClick={() => setTimeframe("yearly")}
-                className={timeframe === "yearly" ? "bg-gradient-to-r from-artswarit-purple to-blue-500 border-none" : ""}
+                className={timeframe === "yearly" ? "bg-brand-gradient border-none" : ""}
               >
                 Yearly
               </Button>
@@ -230,7 +230,7 @@ const EarningsAnalysis = () => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-md overflow-hidden">
+        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md overflow-hidden">
           <CardHeader className="p-6 sm:p-10 border-b border-border/10">
             <CardTitle className="text-xl sm:text-2xl font-black tracking-tight">Revenue Sources</CardTitle>
             <CardDescription className="text-sm font-medium">Breakdown of your income streams</CardDescription>
@@ -276,7 +276,7 @@ const EarningsAnalysis = () => {
           </CardContent>
         </Card>
         
-        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-md overflow-hidden flex flex-col">
+        <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md overflow-hidden flex flex-col">
           <CardHeader className="p-6 sm:p-10 border-b border-border/10">
             <CardTitle className="text-xl sm:text-2xl font-black tracking-tight">Transactions & Payouts</CardTitle>
             <CardDescription className="text-sm font-medium">Recent financial activity</CardDescription>
@@ -286,8 +286,8 @@ const EarningsAnalysis = () => {
             <div className="px-6 sm:px-10 pt-6">
               <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
                 <TabsList className="flex w-full p-1.5 bg-muted/30 rounded-2xl h-auto min-h-[56px] items-stretch gap-1">
-                  <TabsTrigger value="transactions" className="flex-1 min-w-[120px] rounded-xl font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all py-3">Recent Transactions</TabsTrigger>
-                  <TabsTrigger value="payouts" className="flex-1 min-w-[120px] rounded-xl font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all py-3">Pending Payouts</TabsTrigger>
+                  <TabsTrigger value="transactions" className="flex-1 min-w-[120px] rounded-xl font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all py-3">Recent Transactions</TabsTrigger>
+                  <TabsTrigger value="payouts" className="flex-1 min-w-[120px] rounded-xl font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all py-3">Pending Payouts</TabsTrigger>
                 </TabsList>
               </div>
             </div>

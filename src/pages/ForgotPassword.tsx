@@ -89,7 +89,7 @@ const ForgotPassword = () => {
                     Didn't receive the email? Check your spam folder or{" "}
                     <button 
                       onClick={() => setIsEmailSent(false)}
-                      className="text-artswarit-purple hover:underline"
+                      className="text-primary hover:underline"
                     >
                       try again
                     </button>
@@ -117,7 +117,7 @@ const ForgotPassword = () => {
 
                   <Button
                     type="submit"
-                    className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
+                    className="w-full h-11 bg-brand-gradient hover:bg-brand-gradient-hover text-primary-foreground font-medium"
                     loading={isSubmitting}
                   >
                     {isSubmitting ? "Sending..." : "Send Reset Link"}
@@ -128,7 +128,7 @@ const ForgotPassword = () => {
               <div className="text-center pt-2">
                 <Link
                   to="/login"
-                  className="inline-flex items-center text-sm font-medium text-artswarit-purple hover:text-artswarit-purple-dark"
+                  className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80"
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Login

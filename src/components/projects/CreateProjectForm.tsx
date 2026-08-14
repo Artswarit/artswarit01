@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Trash2, Upload, X, FileText, AlertTriangle, Check, GripVertical, Calendar, Loader2, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, Upload, X, FileText, AlertTriangle, Check, GripVertical, Calendar, TrendingUp } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Progress } from '@/components/ui/progress';
 import { uploadFileWithProgress } from '@/lib/uploadWithProgress';
@@ -355,7 +355,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                 placeholder="e.g., Logo Design for Company X"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="h-14 rounded-2xl bg-white/50 border-border/40 focus:ring-primary/20 transition-all text-base"
+                className="h-14 rounded-2xl bg-card/50 border-border/40 focus:ring-primary/20 transition-all text-base"
               />
             </div>
 
@@ -367,7 +367,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                   id="budget"
                   type="number"
                   min="0"
-                  className="pl-10 h-14 rounded-2xl bg-white/50 border-border/40 focus:ring-primary/20 transition-all text-base"
+                  className="pl-10 h-14 rounded-2xl bg-card/50 border-border/40 focus:ring-primary/20 transition-all text-base"
                   placeholder={`e.g., ${userCurrency === 'INR' ? '50000' : '1000'}`}
                   value={budget || ''}
                   onChange={(e) => setBudget(Number(e.target.value))}
@@ -390,7 +390,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              className="rounded-2xl bg-white/50 border-border/40 focus:ring-primary/20 transition-all text-base p-4 resize-none"
+              className="rounded-2xl bg-card/50 border-border/40 focus:ring-primary/20 transition-all text-base p-4 resize-none"
             />
           </div>
 
@@ -403,7 +403,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="h-14 rounded-2xl bg-white/50 border-border/40 focus:ring-primary/20 transition-all text-base appearance-none px-4"
+                className="h-14 rounded-2xl bg-card/50 border-border/40 focus:ring-primary/20 transition-all text-base appearance-none px-4"
               />
             </div>
           </div>
@@ -439,7 +439,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                   const pct = refProgress[index];
                   const showProgress = submitting && typeof pct === 'number';
                   return (
-                    <div key={index} className="flex flex-col gap-1.5 p-3 bg-white/60 backdrop-blur-sm rounded-2xl border border-border/40 group/file hover:shadow-md transition-all min-w-[200px]">
+                    <div key={index} className="flex flex-col gap-1.5 p-3 bg-card/60 backdrop-blur-sm rounded-2xl border border-border/40 group/file hover:shadow-md transition-all min-w-[200px]">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-lg bg-primary/10 text-primary">
                           <FileText className="h-4 w-4" />
@@ -483,7 +483,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
               variant="outline" 
               size="sm" 
               onClick={addMilestone}
-              className="h-11 px-4 rounded-xl border-primary/20 text-primary font-bold hover:bg-primary hover:text-white transition-all shadow-sm"
+              className="h-11 px-4 rounded-xl border-primary/20 text-primary font-bold hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Phase
@@ -527,7 +527,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className="group border border-border/40 rounded-[2rem] p-6 bg-white/40 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden"
+                          className="group border border-border/40 rounded-[2rem] p-6 bg-card/40 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 relative overflow-hidden"
                         >
                           <div className="absolute top-0 left-0 w-1.5 h-full bg-primary/10 group-hover:bg-primary transition-colors" />
                           
@@ -551,7 +551,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                                     variant="ghost"
                                     size="icon"
                                     className="h-10 w-10 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-colors sm:opacity-0 group-hover:opacity-100"
-                                    onClick={() => removeMilestone(index)}
+                                    aria-label={`Remove milestone ${index + 1}`} onClick={() => removeMilestone(index)}
                                   >
                                     <Trash2 className="h-5 w-5" />
                                   </Button>
@@ -560,22 +560,24 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
 
                               <div className="grid gap-6 md:grid-cols-2">
                                 <div className="space-y-2.5">
-                                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Title *</Label>
+                                  <Label htmlFor={`milestone-title-${index}`} className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Title *</Label>
                                   <Input
+                                    id={`milestone-title-${index}`}
                                     placeholder="e.g., Initial Concepts"
                                     value={milestone.title}
                                     onChange={(e) => updateMilestone(index, 'title', e.target.value)}
-                                    className="h-12 rounded-xl bg-white/50 border-border/40 focus:ring-primary/20 text-base font-medium"
+                                    className="h-12 rounded-xl bg-card/50 border-border/40 focus:ring-primary/20 text-base font-medium"
                                   />
                                 </div>
                                 <div className="space-y-2.5">
-                                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Amount ({userCurrency === 'INR' ? 'INR' : 'USD'}) *</Label>
+                                  <Label htmlFor={`milestone-amount-${index}`} className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Amount ({userCurrency === 'INR' ? 'INR' : 'USD'}) *</Label>
                                   <div className="relative group">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground group-focus-within:text-primary transition-colors">{userCurrencySymbol}</span>
+                                    <span aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground group-focus-within:text-primary transition-colors">{userCurrencySymbol}</span>
                                     <Input
+                                      id={`milestone-amount-${index}`}
                                       type="number"
                                       min="0"
-                                      className="pl-8 h-12 rounded-xl bg-white/50 border-border/40 focus:ring-primary/20 text-base font-bold"
+                                      className="pl-8 h-12 rounded-xl bg-card/50 border-border/40 focus:ring-primary/20 text-base font-bold"
                                       placeholder="0"
                                       value={milestone.amount || ''}
                                       onChange={(e) => updateMilestone(index, 'amount', Number(e.target.value))}
@@ -585,35 +587,38 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                               </div>
 
                               <div className="space-y-2.5">
-                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Description</Label>
+                                <Label htmlFor={`milestone-description-${index}`} className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Description</Label>
                                 <Textarea
+                                  id={`milestone-description-${index}`}
                                   placeholder="Describe what will be delivered in this milestone..."
                                   value={milestone.description}
                                   onChange={(e) => updateMilestone(index, 'description', e.target.value)}
                                   rows={2}
-                                  className="rounded-xl bg-white/50 border-border/40 focus:ring-primary/20 text-sm p-4 resize-none"
+                                  className="rounded-xl bg-card/50 border-border/40 focus:ring-primary/20 text-sm p-4 resize-none"
                                 />
                               </div>
 
                               <div className="grid gap-6 md:grid-cols-2">
                                 <div className="space-y-2.5">
-                                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Deliverables</Label>
+                                  <Label htmlFor={`milestone-deliverables-${index}`} className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Deliverables</Label>
                                   <Input
+                                    id={`milestone-deliverables-${index}`}
                                     placeholder="e.g., 3 logo concepts"
                                     value={milestone.deliverables}
                                     onChange={(e) => updateMilestone(index, 'deliverables', e.target.value)}
-                                    className="h-12 rounded-xl bg-white/50 border-border/40 focus:ring-primary/20 text-sm font-medium"
+                                    className="h-12 rounded-xl bg-card/50 border-border/40 focus:ring-primary/20 text-sm font-medium"
                                   />
                                 </div>
                                 <div className="space-y-2.5">
-                                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Due Date</Label>
+                                  <Label htmlFor={`milestone-due-date-${index}`} className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">Due Date</Label>
                                   <div className="relative">
                                     <Input
+                                      id={`milestone-due-date-${index}`}
                                       type="date"
                                       value={milestone.due_date}
                                       onChange={(e) => updateMilestone(index, 'due_date', e.target.value)}
                                       min={new Date().toISOString().split('T')[0]}
-                                      className="h-12 rounded-xl bg-white/50 border-border/40 focus:ring-primary/20 text-sm appearance-none px-4"
+                                      className="h-12 rounded-xl bg-card/50 border-border/40 focus:ring-primary/20 text-sm appearance-none px-4"
                                     />
                                   </div>
                                 </div>
@@ -642,17 +647,13 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
               Cancel
             </Button>
           )}
-          <Button 
+          <Button
             className="flex-1 h-14 sm:h-12 px-4 sm:px-8 rounded-2xl font-black uppercase tracking-wider text-[10px] sm:text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 active:scale-[0.98]"
             onClick={handleSubmit}
-            disabled={submitting || !budgetMatches || !title.trim() || budget <= 0}
+            disabled={!budgetMatches || !title.trim() || budget <= 0}
+            loading={submitting}
           >
-            {submitting ? (
-              <div className="flex items-center gap-3">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Creating Project...</span>
-              </div>
-            ) : 'Launch Project Request'}
+            {submitting ? 'Creating Project...' : 'Launch Project Request'}
           </Button>
         </div>
       </CardContent>

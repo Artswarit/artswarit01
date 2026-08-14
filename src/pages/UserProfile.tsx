@@ -205,31 +205,35 @@ export default function UserProfile() {
         lastActive,
       });
 
-      // Fetch artist details for reviews (reviews FROM artists)
-      const reviewsWithArtists: ReviewData[] = [];
-      for (const review of clientReviewsData.slice(0, 10)) {
-        const { data: artistData } = await supabase
-          .from('public_profiles')
-          .select('full_name, avatar_url')
-          .eq('id', review.artist_id)
-          .maybeSingle();
+      // Fetch artist details for reviews (reviews FROM artists).
+      // Previously this looped the reviews and awaited two queries per row --
+      // up to 20 sequential round trips before the profile could render. Batch
+      // them into two parallel `in()` lookups instead.
+      const topReviews = clientReviewsData.slice(0, 10);
+      const reviewArtistIds = [...new Set(topReviews.map(r => r.artist_id).filter(Boolean))];
+      const reviewProjectIds = [...new Set(topReviews.map(r => r.project_id).filter(Boolean))];
 
-        const { data: projectData } = await supabase
-          .from('projects')
-          .select('title')
-          .eq('id', review.project_id)
-          .maybeSingle();
+      const [artistsRes, projectsRes] = await Promise.all([
+        reviewArtistIds.length
+          ? supabase.from('public_profiles').select('id, full_name, avatar_url').in('id', reviewArtistIds)
+          : Promise.resolve({ data: [] as { id: string; full_name: string | null; avatar_url: string | null }[] }),
+        reviewProjectIds.length
+          ? supabase.from('projects').select('id, title').in('id', reviewProjectIds)
+          : Promise.resolve({ data: [] as { id: string; title: string | null }[] }),
+      ]);
 
-        reviewsWithArtists.push({
-          id: review.id,
-          rating: review.rating,
-          review_text: review.review_text,
-          created_at: review.created_at,
-          artist_name: artistData?.full_name || null,
-          artist_avatar: artistData?.avatar_url || null,
-          project_title: projectData?.title || null,
-        });
-      }
+      const artistById = new Map((artistsRes.data || []).map(a => [a.id, a]));
+      const projectById = new Map((projectsRes.data || []).map(p => [p.id, p]));
+
+      const reviewsWithArtists: ReviewData[] = topReviews.map(review => ({
+        id: review.id,
+        rating: review.rating,
+        review_text: review.review_text,
+        created_at: review.created_at,
+        artist_name: artistById.get(review.artist_id)?.full_name || null,
+        artist_avatar: artistById.get(review.artist_id)?.avatar_url || null,
+        project_title: projectById.get(review.project_id)?.title || null,
+      }));
       setReviews(reviewsWithArtists);
       
       // Calculate average rating (ratings this client has RECEIVED from artists)

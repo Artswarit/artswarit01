@@ -5,6 +5,7 @@
 // hook is the client-side confirmation event used by funnels.
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { track } from "@/lib/analytics";
 
 const SEEN_KEY = "ph_stripe_return_seen_v1";
@@ -37,32 +38,55 @@ export function StripeReturnTracker() {
     const dedupeKey = `${location.pathname}?${location.search}`;
     if (alreadySeen(dedupeKey)) return;
 
+    // Returning from Stripe previously fired analytics and silently stripped
+    // the params, so the user was dropped back on the page with no
+    // acknowledgement that their payment had gone through (or been cancelled).
+    // Confirmation is deliberately worded as "confirming" for success, because
+    // the webhook that actually grants access may land a moment later.
     if (artworkStatus === "success") {
       track("payment_success", {
         provider: "stripe",
         kind: "artwork",
         artwork_id: location.pathname.split("/artwork/")[1]?.split("?")[0] ?? null,
       });
+      toast.success("Payment received", {
+        description: "We're confirming your purchase — access will appear here shortly.",
+      });
       fired = true;
     } else if (artworkStatus === "cancel") {
       track("payment_failed", { provider: "stripe", kind: "artwork", reason: "cancelled" });
+      toast("Checkout cancelled", {
+        description: "You have not been charged. You can try again whenever you're ready.",
+      });
       fired = true;
     }
 
     if (milestone === "success") {
       track("payment_success", { provider: "stripe", kind: "milestone" });
+      toast.success("Milestone funded", {
+        description: "We're confirming the payment — the milestone will become active shortly.",
+      });
       fired = true;
     } else if (milestone === "cancel") {
       track("payment_failed", { provider: "stripe", kind: "milestone", reason: "cancelled" });
+      toast("Payment cancelled", {
+        description: "You have not been charged. The milestone is still awaiting funds.",
+      });
       fired = true;
     }
 
     if (premium === "success") {
       track("subscription_upgraded", { provider: "stripe", plan });
       track("payment_success", { provider: "stripe", kind: "subscription", plan });
+      toast.success("Subscription active", {
+        description: "We're confirming your plan — Pro benefits will apply shortly.",
+      });
       fired = true;
     } else if (premium === "cancel") {
       track("payment_failed", { provider: "stripe", kind: "subscription", plan, reason: "cancelled" });
+      toast("Upgrade cancelled", {
+        description: "You have not been charged and remain on your current plan.",
+      });
       fired = true;
     }
 

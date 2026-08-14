@@ -7,9 +7,98 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-razorpay-signature',
 };
 
+const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID')!;
 const RAZORPAY_KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+/**
+ * Artwork purchases don't create a `payments` row -- create-artwork-order only
+ * creates a Razorpay order, writing the artwork/user reference into its notes.
+ * So when no payment record matches, the order may still be a legitimate
+ * artwork purchase whose client-side verification never ran (tab closed,
+ * network dropped). This resolves it from Razorpay and completes the unlock,
+ * giving artwork purchases the same webhook safety net milestone funding has.
+ *
+ * Returns true when it handled the event as an artwork unlock.
+ */
+async function tryCompleteArtworkUnlock(
+  supabaseAdmin: ReturnType<typeof createClient>,
+  orderId: string,
+  paymentId: string,
+): Promise<boolean> {
+  try {
+    const auth = btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`);
+    const orderRes = await fetch(`https://api.razorpay.com/v1/orders/${encodeURIComponent(orderId)}`, {
+      headers: { Authorization: `Basic ${auth}` },
+    });
+
+    if (!orderRes.ok) {
+      console.error('Could not fetch Razorpay order for fallback unlock:', orderId, orderRes.status);
+      return false;
+    }
+
+    const order = await orderRes.json();
+    const notes = (order?.notes ?? {}) as Record<string, string>;
+
+    if (notes.type !== 'artwork_unlock') return false;
+
+    const artworkId = notes.artwork_id;
+    const userId = notes.user_id;
+    if (!artworkId || !userId) {
+      console.error('Artwork order missing notes references:', orderId);
+      return false;
+    }
+
+    // Idempotent: the client-side verify may have already completed this.
+    const { data: existing } = await supabaseAdmin
+      .from('artwork_unlocks')
+      .select('id')
+      .eq('artwork_id', artworkId)
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (existing) {
+      console.log('Artwork already unlocked; webhook fallback no-op', { artworkId, userId });
+      return true;
+    }
+
+    const { data: artwork } = await supabaseAdmin
+      .from('artworks')
+      .select('id, price, artist_id')
+      .eq('id', artworkId)
+      .maybeSingle();
+
+    const { error: unlockError } = await supabaseAdmin.from('artwork_unlocks').insert({
+      artwork_id: artworkId,
+      user_id: userId,
+      payment_id: paymentId,
+      order_id: orderId,
+      amount: artwork?.price ?? null,
+    });
+
+    if (unlockError) {
+      console.error('Fallback unlock insert failed:', unlockError);
+      return false;
+    }
+
+    if (artwork?.artist_id) {
+      await supabaseAdmin.from('notifications').insert({
+        user_id: artwork.artist_id,
+        type: 'artwork_sold',
+        title: 'Artwork Sold!',
+        message: 'Your artwork was purchased.',
+        metadata: { artwork_id: artworkId, buyer_id: userId },
+      });
+    }
+
+    console.log('Completed artwork unlock via webhook fallback', { artworkId, userId });
+    return true;
+  } catch (err) {
+    console.error('Artwork unlock fallback threw:', err);
+    return false;
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -97,13 +186,24 @@ serve(async (req) => {
         .single();
 
       if (fetchError || !paymentRecord) {
-        console.error('Payment record not found for order:', orderId);
+        // No payments row: this may be an artwork purchase (those only exist as
+        // a Razorpay order). Previously every artwork payment fell through here
+        // and was discarded, so a buyer whose tab closed after paying lost the
+        // unlock permanently with no recovery path.
+        const handledAsArtwork = await tryCompleteArtworkUnlock(supabaseAdmin, orderId, paymentId);
+
+        console[handledAsArtwork ? 'log' : 'error'](
+          handledAsArtwork
+            ? `Handled artwork unlock via fallback for order: ${orderId}`
+            : `Payment record not found for order: ${orderId}`
+        );
+
         await supabaseAdmin.from('webhook_logs').update({
           processed: true,
-          error_message: 'Payment record not found',
+          error_message: handledAsArtwork ? null : 'Payment record not found',
           processed_at: new Date().toISOString(),
         }).eq('event_id', eventId);
-        
+
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });

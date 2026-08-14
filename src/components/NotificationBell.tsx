@@ -162,32 +162,35 @@ const NotificationBell = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative h-9 w-9 p-0 hover:bg-primary/5 rounded-xl transition-all">
-          <Bell className="h-5 w-5 text-gray-600" />
+        <Button variant="ghost" size="sm" aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'} className="relative h-9 w-9 p-0 hover:bg-primary/5 rounded-xl transition-all">
+          <Bell className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-500 text-white text-[10px] font-black rounded-full border-2 border-white animate-in zoom-in duration-300">
+            <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-destructive text-destructive-foreground text-[10px] font-black rounded-full border-2 border-background animate-in zoom-in duration-300">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-80 max-h-96 overflow-y-auto z-50 bg-white/95 backdrop-blur-xl border border-muted/20 shadow-2xl rounded-2xl p-0 overflow-hidden"
+        className="w-80 max-h-96 overflow-y-auto z-50 bg-popover/95 backdrop-blur-xl border border-muted/20 shadow-2xl rounded-2xl p-0 overflow-hidden"
         align="end"
         forceMount
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-muted/10 bg-muted/5">
           <span className="font-black text-xs uppercase tracking-widest text-muted-foreground/60">Notifications</span>
           {unreadCount > 0 && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 markAllAsRead();
               }}
-              className="text-[10px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
+              className="h-8 px-2 text-[10px] font-bold text-primary hover:text-primary/80 uppercase tracking-wider"
             >
               Mark all read
-            </button>
+            </Button>
           )}
         </div>
 

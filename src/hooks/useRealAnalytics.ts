@@ -67,20 +67,25 @@ export function useRealAnalytics() {
         recentFollowers,
         previousFollowers
       ] = await Promise.all([
-        // Total counts
-        supabase.from('artwork_views').select('id').in('artwork_id', artworkIds),
-        supabase.from('artwork_likes').select('id').in('artwork_id', artworkIds),
+        // Total counts.
+        // These are count-only, so use a HEAD request with count: 'exact'
+        // instead of pulling every row id back just to read .length -- an
+        // artist with thousands of views was transferring thousands of UUIDs
+        // per dashboard load. The revenue queries below still select `amount`
+        // because they genuinely need the values to sum.
+        supabase.from('artwork_views').select('id', { count: 'exact', head: true }).in('artwork_id', artworkIds),
+        supabase.from('artwork_likes').select('id', { count: 'exact', head: true }).in('artwork_id', artworkIds),
         supabase.from('artwork_unlocks').select('amount').in('artwork_id', artworkIds),
-        supabase.from('follows').select('id').eq('following_id', user.id),
+        supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', user.id),
         // Recent 30 days
-        supabase.from('artwork_views').select('id').in('artwork_id', artworkIds)
+        supabase.from('artwork_views').select('id', { count: 'exact', head: true }).in('artwork_id', artworkIds)
           .gte('created_at', thirtyDaysAgo.toISOString()),
-        supabase.from('artwork_views').select('id').in('artwork_id', artworkIds)
+        supabase.from('artwork_views').select('id', { count: 'exact', head: true }).in('artwork_id', artworkIds)
           .gte('created_at', sixtyDaysAgo.toISOString())
           .lt('created_at', thirtyDaysAgo.toISOString()),
-        supabase.from('artwork_likes').select('id').in('artwork_id', artworkIds)
+        supabase.from('artwork_likes').select('id', { count: 'exact', head: true }).in('artwork_id', artworkIds)
           .gte('created_at', thirtyDaysAgo.toISOString()),
-        supabase.from('artwork_likes').select('id').in('artwork_id', artworkIds)
+        supabase.from('artwork_likes').select('id', { count: 'exact', head: true }).in('artwork_id', artworkIds)
           .gte('created_at', sixtyDaysAgo.toISOString())
           .lt('created_at', thirtyDaysAgo.toISOString()),
         supabase.from('artwork_unlocks').select('amount').in('artwork_id', artworkIds)
@@ -88,28 +93,28 @@ export function useRealAnalytics() {
         supabase.from('artwork_unlocks').select('amount').in('artwork_id', artworkIds)
           .gte('created_at', sixtyDaysAgo.toISOString())
           .lt('created_at', thirtyDaysAgo.toISOString()),
-        supabase.from('follows').select('id').eq('following_id', user.id)
+        supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', user.id)
           .gte('created_at', thirtyDaysAgo.toISOString()),
-        supabase.from('follows').select('id').eq('following_id', user.id)
+        supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', user.id)
           .gte('created_at', sixtyDaysAgo.toISOString())
           .lt('created_at', thirtyDaysAgo.toISOString())
       ]);
 
-      // Calculate totals
-      const totalViews = viewsData.data?.length || 0;
-      const totalLikes = likesData.data?.length || 0;
+      // Calculate totals. Count-only queries return `count`, not `data`.
+      const totalViews = viewsData.count ?? 0;
+      const totalLikes = likesData.count ?? 0;
       const totalRevenue = (revenueData.data || []).reduce((sum, r) => sum + Number(r.amount), 0);
-      const totalFollowers = followersData.data?.length || 0;
+      const totalFollowers = followersData.count ?? 0;
 
       // Calculate growth percentages
-      const recentViewsCount = recentViews.data?.length || 0;
-      const previousViewsCount = previousViews.data?.length || 1; // Avoid division by zero
+      const recentViewsCount = recentViews.count ?? 0;
+      const previousViewsCount = previousViews.count || 1; // Avoid division by zero
       const viewsGrowth = previousViewsCount > 0 
         ? Math.round(((recentViewsCount - previousViewsCount) / previousViewsCount) * 100) 
         : recentViewsCount > 0 ? 100 : 0;
 
-      const recentLikesCount = recentLikes.data?.length || 0;
-      const previousLikesCount = previousLikes.data?.length || 1;
+      const recentLikesCount = recentLikes.count ?? 0;
+      const previousLikesCount = previousLikes.count || 1;
       const likesGrowth = previousLikesCount > 0 
         ? Math.round(((recentLikesCount - previousLikesCount) / previousLikesCount) * 100) 
         : recentLikesCount > 0 ? 100 : 0;
@@ -120,8 +125,8 @@ export function useRealAnalytics() {
         ? Math.round(((recentRevenueTotal - previousRevenueTotal) / previousRevenueTotal) * 100) 
         : recentRevenueTotal > 0 ? 100 : 0;
 
-      const recentFollowersCount = recentFollowers.data?.length || 0;
-      const previousFollowersCount = previousFollowers.data?.length || 1;
+      const recentFollowersCount = recentFollowers.count ?? 0;
+      const previousFollowersCount = previousFollowers.count || 1;
       const followersGrowth = previousFollowersCount > 0 
         ? Math.round(((recentFollowersCount - previousFollowersCount) / previousFollowersCount) * 100) 
         : recentFollowersCount > 0 ? 100 : 0;

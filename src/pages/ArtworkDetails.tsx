@@ -4,9 +4,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
   ArrowLeft, Eye, Heart, Maximize2, Bookmark,
-  Crown, Lock, Music, MessageCircle, Share2, X
+  Crown, Music, MessageCircle, Share2, X
 } from "lucide-react";
 import ArtworkFeedback from "@/components/artwork/ArtworkFeedback";
+import ArtworkDiscoveryCard from "@/components/artwork/ArtworkDiscoveryCard";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,6 +23,19 @@ import LogoLoader from "@/components/ui/LogoLoader";
 import { trackOncePerSession } from "@/lib/analytics";
 import { getOptimizedImageUrl, ImagePresets } from "@/lib/image-optimization";
 import { PayArtworkButton } from "@/components/payments/PayArtworkButton";
+
+interface RelatedArtwork {
+  id: string;
+  title: string;
+  artist: string;
+  artistId: string;
+  artistAvatar: string | null;
+  type: string;
+  imageUrl: string;
+  likes: number;
+  price: number;
+  currency: string;
+}
 
 export default function ArtworkDetails({ isModal = false }: { isModal?: boolean }) {
   const { id } = useParams();
@@ -41,6 +55,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
   const lastTapRef = useRef(0);
   const { format } = useCurrencyFormat();
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [relatedArtworks, setRelatedArtworks] = useState<RelatedArtwork[]>([]);
 
   useEffect(() => {
     // Reset state before loading new artwork
@@ -194,6 +209,83 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
     };
   }, [id, user?.id]);
 
+  // Related artwork — same category first, backfilled with recent public
+  // pieces so the section is never empty just because the category is niche.
+  useEffect(() => {
+    if (!artwork?.id) {
+      setRelatedArtworks([]);
+      return;
+    }
+    let isCancelled = false;
+
+    (async () => {
+      const RELATED_LIMIT = 8;
+      const baseQuery = supabase
+        .from('artworks')
+        .select('id, title, media_url, media_type, price, metadata, artist_id')
+        .eq('status', 'public')
+        .neq('id', artwork.id)
+        .limit(RELATED_LIMIT);
+
+      const { data: sameCategory } = artwork.category
+        ? await baseQuery.eq('category', artwork.category)
+        : { data: [] as any[] };
+
+      let pool = sameCategory || [];
+      if (pool.length < RELATED_LIMIT) {
+        const { data: recent } = await supabase
+          .from('artworks')
+          .select('id, title, media_url, media_type, price, metadata, artist_id')
+          .eq('status', 'public')
+          .neq('id', artwork.id)
+          .order('created_at', { ascending: false })
+          .limit(RELATED_LIMIT);
+        const seen = new Set(pool.map(a => a.id));
+        pool = [...pool, ...(recent || []).filter(a => !seen.has(a.id))].slice(0, RELATED_LIMIT);
+      }
+
+      if (pool.length === 0) {
+        if (!isCancelled) setRelatedArtworks([]);
+        return;
+      }
+
+      const artistIds = [...new Set(pool.map(a => a.artist_id).filter(Boolean))];
+      const artworkIds = pool.map(a => a.id);
+
+      const [{ data: artists }, { data: likeRows }] = await Promise.all([
+        artistIds.length > 0
+          ? supabase.from('public_profiles').select('id, full_name, avatar_url').in('id', artistIds)
+          : Promise.resolve({ data: [] as any[] }),
+        supabase.from('artwork_likes').select('artwork_id').in('artwork_id', artworkIds),
+      ]);
+
+      const artistMap = new Map((artists || []).map(a => [a.id, a]));
+      const likeCounts = new Map<string, number>();
+      (likeRows || []).forEach(r => likeCounts.set(r.artwork_id, (likeCounts.get(r.artwork_id) || 0) + 1));
+
+      const transformed: RelatedArtwork[] = pool.map(a => {
+        const meta = (a.metadata as any) || {};
+        const artistInfo = artistMap.get(a.artist_id);
+        return {
+          id: a.id,
+          title: a.title,
+          artist: artistInfo?.full_name || 'Unknown Artist',
+          artistId: a.artist_id,
+          artistAvatar: artistInfo?.avatar_url || null,
+          type: a.media_type,
+          imageUrl: a.media_url,
+          likes: likeCounts.get(a.id) || 0,
+          price: a.price || 0,
+          currency: meta.currency || 'USD',
+        };
+      });
+
+      if (!isCancelled) setRelatedArtworks(transformed);
+    })();
+
+    return () => { isCancelled = true; };
+  }, [artwork?.id, artwork?.category]);
+
   const handleLike = async () => {
     if (!user?.id) {
       toast({ title: "Sign in required", description: "Please sign in to like artworks." });
@@ -258,7 +350,9 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
     if (navigator.share) {
       try {
         await navigator.share({ title: artwork?.title, url });
-      } catch {}
+      } catch {
+        // User dismissed the native share sheet — nothing to do.
+      }
     } else if (navigator.clipboard) {
       await navigator.clipboard.writeText(url);
       toast({ title: "Link copied!" });
@@ -337,12 +431,24 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
     );
   }
 
+  const AccessBadge = () => (
+    <span className={cn(
+      "text-[10px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0",
+      artwork.accessType === "exclusive"
+        ? "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400"
+        : "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
+    )}>
+      <Crown className="h-3 w-3" />
+      {artwork.accessType === "exclusive" ? "Exclusive" : "Premium"}
+    </span>
+  );
+
   return (
     <div className={cn("min-h-screen flex flex-col bg-background", isModal && "min-h-0")}>
       {!isModal && <Navbar />}
 
       {isModal && (
-        <button 
+        <button
           onClick={() => navigate(-1)}
           className="fixed top-[calc(1rem+var(--safe-top))] right-4 z-[110] h-10 w-10 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/30 active:scale-90 transition-all shadow-xl"
         >
@@ -350,239 +456,243 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
         </button>
       )}
 
-      <main className={cn("flex-1 pb-4", isModal ? "pt-[var(--safe-top)]" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+1rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+1.5rem)]")}>
-        <div className={cn("max-w-6xl mx-auto px-0", !isModal && "sm:px-4 lg:px-8")}>
-          <div className={cn("bg-card overflow-hidden", !isModal ? "sm:rounded-2xl border-x-0 sm:border border-border/40 shadow-sm" : "border-none")}>
+      <main className={cn("flex-1 pb-16", isModal ? "pt-[var(--safe-top)]" : "pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+1rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+1.5rem)]")}>
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
 
-          {/* ── ARTIST HEADER (Instagram-style post header) ─────────── */}
-          <div className="flex items-center gap-3 px-3 sm:px-4 py-3">
-            <button onClick={() => navigate(-1)} className="mr-1 text-muted-foreground hover:text-foreground transition-colors sm:hidden">
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            <Link
-              to={`/artist/${artwork.artistId}`}
-              className="flex items-center gap-3 flex-1 min-w-0 group"
+          {!isModal && (
+            <button
+              onClick={() => navigate(-1)}
+              className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-6"
             >
-              {artwork.artistAvatar ? (
-                <img loading="lazy" decoding="async"
-                  src={artwork.artistAvatar}
-                  alt={artwork.artist}
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all"
-                />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center text-primary font-bold text-sm shrink-0">
-                  {artwork.artist?.charAt(0)?.toUpperCase()}
-                </div>
-              )}
-              <div className="min-w-0">
-                <p className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">
-                  {artwork.artist}
-                </p>
-                {artwork.category && (
-                  <p className="text-[11px] text-muted-foreground truncate">{artwork.category}</p>
-                )}
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+          )}
+
+          <div className="grid lg:grid-cols-[1.3fr_1fr] gap-6 lg:gap-12 items-start">
+
+            {/* ── MEDIA VIEWER ──────────────────────────────────────── */}
+            <div className="lg:sticky lg:top-24">
+              <div className="flex items-center justify-between mb-3 sm:hidden">
+                <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                {artwork.accessType !== "free" && <AccessBadge />}
               </div>
-            </Link>
-            {/* Access badge */}
-            {artwork.accessType !== "free" && (
-              <span className={cn(
-                "text-[10px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1",
-                artwork.accessType === "exclusive"
-                  ? "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-400"
-                  : "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
-              )}>
-                <Crown className="h-3 w-3" />
-                {artwork.accessType === "exclusive" ? "Exclusive" : "Premium"}
-              </span>
-            )}
-          </div>
 
-          {/* ── MEDIA (Full-width Instagram style) ─────────────────── */}
-          <div
-            className="relative w-full select-none"
-            onClick={handleDoubleTap}
-          >
-            {/* IMAGE */}
-            {artwork.type === "image" && artwork.imageUrl && (
-              <>
-                <div className="bg-muted/30 flex items-center justify-center">
-                  <img loading="lazy" decoding="async"
-                    src={getOptimizedImageUrl(artwork.imageUrl, ImagePresets.ARTWORK_DETAIL)}
-                    alt={artwork.title}
-                    className="w-full h-auto max-h-[90vh] object-contain block mx-auto"
-                    draggable={false}
-                  />
-                </div>
-                {/* Fullscreen */}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/40 backdrop-blur-sm text-white flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity">
-                      <Maximize2 className="h-3.5 w-3.5" />
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[98vw] max-h-[98vh] p-0 border-none bg-background rounded-2xl overflow-hidden flex items-center justify-center">
-                    <DialogTitle className="sr-only">Fullscreen — {artwork.title}</DialogTitle>
-                    <DialogDescription className="sr-only">Full size view of {artwork.title}</DialogDescription>
-                    <img loading="lazy" decoding="async" src={artwork.imageUrl} alt={artwork.title} className="max-w-full max-h-[96vh] object-contain" />
-                  </DialogContent>
-                </Dialog>
-              </>
-            )}
+              <div
+                className="relative w-full select-none rounded-2xl sm:rounded-3xl overflow-hidden bg-muted/30 border border-border/40 shadow-sm"
+                onClick={handleDoubleTap}
+              >
+                {/* IMAGE */}
+                {artwork.type === "image" && artwork.imageUrl && (
+                  <>
+                    <div className="flex items-center justify-center">
+                      <img loading="lazy" decoding="async"
+                        src={getOptimizedImageUrl(artwork.imageUrl, ImagePresets.ARTWORK_DETAIL)}
+                        alt={artwork.title}
+                        className="w-auto h-auto max-w-full max-h-[75vh] object-contain block mx-auto"
+                        draggable={false}
+                      />
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-black/40 backdrop-blur-sm text-white flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity">
+                          <Maximize2 className="h-3.5 w-3.5" />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="w-fit max-w-[98vw] max-h-[98vh] p-0 border-none bg-transparent shadow-none rounded-2xl overflow-hidden flex items-center justify-center">
+                        <DialogTitle className="sr-only">Fullscreen — {artwork.title}</DialogTitle>
+                        <DialogDescription className="sr-only">Full size view of {artwork.title}</DialogDescription>
+                        <img loading="lazy" decoding="async" src={artwork.imageUrl} alt={artwork.title} className="w-auto h-auto max-w-[98vw] max-h-[98vh] object-contain rounded-2xl" />
+                      </DialogContent>
+                    </Dialog>
+                  </>
+                )}
 
-            {/* VIDEO */}
-            {artwork.type === "video" && artwork.videoUrl && (
-              <video controls playsInline className="w-full h-auto block max-h-[80vh]">
-                <source src={artwork.videoUrl} type="video/mp4" />
-              </video>
-            )}
+                {/* VIDEO */}
+                {artwork.type === "video" && artwork.videoUrl && (
+                  <video controls playsInline className="w-full h-auto block max-h-[75vh]">
+                    <source src={artwork.videoUrl} type="video/mp4" />
+                  </video>
+                )}
 
-            {/* AUDIO */}
-            {(artwork.type === "audio" || artwork.type === "music") && (
-              <div className="p-6 space-y-4">
-                {artwork.imageUrl ? (
-                  <img loading="lazy" decoding="async" src={artwork.imageUrl} alt={artwork.title} className="w-full rounded-xl object-cover max-h-72" />
-                ) : (
-                  <div className="w-full h-48 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <Music className="h-14 w-14 text-primary/30" />
+                {/* AUDIO */}
+                {(artwork.type === "audio" || artwork.type === "music") && (
+                  <div className="p-6 space-y-4">
+                    {artwork.imageUrl ? (
+                      <img loading="lazy" decoding="async" src={artwork.imageUrl} alt={artwork.title} className="w-full rounded-xl object-cover max-h-72" />
+                    ) : (
+                      <div className="w-full h-48 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                        <Music className="h-14 w-14 text-primary/30" />
+                      </div>
+                    )}
+                    {artwork.audioUrl && (
+                      <audio controls className="w-full">
+                        <source src={artwork.audioUrl} type="audio/mpeg" />
+                      </audio>
+                    )}
                   </div>
                 )}
-                {artwork.audioUrl && (
-                  <audio controls className="w-full">
-                    <source src={artwork.audioUrl} type="audio/mpeg" />
-                  </audio>
+
+                {/* Double-tap heart animation */}
+                {doubleTapLike && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                    <Heart className="h-24 w-24 text-white fill-white drop-shadow-2xl animate-ping" style={{ animationDuration: '0.6s', animationIterationCount: 1 }} />
+                  </div>
                 )}
               </div>
-            )}
+            </div>
 
-            {/* Double-tap heart animation */}
-            {doubleTapLike && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <Heart className="h-24 w-24 text-white fill-white drop-shadow-2xl animate-ping" style={{ animationDuration: '0.6s', animationIterationCount: 1 }} />
-              </div>
-            )}
-          </div>
-
-          {/* ── ACTION BAR (Instagram-style) ────────────────────────── */}
-          <div className="flex items-center px-3 sm:px-4 py-3 border-t border-border/20 bg-card/95 backdrop-blur-sm">
-            {/* Left actions */}
-            <div className="flex items-center gap-1.5">
-              {/* Like */}
-              <div className="relative">
-                <button
-                  onClick={handleLike}
-                  disabled={isLiking}
-                  aria-label={isLiked ? "Unlike" : "Like"}
-                  className="h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 hover:bg-muted/60 disabled:opacity-60"
-                >
-                  <Heart
-                    className={cn(
-                      "h-6 w-6 transition-all duration-300",
-                      isLiked
-                        ? "text-red-500 fill-red-500 scale-110"
-                        : "text-foreground hover:text-muted-foreground"
+            {/* ── INFO PANEL ────────────────────────────────────────── */}
+            <div className="space-y-5 sm:space-y-6">
+              <div className="flex items-start justify-between gap-3">
+                <Link to={`/artist/${artwork.artistId}`} className="flex items-center gap-3 min-w-0 group">
+                  {artwork.artistAvatar ? (
+                    <img loading="lazy" decoding="async"
+                      src={artwork.artistAvatar}
+                      alt={artwork.artist}
+                      className="w-11 h-11 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all shrink-0"
+                    />
+                  ) : (
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center text-primary font-bold shrink-0">
+                      {artwork.artist?.charAt(0)?.toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                      {artwork.artist}
+                    </p>
+                    {artwork.category && (
+                      <p className="text-xs text-muted-foreground truncate">{artwork.category}</p>
                     )}
-                  />
-                </button>
-                <LikeParticles trigger={animateLike} />
+                  </div>
+                </Link>
+                {artwork.accessType !== "free" && <div className="hidden sm:block"><AccessBadge /></div>}
               </div>
 
-              {/* Comment */}
-              <button
-                onClick={openComments}
-                aria-label="Comments"
-                className="h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 hover:bg-muted/60"
-              >
-                <MessageCircle className="h-6 w-6 text-foreground hover:text-muted-foreground transition-colors" />
-              </button>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground leading-tight">
+                  {artwork.title}
+                </h1>
+              </div>
 
-              {/* Share */}
-              <button
-                onClick={handleShare}
-                aria-label="Share"
-                className="h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 hover:bg-muted/60"
-              >
-                <Share2 className="h-5 w-5 text-foreground hover:text-muted-foreground transition-colors" />
-              </button>
+              {artwork.description && (
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {artwork.description}
+                </p>
+              )}
+
+              {artwork.tags?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {artwork.tags.map((tag: string) => (
+                    <span key={tag} className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center gap-5 text-sm text-muted-foreground border-y border-border/40 py-4">
+                <span className="flex items-center gap-1.5">
+                  <Eye className="h-4 w-4" />
+                  {viewCount.toLocaleString()} views
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Heart className="h-4 w-4" />
+                  {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
+                </span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <button
+                    onClick={handleLike}
+                    disabled={isLiking}
+                    aria-label={isLiked ? "Unlike" : "Like"}
+                    className={cn(
+                      "h-11 px-4 rounded-full flex items-center gap-2 text-sm font-semibold border transition-all duration-200 active:scale-95",
+                      isLiked
+                        ? "bg-red-50 border-red-200 text-red-600 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400"
+                        : "border-border hover:bg-muted/60 text-foreground"
+                    )}
+                  >
+                    <Heart className={cn("h-[18px] w-[18px]", isLiked && "fill-current")} />
+                    Like
+                  </button>
+                  <LikeParticles trigger={animateLike} />
+                </div>
+
+                <button
+                  onClick={openComments}
+                  aria-label="Comments"
+                  className="h-11 px-4 rounded-full flex items-center gap-2 text-sm font-semibold border border-border hover:bg-muted/60 text-foreground transition-all duration-200 active:scale-95"
+                >
+                  <MessageCircle className="h-[18px] w-[18px]" />
+                  Comment
+                </button>
+
+                <button
+                  onClick={handleShare}
+                  aria-label="Share"
+                  className="h-11 w-11 rounded-full flex items-center justify-center border border-border hover:bg-muted/60 text-foreground transition-all duration-200 active:scale-95"
+                >
+                  <Share2 className="h-[18px] w-[18px]" />
+                </button>
+
+                <button
+                  onClick={handleBookmark}
+                  aria-label={isBookmarked ? "Remove from saved" : "Save"}
+                  className={cn(
+                    "h-11 w-11 rounded-full flex items-center justify-center border transition-all duration-200 active:scale-95 ml-auto",
+                    isBookmarked ? "border-primary/30 text-primary bg-primary/5" : "border-border hover:bg-muted/60 text-foreground"
+                  )}
+                >
+                  <Bookmark className={cn("h-[18px] w-[18px]", isBookmarked && "fill-current")} />
+                </button>
+              </div>
+
+              {/* Price / purchase CTA */}
+              {artwork.price > 0 && (artwork.accessType === "premium" || artwork.accessType === "exclusive") && (
+                <div className="pt-2">
+                  <div className="flex items-baseline justify-between mb-3">
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Price</span>
+                    <span className="text-2xl font-black text-foreground">{format(artwork.price, artwork.currency)}</span>
+                  </div>
+                  <PayArtworkButton
+                    artworkId={id!}
+                    amount={artwork.price}
+                    artworkTitle={artwork.title}
+                    className="w-full h-12 rounded-2xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-lg transition-all active:scale-[0.98]"
+                    onSuccess={() => window.location.reload()}
+                  />
+                </div>
+              )}
             </div>
-
-            {/* Spacer */}
-            <div className="flex-1" />
-
-            {/* Bookmark */}
-            <button
-              onClick={handleBookmark}
-              aria-label={isBookmarked ? "Remove from saved" : "Save"}
-              className="h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 hover:bg-muted/60"
-            >
-              <Bookmark
-                className={cn(
-                  "h-6 w-6 transition-all duration-300",
-                  isBookmarked
-                    ? "text-foreground fill-foreground"
-                    : "text-foreground hover:text-muted-foreground"
-                )}
-              />
-            </button>
           </div>
 
-          {/* ── LIKES COUNT ─────────────────────────────────────────── */}
-          <div className="px-3 sm:px-4">
-            <p className="text-sm font-semibold text-foreground">
-              {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
-            </p>
-          </div>
-
-          {/* ── TITLE & DESCRIPTION (Instagram caption style) ──────── */}
-          <div className="px-3 sm:px-4 pt-1.5 pb-1 space-y-1">
-            <p className="text-sm">
-              <Link to={`/artist/${artwork.artistId}`} className="font-semibold text-foreground hover:text-muted-foreground transition-colors mr-1.5">
-                {artwork.artist}
-              </Link>
-              <span className="font-medium text-foreground">{artwork.title}</span>
-            </p>
-            {artwork.description && (
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {artwork.description}
-              </p>
-            )}
-          </div>
-
-          {/* ── TAGS ────────────────────────────────────────────────── */}
-          {artwork.tags?.length > 0 && (
-            <div className="px-3 sm:px-4 pb-1">
-              <p className="text-sm text-primary/80">
-                {artwork.tags.map((tag: string) => `#${tag}`).join(' ')}
-              </p>
-            </div>
+          {/* ── RELATED ARTWORK ─────────────────────────────────────── */}
+          {relatedArtworks.length > 0 && (
+            <section className="mt-16 sm:mt-24">
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground mb-6 sm:mb-8">
+                More to Discover
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                {relatedArtworks.map((related, idx) => (
+                  <ArtworkDiscoveryCard
+                    key={related.id}
+                    {...related}
+                    position={idx}
+                    surface="artwork_related"
+                  />
+                ))}
+              </div>
+            </section>
           )}
-
-          {/* ── VIEWS ───────────────────────────────────────────────── */}
-          <div className="px-3 sm:px-4 pb-2">
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-              <Eye className="h-3 w-3" />
-              {viewCount.toLocaleString()} views
-            </p>
-          </div>
-
-          {/* ── PRICE / PURCHASE CTA ────────────────────────────────── */}
-          {artwork.price > 0 && (artwork.accessType === "premium" || artwork.accessType === "exclusive") && (
-            <div className="px-3 sm:px-4 pb-3">
-              <PayArtworkButton 
-                artworkId={id!} 
-                amount={artwork.price} 
-                artworkTitle={artwork.title}
-                className="w-full h-11 rounded-xl font-black bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 hover:from-amber-500 hover:via-orange-600 hover:to-red-600 text-white border-none shadow-md transition-all active:scale-95"
-                onSuccess={() => window.location.reload()}
-              />
-            </div>
-          )}
-
-          </div>
-
-          {/* ── COMMENT BOTTOM SHEET ───────────────────────────────── */}
-          {id && <ArtworkFeedback artworkId={id} isOpen={commentsOpen} onClose={() => setCommentsOpen(false)} />}
-      </div>
+        </div>
       </main>
+
+      {id && <ArtworkFeedback artworkId={id} isOpen={commentsOpen} onClose={() => setCommentsOpen(false)} />}
       {!isModal && <Footer />}
     </div>
   );

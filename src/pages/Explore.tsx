@@ -3,16 +3,17 @@ import { cn } from '@/lib/utils';
 import { usePublicArtworks } from '@/hooks/usePublicArtworks';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import ArtworkCard from '@/components/artwork/ArtworkCard';
+import ArtworkDiscoveryCard from '@/components/artwork/ArtworkDiscoveryCard';
 import TopFilters from '@/components/explore/TopFilters';
 import RecentlyViewed from '@/components/explore/RecentlyViewed';
 import GlassCard from '@/components/ui/glass-card';
-import { Loader2 } from 'lucide-react';
 import LogoLoader from '@/components/ui/LogoLoader';
 import { Button } from '@/components/ui/button';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArtworkSkeleton } from '@/components/artwork/ArtworkSkeleton';
 import { track } from '@/lib/analytics';
+import { EmptyState } from '@/components/shared';
+import { ImageOff } from 'lucide-react';
 
 const Explore = () => {
   const { artworks, loading, error, hasMore, loadMore, loadingMore, refetch } = usePublicArtworks();
@@ -375,57 +376,43 @@ const Explore = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative pt-[calc(6rem+var(--safe-top))] sm:pt-[calc(8rem+var(--safe-top))] pb-12 sm:pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(120,119,198,0.1),transparent)] pointer-events-none" />
-        
+      <section className="relative pt-[calc(5rem+var(--safe-top))] sm:pt-[calc(7rem+var(--safe-top))] pb-8 sm:pb-14 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+
         <div className="container-responsive relative mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] sm:text-xs font-black uppercase tracking-widest mb-4 sm:mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-            </span>
-            Discover the Future of Art
-          </div>
-          
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 sm:mb-6 tracking-tighter leading-tight sm:leading-[0.9] animate-in fade-in slide-in-from-bottom-6 duration-1000">
-            EXPLORE THE <br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent uppercase">COLLECTION</span>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black mb-3 sm:mb-4 tracking-tighter leading-[1.05] animate-in fade-in slide-in-from-bottom-6 duration-1000">
+            Explore the <span className="text-brand-gradient">Collection</span>
           </h1>
-          
-          <p className="text-sm sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto font-medium leading-relaxed opacity-80 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-            Curated masterpieces from visionaries worldwide. 
-            Filter by medium, style, or artist to find your next obsession.
+
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-xl mx-auto font-medium leading-relaxed opacity-80 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
+            Discover original work from independent artists around the world.
           </p>
         </div>
       </section>
 
       {/* Recently Viewed */}
-      <div className="relative z-10 -mt-8 mb-12 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
+      <div className="relative z-10 mb-10 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
         <RecentlyViewed />
       </div>
 
       {/* Trending Section */}
       {(trendingArtworks.length > 0 || loading) && (
-        <section className="container-responsive mx-auto py-8 animate-in fade-in duration-1000 delay-500">
-          <div className="flex items-center justify-between mb-8 sm:mb-12">
-            <div>
-              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-foreground uppercase">Trending Now</h2>
-              <div className="h-1.5 w-12 bg-primary rounded-full mt-2" />
-            </div>
+        <section className="container-responsive mx-auto py-6 animate-in fade-in duration-1000 delay-500">
+          <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Trending Now</h2>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {loading ? (
               [...Array(4)].map((_, idx) => <ArtworkSkeleton key={`trend-skeleton-${idx}`} />)
             ) : (
               trendingArtworks.map((artwork, idx) => (
-                <div 
-                  key={`trending-${artwork.id}`} 
+                <div
+                  key={`trending-${artwork.id}`}
                   className="animate-in fade-in slide-in-from-bottom-4 duration-700"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
-                  <ArtworkCard
+                  <ArtworkDiscoveryCard
                     {...artwork}
                     position={idx}
                     surface="explore_trending"
@@ -434,7 +421,6 @@ const Explore = () => {
               ))
             )}
           </div>
-          <div className="h-px bg-gradient-to-r from-transparent via-border/10 to-transparent my-4" />
         </section>
       )}
 
@@ -457,19 +443,19 @@ const Explore = () => {
               <div className={cn(
                 "transition-all duration-500",
                 viewMode === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8'
-                  : 'flex flex-col gap-4 sm:gap-6 max-w-4xl mx-auto'
+                  ? 'grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'
+                  : 'flex flex-col gap-4 sm:gap-6 max-w-2xl mx-auto'
               )}>
                 {loading ? (
                   [...Array(8)].map((_, idx) => <ArtworkSkeleton key={`skeleton-${idx}`} />)
                 ) : (
                   filteredArtworks.map((artwork, idx) => (
-                    <div 
+                    <div
                       key={artwork.id}
                       className="animate-in fade-in zoom-in-95 duration-500"
                       style={{ animationDelay: `${(idx % 12) * 50}ms` }}
                     >
-                      <ArtworkCard
+                      <ArtworkDiscoveryCard
                         {...artwork}
                         position={idx}
                         searchQuery={activeSearchQuery || undefined}
@@ -484,48 +470,37 @@ const Explore = () => {
                 <div className="flex flex-col items-center justify-center py-12 border-t border-border/10">
                   <Button
                     onClick={loadMore}
-                    disabled={loadingMore}
+                    loading={loadingMore}
                     className="rounded-2xl px-10 h-12 font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
                   >
-                    {loadingMore ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Loading More
-                      </>
-                    ) : (
-                      'Load More'
-                    )}
+                    {loadingMore ? 'Loading More' : 'Load More'}
                   </Button>
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-center py-24 sm:py-32">
-              <div className="max-w-md mx-auto space-y-8">
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-                  <div className="relative text-7xl sm:text-8xl animate-bounce">🎨</div>
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-2xl sm:text-3xl font-black tracking-tight">SILENCE IN THE GALLERY</h3>
-                  <p className="text-muted-foreground font-medium leading-relaxed">
-                    {currentCategory !== 'all' 
-                      ? 'Currently not found — coming soon' 
-                      : "We couldn't find any artworks matching your current filters. Try broadening your search or exploring new categories."}
-                  </p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleFiltersChange({
-                      search: '', category: 'all', artworkType: 'all', priceRange: 'all', 
-                      tags: [], sortBy: 'most_recent', location: ''
-                    })}
-                    className="rounded-2xl px-8 h-12 font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all"
-                  >
-                    Reset All Filters
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <EmptyState
+              icon={ImageOff}
+              size="lg"
+              title="No artworks found"
+              description={
+                currentCategory !== 'all'
+                  ? 'Currently not found — coming soon'
+                  : "We couldn't find any artworks matching your current filters. Try broadening your search or exploring new categories."
+              }
+              action={
+                <Button
+                  variant="outline"
+                  onClick={() => handleFiltersChange({
+                    search: '', category: 'all', artworkType: 'all', priceRange: 'all',
+                    tags: [], sortBy: 'most_recent', location: ''
+                  })}
+                  className="rounded-2xl px-8 h-12 font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all"
+                >
+                  Reset All Filters
+                </Button>
+              }
+            />
           )}
         </main>
       </div>

@@ -40,6 +40,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { broadcastRefresh, useRealtimeSync } from "@/lib/realtime-sync";
 import TabErrorBoundary from "@/components/dashboard/TabErrorBoundary";
+import LogoLoader from "@/components/ui/LogoLoader";
 interface Project {
   id: string;
   title: string;
@@ -335,8 +336,25 @@ const ClientDashboard = () => {
       }
 
       // 2. Restore UI State (Dialogs, etc.)
+      //
+      // These dialogs are all Projects-tab concepts (create project, a specific
+      // project's detail modal, artist assignment for a project). Restoring
+      // them was previously unconditional, with no check against the URL's
+      // `tab` param -- unlike the tab-restore just above, which correctly
+      // skips itself when the URL already specifies a tab. That mismatch meant
+      // an unrelated leftover dialog (e.g. from an earlier session that ended
+      // with "New Project" open and was never explicitly closed) would pop up
+      // on top of a completely different tab -- reproduced by navigating
+      // straight to `?tab=artists` and seeing the Create Project dialog
+      // floating over the Saved Artists list. Only restore when the URL either
+      // has no tab (a bare reload of "wherever I was") or explicitly points at
+      // Projects.
+      const tabParam = searchParams.get('tab');
+      const uiStateBelongsToCurrentTab = !tabParam || tabParam === 'projects';
       try {
-        const savedUIState = sessionStorage.getItem('client_dashboard_ui_state');
+        const savedUIState = uiStateBelongsToCurrentTab
+          ? sessionStorage.getItem('client_dashboard_ui_state')
+          : null;
         if (savedUIState) {
           const parsed = JSON.parse(savedUIState);
           if (parsed.createProjectOpen) setCreateProjectOpen(true);
@@ -348,6 +366,11 @@ const ClientDashboard = () => {
             setAssigningProjectId(parsed.assigningProjectId);
             setArtistSelectionOpen(true);
           }
+        } else if (!uiStateBelongsToCurrentTab) {
+          // Landing explicitly on a different tab supersedes any stale dialog
+          // state from a prior session -- clear it so it can't resurface later
+          // on a bare reload either.
+          sessionStorage.removeItem('client_dashboard_ui_state');
         }
       } catch (e) {
         console.error("Failed to restore UI state", e);
@@ -586,7 +609,7 @@ const ClientDashboard = () => {
 
   if (loading || profileLoading) {
     return (
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
+      <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <LogoLoader text="Loading your dashboard..." />
@@ -596,16 +619,16 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
+    <div className="flex flex-col min-h-screen bg-gray-50/50 dark:bg-background">
       <Navbar />
 
       <div className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pb-[calc(7rem+var(--safe-bottom))] sm:pb-12 pt-[calc(4.75rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))] lg:pt-[calc(6.5rem+var(--safe-top))]">
         {/* Dashboard Header */}
         {selectedTab === 'overview' && (
-          <div className="mb-4 sm:mb-6 lg:mb-8 animate-fade-in">
-            <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black mb-1 sm:mb-2">Client Dashboard</h1>
-            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
-              Welcome back, <span className="font-black text-foreground">{userName}</span>! Manage your projects and discover new artists.
+          <div className="space-y-2 sm:space-y-3 max-w-2xl mb-6 sm:mb-8 lg:mb-10">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.1] animate-in fade-in slide-in-from-left-4 duration-500">Client Dashboard</h1>
+            <p className="text-muted-foreground text-xs sm:text-base lg:text-lg leading-relaxed font-medium opacity-80 animate-in fade-in slide-in-from-left-6 duration-700">
+              Welcome back, <span className="text-foreground font-bold">{userName}</span>! Manage your projects and discover new artists.
             </p>
           </div>
         )}
@@ -621,6 +644,7 @@ const ClientDashboard = () => {
                       <TabsTrigger
                         key={tab.value}
                         value={tab.value}
+                        data-testid={`dashboard-tab-${tab.value}`}
                         className={cn(
                           "flex flex-col items-center gap-1.5 text-[10px] px-3.5 py-3 rounded-xl transition-all duration-300 snap-center min-w-[90px]",
                           "sm:flex-row sm:gap-2 sm:text-xs sm:px-4 sm:py-2.5 sm:rounded-2xl sm:min-w-[100px]",
@@ -797,7 +821,7 @@ const ClientDashboard = () => {
                             </div>
                           </div>
                           <div className="flex sm:flex-col gap-2 shrink-0 self-end sm:self-center">
-                            <Button size="sm" variant="outline" className="rounded-xl px-4 hover:bg-primary hover:text-white transition-all shadow-sm" onClick={() => {
+                            <Button size="sm" variant="outline" className="rounded-xl px-4 hover:bg-primary hover:text-primary-foreground transition-all shadow-sm" onClick={() => {
                               setSelectedProjectId(project.id);
                               setProjectModalOpen(true);
                             }}>
@@ -967,7 +991,7 @@ const ClientDashboard = () => {
                             {project.description && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{project.description}</p>}
                             <div className="flex items-center gap-2 mt-2 sm:mt-3">
                               <div className="flex-1 bg-gray-200 dark:bg-muted rounded-full h-1.5 sm:h-2">
-                                <div className="bg-gradient-to-r from-artswarit-purple to-blue-500 h-full rounded-full transition-all duration-500" style={{
+                                <div className="bg-brand-gradient h-full rounded-full transition-all duration-500" style={{
                             width: `${project.progress}%`
                           }} />
                               </div>
@@ -1004,10 +1028,21 @@ const ClientDashboard = () => {
                                   
                                   {(project.status === 'Draft' || project.status === 'Pending Confirm') && (
                                     <>
-                                      <Button 
-                                        size="sm" 
-                                        variant="outline" 
-                                        className="h-9 sm:h-10 min-w-[44px] text-xs border-primary text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                                      {/* On a Draft, assigning an artist is the
+                                          only way forward, so it gets primary
+                                          weight -- it previously matched
+                                          View/Delete and nothing signalled the
+                                          required next step. On Pending Confirm
+                                          it stays secondary, because "Confirm"
+                                          is the primary action there. */}
+                                      <Button
+                                        size="sm"
+                                        variant={project.status === 'Draft' ? 'default' : 'outline'}
+                                        className={
+                                          project.status === 'Draft'
+                                            ? "h-9 sm:h-10 min-w-[44px] text-xs bg-primary text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                                            : "h-9 sm:h-10 min-w-[44px] text-xs border-primary text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                                        }
                                         disabled={!!buttonLoading[`assign-${project.id}`]}
                                         onClick={() => {
                                           setAssigningProjectId(project.id);
@@ -1015,7 +1050,10 @@ const ClientDashboard = () => {
                                         }}
                                       >
                                         {buttonLoading[`assign-${project.id}`] ? (
-                                          <span className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                          <span className={cn(
+                                            "h-3 w-3 animate-spin rounded-full border-2 border-t-transparent",
+                                            project.status === 'Draft' ? "border-primary-foreground" : "border-primary"
+                                          )} />
                                         ) : (
                                           project.status === 'Draft' ? 'Assign Artist' : 'Reassign'
                                         )}
@@ -1151,8 +1189,8 @@ const ClientDashboard = () => {
                 <TabErrorBoundary tabLabel="My Works">
                 <Tabs defaultValue="purchased" className="w-full">
                   <TabsList className="bg-muted/50 p-1 rounded-xl mb-4 inline-flex w-auto">
-                    <TabsTrigger value="purchased" className="rounded-lg text-xs px-4 py-2">Purchased</TabsTrigger>
-                    <TabsTrigger value="saved" className="rounded-lg text-xs px-4 py-2">Wishlist</TabsTrigger>
+                    <TabsTrigger value="purchased" data-testid="mywork-tab-purchased" className="rounded-lg text-xs px-4 py-2">Purchased</TabsTrigger>
+                    <TabsTrigger value="saved" data-testid="mywork-tab-saved" className="rounded-lg text-xs px-4 py-2">Wishlist</TabsTrigger>
                   </TabsList>
                   <TabsContent value="purchased" className="mt-0">
                     <PurchasedArtworks />
@@ -1188,9 +1226,9 @@ const ClientDashboard = () => {
                 <Tabs defaultValue="profile" className="w-full">
                   <div className="flex overflow-x-auto pb-2 mb-6 -mx-1 px-1 scrollbar-hide">
                     <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-3 h-auto overflow-x-auto">
-                      <TabsTrigger value="profile" className="rounded-lg text-xs px-4 py-2 shrink-0">Profile</TabsTrigger>
-                      <TabsTrigger value="payments" className="rounded-lg text-xs px-4 py-2 shrink-0">Payments</TabsTrigger>
-                      <TabsTrigger value="settings" className="rounded-lg text-xs px-4 py-2 shrink-0">Settings</TabsTrigger>
+                      <TabsTrigger value="profile" data-testid="account-tab-profile" className="rounded-lg text-xs px-4 py-2 shrink-0">Profile</TabsTrigger>
+                      <TabsTrigger value="payments" data-testid="account-tab-payments" className="rounded-lg text-xs px-4 py-2 shrink-0">Payments</TabsTrigger>
+                      <TabsTrigger value="settings" data-testid="account-tab-settings" className="rounded-lg text-xs px-4 py-2 shrink-0">Settings</TabsTrigger>
                     </TabsList>
                   </div>
                   

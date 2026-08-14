@@ -8,6 +8,8 @@ import { Bell, Check, Info, CheckCircle, AlertTriangle, XCircle } from 'lucide-r
 import { useToast } from '@/hooks/use-toast';
 import LogoLoader from '@/components/ui/LogoLoader';
 import { cn } from '@/lib/utils';
+import { EmptyState, PageHeader, RetryableError } from '@/components/shared';
+import { useNavigate } from 'react-router-dom';
 
 interface Notification {
   id: string;
@@ -27,8 +29,17 @@ const NotificationCenter = () => {
   const [loading, setLoading] = useState(true);
   const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  const [markingAllRead, setMarkingAllRead] = useState(false);
+  const navigate = useNavigate();
 
-  const fetchNotifications = useCallback(async () => {
+  const fetchNotifications = useCallback(async (showLoading = true) => {
+    if (!user?.id) {
+      if (showLoading) setLoading(false);
+      return;
+    }
+    setError(null);
+    if (showLoading) setLoading(true);
     try {
       const {
         data,
@@ -38,21 +49,23 @@ const NotificationCenter = () => {
       }).limit(200);
       if (error) {
         console.error('Error fetching notifications:', error);
-        setNotifications([]);
+        setError(error);
         return;
       }
       setNotifications(data as Notification[] || []);
     } catch (error) {
       console.error('Error:', error);
-      setNotifications([]);
+      setError(error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, [user?.id]);
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
+    } else {
+      setLoading(false);
     }
   }, [user, fetchNotifications]);
 
@@ -65,7 +78,7 @@ const NotificationCenter = () => {
       table: 'notifications',
       filter: `user_id=eq.${user.id}`
     }, () => {
-      fetchNotifications();
+      fetchNotifications(false);
     }).subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -106,6 +119,7 @@ const NotificationCenter = () => {
 
       if (error) {
         console.error('Error marking notification as read:', error);
+        toast({ title: 'Could not update notification', description: 'Please try again.', variant: 'destructive' });
         return;
       }
 
@@ -116,10 +130,13 @@ const NotificationCenter = () => {
       );
     } catch (error) {
       console.error('Error:', error);
+      toast({ title: 'Could not update notification', description: 'Please try again.', variant: 'destructive' });
     }
   };
 
   const markAllAsRead = async () => {
+    if (!user?.id || markingAllRead) return;
+    setMarkingAllRead(true);
     try {
       const { error } = await supabase
         .from('notifications')
@@ -129,6 +146,7 @@ const NotificationCenter = () => {
 
       if (error) {
         console.error('Error marking all notifications as read:', error);
+        toast({ title: 'Could not update notifications', description: 'Please try again.', variant: 'destructive' });
         return;
       }
 
@@ -142,6 +160,9 @@ const NotificationCenter = () => {
       });
     } catch (error) {
       console.error('Error:', error);
+      toast({ title: 'Could not update notifications', description: 'Please try again.', variant: 'destructive' });
+    } finally {
+      setMarkingAllRead(false);
     }
   };
 
@@ -181,32 +202,49 @@ const NotificationCenter = () => {
     );
   }
 
+  if (error) {
+    return (
+      <RetryableError
+        title="Could not load notifications"
+        description="Please check your connection and try again."
+        error={error}
+        onRetry={fetchNotifications}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Bell className="h-6 w-6" />
-          <h2 className="text-2xl font-semibold">Notifications</h2>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <PageHeader
+          title="Notifications"
+          description="Stay up to date with activity across your work and profile."
+          size="sm"
+          className="flex-1"
+          eyebrow={<span className="inline-flex items-center gap-2"><Bell className="h-3.5 w-3.5" aria-hidden /> Activity</span>}
+        />
+        <div className="flex items-center gap-2 sm:shrink-0">
           {unreadCount > 0 && (
             <Badge variant="destructive" className="ml-2">
               {unreadCount} unread
             </Badge>
           )}
-        </div>
-        {unreadCount > 0 && (
-          <Button onClick={markAllAsRead} variant="outline" size="sm">
+          {unreadCount > 0 && (
+          <Button onClick={markAllAsRead} variant="outline" size="sm" loading={markingAllRead}>
             <Check className="h-4 w-4 mr-1" />
             Mark all as read
           </Button>
-        )}
+          )}
+        </div>
       </div>
 
       {notifications.length === 0 ? (
         <Card>
-          <CardContent className="text-center py-8">
-            <Bell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No notifications yet</p>
-          </CardContent>
+          <EmptyState
+            icon={Bell}
+            title="No notifications yet"
+            description="Updates about projects, messages, and activity will appear here."
+          />
         </Card>
       ) : (
         <div className="space-y-4">
@@ -224,7 +262,7 @@ const NotificationCenter = () => {
                 onClick={() => {
                   if (!notification.is_read) markAsRead(notification.id);
                   const link = getNotificationLink(notification);
-                  if (link !== '#') window.location.href = link;
+                  if (link !== '#') navigate(link);
                 }}
               >
                 <CardHeader className="pb-3">
@@ -250,6 +288,7 @@ const NotificationCenter = () => {
                           onClick={() => markAsRead(notification.id)}
                           variant="ghost"
                           size="sm"
+                          aria-label="Mark notification as read"
                           className="h-8 w-8 p-0"
                         >
                           <Check className="h-4 w-4" />

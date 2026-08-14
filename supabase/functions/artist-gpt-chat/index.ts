@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { callerBucketKey, checkRateLimit, rateLimitResponse } from '../_shared/rateLimit.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,6 +17,10 @@ const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 // Input validation constants
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_MESSAGES = 50;
+
+// Throttle per authenticated caller to cap LLM spend.
+const CHAT_RATE_LIMIT = 20;
+const CHAT_RATE_WINDOW_SECONDS = 60;
 
 // Input validation for messages
 interface Message {
@@ -92,6 +97,40 @@ serve(async (req: Request) => {
   }
 
   try {
+    // This endpoint proxies a paid LLM API and had no auth check at all
+    // (verify_jwt is off at the gateway), leaving it open to unauthenticated
+    // cost abuse. It has no caller in the web app -- the site chatbot uses
+    // universal-chatgpt-assistant -- so requiring a valid session here costs
+    // nothing in UX and closes the hole.
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const authClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data: authData, error: authError } = await authClient.auth.getUser(
+      authHeader.replace(/^Bearer\s+/i, "")
+    );
+
+    if (authError || !authData?.user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid authentication" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const limit = await checkRateLimit(
+      callerBucketKey(req, "artist-gpt", authData.user.id),
+      CHAT_RATE_LIMIT,
+      CHAT_RATE_WINDOW_SECONDS
+    );
+    if (!limit.allowed) {
+      return rateLimitResponse(limit.retryAfter, corsHeaders);
+    }
+
     if (!GOOGLE_GEMINI_API_KEY) {
       console.error("GOOGLE_GEMINI_API_KEY not set");
       return new Response(

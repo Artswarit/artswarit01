@@ -115,8 +115,8 @@ const LeaveReviewDialog: React.FC<LeaveReviewDialogProps> = ({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div>
-            <Label>Rating *</Label>
-            <div className="flex gap-1 mt-2">
+            <Label id="review-rating-label">Rating *</Label>
+            <div className="flex gap-1 mt-2" role="radiogroup" aria-labelledby="review-rating-label">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -124,7 +124,10 @@ const LeaveReviewDialog: React.FC<LeaveReviewDialogProps> = ({
                   onClick={() => setRating(star)}
                   onMouseEnter={() => setHoverRating(star)}
                   onMouseLeave={() => setHoverRating(0)}
-                  className="focus:outline-none"
+                  className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-label={`${star} star${star === 1 ? '' : 's'}`}
+                  aria-checked={rating === star}
+                  role="radio"
                 >
                   <Star
                     className={`w-8 h-8 transition-colors ${

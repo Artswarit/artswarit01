@@ -267,7 +267,7 @@ const ProjectRating = () => {
 
                 <CardContent className="space-y-3">
                   <Button
-                    className="w-full h-[48px] bg-gradient-to-r from-artswarit-purple to-blue-500 font-bold"
+                    className="w-full h-[48px] bg-brand-gradient font-bold"
                     onClick={() => {
                       setSelectedProject(project);
                       setDialogOpen(true);
@@ -392,7 +392,7 @@ const ProjectRating = () => {
             <Button
               onClick={handleSubmitRating}
               disabled={rating === 0 || submitting}
-              className="h-[48px] w-full sm:w-auto bg-gradient-to-r from-artswarit-purple to-blue-500 font-bold"
+              className="h-[48px] w-full sm:w-auto bg-brand-gradient font-bold"
             >
               {submitting ? "Submitting..." : "Submit Rating"}
             </Button>

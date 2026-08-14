@@ -147,7 +147,7 @@ const ResetPassword = () => {
             <CardContent className="space-y-3">
               <Button
                 onClick={() => navigate('/forgot-password')}
-                className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
+                className="w-full h-11 bg-brand-gradient hover:bg-brand-gradient-hover text-primary-foreground font-medium"
               >
                 Request new link
               </Button>
@@ -201,7 +201,7 @@ const ResetPassword = () => {
                   </p>
                   <Button
                     onClick={() => navigate('/login')}
-                    className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
+                    className="w-full h-11 bg-brand-gradient hover:bg-brand-gradient-hover text-primary-foreground font-medium"
                   >
                     Go to Login
                   </Button>
@@ -270,7 +270,7 @@ const ResetPassword = () => {
 
                   <Button
                     type="submit"
-                    className="w-full h-11 bg-gradient-to-r from-artswarit-purple to-blue-500 hover:from-artswarit-purple-dark hover:to-blue-600 text-white font-medium"
+                    className="w-full h-11 bg-brand-gradient hover:bg-brand-gradient-hover text-primary-foreground font-medium"
                     loading={isSubmitting}
                   >
                     {isSubmitting ? "Updating..." : "Reset Password"}

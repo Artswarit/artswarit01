@@ -363,7 +363,7 @@ const ServicesManagement: React.FC = () => {
                       variant="ghost"
                       size="icon"
                       className="h-12 w-12 rounded-2xl hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/10 transition-all duration-300"
-                      onClick={() => openEditDialog(s)}
+                      aria-label="Edit service" onClick={() => openEditDialog(s)}
                     >
                       <Pencil className="h-5 w-5" />
                     </Button>
@@ -371,7 +371,7 @@ const ServicesManagement: React.FC = () => {
                       variant="ghost"
                       size="icon"
                       className="h-12 w-12 rounded-2xl hover:bg-destructive/10 hover:text-destructive border border-transparent hover:border-destructive/10 transition-all duration-300"
-                      onClick={() => confirmDelete(s.id)}
+                      aria-label="Delete service" onClick={() => confirmDelete(s.id)}
                     >
                       <Trash2 className="h-5 w-5" />
                     </Button>
@@ -459,10 +459,8 @@ const ServicesManagement: React.FC = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={saving} className="h-14 flex-1 font-black text-[10px] uppercase tracking-widest rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                {saving ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : editingService ? (
+              <Button onClick={handleSave} loading={saving} className="h-14 flex-1 font-black text-[10px] uppercase tracking-widest rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                {saving ? null : editingService ? (
                   <Pencil className="h-4 w-4 mr-2" />
                 ) : (
                   <Plus className="h-4 w-4 mr-2" />

@@ -22,6 +22,7 @@ export interface PublicArtwork {
   artist: string;
   artistId: string;
   artistLocation: string | null;
+  artistAvatar: string | null;
   likes: number;
   views: number;
   is_pinned: boolean;
@@ -69,12 +70,12 @@ export const usePublicArtworks = () => {
       const { data: artistsData } = artistIds.length > 0
         ? await supabase
             .from('public_profiles')
-            .select('id, full_name, location')
+            .select('id, full_name, location, avatar_url')
             .in('id', artistIds)
         : { data: [] as any[] };
 
       // Create artist map
-      const artistMap = new Map((artistsData || []).map(a => [a.id, { name: a.full_name, location: a.location }]));
+      const artistMap = new Map((artistsData || []).map(a => [a.id, { name: a.full_name, location: a.location, avatar: a.avatar_url }]));
 
       const freeArtworks = (artworksData || []).filter(artwork => {
         const accessType = (artwork.metadata as any)?.access_type || 'free';
@@ -119,6 +120,7 @@ export const usePublicArtworks = () => {
           artist: artistInfo?.name || 'Unknown Artist',
           artistId: artwork.artist_id,
           artistLocation: artistInfo?.location || null,
+          artistAvatar: artistInfo?.avatar || null,
           likes: liveLikes.get(artwork.id) || 0,
           views: liveViews.get(artwork.id) || 0,
           is_pinned: (artwork.metadata as any)?.is_pinned || false,

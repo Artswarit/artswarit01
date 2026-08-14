@@ -95,7 +95,7 @@ const Categories = () => {
       
       <main className="container mx-auto px-4 pt-[calc(var(--navbar-height-mobile)+var(--safe-top)+1rem)] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top)+2rem)] pb-16 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-artswarit-purple to-blue-500">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-brand-gradient">
             All Categories
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">

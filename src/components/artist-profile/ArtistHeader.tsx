@@ -93,7 +93,11 @@ const ArtistHeader: React.FC<Props> = ({
           src={getOptimizedImageUrl(artist.cover, ImagePresets.PROFILE_COVER)}
           alt=""
           loading="eager"
-          {...({ fetchPriority: "high" } as { fetchPriority?: "high" | "low" | "auto" })}
+          // The camelCase `fetchPriority` JSX prop is only recognized by React
+          // 19+; on React 18 (this app's version) it falls through unmapped and
+          // React warns "does not recognize the fetchPriority prop" on every
+          // render. The actual DOM/HTML attribute is lowercase.
+          {...({ fetchpriority: "high" } as { fetchpriority?: "high" | "low" | "auto" })}
           className="w-full h-full object-cover object-center scale-105 blur-sm opacity-70 transition-all duration-300"
           style={{ filter: "blur(5px)" }}
         />

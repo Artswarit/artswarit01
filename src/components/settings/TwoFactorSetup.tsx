@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Shield, Loader2, CheckCircle, Smartphone, AlertTriangle } from 'lucide-react';
+import { Shield, CheckCircle, Smartphone, AlertTriangle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -238,8 +238,7 @@ const TwoFactorSetup = () => {
                 <Button variant="outline" onClick={() => setShowSetupDialog(false)}>
                   Cancel
                 </Button>
-                <Button onClick={startEnrollment} disabled={loading}>
-                  {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                <Button onClick={startEnrollment} loading={loading}>
                   Continue
                 </Button>
               </DialogFooter>
@@ -305,11 +304,11 @@ const TwoFactorSetup = () => {
                 <Button variant="outline" onClick={() => setSetupStep('qr')}>
                   Back
                 </Button>
-                <Button 
-                  onClick={verifyAndEnable} 
-                  disabled={verifying || verificationCode.length !== 6}
+                <Button
+                  onClick={verifyAndEnable}
+                  disabled={verificationCode.length !== 6}
+                  loading={verifying}
                 >
-                  {verifying && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                   Verify & Enable
                 </Button>
               </DialogFooter>

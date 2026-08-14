@@ -159,7 +159,7 @@ export function FollowersList() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="shrink-0 h-11 sm:h-9 px-5 sm:px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:bg-primary hover:text-white hover:border-primary min-h-[44px] sm:min-h-[36px]"
+                  className="shrink-0 h-11 sm:h-9 px-5 sm:px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:bg-primary hover:text-primary-foreground hover:border-primary min-h-[44px] sm:min-h-[36px]"
                   onClick={() => navigate(follower.role === 'artist' ? `/artist/${follower.id}` : `/profile/${follower.id}`)}
                 >
                   View Profile

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { track } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
-import { DollarSign, Loader2, AlertCircle } from 'lucide-react';
+import { DollarSign, AlertCircle } from 'lucide-react';
 import { useRazorpay } from '@/hooks/useRazorpay';
 import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { useArtistPlan, calculateEarnings } from '@/hooks/useArtistPlan';
@@ -125,13 +125,10 @@ export function PayMilestoneButton({
         size="sm"
         className={`bg-primary hover:bg-primary/90 ${className}`}
         onClick={() => setConfirmOpen(true)}
-        disabled={disabled || loading || stripeProcessing}
+        disabled={disabled}
+        loading={loading || stripeProcessing}
       >
-        {loading || stripeProcessing ? (
-          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-        ) : (
-          <DollarSign className="h-4 w-4 mr-1" />
-        )}
+        {!(loading || stripeProcessing) && <DollarSign className="h-4 w-4 mr-1" />}
         Fund Milestone ({gatewayDisplayAmount})
       </Button>
 
@@ -207,12 +204,11 @@ export function PayMilestoneButton({
             <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={loading || stripeProcessing}>
               Cancel
             </Button>
-            <Button 
+            <Button
               className="bg-primary hover:bg-primary/90"
               onClick={handlePayment}
-              disabled={loading || stripeProcessing}
+              loading={loading || stripeProcessing}
             >
-              {(loading || stripeProcessing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {stripeError && !stripeProcessing ? 'Retry Payment' : `Pay ${gatewayDisplayAmount}`}
             </Button>
           </DialogFooter>

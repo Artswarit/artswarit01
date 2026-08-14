@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, MapPin, CheckCircle, Pencil, X } from 'lucide-react';
+import { MapPin, CheckCircle, Pencil, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BillingAddress {
@@ -380,12 +380,9 @@ export function BillingAddressForm() {
             )}
           </div>
 
-          <Button type="submit" disabled={saving} className="w-full sm:w-auto">
+          <Button type="submit" loading={saving} className="w-full sm:w-auto">
             {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
+              'Saving...'
             ) : saved ? (
               <>
                 <CheckCircle className="h-4 w-4 mr-2" />

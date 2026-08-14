@@ -32,8 +32,8 @@ const Footer = () => {
             {/* Social Icons */}
             <div className="flex items-center space-x-4">
               <a 
-                href="https://twitter.com/artswarit" 
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/60 hover:bg-primary hover:text-white transition-all duration-300" 
+                href="https://twitter.com/artswarit"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/60 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                 aria-label="Twitter"
                 target="_blank" 
                 rel="noopener noreferrer"
@@ -43,8 +43,8 @@ const Footer = () => {
                 </svg>
               </a>
               <a 
-                href="https://instagram.com/artswarit" 
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/60 hover:bg-primary hover:text-white transition-all duration-300" 
+                href="https://instagram.com/artswarit"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/60 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                 aria-label="Instagram"
                 target="_blank" 
                 rel="noopener noreferrer"
@@ -54,8 +54,8 @@ const Footer = () => {
                 </svg>
               </a>
               <a 
-                href="https://www.linkedin.com/company/artswarit" 
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/60 hover:bg-primary hover:text-white transition-all duration-300" 
+                href="https://www.linkedin.com/company/artswarit"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/60 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                 aria-label="LinkedIn"
                 target="_blank" 
                 rel="noopener noreferrer"

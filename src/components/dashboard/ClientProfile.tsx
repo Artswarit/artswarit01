@@ -294,8 +294,8 @@ const ClientProfile = () => {
           <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">Complete Your Profile</h2>
           <p className="text-muted-foreground text-sm">Fill in your profile to start discovering and working with artists</p>
         </div>
-        <Button onClick={saveProfile} disabled={saving} className="w-full sm:w-auto">
-          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+        <Button onClick={saveProfile} loading={saving} className="w-full sm:w-auto">
+          {!saving && <Save className="h-4 w-4 mr-2" />}
           Save Profile
         </Button>
       </div>

@@ -1053,7 +1053,7 @@ export default function ArtistProfile() {
         <TagDisplay tags={[profileState.category, ...(profileState.specialties || [])]} />
         <GlassCard className="p-3 sm:p-4 lg:p-6 xl:p-8 mt-3 sm:mt-4 shadow-lg">
           <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-            <h2 className="font-heading text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-gray-900">
+            <h2 className="font-heading text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-foreground">
               Portfolio
             </h2>
           </div>

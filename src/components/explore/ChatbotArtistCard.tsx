@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2 } from "lucide-react";
 
 type Artist = {
   id: string;
@@ -71,8 +70,8 @@ const ChatbotArtistCard: React.FC<Props> = ({ artist, onFollow, onMessage }) => 
             <Button size="sm" variant="outline">View Profile</Button>
           </Link>
           {onFollow && (
-            <Button size="sm" variant="secondary" onClick={handleFollow} disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isFollowing ? 'Following' : 'Follow'}
+            <Button size="sm" variant="secondary" onClick={handleFollow} loading={loading}>
+              {!loading && (isFollowing ? 'Following' : 'Follow')}
             </Button>
           )}
           {onMessage && (

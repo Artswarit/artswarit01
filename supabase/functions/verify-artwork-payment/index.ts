@@ -40,9 +40,10 @@ serve(async (req) => {
   }
 
   try {
+    const razorpayKeyId = Deno.env.get("RAZORPAY_KEY_ID");
     const razorpayKeySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
-    
-    if (!razorpayKeySecret) {
+
+    if (!razorpayKeyId || !razorpayKeySecret) {
       throw new Error("Razorpay credentials not configured");
     }
 
@@ -73,8 +74,14 @@ serve(async (req) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      artworkId,
+      // NOTE: `artworkId` from the request body is an UNTRUSTED client hint only.
+      // The authoritative artwork is derived from the Razorpay order below.
+      artworkId: clientArtworkIdHint,
     } = await req.json();
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      throw new Error("Missing payment verification parameters");
+    }
 
     // Verify signature
     const isValid = await verifySignature(
@@ -86,6 +93,75 @@ serve(async (req) => {
 
     if (!isValid) {
       throw new Error("Invalid payment signature");
+    }
+
+    // The HMAC only proves that this order/payment pair was signed by Razorpay --
+    // it says nothing about WHICH artwork the order was created for. Fetch the
+    // order from Razorpay and use the server-written `notes` as the source of
+    // truth, otherwise a caller could pay for a cheap artwork and unlock an
+    // expensive one by passing a different artworkId.
+    const razorpayAuth = btoa(`${razorpayKeyId}:${razorpayKeySecret}`);
+    const orderResponse = await fetch(
+      `https://api.razorpay.com/v1/orders/${encodeURIComponent(razorpay_order_id)}`,
+      { headers: { Authorization: `Basic ${razorpayAuth}` } }
+    );
+
+    if (!orderResponse.ok) {
+      console.error("Failed to fetch Razorpay order:", razorpay_order_id, orderResponse.status);
+      throw new Error("Could not verify payment order");
+    }
+
+    const order = await orderResponse.json();
+    const notes = (order?.notes ?? {}) as Record<string, string>;
+
+    if (order?.status !== "paid") {
+      throw new Error("Payment order is not in a paid state");
+    }
+
+    if (notes.type !== "artwork_unlock") {
+      throw new Error("Payment order is not an artwork purchase");
+    }
+
+    // The order must belong to the caller.
+    if (notes.user_id !== user.id) {
+      console.error("Order/user mismatch", { orderUser: notes.user_id, caller: user.id });
+      throw new Error("This payment does not belong to the current user");
+    }
+
+    const artworkId = notes.artwork_id;
+    if (!artworkId) {
+      throw new Error("Payment order is missing artwork reference");
+    }
+
+    // A mismatch here means the client asked to unlock something other than what
+    // it paid for. Reject rather than silently unlocking the correct one.
+    if (clientArtworkIdHint && clientArtworkIdHint !== artworkId) {
+      console.error("Artwork mismatch on verification", {
+        requested: clientArtworkIdHint,
+        paidFor: artworkId,
+        userId: user.id,
+      });
+      throw new Error("Payment does not match the requested artwork");
+    }
+
+    // Idempotency: a retried verification (double callback, refreshed tab) must
+    // succeed quietly instead of surfacing a unique-constraint error.
+    const { data: existingUnlock } = await supabaseAdmin
+      .from("artwork_unlocks")
+      .select("id")
+      .eq("artwork_id", artworkId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existingUnlock) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          artworkId,
+          message: "Artwork already unlocked",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+      );
     }
 
     // Get artwork details

@@ -124,7 +124,7 @@ const Navbar = () => {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 sm:h-12 sm:w-12 p-0 rounded-2xl hover:bg-primary/5 transition-all duration-300 group">
+                  <Button variant="ghost" aria-label="Account menu" className="relative h-10 w-10 sm:h-12 sm:w-12 p-0 rounded-2xl hover:bg-primary/5 transition-all duration-300 group">
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl border-2 border-background shadow-sm transition-transform group-hover:scale-105 group-active:scale-95">
                       <AvatarImage src={getOptimizedImageUrl(profile?.avatar_url || user?.user_metadata?.avatar_url || '', ImagePresets.AVATAR)} />
                       <AvatarFallback className="bg-primary/5 text-primary text-xs font-black">

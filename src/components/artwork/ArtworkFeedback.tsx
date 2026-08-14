@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useArtworkFeedback, Feedback as FeedbackType } from '@/hooks/useArtworkFeedback';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -354,6 +355,23 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
+  // This sheet is hand-rolled rather than built on Radix, so it doesn't inherit
+  // dismiss-on-Escape. Without this a keyboard user had no way to close it --
+  // the only exit was clicking the overlay or the unlabelled X.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const onEmojiClick = (emojiData: EmojiClickData) => {
     setNewComment(prev => prev + emojiData.emoji);
     setShowEmojiPicker(false);
@@ -381,11 +399,22 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
 
   const commentCount = feedback?.length || 0;
 
-  return (
+  // Portalled to <body> — this sheet is fixed-positioned, but rendering it
+  // inline would nest it inside the route's PageTransition wrapper, whose
+  // `will-change: transform` creates a CSS containing block for descendant
+  // `position: fixed` elements. That silently turns "fixed to the viewport"
+  // into "fixed to that ancestor's box", which for a tall page pins the
+  // sheet thousands of pixels below the fold instead of at the bottom of
+  // the screen. A portal escapes that subtree entirely, the same way
+  // Radix's Dialog already does for the fullscreen image viewer.
+  return createPortal(
     <>
-      {/* Overlay */}
+      {/* Overlay. Decorative: dismissing by click is a convenience, keyboard
+          users dismiss with Escape (handled above), so it is hidden from
+          assistive tech rather than exposed as a phantom control. */}
       <div
         onClick={onClose}
+        aria-hidden="true"
         className={cn(
           'fixed inset-0 bg-black/50 z-50 transition-opacity duration-300',
           isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -395,6 +424,9 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
       {/* Bottom Sheet */}
       <div
         ref={sheetRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="artwork-comments-title"
         className={cn(
           'fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-2xl shadow-2xl transition-transform duration-300 ease-out flex flex-col',
           'max-h-[85vh] sm:max-h-[75vh]',
@@ -404,19 +436,20 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
       >
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          <div className="w-10 h-1 rounded-full bg-muted-foreground/30" aria-hidden="true" />
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pb-3 border-b border-border/40">
-          <h3 className="font-semibold text-base text-foreground">
+          <h3 id="artwork-comments-title" className="font-semibold text-base text-foreground">
             Comments {commentCount > 0 && <span className="text-muted-foreground font-normal text-sm">({commentCount})</span>}
           </h3>
           <button
             onClick={onClose}
+            aria-label="Close comments"
             className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
           >
-            <X className="h-5 w-5 text-muted-foreground" />
+            <X className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
           </button>
         </div>
 
@@ -475,7 +508,9 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
                 <Avatar className="h-8 w-8 shrink-0">
                   <AvatarFallback className="text-xs bg-muted">{user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 flex items-center bg-muted/40 rounded-full border border-border/40 px-3 py-1.5">
+                {/* The inner input sets outline-none, so without focus-within
+                    the composer gave no focus indication at all. */}
+                <div className="flex-1 flex items-center bg-muted/40 rounded-full border border-border/40 px-3 py-1.5 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1">
                   <input
                     ref={inputRef}
                     value={newComment}
@@ -517,7 +552,8 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
           )}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };
 

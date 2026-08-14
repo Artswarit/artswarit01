@@ -109,17 +109,13 @@ export function ArtistBilling() {
                   <span className="text-emerald-600 font-medium">0%</span>
                 </div>
                 <Separator className="my-3" />
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 sm:h-10 min-h-[48px] sm:min-h-[40px]" 
+                <Button
+                  variant="outline"
+                  className="w-full h-12 sm:h-10 min-h-[48px] sm:min-h-[40px]"
                   onClick={handleManageSubscription}
-                  disabled={loadingPortal}
+                  loading={loadingPortal}
                 >
-                  {loadingPortal ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                  )}
+                  {!loadingPortal && <ExternalLink className="h-4 w-4 mr-2" />}
                   Manage Subscription
                 </Button>
               </div>
@@ -134,16 +130,12 @@ export function ArtistBilling() {
                     <li>• Advanced analytics dashboard</li>
                   </ul>
                 </div>
-                <Button 
+                <Button
                   className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 h-12 sm:h-11 min-h-[48px] sm:min-h-[44px]"
                   onClick={handleSubscribe}
-                  disabled={loadingPortal}
+                  loading={loadingPortal}
                 >
-                  {loadingPortal ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Crown className="h-4 w-4 mr-2" />
-                  )}
+                  {!loadingPortal && <Crown className="h-4 w-4 mr-2" />}
                   Upgrade to Pro - {formatPrice(6)}/month
                 </Button>
               </div>

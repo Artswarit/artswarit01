@@ -236,7 +236,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => setIsEditing(true)}
+              aria-label="Edit review" onClick={() => setIsEditing(true)}
             >
               <Pencil className="w-4 h-4" />
             </Button>

@@ -183,13 +183,28 @@ const DashboardAttentionRequired = ({ role, profile, onAction }: DashboardAttent
               <div className="flex-1 min-w-0 pr-8">
                 <h3 className="font-bold text-sm mb-1 group-hover:text-primary transition-colors">{item.title}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{item.description}</p>
+
+                {/* actionLabel was computed for every card but never rendered,
+                    so a high-severity "unread messages" card looked identical
+                    to a low-severity setup nudge and the control had no
+                    accessible name. */}
+                <Button
+                  onClick={() => onAction(item.actionTab)}
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 mt-2 text-xs font-semibold text-primary hover:text-primary/80"
+                >
+                  {item.actionLabel}
+                  <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+                </Button>
               </div>
 
-              <Button 
+              <Button
                 onClick={() => onAction(item.actionTab)}
-                variant="ghost" 
-                size="icon" 
-                className="absolute top-4 right-4 rounded-full hover:bg-primary hover:text-white transition-all shadow-sm"
+                variant="ghost"
+                size="icon"
+                aria-label={item.actionLabel}
+                className="absolute top-4 right-4 rounded-full hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
