@@ -99,7 +99,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
 
           {/* Platform Highlights */}
           <div className="space-y-6">
-            <h3 className="text-white/40 text-xs font-black uppercase tracking-[0.2em]">Platform Features</h3>
+            <h3 className="text-white/40 text-xs font-medium uppercase tracking-[0.1em]">Platform Features</h3>
             <div className="space-y-6">
               {[
                 {

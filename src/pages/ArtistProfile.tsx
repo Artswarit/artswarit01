@@ -988,7 +988,7 @@ export default function ArtistProfile() {
                   <span className={`grid place-items-center rounded-lg p-2 ${showBusy ? 'bg-amber-100/60' : 'bg-red-100/60'}`}>
                     <Calendar className={`${showBusy ? 'text-amber-700' : 'text-red-700'} w-4 h-4`} aria-hidden="true" />
                   </span>
-                  <span className={`text-xs sm:text-sm font-black uppercase tracking-widest ${accentText}`}>
+                  <span className={`text-xs sm:text-sm font-semibold uppercase tracking-wide ${accentText}`}>
                     {showBusy ? 'Busy' : 'Vacation'}
                   </span>
                   {showBusy ? (
@@ -1034,7 +1034,7 @@ export default function ArtistProfile() {
               <span className="grid place-items-center rounded-lg p-2 bg-emerald-100/60">
                 <TrendingUp className="text-emerald-700 w-4 h-4" aria-hidden="true" />
               </span>
-              <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
+              <span className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
                 Earnings
               </span>
               <span className="text-xs sm:text-sm font-extrabold text-foreground">

@@ -61,7 +61,7 @@ export const StatTile: React.FC<StatTileProps> = ({
             {iconSlot ?? (Icon ? <Icon className="h-[18px] w-[18px]" /> : null)}
           </span>
         )}
-        <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
           {label}
         </span>
       </div>

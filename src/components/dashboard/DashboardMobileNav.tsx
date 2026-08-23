@@ -71,8 +71,8 @@ const DashboardMobileNav = ({
               </div>
               
               <span className={cn(
-                "text-[8px] sm:text-[9px] font-black uppercase tracking-tighter",
-                isActive ? "opacity-100" : "opacity-70"
+                "text-[9px] sm:text-[10px] font-medium tracking-wide",
+                isActive ? "opacity-100" : "opacity-60"
               )}>
                 {tab.label}
               </span>

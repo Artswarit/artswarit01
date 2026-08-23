@@ -21,11 +21,10 @@ export const DashboardTabBar: React.FC<DashboardTabBarProps> = ({ tabs, badges, 
   return (
     <TabsList
       className={cn(
-        "h-auto w-full items-stretch gap-1 rounded-2xl border border-border/60 bg-card/80 p-1 shadow-token-xs backdrop-blur-xl",
-        "grid",
+        "h-auto w-full items-stretch gap-0.5 rounded-2xl border border-border/60 bg-card/80 p-1 shadow-token-xs backdrop-blur-xl",
+        "flex overflow-x-auto no-scrollbar",
         className,
       )}
-      style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
     >
       {tabs.map((tab) => {
         const Icon = tab.icon;
@@ -35,18 +34,17 @@ export const DashboardTabBar: React.FC<DashboardTabBarProps> = ({ tabs, badges, 
             key={tab.value}
             value={tab.value}
             className={cn(
-              "relative flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 text-sm font-medium",
-              "text-muted-foreground transition-all duration-300 ease-apple",
+              "relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-2.5 sm:px-3 text-[12px] sm:text-[13px] font-medium whitespace-nowrap",
+              "text-muted-foreground transition-all duration-200 ease-apple",
               "hover:bg-muted/70 hover:text-foreground",
               "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-token-sm",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background",
             )}
           >
-            <Icon className="h-[18px] w-[18px] shrink-0" />
-            <span className="hidden truncate tracking-tight lg:inline">{tab.label}</span>
-            <span className="truncate tracking-tight lg:hidden">{tab.shortLabel}</span>
+            <Icon className="h-[14px] w-[14px] shrink-0" />
+            <span>{tab.label}</span>
             {badge ? (
-              <span className="ml-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+              <span className="ml-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-destructive px-1 text-[9px] font-semibold text-destructive-foreground">
                 {badge > 99 ? "99+" : badge}
               </span>
             ) : null}

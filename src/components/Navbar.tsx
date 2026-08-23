@@ -136,7 +136,7 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 p-2 z-50 rounded-2xl border-muted/20 bg-white/95 dark:bg-card/95 backdrop-blur-xl shadow-2xl" align="end" sideOffset={8}>
                   <div className="px-3 py-2.5 mb-2">
-                    <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/50">Account</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground/50">Account</p>
                     <p className="text-sm font-bold truncate mt-1">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator className="bg-muted/50" />

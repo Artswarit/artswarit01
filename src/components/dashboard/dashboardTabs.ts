@@ -31,21 +31,21 @@ export interface DashboardTab {
 }
 
 export const artistDashboardTabs: readonly DashboardTab[] = [
-  { value: 'overview',   label: 'Overview',   shortLabel: 'Home',  mobileLabel: 'Home',     icon: LayoutDashboard },
-  { value: 'portfolio',  label: 'My Works',   shortLabel: 'Works', mobileLabel: 'Works',    icon: Palette },
-  { value: 'projects',   label: 'Projects',   shortLabel: 'Proj',  mobileLabel: 'Projects', icon: Briefcase },
-  { value: 'messages',   label: 'Messages',   shortLabel: 'Msg',   mobileLabel: 'Messages', icon: MessageSquare },
-  { value: 'membership', label: 'Membership', shortLabel: 'Pro',   mobileLabel: 'Pro',      icon: Crown },
-  { value: 'account',    label: 'Account',    shortLabel: 'Acc',   mobileLabel: 'Account',  icon: Settings },
+  { value: 'overview',   label: 'Overview',   shortLabel: 'Overview',  mobileLabel: 'Home',     icon: LayoutDashboard },
+  { value: 'portfolio',  label: 'My Works',   shortLabel: 'Works',     mobileLabel: 'Works',    icon: Palette },
+  { value: 'projects',   label: 'Projects',   shortLabel: 'Projects',  mobileLabel: 'Projects', icon: Briefcase },
+  { value: 'messages',   label: 'Messages',   shortLabel: 'Messages',  mobileLabel: 'Messages', icon: MessageSquare },
+  { value: 'membership', label: 'Membership', shortLabel: 'Membership',mobileLabel: 'Pro',      icon: Crown },
+  { value: 'account',    label: 'Account',    shortLabel: 'Account',   mobileLabel: 'Account',  icon: Settings },
 ] as const;
 
 export const clientDashboardTabs: readonly DashboardTab[] = [
-  { value: 'overview',   label: 'Overview', shortLabel: 'Home',  mobileLabel: 'Home',     icon: LayoutDashboard },
-  { value: 'collection', label: 'My Works', shortLabel: 'Works', mobileLabel: 'Works',    icon: ShoppingBag },
-  { value: 'projects',   label: 'Projects', shortLabel: 'Proj',  mobileLabel: 'Projects', icon: FileText },
-  { value: 'messages',   label: 'Messages', shortLabel: 'Msg',   mobileLabel: 'Messages', icon: MessageSquare },
-  { value: 'artists',    label: 'Artists',  shortLabel: 'Art',   mobileLabel: 'Artists',  icon: Users },
-  { value: 'account',    label: 'Account',  shortLabel: 'Acc',   mobileLabel: 'Account',  icon: Settings },
+  { value: 'overview',   label: 'Overview', shortLabel: 'Overview', mobileLabel: 'Home',     icon: LayoutDashboard },
+  { value: 'collection', label: 'My Works', shortLabel: 'Works',    mobileLabel: 'Works',    icon: ShoppingBag },
+  { value: 'projects',   label: 'Projects', shortLabel: 'Projects', mobileLabel: 'Projects', icon: FileText },
+  { value: 'messages',   label: 'Messages', shortLabel: 'Messages', mobileLabel: 'Messages', icon: MessageSquare },
+  { value: 'artists',    label: 'Artists',  shortLabel: 'Artists',  mobileLabel: 'Artists',  icon: Users },
+  { value: 'account',    label: 'Account',  shortLabel: 'Account',  mobileLabel: 'Account',  icon: Settings },
 ] as const;
 
 export const getDashboardTabs = (role: 'artist' | 'client'): readonly DashboardTab[] =>

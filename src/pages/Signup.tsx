@@ -177,7 +177,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
 
           {/* How it Works - Real Steps */}
           <div className="space-y-6">
-            <h3 className="text-white/40 text-xs font-black uppercase tracking-[0.2em]">How it Works</h3>
+            <h3 className="text-white/40 text-xs font-medium uppercase tracking-[0.1em]">How it Works</h3>
             <div className="space-y-6">
               {[
                 {

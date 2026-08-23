@@ -349,13 +349,13 @@ const Explore = () => {
         <div className="flex-1 flex items-center justify-center p-4">
           <GlassCard className="p-8 max-w-md w-full text-center space-y-6">
             <div className="text-4xl">⚠️</div>
-            <h3 className="text-xl font-black uppercase tracking-tight">Connection Lost</h3>
-            <p className="text-muted-foreground font-medium">
+            <h3 className="text-xl font-semibold tracking-tight">Connection lost</h3>
+            <p className="text-muted-foreground">
               We're having trouble reaching the gallery. Please check your connection and try again.
             </p>
             <Button
               onClick={() => refetch()}
-              className="w-full sm:w-auto rounded-2xl h-12 font-black uppercase tracking-widest"
+              className="w-full sm:w-auto rounded-2xl h-11 font-medium"
             >
               Retry Connection
             </Button>
@@ -436,7 +436,7 @@ const Explore = () => {
                   <Button
                     onClick={loadMore}
                     loading={loadingMore}
-                    className="rounded-2xl px-10 h-12 font-black uppercase tracking-[0.2em] bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                    className="rounded-2xl px-10 h-11 font-medium bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
                   >
                     {loadingMore ? 'Loading More' : 'Load More'}
                   </Button>
@@ -460,7 +460,7 @@ const Explore = () => {
                     search: '', category: 'all', artworkType: 'all', priceRange: 'all',
                     tags: [], sortBy: 'most_recent', location: ''
                   })}
-                  className="rounded-2xl px-8 h-12 font-black uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all"
+                  className="rounded-2xl px-8 h-11 font-medium hover:bg-primary hover:text-primary-foreground transition-all"
                 >
                   Reset All Filters
                 </Button>

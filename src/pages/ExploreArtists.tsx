@@ -485,7 +485,7 @@ const ExploreArtists = () => {
       <main className="flex-1 container mx-auto px-4 py-6 sm:py-8 pt-[calc(5rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))]">
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="max-w-full overflow-hidden">
-            <h1 className="text-2xl xs:text-3xl sm:text-4xl font-black text-foreground mb-1 sm:mb-2 leading-tight uppercase tracking-tighter">Explore Artists</h1>
+            <h1 className="text-2xl xs:text-3xl sm:text-4xl font-bold text-foreground mb-1 sm:mb-2 leading-tight tracking-tight">Explore Artists</h1>
             <p className="text-xs sm:text-base text-muted-foreground font-medium">Discover talented creators worldwide</p>
           </div>
           <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground self-end sm:self-auto bg-muted/30 px-3 py-1.5 rounded-full border border-border/10">
@@ -517,7 +517,7 @@ const ExploreArtists = () => {
                     <span className="font-bold text-xs uppercase tracking-widest">Filters</span>
                   </Button>
                 )}
-                <p className="text-[10px] sm:text-sm text-muted-foreground font-black uppercase tracking-widest bg-muted/20 px-3 py-2 rounded-xl border border-border/5">
+                <p className="text-[10px] sm:text-sm text-muted-foreground font-medium bg-muted/20 px-3 py-2 rounded-xl border border-border/5">
                   <span className="text-foreground">{filteredArtists.length}</span> artist{filteredArtists.length !== 1 ? 's' : ''}
                 </p>
               </div>

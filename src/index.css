@@ -41,6 +41,12 @@ html, body {
 
 /* Smooth, Apple-feel transitions on common interactive primitives */
 @layer utilities {
+  /* ── Typography restraint: tame over-aggressive tracking and weight ── */
+  /* tracking-widest (0.1em → 0.08em) — more refined for UI labels */
+  .tracking-widest { letter-spacing: 0.08em; }
+  /* font-black combined with uppercase is 900-weight screaming; soften to semibold */
+  .font-black.uppercase { font-weight: 600; }
+
   .ease-apple { transition-timing-function: var(--ease-apple); }
   .tap-scale { transition: transform 150ms var(--ease-apple); }
   .tap-scale:active { transform: scale(0.97); }
@@ -107,6 +113,23 @@ html, body {
 
 
 @layer base {
+  /* ── Global typography baseline ── */
+  body {
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    text-size-adjust: 100%;
+  }
+
+  /* Heading letter-spacing — tighter for large display text */
+  h1 { letter-spacing: -0.03em; }
+  h2 { letter-spacing: -0.025em; }
+  h3 { letter-spacing: -0.02em; }
+  h4, h5, h6 { letter-spacing: -0.01em; }
+
+  /* Body copy — no artificial spread */
+  p, li, label, input, textarea, select, button {
+    letter-spacing: 0;
+  }
+
   :root {
     --background: 220 70% 98%;
     --foreground: 220 10% 10%;
