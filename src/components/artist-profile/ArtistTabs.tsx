@@ -773,7 +773,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
               type="button"
               variant="outline"
               onClick={() => setRequestServiceTitle(null)}
-              className="h-11"
+              className="w-full sm:w-auto h-11"
             >
               Cancel
             </Button>
@@ -781,7 +781,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
               type="submit"
               disabled={isSubmitting}
               onClick={handleSubmit(submitRequest)}
-              className="h-11 bg-violet-600 text-white hover:bg-violet-700 gap-2"
+              className="w-full sm:w-auto h-11 bg-violet-600 text-white hover:bg-violet-700 gap-2"
             >
               <Mail size={16} />
               {isSubmitting ? "Sending…" : "Send Request"}

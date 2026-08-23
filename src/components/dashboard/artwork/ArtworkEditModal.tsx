@@ -396,10 +396,10 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-primary/10">
-            <Button variant="outline" onClick={onClose} disabled={saving} className="h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95 order-2 sm:order-1">
+            <Button variant="outline" onClick={onClose} disabled={saving} className="w-full sm:w-auto h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95 order-2 sm:order-1">
               Cancel
             </Button>
-            <Button onClick={handleSave} loading={saving} className="h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all gap-3 order-1 sm:order-2">
+            <Button onClick={handleSave} loading={saving} className="w-full sm:w-auto h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all gap-3 order-1 sm:order-2">
               {!saving && <Save className="h-5 w-5" />}
               {saving ? "Saving Changes..." : "Save Changes"}
             </Button>
