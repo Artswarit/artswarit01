@@ -113,11 +113,11 @@ const ArtworkCarousel = () => {
 
                     <div className="p-5 sm:p-7 flex-1 bg-white dark:bg-card space-y-3">
                       <div>
-                        <h3 className="font-black text-lg sm:text-xl text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-base sm:text-lg text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
                           {artwork.title}
                         </h3>
-                        <p 
-                          className="text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2 mt-1 hover:text-primary transition-colors cursor-pointer"
+                        <p
+                          className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-2 mt-1 hover:text-primary transition-colors cursor-pointer"
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -133,14 +133,14 @@ const ArtworkCarousel = () => {
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1.5 text-muted-foreground">
                             <Heart className="h-4 w-4 text-red-500/80" />
-                            <span className="text-xs font-black">{artwork.likes}</span>
+                            <span className="text-xs font-medium">{artwork.likes}</span>
                           </div>
                           <div className="flex items-center gap-1.5 text-muted-foreground">
                             <Eye className="h-4 w-4 text-blue-500/80" />
-                            <span className="text-xs font-black">{artwork.views}</span>
+                            <span className="text-xs font-medium">{artwork.views}</span>
                           </div>
                         </div>
-                        <div className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2.5 py-1.5 rounded-lg border border-primary/10">
+                        <div className="text-[11px] font-medium text-primary bg-primary/5 px-2.5 py-1.5 rounded-lg border border-primary/10">
                           View Work
                         </div>
                       </div>
