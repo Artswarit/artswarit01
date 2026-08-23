@@ -4,9 +4,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, MessagesSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import {
@@ -56,6 +58,8 @@ const MessageArtistDialog: React.FC<MessageArtistDialogProps> = ({
   currentUserId,
 }) => {
   const { toast } = useToast();
+  const { profile } = useAuth();
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -293,6 +297,13 @@ const MessageArtistDialog: React.FC<MessageArtistDialogProps> = ({
     }
   };
 
+  const handleOpenFullChat = () => {
+    if (!conversationId) return;
+    const dashboard = profile?.role === 'artist' || profile?.role === 'premium' ? '/artist-dashboard' : '/client-dashboard';
+    onOpenChange(false);
+    navigate(`${dashboard}?tab=messages&conversationId=${conversationId}`);
+  };
+
   const handleAttach = (attachment: Attachment) => {
     setPendingAttachments((prev) => [...prev, attachment]);
   };
@@ -304,7 +315,7 @@ const MessageArtistDialog: React.FC<MessageArtistDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md w-[95vw] sm:w-full max-h-[90vh] sm:max-h-[80vh] flex flex-col p-0 overflow-hidden rounded-3xl">
-        <DialogHeader className="p-4 sm:p-6 border-b">
+        <DialogHeader className="p-4 sm:p-6 border-b flex-row items-center justify-between space-y-0">
           <DialogTitle className="flex items-center gap-3">
             <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-primary/10">
               <AvatarImage src={artistAvatar} alt={artistName} />
@@ -320,6 +331,17 @@ const MessageArtistDialog: React.FC<MessageArtistDialogProps> = ({
           <DialogDescription className="sr-only">
             Conversation with {artistName}
           </DialogDescription>
+          {conversationId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleOpenFullChat}
+              className="mr-8 h-8 rounded-lg text-xs font-bold text-muted-foreground hover:text-primary"
+            >
+              <MessagesSquare className="h-3.5 w-3.5 mr-1.5" />
+              Open in Messages
+            </Button>
+          )}
         </DialogHeader>
 
         <div className="flex-1 min-h-0 bg-muted/5">

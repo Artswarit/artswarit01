@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { cn } from "@/lib/utils";
+import { broadcastRefresh } from "@/lib/realtime-sync";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -318,7 +319,11 @@ const MessagingModule = ({ onChatActiveChange }: MessagingModuleProps) => {
         title: "User Blocked",
         description: `${activeConversation.otherUser.name} has been blocked.`,
       });
-      
+
+      // Let other mounted consumers of useBlockedUsers (e.g. an open profile
+      // page's BlockUserButton) know the blocked list changed.
+      broadcastRefresh('all');
+
       // Clear active conversation
       setActiveConversationId(null);
     } catch (error: any) {

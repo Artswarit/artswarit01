@@ -322,7 +322,7 @@ const EarningsAnalysis = () => {
                   ))}
                 </div>
                 <div className="px-6 sm:px-10 py-6 mt-auto border-t border-border/10">
-                  <Button variant="outline" className="w-full h-12 rounded-xl font-black text-[10px] uppercase tracking-widest border-border/40 hover:bg-muted/50 transition-all">
+                  <Button variant="outline" className="w-full sm:w-auto h-12 rounded-xl font-black text-[10px] uppercase tracking-widest border-border/40 hover:bg-muted/50 transition-all">
                     View All Transactions
                   </Button>
                 </div>
@@ -358,7 +358,7 @@ const EarningsAnalysis = () => {
                     <InfoIcon size={16} className="text-primary shrink-0" />
                     <span>Payouts are processed on the 1st and 15th of every month.</span>
                   </div>
-                  <Button variant="outline" className="w-full h-12 rounded-xl font-black text-[10px] uppercase tracking-widest border-border/40 hover:bg-muted/50 transition-all">
+                  <Button variant="outline" className="w-full sm:w-auto h-12 rounded-xl font-black text-[10px] uppercase tracking-widest border-border/40 hover:bg-muted/50 transition-all">
                     View Payout History
                   </Button>
                 </div>

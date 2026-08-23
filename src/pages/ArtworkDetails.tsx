@@ -220,26 +220,28 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
 
     (async () => {
       const RELATED_LIMIT = 8;
-      const baseQuery = supabase
-        .from('artworks')
-        .select('id, title, media_url, media_type, price, metadata, artist_id')
-        .eq('status', 'public')
-        .neq('id', artwork.id)
-        .limit(RELATED_LIMIT);
 
+      // Server-side filtered (status='public' AND free access_type) via
+      // get_public_artworks() — the same access-control function Explore
+      // uses, so "More to Discover" can't leak premium/exclusive artwork
+      // either. Never query `artworks` directly for a public feed: that
+      // table's only public SELECT policy is `status = 'public'`, with no
+      // access_type check, so a raw query (or a client-side filter after
+      // the fact) would return premium rows to unauthorized viewers.
       const { data: sameCategory } = artwork.category
-        ? await baseQuery.eq('category', artwork.category)
+        ? await supabase.rpc('get_public_artworks', {
+            p_limit: RELATED_LIMIT,
+            p_exclude_id: artwork.id,
+            p_category: artwork.category,
+          })
         : { data: [] as any[] };
 
       let pool = sameCategory || [];
       if (pool.length < RELATED_LIMIT) {
-        const { data: recent } = await supabase
-          .from('artworks')
-          .select('id, title, media_url, media_type, price, metadata, artist_id')
-          .eq('status', 'public')
-          .neq('id', artwork.id)
-          .order('created_at', { ascending: false })
-          .limit(RELATED_LIMIT);
+        const { data: recent } = await supabase.rpc('get_public_artworks', {
+          p_limit: RELATED_LIMIT,
+          p_exclude_id: artwork.id,
+        });
         const seen = new Set(pool.map(a => a.id));
         pool = [...pool, ...(recent || []).filter(a => !seen.has(a.id))].slice(0, RELATED_LIMIT);
       }
@@ -470,12 +472,36 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
 
           <div className="grid lg:grid-cols-[1.3fr_1fr] gap-6 lg:gap-12 items-start">
 
-            {/* ── MEDIA VIEWER ──────────────────────────────────────── */}
-            <div className="lg:sticky lg:top-24">
-              <div className="flex items-center justify-between mb-3 sm:hidden">
-                <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors">
-                  <ArrowLeft className="h-5 w-5" />
-                </button>
+            {/* ── MEDIA COLUMN: artist header, artwork, title + description ── */}
+            <div className="min-w-0">
+              {/* Artist header — above the artwork, every viewport */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors shrink-0 sm:hidden">
+                    <ArrowLeft className="h-5 w-5" />
+                  </button>
+                  <Link to={`/artist/${artwork.artistId}`} className="flex items-center gap-3 min-w-0 group">
+                    {artwork.artistAvatar ? (
+                      <img loading="lazy" decoding="async"
+                        src={artwork.artistAvatar}
+                        alt={artwork.artist}
+                        className="w-11 h-11 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all shrink-0"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center text-primary font-bold shrink-0">
+                        {artwork.artist?.charAt(0)?.toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                        {artwork.artist}
+                      </p>
+                      {artwork.category && (
+                        <p className="text-xs text-muted-foreground truncate">{artwork.category}</p>
+                      )}
+                    </div>
+                  </Link>
+                </div>
                 {artwork.accessType !== "free" && <AccessBadge />}
               </div>
 
@@ -541,65 +567,37 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* ── INFO PANEL ────────────────────────────────────────── */}
-            <div className="space-y-5 sm:space-y-6">
-              <div className="flex items-start justify-between gap-3">
-                <Link to={`/artist/${artwork.artistId}`} className="flex items-center gap-3 min-w-0 group">
-                  {artwork.artistAvatar ? (
-                    <img loading="lazy" decoding="async"
-                      src={artwork.artistAvatar}
-                      alt={artwork.artist}
-                      className="w-11 h-11 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all shrink-0"
-                    />
-                  ) : (
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center text-primary font-bold shrink-0">
-                      {artwork.artist?.charAt(0)?.toUpperCase()}
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <p className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">
-                      {artwork.artist}
-                    </p>
-                    {artwork.category && (
-                      <p className="text-xs text-muted-foreground truncate">{artwork.category}</p>
-                    )}
-                  </div>
-                </Link>
-                {artwork.accessType !== "free" && <div className="hidden sm:block"><AccessBadge /></div>}
-              </div>
-
-              <div>
+              {/* Title + description — directly below the artwork */}
+              <div className="mt-4 space-y-3">
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground leading-tight">
                   {artwork.title}
                 </h1>
+
+                {artwork.description && (
+                  <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                    {artwork.description}
+                  </p>
+                )}
+
+                {artwork.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {artwork.tags.map((tag: string) => (
+                      <span key={tag} className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
+            </div>
 
-              {artwork.description && (
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {artwork.description}
-                </p>
-              )}
-
-              {artwork.tags?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {artwork.tags.map((tag: string) => (
-                    <span key={tag} className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
+            {/* ── ENGAGEMENT PANEL: stats, actions, price ─────────────── */}
+            <div className="space-y-5 sm:space-y-6 lg:sticky lg:top-24">
               <div className="flex items-center gap-5 text-sm text-muted-foreground border-y border-border/40 py-4">
                 <span className="flex items-center gap-1.5">
                   <Eye className="h-4 w-4" />
                   {viewCount.toLocaleString()} views
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Heart className="h-4 w-4" />
-                  {likeCount.toLocaleString()} {likeCount === 1 ? 'like' : 'likes'}
                 </span>
               </div>
 
@@ -618,7 +616,8 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
                     )}
                   >
                     <Heart className={cn("h-[18px] w-[18px]", isLiked && "fill-current")} />
-                    Like
+                    {isLiked ? 'Liked' : 'Like'}
+                    {likeCount > 0 && <span className="opacity-70">· {likeCount.toLocaleString()}</span>}
                   </button>
                   <LikeParticles trigger={animateLike} />
                 </div>

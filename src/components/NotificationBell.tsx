@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { getNotificationLink } from '@/lib/notificationLinks';
 
 interface Notification {
   id: string;
@@ -113,50 +114,6 @@ const NotificationBell = () => {
     setUnreadCount(0);
   };
 
-  const getNotificationLink = (notification: Notification) => {
-    if (notification.type === 'like' && notification.metadata?.artwork_id) {
-      return `/artwork/${notification.metadata.artwork_id}`;
-    }
-    if (notification.type === 'follow' && notification.metadata?.follower_id) {
-      return `/artist/${notification.metadata.follower_id}`;
-    }
-
-    // Review notifications
-    if (
-      (notification.type === 'review_response' || notification.type === 'new_review') &&
-      notification.metadata?.artist_id
-    ) {
-      const reviewId = notification.metadata?.review_id;
-      return `/artist/${notification.metadata.artist_id}?tab=about${
-        reviewId ? `&review=${reviewId}` : ''
-      }`;
-    }
-
-    // Fallback for older review notifications that only have review_id
-    if (
-      (notification.type === 'review_response' || notification.type === 'new_review') &&
-      notification.metadata?.review_id
-    ) {
-      return `/review/${notification.metadata.review_id}`;
-    }
-
-    // Project-related notifications
-    const targetDashboard = profile?.role === 'artist' ? '/artist-dashboard' : '/client-dashboard';
-    if (
-      (notification.type === 'project_accepted' ||
-        notification.type === 'project_rejected' ||
-        notification.type === 'project_progress' ||
-        notification.type === 'project_completed' ||
-        notification.type === 'milestone_submitted' ||
-        notification.type === 'milestone_approved' ||
-        notification.type === 'milestone_revision') &&
-      notification.metadata?.project_id
-    ) {
-      return `${targetDashboard}?tab=projects&project=${notification.metadata.project_id}`;
-    }
-    return '#';
-  };
-
   if (!user) return null;
 
   return (
@@ -216,7 +173,7 @@ const NotificationBell = () => {
                   )}
                 >
                   <Link
-                    to={getNotificationLink(notification)}
+                    to={getNotificationLink(notification, profile?.role)}
                     onClick={() => {
                       if (!notification.is_read) {
                         markAsRead(notification.id);

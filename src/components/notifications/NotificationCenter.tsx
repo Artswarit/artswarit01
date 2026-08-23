@@ -10,20 +10,22 @@ import LogoLoader from '@/components/ui/LogoLoader';
 import { cn } from '@/lib/utils';
 import { EmptyState, PageHeader, RetryableError } from '@/components/shared';
 import { useNavigate } from 'react-router-dom';
+import { getNotificationLink } from '@/lib/notificationLinks';
 
 interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: string;
   is_read: boolean;
   created_at: string;
+  metadata: Record<string, any> | null;
 }
 
 const ITEMS_PER_PAGE = 10;
 
 const NotificationCenter = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,20 +86,6 @@ const NotificationCenter = () => {
       supabase.removeChannel(channel);
     };
   }, [user?.id, fetchNotifications]);
-
-  const getNotificationLink = (notification: any) => {
-    if (notification.type === 'like' && notification.metadata?.artwork_id) {
-      return `/artwork/${notification.metadata.artwork_id}`;
-    }
-    if (notification.type === 'follow' && notification.metadata?.follower_id) {
-      return `/artist/${notification.metadata.follower_id}`;
-    }
-    const targetDashboard = user?.user_metadata?.role === 'artist' ? '/artist-dashboard' : '/client-dashboard';
-    if (notification.metadata?.project_id) {
-      return `${targetDashboard}?tab=projects&project=${notification.metadata.project_id}`;
-    }
-    return '#';
-  };
 
   const displayedNotifications = notifications.slice(0, displayCount);
   const hasMore = notifications.length > displayCount;
@@ -248,7 +236,10 @@ const NotificationCenter = () => {
         </Card>
       ) : (
         <div className="space-y-4">
-          {displayedNotifications.map((notification) => (
+          {displayedNotifications.map((notification) => {
+            const link = getNotificationLink(notification, profile?.role);
+            const isActionable = link !== '#';
+            return (
             <Card
               key={notification.id}
               className={`transition-all hover:shadow-md ${
@@ -257,12 +248,11 @@ const NotificationCenter = () => {
                   : 'border-l-4 border-l-muted'
               }`}
             >
-              <div 
-                className="cursor-pointer"
+              <div
+                className={isActionable ? "cursor-pointer" : "cursor-default"}
                 onClick={() => {
                   if (!notification.is_read) markAsRead(notification.id);
-                  const link = getNotificationLink(notification);
-                  if (link !== '#') navigate(link);
+                  if (isActionable) navigate(link);
                 }}
               >
                 <CardHeader className="pb-3">
@@ -304,8 +294,9 @@ const NotificationCenter = () => {
                 </CardContent>
               </div>
             </Card>
-          ))}
-          
+            );
+          })}
+
           {hasMore && (
             <div className="flex flex-col items-center gap-3 pt-8 pb-4">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">

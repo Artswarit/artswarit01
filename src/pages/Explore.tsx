@@ -93,12 +93,6 @@ const Explore = () => {
         .replace(/[^a-z0-9\-]/g, '')
     );
 
-  const trendingArtworks = useMemo(() => {
-    return [...(artworks || [])]
-      .sort((a, b) => ((b.views || 0) + (b.likes || 0) * 5) - ((a.views || 0) + (a.likes || 0) * 5))
-      .slice(0, 4);
-  }, [artworks]);
-
   const handleFiltersChange = (filters: {
     search: string;
     category: string;
@@ -359,9 +353,9 @@ const Explore = () => {
             <p className="text-muted-foreground font-medium">
               We're having trouble reaching the gallery. Please check your connection and try again.
             </p>
-            <Button 
+            <Button
               onClick={() => refetch()}
-              className="w-full rounded-2xl h-12 font-black uppercase tracking-widest"
+              className="w-full sm:w-auto rounded-2xl h-12 font-black uppercase tracking-widest"
             >
               Retry Connection
             </Button>
@@ -394,35 +388,6 @@ const Explore = () => {
       <div className="relative z-10 mb-10 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
         <RecentlyViewed />
       </div>
-
-      {/* Trending Section */}
-      {(trendingArtworks.length > 0 || loading) && (
-        <section className="container-responsive mx-auto py-6 animate-in fade-in duration-1000 delay-500">
-          <div className="flex items-center justify-between mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Trending Now</h2>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {loading ? (
-              [...Array(4)].map((_, idx) => <ArtworkSkeleton key={`trend-skeleton-${idx}`} />)
-            ) : (
-              trendingArtworks.map((artwork, idx) => (
-                <div
-                  key={`trending-${artwork.id}`}
-                  className="animate-in fade-in slide-in-from-bottom-4 duration-700"
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  <ArtworkDiscoveryCard
-                    {...artwork}
-                    position={idx}
-                    surface="explore_trending"
-                  />
-                </div>
-              ))
-            )}
-          </div>
-        </section>
-      )}
 
       {/* Filters & Content */}
       <div className="relative pb-24">

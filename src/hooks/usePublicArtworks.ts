@@ -52,16 +52,17 @@ export const usePublicArtworks = () => {
       setError(null);
 
       const from = pageIndex * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
 
-      // Fetch only FREE public artworks for Explore page
-      // Premium and Exclusive artworks should NOT appear on explore
+      // Public discovery must never expose premium/exclusive artwork — that
+      // filtering happens server-side, in get_public_artworks(), not here.
+      // A client-side `.filter(access_type === 'free')` after the fact is
+      // not an access-control boundary: it doesn't stop someone calling the
+      // REST API directly with the anon key.
       const { data: artworksData, error: artworksError } = await supabase
-        .from('artworks')
-        .select('*')
-        .eq('status', 'public')
-        .order('created_at', { ascending: false })
-        .range(from, to);
+        .rpc('get_public_artworks', {
+          p_limit: PAGE_SIZE,
+          p_offset: from,
+        });
 
       if (artworksError) throw artworksError;
 
@@ -79,13 +80,10 @@ export const usePublicArtworks = () => {
       // Create artist map
       const artistMap = new Map((artistsData || []).map(a => [a.id, { name: a.full_name, location: a.location, avatar: a.avatar_url }]));
 
-      const freeArtworks = (artworksData || []).filter(artwork => {
-        const accessType = (artwork.metadata as any)?.access_type || 'free';
-        return accessType === 'free';
-      });
+      const publicArtworks = artworksData || [];
 
       // Fetch LIVE likes and views counts for accurate data (not stale metadata)
-      const artworkIds = freeArtworks.map(a => a.id);
+      const artworkIds = publicArtworks.map(a => a.id);
       const [likesResult, viewsResult] = artworkIds.length > 0
         ? await Promise.all([
             supabase.from('artwork_likes').select('artwork_id').in('artwork_id', artworkIds),
@@ -99,7 +97,7 @@ export const usePublicArtworks = () => {
       (viewsResult.data || []).forEach(r => { liveViews.set(r.artwork_id, (liveViews.get(r.artwork_id) || 0) + 1); });
 
       // Transform data to match component expectations
-      const transformedArtworks: PublicArtwork[] = freeArtworks.map(artwork => {
+      const transformedArtworks: PublicArtwork[] = publicArtworks.map(artwork => {
         const artistInfo = artistMap.get(artwork.artist_id);
         return {
           id: artwork.id,
@@ -134,8 +132,11 @@ export const usePublicArtworks = () => {
 
       setArtworks(prev => append ? [...prev, ...transformedArtworks] : transformedArtworks);
       setPage(pageIndex);
-      // hasMore: check against raw page size (before free filter), not filtered count
-      setHasMore((artworksData?.length || 0) === PAGE_SIZE);
+      // Filtering now happens server-side before the LIMIT is applied, so a
+      // full page really does mean "there may be more" (previously this
+      // checked the pre-filter count, which under/over-reported hasMore
+      // whenever a page contained any premium/exclusive rows).
+      setHasMore(publicArtworks.length === PAGE_SIZE);
     } catch (err) {
       console.error('Error fetching public artworks:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch artworks');

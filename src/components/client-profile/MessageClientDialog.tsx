@@ -3,9 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, MessagesSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import {
@@ -55,6 +56,7 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
   currentUserId,
 }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -230,6 +232,12 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
     }
   };
 
+  const handleOpenFullChat = () => {
+    if (!conversationId) return;
+    onOpenChange(false);
+    navigate(`/artist-dashboard?tab=messages&conversationId=${conversationId}`);
+  };
+
   const handleAttach = (attachment: Attachment) => {
     setPendingAttachments((prev) => [...prev, attachment]);
   };
@@ -241,7 +249,7 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
-        <DialogHeader>
+        <DialogHeader className="flex-row items-center justify-between space-y-0">
           <DialogTitle className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
               <AvatarImage src={clientAvatar} alt={clientName} />
@@ -252,6 +260,17 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
           <DialogDescription className="sr-only">
             Send a message to {clientName}
           </DialogDescription>
+          {conversationId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleOpenFullChat}
+              className="mr-8 h-8 rounded-lg text-xs font-bold text-muted-foreground hover:text-primary"
+            >
+              <MessagesSquare className="h-3.5 w-3.5 mr-1.5" />
+              Open in Messages
+            </Button>
+          )}
         </DialogHeader>
 
         <div className="flex-1 min-h-0">

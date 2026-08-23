@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtimeSync } from '@/lib/realtime-sync';
 
 interface BlockedUser {
   id: string;
@@ -79,6 +80,12 @@ export function useBlockedUsers() {
   useEffect(() => {
     fetchBlockedUsers();
   }, [fetchBlockedUsers]);
+
+  // Cross-tab/cross-component sync: MessagingModule blocks users via a direct
+  // insert (its own confirm-dialog flow) rather than this hook's blockUser(),
+  // so an already-mounted consumer's cached blockedUserIds could otherwise
+  // stay stale after a block made from inside a chat.
+  useRealtimeSync('all', fetchBlockedUsers);
 
   // Check if a user is blocked
   const isUserBlocked = useCallback((userId: string) => {

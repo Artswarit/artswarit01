@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { FileText, MessageSquare, CheckCircle, Upload, Calendar, User, Clock, Plus, Trash2, Loader2, Download, GitBranch, DollarSign, SendHorizontal, Lock } from "lucide-react";
+import { FileText, MessageSquare, CheckCircle, Upload, Calendar, User, Clock, Plus, Trash2, Loader2, Download, GitBranch, DollarSign, SendHorizontal, Lock, RotateCcw, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -127,9 +127,8 @@ const ProjectDetailModal = ({
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("workflow");
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'toggle_status' | 'delete_milestone';
+    type: 'delete_milestone';
     milestone: Milestone;
-    nextStatus?: string;
   } | null>(null);
   const modalViewportRef = useRef<HTMLDivElement | null>(null);
 
@@ -397,31 +396,6 @@ const ProjectDetailModal = ({
       setAddingMilestone(false);
     }
   };
-  const handleToggleMilestoneStatus = async (milestone: Milestone) => {
-    // Only clients approve milestones. Artists use the submission workflow.
-    if (!isClient) {
-      toast.error("Only the client can approve milestones.");
-      return;
-    }
-
-    if (milestone.status === 'LOCKED' || milestone.status === 'WAITING_FUNDS') {
-      toast.error("Milestone must be funded and active before it can be completed.");
-      return;
-    }
-
-    // Completing a milestone means releasing escrowed funds to the artist, so it
-    // has to go through release-milestone-payout. This previously wrote
-    // status='COMPLETED' straight to the table, which marked the milestone paid
-    // without any payout actually happening -- and it is not reversible, so the
-    // old COMPLETED -> ACTIVE "un-approve" direction is gone too.
-    if (milestone.status === 'COMPLETED') {
-      toast.error("A completed milestone has already been paid out and cannot be reopened.");
-      return;
-    }
-
-    setConfirmAction({ type: 'toggle_status', milestone, nextStatus: 'COMPLETED' });
-  };
-
   const handleDeleteMilestone = async (milestone: Milestone) => {
     // P2 Fix: Add confirmation and state checks
     if (milestone.status !== 'LOCKED' && milestone.status !== 'WAITING_FUNDS') {
@@ -434,49 +408,16 @@ const ProjectDetailModal = ({
 
   const executeConfirmAction = async () => {
     if (!confirmAction) return;
-    const { type, milestone, nextStatus } = confirmAction;
+    const { milestone } = confirmAction;
     setConfirmAction(null);
 
-    if (type === 'toggle_status' && nextStatus) {
-      try {
-        // Release escrow through the secure edge function, which validates the
-        // caller is the project's client, requires REVIEW_PENDING, takes an
-        // atomic lock, pays the artist, and only then marks it COMPLETED.
-        const { data, error } = await supabase.functions.invoke('release-milestone-payout', {
-          body: { milestoneId: milestone.id },
-        });
-
-        if (error || !data?.success) {
-          throw new Error(data?.error || error?.message || 'Failed to release payout');
-        }
-
-        // Log activity
-        await supabase.from('project_activity_logs').insert({
-          project_id: project!.id,
-          milestone_id: milestone.id,
-          user_id: user?.id,
-          action: 'milestone_approved',
-          details: { note: "Approved from project detail modal" }
-        });
-
-        broadcastRefresh('milestones');
-        fetchProjectData(undefined, true);
-        toast.success('Milestone approved and payout released');
-      } catch (err: any) {
-        console.error('Failed to approve milestone:', err);
-        toast.error(err?.message || "Failed to approve milestone");
-      }
-    } else if (type === 'delete_milestone') {
-      try {
-        const {
-          error
-        } = await supabase.from('project_milestones').delete().eq('id', milestone.id);
-        if (error) throw error;
-        toast.success("Milestone deleted");
-        fetchProjectData(undefined, true);
-      } catch (err: any) {
-        toast.error("Failed to delete milestone");
-      }
+    try {
+      const { error } = await supabase.from('project_milestones').delete().eq('id', milestone.id);
+      if (error) throw error;
+      toast.success("Milestone deleted");
+      fetchProjectData(undefined, true);
+    } catch (err: any) {
+      toast.error("Failed to delete milestone");
     }
   };
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -925,10 +866,25 @@ const ProjectDetailModal = ({
                                         <Clock className="h-3.5 w-3.5" />
                                         <span>Awaiting Funds</span>
                                       </div>
+                                    ) : milestone.status === 'REVIEW_PENDING' ? (
+                                      <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-indigo-500/10 text-indigo-600 text-[11px] font-bold uppercase tracking-wider border border-indigo-500/20">
+                                        <Upload className="h-3.5 w-3.5" />
+                                        <span>Review Pending</span>
+                                      </div>
+                                    ) : milestone.status === 'REVISION_REQUESTED' ? (
+                                      <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-500/10 text-orange-600 text-[11px] font-bold uppercase tracking-wider border border-orange-500/20">
+                                        <RotateCcw className="h-3.5 w-3.5" />
+                                        <span>Revision Requested</span>
+                                      </div>
+                                    ) : milestone.status === 'DISPUTED' ? (
+                                      <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-red-500/10 text-red-600 text-[11px] font-bold uppercase tracking-wider border border-red-500/20">
+                                        <AlertTriangle className="h-3.5 w-3.5" />
+                                        <span>Disputed</span>
+                                      </div>
                                     ) : (
                                       <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-muted text-muted-foreground text-[11px] font-bold uppercase tracking-wider">
                                         <Lock className="h-3.5 w-3.5" />
-                                        <span>{milestone.status || 'Locked'}</span>
+                                        <span>Locked</span>
                                       </div>
                                     )}
                                   </div>
@@ -936,23 +892,26 @@ const ProjectDetailModal = ({
                               </div>
 
                               <div className="flex items-center gap-2">
-                                {isClient && (milestone.status === 'ACTIVE' || milestone.status === 'COMPLETED') && (
-                                  <Button 
-                                    onClick={() => handleToggleMilestoneStatus(milestone)}
-                                    size="sm"
-                                    variant="outline"
-                                    className="rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-primary/5 h-10 px-4"
-                                  >
-                                    {milestone.status === 'COMPLETED' ? 'Mark Active' : 'Mark Done'}
-                                  </Button>
-                                )}
                                 {isClient && milestone.status === 'WAITING_FUNDS' && (
-                                  <Button 
-                                    variant="link" 
-                                    onClick={() => setActiveTab('workflow')} 
+                                  <Button
+                                    variant="link"
+                                    onClick={() => setActiveTab('workflow')}
                                     className="h-auto p-0 text-[10px] font-black uppercase text-primary hover:underline px-4"
                                   >
                                     Pay in Workflow
+                                  </Button>
+                                )}
+                                {(isClient || isArtist) && (
+                                  milestone.status === 'REVIEW_PENDING' ||
+                                  milestone.status === 'REVISION_REQUESTED' ||
+                                  milestone.status === 'DISPUTED'
+                                ) && (
+                                  <Button
+                                    variant="link"
+                                    onClick={() => setActiveTab('workflow')}
+                                    className="h-auto p-0 text-[10px] font-black uppercase text-primary hover:underline px-4"
+                                  >
+                                    {milestone.status === 'REVIEW_PENDING' && isClient ? 'Review in Workflow' : 'View in Workflow'}
                                   </Button>
                                 )}
                                 {isClient && (milestone.status === 'LOCKED' || milestone.status === 'WAITING_FUNDS') && (
@@ -1083,9 +1042,6 @@ const ProjectDetailModal = ({
                                 <Button variant="secondary" size="sm" className="h-10 rounded-xl px-4 font-bold text-[10px] uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-all" onClick={() => handleDownloadFile(file)}>
                                   Download
                                 </Button>
-                                {file.uploader_id === user?.id && (
-                                  <></>
-                                )}
                               </div>
                             </div>
                           </div>
@@ -1227,19 +1183,15 @@ const ProjectDetailModal = ({
       <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmAction?.type === 'delete_milestone' ? 'Delete Milestone' : 'Change Milestone Status'}
-            </AlertDialogTitle>
+            <AlertDialogTitle>Delete Milestone</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmAction?.type === 'delete_milestone'
-                ? `Are you sure you want to delete the milestone "${confirmAction?.milestone?.title}"?`
-                : `Are you sure you want to mark this milestone as ${confirmAction?.nextStatus}? This bypasses the normal review workflow.`}
+              Are you sure you want to delete the milestone "{confirmAction?.milestone?.title}"?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={executeConfirmAction}>
-              {confirmAction?.type === 'delete_milestone' ? 'Delete' : 'Confirm'}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

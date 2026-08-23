@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from "@/lib/utils";
 import { Lock } from "lucide-react";
 import { getDashboardTabs } from "./dashboardTabs";
@@ -26,7 +27,16 @@ const DashboardMobileNav = ({
     icon: t.icon,
   }));
 
-  return (
+  // Portalled to <body> — this nav is `fixed bottom-0`, but every route is
+  // wrapped in App.tsx's PageTransition, a framer-motion div with
+  // `style={{ willChange: "opacity, transform" }}`. Per spec, `will-change:
+  // transform` creates a containing block for `position: fixed`
+  // descendants, so without the portal this nav is "fixed" to the bottom of
+  // that (very tall, page-length) wrapper instead of the viewport — it
+  // renders far below the fold and the user has to scroll all the way down
+  // to reach it. Portalling escapes that subtree so the existing `fixed
+  // bottom-0` rule finally does what it was written to do.
+  return createPortal(
     <nav className="fixed bottom-0 left-0 right-0 z-[100] sm:hidden pb-[env(safe-area-inset-bottom)]">
       {/* Decorative background glassmorphism */}
       <div className="absolute inset-0 bg-white/80 dark:bg-card/90 backdrop-blur-2xl border-t border-border/40 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]" />
@@ -76,7 +86,8 @@ const DashboardMobileNav = ({
           );
         })}
       </div>
-    </nav>
+    </nav>,
+    document.body
   );
 };
 
