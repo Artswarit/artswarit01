@@ -69,14 +69,10 @@ export const useRealtimeSync = (type: SyncEventType, refetch: () => void) => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Refetch on window focus as an extra measure
-    window.addEventListener('focus', handleVisibilityChange);
-
     return () => {
       clearTimeout(timeoutId);
       syncChannel.removeEventListener('message', handleMessage);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleVisibilityChange);
     };
   }, [type]); // Removed refetch from dependency array!
 };

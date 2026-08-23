@@ -119,7 +119,6 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
   }, [user?.id]);
 
   // Use Realtime Sync for multi-tab updates
-  useRealtimeSync('artworks', fetchStats);
   useRealtimeSync('all', fetchStats);
 
   useEffect(() => {

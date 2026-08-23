@@ -111,7 +111,7 @@ export function ArtistBilling() {
                 <Separator className="my-3" />
                 <Button
                   variant="outline"
-                  className="w-full h-12 sm:h-10 min-h-[48px] sm:min-h-[40px]"
+                  className="w-full sm:w-auto h-12 sm:h-10 min-h-[48px] sm:min-h-[40px]"
                   onClick={handleManageSubscription}
                   loading={loadingPortal}
                 >
@@ -131,7 +131,7 @@ export function ArtistBilling() {
                   </ul>
                 </div>
                 <Button
-                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 h-12 sm:h-11 min-h-[48px] sm:min-h-[44px]"
+                  className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 h-12 sm:h-11 min-h-[48px] sm:min-h-[44px]"
                   onClick={handleSubscribe}
                   loading={loadingPortal}
                 >
