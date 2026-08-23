@@ -615,7 +615,7 @@ const ClientDashboard = () => {
               size="md"
               description={
                 <>
-                  Hi <span className="font-semibold text-foreground">{userName}</span> — manage your projects and discover artists.
+                  Hi <span className="font-semibold text-foreground">{userName}</span>, manage your projects and discover artists.
                 </>
               }
               actions={
