@@ -612,10 +612,10 @@ const ClientDashboard = () => {
           <div className="pt-4 sm:pt-6 mb-5 sm:mb-6 animate-fade-in">
             <PageHeader
               title="Client Dashboard"
-              size="lg"
+              size="md"
               description={
                 <>
-                  Welcome back, <span className="font-semibold text-foreground">{userName}</span>. Track your projects, connect with artists, and bring your ideas to life.
+                  Hi <span className="font-semibold text-foreground">{userName}</span> — manage your projects and discover artists.
                 </>
               }
               actions={
