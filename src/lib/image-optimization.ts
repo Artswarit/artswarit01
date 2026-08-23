@@ -67,8 +67,8 @@ export const getOptimizedImageUrl = (
  * Do NOT request larger than the display size — this is where egress savings come from.
  */
 export const ImagePresets = {
-  THUMBNAIL: { width: 360, quality: 70 } as ImageOptimizationOptions,          // Grid cards
-  AVATAR: { width: 96, height: 96, quality: 75 } as ImageOptimizationOptions,   // Round avatars
-  PROFILE_COVER: { width: 1024, quality: 72 } as ImageOptimizationOptions,      // Header banners
-  ARTWORK_DETAIL: { width: 1280, quality: 80 } as ImageOptimizationOptions,     // Detail view
+  THUMBNAIL: { width: 640, quality: 82 } as ImageOptimizationOptions,          // Grid cards
+  AVATAR: { width: 128, height: 128, quality: 82 } as ImageOptimizationOptions, // Round avatars
+  PROFILE_COVER: { width: 1440, quality: 82 } as ImageOptimizationOptions,     // Header banners
+  ARTWORK_DETAIL: { width: 1600, quality: 85 } as ImageOptimizationOptions,    // Detail view
 };

@@ -491,49 +491,59 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
       setTab(v);
       setPage(1);
     }}>
-        <div className="relative mb-6 sm:mb-10 group mt-4">
-          <div className="w-full overflow-x-auto pb-4 scrollbar-hide px-1">
-            <TabsList className="flex items-center justify-start lg:justify-center w-max sm:w-full min-w-full bg-white/10 dark:bg-black/20 backdrop-blur-2xl p-1.5 sm:p-2.5 rounded-3xl sm:rounded-[3rem] border border-white/20 shadow-2xl h-auto">
-              <TabsTrigger 
-                value="all" 
-                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
-              >
-                <Image size={16} className="shrink-0" />
-                <span className="hidden xs:inline">Portfolio</span>
-                {freeArt.length > 0 && <span className="ml-1 opacity-40 font-bold">({freeArt.length})</span>}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="premium" 
-                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-2xl data-[state=active]:shadow-amber-500/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
-              >
-                <Crown size={16} className={cn("shrink-0", tab === "premium" ? "text-amber-500" : "")} />
-                <span className="hidden xs:inline">Premium</span>
-                {premiumArt.length > 0 && <span className="ml-1 opacity-40 font-bold">({premiumArt.length})</span>}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="exclusive" 
-                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-purple-600 data-[state=active]:shadow-2xl data-[state=active]:shadow-purple-500/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
-              >
-                <Layers size={16} className={cn("shrink-0", tab === "exclusive" ? "text-purple-500" : "")} />
-                <span className="hidden xs:inline">Exclusive</span>
-                {exclusiveArt.length > 0 && <span className="ml-1 opacity-40 font-bold">({exclusiveArt.length})</span>}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="services" 
-                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
-              >
-                <Star size={16} className="shrink-0" />
-                <span className="hidden xs:inline">Services</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="about" 
-                className="flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 sm:py-5 rounded-2xl sm:rounded-[2.5rem] data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-2xl data-[state=active]:shadow-primary/20 transition-all duration-300 font-black uppercase tracking-widest text-[10px] sm:text-xs h-full"
-              >
-                <User size={16} className="shrink-0" />
-                <span className="hidden xs:inline">About</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        <div className="relative mb-6 sm:mb-10 mt-4">
+          <TabsList className="h-auto w-full items-stretch gap-0.5 rounded-2xl border border-border/60 bg-card/80 p-1 shadow-sm backdrop-blur-xl flex overflow-x-auto no-scrollbar">
+            <TabsTrigger
+              value="all"
+              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Image size={14} className="shrink-0" />
+              <span>Portfolio</span>
+              {freeArt.length > 0 && (
+                <span className="ml-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-current/20 px-1 text-[9px] font-semibold opacity-80">
+                  {freeArt.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="premium"
+              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Crown size={14} className="shrink-0" />
+              <span>Premium</span>
+              {premiumArt.length > 0 && (
+                <span className="ml-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-current/20 px-1 text-[9px] font-semibold opacity-80">
+                  {premiumArt.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="exclusive"
+              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Layers size={14} className="shrink-0" />
+              <span>Exclusive</span>
+              {exclusiveArt.length > 0 && (
+                <span className="ml-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-current/20 px-1 text-[9px] font-semibold opacity-80">
+                  {exclusiveArt.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="services"
+              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Star size={14} className="shrink-0" />
+              <span>Services</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="about"
+              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <User size={14} className="shrink-0" />
+              <span>About</span>
+            </TabsTrigger>
+          </TabsList>
         </div>
 
         <TabsContent value={tab}>

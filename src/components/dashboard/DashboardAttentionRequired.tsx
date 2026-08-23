@@ -147,13 +147,13 @@ const DashboardAttentionRequired = ({ role, profile, onAction }: DashboardAttent
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/70 flex items-center gap-2">
-          <AlertCircle className="h-4 w-4" />
+        <h2 className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground flex items-center gap-2">
+          <AlertCircle className="h-3.5 w-3.5" />
           Attention Required
         </h2>
         {items.length > 1 && (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase">
-            {items.length} Actions
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+            {items.length} actions
           </span>
         )}
       </div>
