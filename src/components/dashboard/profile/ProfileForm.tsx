@@ -48,7 +48,7 @@ const ProfileForm = memo(({ profile, isEditing, onToggleEdit, onSave, onChange }
         {isEditing ? (
           <>
             <div className="space-y-3">
-              <Label htmlFor="displayName" className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Display Name</Label>
+              <Label htmlFor="displayName" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/70">Display Name</Label>
               <Input
                 id="displayName"
                 value={profile.displayName}
@@ -58,7 +58,7 @@ const ProfileForm = memo(({ profile, isEditing, onToggleEdit, onSave, onChange }
               />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="tagName" className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Tag Name</Label>
+              <Label htmlFor="tagName" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/70">Tag Name</Label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-black">@</span>
                 <Input
@@ -71,7 +71,7 @@ const ProfileForm = memo(({ profile, isEditing, onToggleEdit, onSave, onChange }
               </div>
             </div>
             <div className="space-y-3">
-              <Label htmlFor="bio" className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Bio</Label>
+              <Label htmlFor="bio" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/70">Bio</Label>
               <textarea
                 id="bio"
                 value={profile.bio}

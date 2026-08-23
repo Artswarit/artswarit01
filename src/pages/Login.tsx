@@ -79,7 +79,7 @@ const Login = ({ isModal = false }: { isModal?: boolean }) => {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-            <span className="text-violet-300/80 text-sm font-medium tracking-widest uppercase">Creative Platform</span>
+            <span className="text-violet-300/80 text-sm font-medium tracking-wide">Creative Platform</span>
           </div>
         </div>
 

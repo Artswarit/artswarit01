@@ -283,7 +283,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
                 Content Type
               </span>
               {!isProArtist && (
-                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 bg-muted px-2.5 py-1 rounded-full border border-border/40">
+                <span className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/60 bg-muted px-2.5 py-1 rounded-full border border-border/40">
                   {portfolioCount}/{portfolioLimit} items
                 </span>
               )}
@@ -313,7 +313,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
                       <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                     </div>
                     <p className={cn(
-                      "text-[10px] sm:text-xs font-black uppercase tracking-widest transition-colors",
+                      "text-[10px] sm:text-xs font-medium uppercase tracking-[0.07em] transition-colors",
                       isActive ? "text-primary" : "text-muted-foreground"
                     )}>{type.label}</p>
                     {isActive && (
@@ -337,7 +337,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
           <CardContent className="p-5 sm:p-8 space-y-6 sm:space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
               <div className="space-y-2.5 sm:space-y-3">
-                <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80 ml-1">Artwork Title*</Label>
+                <Label htmlFor="title" className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/80 ml-1">Artwork Title*</Label>
                 <Input 
                   id="title" 
                   value={title} 
@@ -349,7 +349,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
               </div>
 
               <div className="space-y-2.5 sm:space-y-3">
-                <Label htmlFor="category" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80 ml-1">Primary Category*</Label>
+                <Label htmlFor="category" className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/80 ml-1">Primary Category*</Label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger id="category" className="h-12 rounded-xl bg-muted/20 border-border/40 focus:ring-primary/20 focus:border-primary font-medium text-sm sm:text-base">
                     <SelectValue placeholder="Select a category" />
@@ -366,7 +366,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
             </div>
             
             <div className="space-y-2.5 sm:space-y-3">
-              <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80 ml-1">Project Description</Label>
+              <Label htmlFor="description" className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/80 ml-1">Project Description</Label>
               <Textarea 
                 id="description" 
                 value={description} 
@@ -378,7 +378,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
             </div>
             
             <div className="space-y-4">
-              <Label htmlFor="upload" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80 ml-1">
+              <Label htmlFor="upload" className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/80 ml-1">
                 Upload {selectedType === "image" ? "Images" : selectedType === "audio" ? "Audio Files" : "Videos"}*
               </Label>
               <div className="group relative border-2 border-dashed border-border/60 rounded-[2rem] p-5 sm:p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all duration-500 ease-out overflow-hidden">
@@ -435,7 +435,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
           </CardHeader>
           <CardContent className="p-5 sm:p-8 space-y-6 sm:space-y-8">
             <div className="space-y-3 sm:space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80 ml-1">Discovery Visibility</Label>
+              <Label className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/80 ml-1">Discovery Visibility</Label>
               <Select value={visibility} onValueChange={setVisibility}>
                 <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-border/40 focus:ring-primary/20 focus:border-primary font-medium text-sm sm:text-base">
                   <SelectValue placeholder="Select visibility" />
@@ -449,7 +449,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
             </div>
 
             <div className="space-y-3 sm:space-y-4">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80 ml-1">Access Tier & Pricing</Label>
+              <Label className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/80 ml-1">Access Tier & Pricing</Label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 {[
                   { id: "free", label: "Free", desc: "Open to the world" },
@@ -481,7 +481,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
 
             {(visibilityType === "premium" || visibilityType === "exclusive") && (
               <div className="space-y-3 sm:space-y-4 p-5 sm:p-6 rounded-[2rem] bg-primary/5 border border-primary/10 animate-in zoom-in-95 duration-500">
-                <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-primary/80 ml-1">Set Your Price ({userCurrency})*</Label>
+                <Label htmlFor="price" className="text-[10px] font-medium uppercase tracking-[0.07em] text-primary/80 ml-1">Set Your Price ({userCurrency})*</Label>
                 <div className="relative group">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-black text-base sm:text-lg">{userCurrencySymbol}</span>
                   <Input 
@@ -516,7 +516,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
 
             {scheduleRelease && (
               <div className="space-y-2.5 sm:space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80 ml-1">Launch Date</Label>
+                <Label className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/80 ml-1">Launch Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="h-12 w-full justify-start text-left font-medium rounded-xl border-border/40 bg-muted/20 hover:bg-muted/30 transition-all text-sm sm:text-base">

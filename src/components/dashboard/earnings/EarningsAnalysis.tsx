@@ -97,7 +97,7 @@ const EarningsAnalysis = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Total Earnings (2025)</CardTitle>
+            <CardTitle className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/70">Total Earnings (2025)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-black tracking-tighter">₹239,700</div>
@@ -112,7 +112,7 @@ const EarningsAnalysis = () => {
         
         <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Monthly Average</CardTitle>
+            <CardTitle className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/70">Monthly Average</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-black tracking-tighter">₹19,975</div>
@@ -127,7 +127,7 @@ const EarningsAnalysis = () => {
         
         <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground/70">Pending Payouts</CardTitle>
+            <CardTitle className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/70">Pending Payouts</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-4xl font-black tracking-tighter text-amber-600">₹33,000</div>
@@ -268,7 +268,7 @@ const EarningsAnalysis = () => {
             <div className="grid grid-cols-2 gap-3 mt-8">
               {revenueSourcesData.map((item) => (
                 <div key={item.name} className="p-4 rounded-2xl bg-muted/20 border border-border/10">
-                  <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 mb-1">{item.name}</div>
+                  <div className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/70 mb-1">{item.name}</div>
                   <div className="text-2xl font-black tracking-tighter">{item.value}%</div>
                 </div>
               ))}
@@ -299,7 +299,7 @@ const EarningsAnalysis = () => {
                       <div className="flex justify-between items-center">
                         <div className="space-y-1">
                           <div className="font-bold text-sm group-hover:text-primary transition-colors">{transaction.title}</div>
-                          <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
+                          <div className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/70">
                             {new Date(transaction.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} • 
                             {transaction.type === "sale" && " Artwork Sale"}
                             {transaction.type === "commission" && " Commission"}
@@ -311,9 +311,9 @@ const EarningsAnalysis = () => {
                           <div className="font-black text-base tracking-tight">₹{transaction.amount.toLocaleString()}</div>
                           <div className="flex justify-end">
                             {transaction.status === "completed" ? (
-                              <span className="text-[10px] font-black uppercase tracking-widest text-green-600 bg-green-50 px-2 py-0.5 rounded-md">Completed</span>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-green-600 bg-green-50 px-2 py-0.5 rounded-md">Completed</span>
                             ) : (
-                              <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Pending</span>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Pending</span>
                             )}
                           </div>
                         </div>
@@ -335,7 +335,7 @@ const EarningsAnalysis = () => {
                       <div className="flex justify-between items-center">
                         <div className="space-y-1">
                           <div className="font-bold text-sm group-hover:text-primary transition-colors">{payout.title}</div>
-                          <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70">
+                          <div className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/70">
                             Expected on {new Date(payout.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                           </div>
                         </div>
@@ -343,9 +343,9 @@ const EarningsAnalysis = () => {
                           <div className="font-black text-base tracking-tight">₹{payout.amount.toLocaleString()}</div>
                           <div className="flex justify-end">
                             {payout.status === "processing" ? (
-                              <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Processing</span>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Processing</span>
                             ) : (
-                              <span className="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Scheduled</span>
+                              <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Scheduled</span>
                             )}
                           </div>
                         </div>

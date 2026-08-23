@@ -157,7 +157,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-emerald-300/80 text-sm font-medium tracking-widest uppercase">Join Today</span>
+            <span className="text-emerald-300/80 text-sm font-medium tracking-wide">Join Today</span>
           </div>
         </div>
 

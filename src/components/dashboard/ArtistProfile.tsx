@@ -308,11 +308,11 @@ const ArtistProfile = ({
         <CardContent className="space-y-6 pt-6">
           {isEditing ? <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Display Name *</Label>
+                <Label htmlFor="displayName" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">Display Name *</Label>
                 <Input id="displayName" value={editForm.displayName} onChange={e => handleChange('displayName', e.target.value)} placeholder="Your display name" className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-primary/20 font-medium min-h-[48px]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="country" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <Label htmlFor="country" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">
                   <Flag className="h-3 w-3 inline mr-1 mb-0.5" />
                   Country *
                 </Label>
@@ -328,39 +328,39 @@ const ArtistProfile = ({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="city" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <Label htmlFor="city" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">
                   <MapPin className="h-3 w-3 inline mr-1 mb-0.5" />
                   City *
                 </Label>
                 <Input id="city" value={editForm.city} onChange={e => handleChange('city', e.target.value)} placeholder="Enter your city name" className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-primary/20 font-medium min-h-[48px]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="location" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <Label htmlFor="location" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">
                   <MapPin className="h-3 w-3 inline mr-1 mb-0.5" />
                   Full Address (optional)
                 </Label>
                 <Input id="location" value={editForm.location} onChange={e => handleChange('location', e.target.value)} placeholder="e.g., Los Angeles, CA" className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-primary/20 font-medium min-h-[48px]" />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="bio" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Bio *</Label>
+                <Label htmlFor="bio" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">Bio *</Label>
                 <textarea id="bio" value={editForm.bio} onChange={e => handleChange('bio', e.target.value)} className="w-full min-h-[120px] rounded-2xl border-none bg-muted/30 px-4 py-3 text-sm font-medium ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 resize-none" placeholder="Tell others about yourself and your art..." />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="website" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <Label htmlFor="website" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">
                   <Globe className="h-3 w-3 inline mr-1 mb-0.5" />
                   Website
                 </Label>
                 <Input id="website" value={editForm.website} onChange={e => handleChange('website', e.target.value)} placeholder="https://yourwebsite.com" className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-primary/20 font-medium min-h-[48px]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="experienceYears" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <Label htmlFor="experienceYears" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">
                   <Briefcase className="h-3 w-3 inline mr-1 mb-0.5" />
                   Experience (years)
                 </Label>
                 <Input id="experienceYears" type="number" min="0" value={editForm.experienceYears} onChange={e => handleChange('experienceYears', e.target.value)} placeholder="e.g., 5" className="h-12 rounded-xl bg-muted/30 border-none focus-visible:ring-primary/20 font-medium min-h-[48px]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="hourlyRate" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <Label htmlFor="hourlyRate" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">
                   <DollarSign className="h-3 w-3 inline mr-1 mb-0.5" />
                   Hourly Rate ({userCurrencySymbol || '$'})
                 </Label>
@@ -449,25 +449,25 @@ const ArtistProfile = ({
         <CardContent className="pt-6">
           {isEditing ? <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="instagram" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                <Label htmlFor="instagram" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1 flex items-center gap-2">
                     <Instagram className="h-3.5 w-3.5" /> Instagram
                 </Label>
                 <Input id="instagram" value={editForm.socialLinks.instagram} onChange={e => handleSocialLinkChange('instagram', e.target.value)} placeholder="Instagram URL" className="h-12 rounded-xl bg-muted/30 border-none font-medium min-h-[48px]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="twitter" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                <Label htmlFor="twitter" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1 flex items-center gap-2">
                     <Twitter className="h-3.5 w-3.5" /> Twitter / X
                 </Label>
                 <Input id="twitter" value={editForm.socialLinks.twitter} onChange={e => handleSocialLinkChange('twitter', e.target.value)} placeholder="Twitter URL" className="h-12 rounded-xl bg-muted/30 border-none font-medium min-h-[48px]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="linkedin" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                <Label htmlFor="linkedin" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1 flex items-center gap-2">
                     <Linkedin className="h-3.5 w-3.5" /> LinkedIn
                 </Label>
                 <Input id="linkedin" value={editForm.socialLinks.linkedin} onChange={e => handleSocialLinkChange('linkedin', e.target.value)} placeholder="LinkedIn URL" className="h-12 rounded-xl bg-muted/30 border-none font-medium min-h-[48px]" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="youtube" className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1 flex items-center gap-2">
+                <Label htmlFor="youtube" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1 flex items-center gap-2">
                     <Youtube className="h-3.5 w-3.5" /> YouTube
                 </Label>
                 <Input id="youtube" value={editForm.socialLinks.youtube} onChange={e => handleSocialLinkChange('youtube', e.target.value)} placeholder="YouTube URL" className="h-12 rounded-xl bg-muted/30 border-none font-medium min-h-[48px]" />

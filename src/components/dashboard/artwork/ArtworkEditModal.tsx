@@ -194,7 +194,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
             <div className="flex flex-col justify-center min-w-0">
               <h3 className="text-lg font-black truncate text-foreground/90">{artwork?.title}</h3>
               <div className="flex items-center gap-2 mt-2">
-                <Badge variant="outline" className="px-3 py-1 rounded-full border-primary/20 bg-primary/5 text-[10px] font-black uppercase tracking-widest text-primary">
+                <Badge variant="outline" className="px-3 py-1 rounded-full border-primary/20 bg-primary/5 text-[10px] font-medium uppercase tracking-[0.07em] text-primary">
                   {artwork?.status || artwork?.approval_status || 'Active'}
                 </Badge>
               </div>
@@ -247,7 +247,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
           {/* Visibility & Pricing Section */}
           <div className="space-y-6 p-6 bg-primary/5 rounded-[2rem] border border-primary/10 shadow-sm">
             <div>
-              <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Visibility & Pricing</h3>
+              <h3 className="text-sm font-medium uppercase tracking-[0.07em] text-foreground">Visibility & Pricing</h3>
               <p className="text-xs font-medium text-muted-foreground mt-1">Set who can see your artwork and how they can access it</p>
             </div>
 
@@ -346,7 +346,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
           {/* Pin to Profile */}
           <div className="flex items-center justify-between p-6 bg-primary/5 rounded-[2rem] border border-primary/10 shadow-sm">
             <div className="space-y-1">
-              <Label htmlFor="is_pinned" className="text-sm font-black uppercase tracking-widest cursor-pointer">Pin to Profile</Label>
+              <Label htmlFor="is_pinned" className="text-sm font-medium uppercase tracking-[0.07em] cursor-pointer">Pin to Profile</Label>
               <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Feature on your profile</p>
             </div>
             <Switch
@@ -396,10 +396,10 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t border-primary/10">
-            <Button variant="outline" onClick={onClose} disabled={saving} className="w-full sm:w-auto h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95 order-2 sm:order-1">
+            <Button variant="outline" onClick={onClose} disabled={saving} className="w-full sm:w-auto h-14 rounded-2xl sm:px-10 font-medium uppercase tracking-[0.07em] text-xs border-primary/10 hover:bg-primary/5 hover:border-primary/30 transition-all active:scale-95 order-2 sm:order-1">
               Cancel
             </Button>
-            <Button onClick={handleSave} loading={saving} className="w-full sm:w-auto h-14 rounded-2xl sm:px-10 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all gap-3 order-1 sm:order-2">
+            <Button onClick={handleSave} loading={saving} className="w-full sm:w-auto h-14 rounded-2xl sm:px-10 font-medium uppercase tracking-[0.07em] text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-95 transition-all gap-3 order-1 sm:order-2">
               {!saving && <Save className="h-5 w-5" />}
               {saving ? "Saving Changes..." : "Save Changes"}
             </Button>
