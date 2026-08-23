@@ -609,7 +609,7 @@ const ClientDashboard = () => {
       <div className="w-full max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 pb-[calc(7rem+var(--safe-bottom))] sm:pb-12 pt-[calc(4.75rem+var(--safe-top))] sm:pt-[calc(6rem+var(--safe-top))] lg:pt-[calc(6.5rem+var(--safe-top))]">
         {/* Dashboard Header */}
         {selectedTab === 'overview' && (
-          <div className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-border/40 animate-fade-in">
+          <div className="pt-4 sm:pt-6 mb-5 sm:mb-6 animate-fade-in">
             <PageHeader
               title="Client Dashboard"
               size="lg"
