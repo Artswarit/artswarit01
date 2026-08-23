@@ -495,7 +495,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
           <TabsList className="h-auto w-full items-stretch gap-0.5 rounded-2xl border border-border/60 bg-card/80 p-1 shadow-sm backdrop-blur-xl flex overflow-x-auto no-scrollbar">
             <TabsTrigger
               value="all"
-              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="relative flex shrink-0 md:flex-1 min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Image size={14} className="shrink-0" />
               <span>Portfolio</span>
@@ -507,7 +507,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
             </TabsTrigger>
             <TabsTrigger
               value="premium"
-              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="relative flex shrink-0 md:flex-1 min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Crown size={14} className="shrink-0" />
               <span>Premium</span>
@@ -519,7 +519,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
             </TabsTrigger>
             <TabsTrigger
               value="exclusive"
-              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="relative flex shrink-0 md:flex-1 min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Layers size={14} className="shrink-0" />
               <span>Exclusive</span>
@@ -531,14 +531,14 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
             </TabsTrigger>
             <TabsTrigger
               value="services"
-              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="relative flex shrink-0 md:flex-1 min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <Star size={14} className="shrink-0" />
               <span>Services</span>
             </TabsTrigger>
             <TabsTrigger
               value="about"
-              className="relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="relative flex shrink-0 md:flex-1 min-h-[40px] items-center justify-center gap-1.5 rounded-xl px-3 sm:px-4 text-[12px] sm:text-[13px] font-medium whitespace-nowrap text-muted-foreground transition-all duration-200 hover:bg-muted/70 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <User size={14} className="shrink-0" />
               <span>About</span>

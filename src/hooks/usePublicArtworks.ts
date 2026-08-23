@@ -58,13 +58,31 @@ export const usePublicArtworks = () => {
       // A client-side `.filter(access_type === 'free')` after the fact is
       // not an access-control boundary: it doesn't stop someone calling the
       // REST API directly with the anon key.
-      const { data: artworksData, error: artworksError } = await supabase
+      let artworksData: any[] | null = null;
+
+      const { data: rpcData, error: rpcError } = await supabase
         .rpc('get_public_artworks', {
           p_limit: PAGE_SIZE,
           p_offset: from,
         });
 
-      if (artworksError) throw artworksError;
+      if (rpcError) {
+        // RPC may not be deployed yet — fall back to a direct table query.
+        // Client-side filter keeps the same intent: free public artworks only.
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('artworks')
+          .select('*')
+          .eq('status', 'public')
+          .order('created_at', { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+        if (fallbackError) throw fallbackError;
+        artworksData = (fallbackData || []).filter((a: any) => {
+          const t = (a.metadata as any)?.access_type;
+          return !t || t === 'free';
+        });
+      } else {
+        artworksData = rpcData;
+      }
 
       // Get unique artist IDs
       const artistIds = [...new Set((artworksData || []).map(a => a.artist_id))];
