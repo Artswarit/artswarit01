@@ -12,19 +12,19 @@ type Message = {
 
 const onboardingTips = {
   artist: [
-    "Hey! 👋 I can help with uploads, projects, earnings & more.",
+    "Hey! I can help with uploads, projects, earnings & more.",
     "Try asking: 'How do I upload artwork?'",
   ],
   client: [
-    "Hey! 👋 Looking for artists or project help?",
+    "Hey! Looking for artists or project help?",
     "Try: 'How do I message an artist?'",
   ],
   admin: [
-    "Hi Admin! 👋 Ask about moderation or analytics.",
+    "Hi Admin! Ask about moderation or analytics.",
     "Try: 'Show platform stats'",
   ],
   general: [
-    "Hi! 👋 I'm your Artswarit Assistant.",
+    "Hi! I'm your Artswarit Assistant.",
     "Ask me anything about the platform!",
   ],
 };

@@ -86,7 +86,7 @@ const LiveStreaming = () => {
           {/* Featured Live Stream */}
           {selectedStream && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-bold">🔴 Live Now</h2>
+              <h2 className="text-2xl font-bold">Live Now</h2>
               <div className="max-w-4xl mx-auto">
                 <LiveStreamPlayer
                   streamId={selectedStream.id}
@@ -163,7 +163,7 @@ const LiveStreaming = () => {
                       className="w-full h-48 object-cover rounded-t-lg"
                     />
                     <Badge className="absolute top-2 left-2 bg-red-500">
-                      🔴 LIVE
+                      LIVE
                     </Badge>
                     <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
                       <Users className="h-3 w-3" />

@@ -233,7 +233,7 @@ const ArtworkManagement = () => {
       }
     } catch (err: any) {
       const detail = err?.message?.includes('not found') ? 'One or more artworks were not found.'
-        : err?.message?.includes('unauthorized') || err?.status === 401 ? 'Permission denied — you can only edit your own artworks.'
+        : err?.message?.includes('unauthorized') || err?.status === 401 ? 'Permission denied. You can only edit your own artworks.'
         : err?.message || 'Bulk action failed';
       toast({ title: 'Error', description: detail, variant: 'destructive' });
     } finally {
@@ -269,7 +269,7 @@ const ArtworkManagement = () => {
       refreshGating();
     } catch (err: any) {
       const detail = err?.message?.includes('not found') ? 'Artwork not found or already deleted.'
-        : err?.message?.includes('unauthorized') ? 'Permission denied — you can only delete your own artworks.'
+        : err?.message?.includes('unauthorized') ? 'Permission denied. You can only delete your own artworks.'
         : err?.message || 'Failed to delete artwork.';
       toast({ title: 'Error', description: detail, variant: 'destructive' });
     } finally {

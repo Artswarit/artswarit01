@@ -248,7 +248,7 @@ export default function DisputeSettlement() {
   const statusBadge = (s: string) => {
     const map: Record<string, { cls: string; label: string }> = {
       open:               { cls: 'bg-yellow-500/20 text-yellow-600 border-yellow-500/30', label: 'Open' },
-      under_review:       { cls: 'bg-purple-500/20 text-purple-600 border-purple-500/30', label: '🔒 Neutral Hold' },
+      under_review:       { cls: 'bg-purple-500/20 text-purple-600 border-purple-500/30', label: 'Neutral Hold' },
       resolved_approved:  { cls: 'bg-green-500/20 text-green-600 border-green-500/30', label: 'Released to Artist' },
       resolved_revision:  { cls: 'bg-orange-500/20 text-orange-600 border-orange-500/30', label: 'Revision Requested' },
       resolved_cancelled: { cls: 'bg-blue-500/20 text-blue-600 border-blue-500/30', label: 'Refunded to Client' },

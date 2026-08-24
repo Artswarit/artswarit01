@@ -129,9 +129,9 @@ export default function AuditLog() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="dispute">💰 Disputes</SelectItem>
-              <SelectItem value="moderation">🛡️ Moderation</SelectItem>
-              <SelectItem value="user">👤 User Actions</SelectItem>
+              <SelectItem value="dispute">Disputes</SelectItem>
+              <SelectItem value="moderation">Moderation</SelectItem>
+              <SelectItem value="user">User Actions</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" size="sm" onClick={loadLog} className="shrink-0">

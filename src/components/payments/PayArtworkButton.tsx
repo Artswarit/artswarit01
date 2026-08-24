@@ -191,7 +191,7 @@ export function PayArtworkButton({
               >
                 <AlertCircle className="h-4 w-4 text-destructive" />
                 <AlertDescription className="text-sm font-medium text-destructive">
-                  {stripeError} You can try again — your selection has been kept.
+                  {stripeError} You can try again. Your selection has been kept.
                 </AlertDescription>
               </Alert>
             )}

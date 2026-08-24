@@ -15,7 +15,7 @@ const Merchandise = () => {
           </div>
           <div className="space-y-3">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Merchandise — Coming Soon
+              Merchandise: Coming Soon
             </h1>
             <p className="text-muted-foreground leading-relaxed">
               We're building a curated marketplace for artist-designed merchandise.

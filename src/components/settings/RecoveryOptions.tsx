@@ -202,7 +202,7 @@ const RecoveryOptions = () => {
             <>
               <div className="bg-muted p-4 rounded-lg">
                 <p className="text-sm font-medium text-destructive mb-3">
-                  ⚠️ Save these codes now! They won't be shown again.
+                  Save these codes now! They won't be shown again.
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {recoveryCodes.map((code, index) => (

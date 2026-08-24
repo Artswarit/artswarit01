@@ -25,8 +25,8 @@ const FeaturedArtistCard = ({
 }: FeaturedArtistCardProps) => {
   return (
     <Link to={`/artist/${id}`} className="block h-full group">
-      <Card className="relative h-full overflow-hidden rounded-2xl sm:rounded-[2rem] border border-muted/20 bg-card shadow-lg hover:shadow-2xl transition-all duration-500">
-        <div className="relative aspect-[4/5] sm:aspect-square overflow-hidden">
+      <Card className="relative h-full overflow-hidden rounded-2xl sm:rounded-[2rem] border border-muted/20 bg-card shadow-lg hover:shadow-2xl transition-all duration-500 isolate">
+        <div className="relative aspect-[4/5] sm:aspect-square overflow-hidden [transform:translateZ(0)]">
           <img
             src={imageUrl}
             alt={name}

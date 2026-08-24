@@ -23,7 +23,7 @@ const AboutUs = () => {
               About Artswarit
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              India's trust-first digital marketplace connecting global artists with clients worldwide — built on escrow-secured payments and complete transparency.
+              India's trust-first digital marketplace connecting global artists with clients worldwide, built on escrow-secured payments and complete transparency.
             </p>
           </div>
 
@@ -37,7 +37,7 @@ const AboutUs = () => {
                 <div>
                   <h2 className="text-xl sm:text-2xl font-black tracking-tight mb-3">Our Mission</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Artswarit is an initiative by <strong>Ashwareet Basu</strong> (Sole Proprietor) to bridge the gap between global artists and clients across the world. We believe that every artist — regardless of geography, language, or background — deserves a secure, transparent, and fair platform to monetise their creative talent.
+                    Artswarit is an initiative by <strong>Ashwareet Basu</strong> (Sole Proprietor) to bridge the gap between global artists and clients across the world. We believe that every artist, regardless of geography, language, or background, deserves a secure, transparent, and fair platform to monetise their creative talent.
                   </p>
                 </div>
               </div>
@@ -65,16 +65,16 @@ const AboutUs = () => {
                 </p>
                 <ol className="list-decimal pl-6 space-y-2">
                   <li>
-                    <strong>Client Funds a Milestone</strong> — Payment is captured via our PCI-DSS compliant payment gateway (Razorpay) and held in a <strong>neutral escrow account</strong>. At no point does Artswarit take ownership of these funds.
+                    <strong>Client Funds a Milestone:</strong> Payment is captured via our PCI-DSS compliant payment gateway (Razorpay) and held in a <strong>neutral escrow account</strong>. At no point does Artswarit take ownership of these funds.
                   </li>
                   <li>
-                    <strong>Artist Delivers Work</strong> — The artist completes the agreed milestone and submits deliverables on the platform for client review.
+                    <strong>Artist Delivers Work:</strong> The artist completes the agreed milestone and submits deliverables on the platform for client review.
                   </li>
                   <li>
-                    <strong>Client Approves or Disputes</strong> — The client has a <strong>48-hour dispute window</strong> to review the work. If approved (or if no dispute is raised within 48 hours), funds are released to the artist.
+                    <strong>Client Approves or Disputes:</strong> The client has a <strong>48-hour dispute window</strong> to review the work. If approved (or if no dispute is raised within 48 hours), funds are released to the artist.
                   </li>
                   <li>
-                    <strong>Transparent Fee Deduction</strong> — A flat <strong>15% platform fee</strong> is deducted at the point of artist payout (0% for Pro subscribers). The artist payout amount is clearly displayed before the client confirms payment.
+                    <strong>Transparent Fee Deduction:</strong> A flat <strong>15% platform fee</strong> is deducted at the point of artist payout (0% for Pro subscribers). The artist payout amount is clearly displayed before the client confirms payment.
                   </li>
                 </ol>
                 <p className="text-sm border-l-4 border-emerald-400 pl-4 py-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-r-lg">
@@ -92,7 +92,7 @@ const AboutUs = () => {
                   <Scale className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black tracking-tight mb-1">Digital Intermediary — Not a Seller</h2>
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight mb-1">Digital Intermediary, Not a Seller</h2>
                   <p className="text-xs font-bold text-blue-600 uppercase tracking-widest">IT Act 2000 · IT Rules 2021 (Amended 2026)</p>
                 </div>
               </div>
@@ -155,7 +155,7 @@ const AboutUs = () => {
                 </div>
                 <h3 className="font-black text-lg">Fair Pricing</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Artists set their own prices. Our flat 15% platform fee (0% for Pro subscribers) is disclosed upfront — no hidden charges, no surprises. See our full <Link to="/terms-of-service" className="text-primary underline underline-offset-2 font-semibold">Terms of Service</Link> for details.
+                  Artists set their own prices. Our flat 15% platform fee (0% for Pro subscribers) is disclosed upfront. No hidden charges, no surprises. See our full <Link to="/terms-of-service" className="text-primary underline underline-offset-2 font-semibold">Terms of Service</Link> for details.
                 </p>
               </CardContent>
             </Card>
@@ -180,14 +180,14 @@ const AboutUs = () => {
                   <p className="text-xs font-bold text-primary uppercase tracking-widest">Registered Office</p>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Bairiya Bazar, Turkaulia,<br />
-                    Purbi Champaran, Bihar — 845437<br />
+                    Purbi Champaran, Bihar 845437<br />
                     India
                   </p>
                 </div>
                 <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">
                   <p className="text-xs font-bold text-primary uppercase tracking-widest">Operations Hub</p>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Kalkaji, New Delhi — 110019<br />
+                    Kalkaji, New Delhi 110019<br />
                     India
                   </p>
                 </div>

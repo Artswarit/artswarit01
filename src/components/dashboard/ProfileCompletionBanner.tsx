@@ -48,7 +48,7 @@ const ProfileCompletionBanner = () => {
           
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-black text-foreground text-xl sm:text-2xl tracking-tight">🎯 Get Started in 5 Minutes</h3>
+              <h3 className="font-black text-foreground text-xl sm:text-2xl tracking-tight">Get Started in 5 Minutes</h3>
               <span className="px-2 py-0.5 rounded-lg bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest leading-none">
                 {completionPercentage}% Done
               </span>

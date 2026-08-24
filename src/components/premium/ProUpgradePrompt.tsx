@@ -40,7 +40,7 @@ export function ProUpgradePrompt({
             <Sparkles className="h-5 w-5 text-yellow-400 absolute -top-1 -right-1 animate-pulse" />
           </div>
           <DialogTitle className="text-2xl font-bold">
-            🎉 You're about to earn {formatCurrency(milestoneAmount)}!
+            You're about to earn {formatCurrency(milestoneAmount)}!
           </DialogTitle>
           <DialogDescription className="text-base mt-2">
             As a Starter artist, a {PLANS.starter.platformFee * 100}% service fee ({formatCurrency(starterEarnings.platformFee)}) will be deducted from this payment.
@@ -87,7 +87,7 @@ export function ProUpgradePrompt({
           {/* Value Proposition */}
           <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200">
             <p className="text-sm text-center font-medium text-yellow-800">
-              💡 <strong>Save {formatCurrency(savings)}</strong> on this project alone by upgrading to Pro for just {formatCurrency(PLANS.pro.price / 83)}/month
+              <strong>Save {formatCurrency(savings)}</strong> on this project alone by upgrading to Pro for just {formatCurrency(PLANS.pro.price / 83)}/month
             </p>
           </div>
 
@@ -115,7 +115,7 @@ export function ProUpgradePrompt({
             className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-6 text-lg shadow-lg hover:shadow-xl transition-all"
           >
             <Crown className="h-5 w-5 mr-2" />
-            Upgrade to Pro — ₹499/month
+            Upgrade to Pro · ₹499/month
             <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
           <p className="text-xs text-center text-muted-foreground -mt-1">

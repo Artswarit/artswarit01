@@ -187,7 +187,7 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
         .insert({
           conversation_id: convId,
           sender_id: currentUserId,
-          content: message.trim() || (pendingAttachments.length > 0 ? "📎 Attachment" : ""),
+          content: message.trim() || (pendingAttachments.length > 0 ? "Attachment" : ""),
           is_read: false,
           attachments: pendingAttachments.length > 0 ? JSON.parse(JSON.stringify(pendingAttachments)) : [],
         })
@@ -299,7 +299,7 @@ const MessageClientDialog: React.FC<MessageClientDialogProps> = ({
                             : "bg-muted"
                         }`}
                       >
-                        {msg.content && msg.content !== "📎 Attachment" && (
+                        {msg.content && msg.content !== "Attachment" && (
                           <p className="text-sm whitespace-pre-wrap break-words">
                             {msg.content}
                           </p>

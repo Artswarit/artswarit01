@@ -77,7 +77,7 @@ export function ProSuccessAnimation({
           {/* Title */}
           <div className="space-y-2">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
-              🎉 You're now a Pro Artist!
+              You're now a Pro Artist!
             </h2>
             {milestoneAmount && (
               <p className="text-lg text-green-600 font-semibold">
@@ -88,7 +88,7 @@ export function ProSuccessAnimation({
 
           {/* Unlocked Features */}
           <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 space-y-3">
-            <p className="text-sm font-medium text-yellow-800">Pro features unlocked ✨</p>
+            <p className="text-sm font-medium text-yellow-800">Pro features unlocked</p>
             <div className="grid grid-cols-2 gap-2">
               {features.map((feature, index) => (
                 <div 

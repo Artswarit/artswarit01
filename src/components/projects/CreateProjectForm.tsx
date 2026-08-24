@@ -511,7 +511,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                 </div>
                 <AlertDescription className="text-sm font-bold">
                   Milestone total: {userCurrencySymbol}{totalMilestoneAmount.toLocaleString()} / Budget: {userCurrencySymbol}{budget.toLocaleString()}
-                  {!budgetMatches && ' — Please adjust amounts to match the budget.'}
+                  {!budgetMatches && '. Please adjust amounts to match the budget.'}
                 </AlertDescription>
               </div>
             </Alert>

@@ -151,7 +151,7 @@ const Footer = () => {
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Registered Office</p>
               <p className="text-xs text-white/50 leading-relaxed">
                 Bairiya Bazar, Turkaulia,<br />
-                Purbi Champaran, Bihar — 845437, India
+                Purbi Champaran, Bihar 845437, India
               </p>
             </div>
 
@@ -159,7 +159,7 @@ const Footer = () => {
             <div className="space-y-1.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">Operations Hub</p>
               <p className="text-xs text-white/50 leading-relaxed">
-                Kalkaji, New Delhi — 110019, India
+                Kalkaji, New Delhi 110019, India
               </p>
             </div>
           </div>

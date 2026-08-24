@@ -58,7 +58,7 @@ function CountdownTimer({ flaggedAt }: { flaggedAt: string }) {
   const isUrgent = remaining < 3600000;
 
   if (isExpired) {
-    return <Badge className="bg-red-600 text-white border-red-700 animate-pulse font-mono text-xs">⚠ OVERDUE — REMOVE NOW</Badge>;
+    return <Badge className="bg-red-600 text-white border-red-700 animate-pulse font-mono text-xs">OVERDUE. REMOVE NOW</Badge>;
   }
   return (
     <Badge className={`font-mono text-xs border ${isUrgent ? 'bg-red-500/20 text-red-600 border-red-500/40 animate-pulse' : 'bg-amber-500/20 text-amber-600 border-amber-500/40'}`}>

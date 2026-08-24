@@ -39,7 +39,7 @@ class TabErrorBoundary extends React.Component<Props, State> {
       return (
         <div className="flex items-center justify-center py-16 px-4">
           <div className="max-w-md w-full text-center space-y-4 p-6 rounded-2xl border border-border bg-card">
-            <div className="text-4xl">⚠️</div>
+            <div className="text-yellow-500"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 mx-auto"><path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd"/></svg></div>
             <div className="space-y-1">
               <h3 className="text-lg font-bold tracking-tight">
                 {this.props.tabLabel ? `${this.props.tabLabel} failed to load` : 'This section failed to load'}

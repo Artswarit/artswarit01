@@ -174,7 +174,7 @@ export function PayMilestoneButton({
             {isProArtist && (
               <div className="bg-primary/10 border border-primary/20 rounded-lg p-2 text-center">
                 <span className="text-primary text-sm font-medium">
-                  ✨ Pro Artist - 0% platform fee applied!
+                  Pro Artist - 0% platform fee applied!
                 </span>
               </div>
             )}
@@ -194,7 +194,7 @@ export function PayMilestoneButton({
               >
                 <AlertCircle className="h-4 w-4 text-destructive" />
                 <AlertDescription className="text-sm text-destructive">
-                  {stripeError} You can try again — your milestone selection has been kept.
+                  {stripeError} You can try again. Your milestone selection has been kept.
                 </AlertDescription>
               </Alert>
             )}

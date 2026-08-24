@@ -15,7 +15,7 @@ const Commissions = () => {
           </div>
           <div className="space-y-3">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Public Commissions — Coming Soon
+              Public Commissions: Coming Soon
             </h1>
             <p className="text-muted-foreground leading-relaxed">
               A public marketplace for open commission requests is on the way.

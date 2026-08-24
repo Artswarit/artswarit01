@@ -220,7 +220,7 @@ const ProjectManagement = () => {
         await supabase.from('notifications').insert({
           user_id: project.client_id,
           type: 'project_completed',
-          title: 'Project Completed! 🎉',
+          title: 'Project Completed!',
           message: `${artistProfile?.full_name || 'The artist'} has completed "${project.title}"`,
           metadata: { project_id: project.id, artist_id: user?.id }
         });
@@ -406,7 +406,7 @@ const ProjectManagement = () => {
         await supabase.from('notifications').insert({
           user_id: project.client_id,
           type: 'project_completed',
-          title: 'Project Completed! 🎉',
+          title: 'Project Completed!',
           message: `${artistProfile?.full_name || 'The artist'} has completed your project "${project.title}"`,
           metadata: {
             project_id: project.id,

@@ -274,7 +274,7 @@ const Signup = ({ isModal = false }: { isModal?: boolean }) => {
                   <div className="flex items-start gap-3 p-4 rounded-xl border border-violet-200 dark:border-violet-900/50 bg-violet-50/70 dark:bg-violet-950/20">
                     <CheckCircle2 className="h-5 w-5 text-violet-600 dark:text-violet-400 flex-shrink-0 mt-0.5" />
                     <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                      Click the link in that email to activate your account. You can close this tab — the link works from anywhere.
+                      Click the link in that email to activate your account. You can close this tab; the link works from anywhere.
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">

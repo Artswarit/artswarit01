@@ -89,8 +89,8 @@ const ArtworkCarousel = () => {
             {featuredArtwork.map((artwork) => (
               <CarouselItem key={artwork.id} className="pl-3 sm:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
                 <Link to={`/artwork/${artwork.id}`} className="block h-full group">
-                  <div className="h-full overflow-hidden rounded-2xl sm:rounded-[2rem] border border-muted/20 bg-card shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col">
-                    <div className="relative aspect-[3/4] overflow-hidden">
+                  <div className="h-full overflow-hidden rounded-2xl sm:rounded-[2rem] border border-muted/20 bg-card shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col isolate">
+                    <div className="relative aspect-[3/4] overflow-hidden [transform:translateZ(0)]">
                       {artwork.type === 'video' ? (
                         <video 
                           src={artwork.imageUrl} 

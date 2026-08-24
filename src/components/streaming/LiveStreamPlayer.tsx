@@ -86,7 +86,7 @@ const LiveStreamPlayer = ({
               {/* Live indicator */}
               {isLive && (
                 <Badge className="absolute top-4 left-4 bg-red-500">
-                  🔴 LIVE
+                  LIVE
                 </Badge>
               )}
               

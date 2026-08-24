@@ -15,7 +15,7 @@ const Collections = () => {
           </div>
           <div className="space-y-3">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Collections — Coming Soon
+              Collections: Coming Soon
             </h1>
             <p className="text-muted-foreground leading-relaxed">
               We're building curated collections so you can group, save, and share

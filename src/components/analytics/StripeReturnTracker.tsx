@@ -50,7 +50,7 @@ export function StripeReturnTracker() {
         artwork_id: location.pathname.split("/artwork/")[1]?.split("?")[0] ?? null,
       });
       toast.success("Payment received", {
-        description: "We're confirming your purchase — access will appear here shortly.",
+        description: "We're confirming your purchase. Access will appear here shortly.",
       });
       fired = true;
     } else if (artworkStatus === "cancel") {
@@ -64,7 +64,7 @@ export function StripeReturnTracker() {
     if (milestone === "success") {
       track("payment_success", { provider: "stripe", kind: "milestone" });
       toast.success("Milestone funded", {
-        description: "We're confirming the payment — the milestone will become active shortly.",
+        description: "We're confirming the payment. The milestone will become active shortly.",
       });
       fired = true;
     } else if (milestone === "cancel") {
@@ -79,7 +79,7 @@ export function StripeReturnTracker() {
       track("subscription_upgraded", { provider: "stripe", plan });
       track("payment_success", { provider: "stripe", kind: "subscription", plan });
       toast.success("Subscription active", {
-        description: "We're confirming your plan — Pro benefits will apply shortly.",
+        description: "We're confirming your plan. Pro benefits will apply shortly.",
       });
       fired = true;
     } else if (premium === "cancel") {

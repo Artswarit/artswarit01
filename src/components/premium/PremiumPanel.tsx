@@ -110,7 +110,7 @@ const PremiumPanel = ({ onUpgrade }: Props) => {
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                 <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 text-xs font-bold shadow-lg rounded-lg my-[2px] mx-[2px] py-[15px]">
-                  ✨ MOST POPULAR
+                  MOST POPULAR
                 </div>
               </div>
             )}

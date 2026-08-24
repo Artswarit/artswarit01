@@ -16,7 +16,7 @@ function describe(errorCode: string | null, errorDescription: string | null): st
     case "otp_expired":
       return "That verification link has expired. Request a new one below.";
     case "access_denied":
-      return "That link is no longer valid — it may have already been used.";
+      return "That link is no longer valid. It may have already been used.";
     default:
       // error_description arrives URL-encoded with + for spaces.
       return errorDescription

@@ -166,7 +166,7 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
             value={completion.isComplete ? "Verified" : "Incomplete"}
             hint={
               completion.isComplete
-                ? "All set — you're discoverable"
+                ? "All set, you're discoverable"
                 : `${completion.completionPercentage}% complete`
             }
             tone={completion.isComplete ? "success" : "warning"}
