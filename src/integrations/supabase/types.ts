@@ -2704,15 +2704,6 @@ export type Database = {
         Returns: Json
       }
       get_artist_stats: { Args: { artist_uuid: string }; Returns: Json }
-      get_public_artworks: {
-        Args: {
-          p_limit?: number
-          p_offset?: number
-          p_exclude_id?: string
-          p_category?: string
-        }
-        Returns: Database["public"]["Tables"]["artworks"]["Row"][]
-      }
       get_public_user_info: {
         Args: { target_user_id: string }
         Returns: {
