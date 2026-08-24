@@ -9,6 +9,9 @@ const corsHeaders = {
 };
 
 const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
+// Groq retired llama-3.3-70b-versatile; keep the model configurable and
+// default to a current production model.
+const GROQ_MODEL = Deno.env.get("GROQ_MODEL") || "openai/gpt-oss-120b";
 
 // Input validation constants
 const MAX_MESSAGE_LENGTH = 2000;
@@ -212,7 +215,7 @@ STRICT INSTRUCTIONS:
     ];
 
     const payload: GroqPayload = {
-      model: "llama-3.3-70b-versatile",
+      model: GROQ_MODEL,
       messages: groqMessages,
       temperature: 0.7,
     };

@@ -135,7 +135,9 @@ const ProjectDetailModal = ({
   const scrollToTab = (tabId: string) => {
     setActiveTab(tabId);
     requestAnimationFrame(() => {
-      modalViewportRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+      // 'instant' overrides the viewport's CSS scroll-smooth so switching
+      // tabs doesn't trigger a long animated scroll through the page.
+      modalViewportRef.current?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
     });
   };
 
@@ -516,7 +518,7 @@ const ProjectDetailModal = ({
   if (loading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-none w-screen h-screen max-h-none bg-background/95 backdrop-blur-xl border-none shadow-none flex flex-col items-center justify-center p-0 pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)]">
+        <DialogContent className="max-w-none w-screen h-[100dvh] max-h-none bg-background/95 backdrop-blur-xl border-none shadow-none flex flex-col items-center justify-center p-0 pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)]">
           <DialogHeader className="sr-only">
             <DialogTitle>Loading Project Details</DialogTitle>
             <DialogDescription>Please wait while we fetch the project details.</DialogDescription>
@@ -556,12 +558,12 @@ const ProjectDetailModal = ({
           </div>
         </DialogContent>
       ) : (
-        <DialogContent className="max-w-none w-screen h-screen max-h-none overflow-hidden overflow-y-hidden flex flex-col p-0 pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] gap-0 border-none shadow-none bg-background backdrop-blur-2xl rounded-none z-[200]">
+        <DialogContent className="max-w-none w-screen h-[100dvh] max-h-none overflow-hidden overflow-y-hidden flex flex-col p-0 pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] gap-0 border-none shadow-none bg-background backdrop-blur-2xl rounded-none z-[200]">
           <DialogHeader className="sr-only">
             <DialogTitle>{project.title}</DialogTitle>
             <DialogDescription>Project details and collaboration workspace</DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-1 h-full" viewportRef={modalViewportRef}>
+          <ScrollArea className="flex-1 min-h-0 h-full" viewportRef={modalViewportRef}>
             <div className="flex flex-col min-h-full max-w-7xl mx-auto w-full relative border-x border-border/5">
             {/* Ultra Modern Header Section */}
             <div className="relative overflow-hidden pt-8 sm:pt-12 pb-7 sm:pb-9 px-4 sm:px-10 border-b bg-gradient-to-br from-primary/[0.07] via-background to-primary/[0.03]">
@@ -743,7 +745,7 @@ const ProjectDetailModal = ({
 
             {/* Enhanced Sticky Navigation */}
               <Tabs value={activeTab} onValueChange={scrollToTab} className="w-full">
-                <div className="relative z-10 -mx-4 sm:-mx-10 px-3 sm:px-10 pt-3 sm:pt-5 pb-4 sm:pb-6 bg-background border-b border-border/40 mb-5 sm:mb-7">
+                <div className="sticky top-0 z-20 -mx-4 sm:-mx-10 px-3 sm:px-10 pt-3 sm:pt-5 pb-4 sm:pb-6 bg-background border-b border-border/40 mb-5 sm:mb-7">
                   <div className="relative group/tabs">
                     {/* Scroll Gradient Indicators */}
                     <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 opacity-0 group-hover/tabs:opacity-100 transition-opacity pointer-events-none" />
@@ -1052,7 +1054,7 @@ const ProjectDetailModal = ({
                 </TabsContent>
 
                 <TabsContent id="project-tab-content-communication" value="communication" className="mt-0 outline-none focus-visible:ring-0">
-                  <div className="fixed inset-0 z-[170] bg-background flex flex-col pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] animate-in fade-in slide-in-from-bottom-2 duration-300 ease-apple overscroll-contain">
+                  <div className="fixed inset-0 h-[100dvh] z-[170] bg-background flex flex-col pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] animate-in fade-in slide-in-from-bottom-2 duration-300 ease-apple overscroll-contain">
                     <div className="px-3 sm:px-6 py-2.5 border-b border-border/40 bg-white/90 dark:bg-card/80 backdrop-blur-xl flex items-center gap-3 shrink-0">
                       <Button
                         variant="ghost"
