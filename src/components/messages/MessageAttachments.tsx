@@ -1,8 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X, Image, FileText, Loader2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getSignedStorageUrl } from "@/lib/storage/signedUrl";
+
+// Attachments live in the private "message-attachments" bucket; the stored URL
+// is only a path carrier and is resolved to a signed URL before use.
+export const MESSAGE_ATTACHMENT_BUCKET = "message-attachments";
 
 export interface Attachment {
   name: string;
@@ -10,6 +15,28 @@ export interface Attachment {
   type: string;
   size: number;
 }
+
+/** Resolves a stored attachment URL into a short-lived signed URL. */
+const useSignedAttachmentUrl = (url?: string) => {
+  const [signedUrl, setSignedUrl] = useState<string>("");
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!url) {
+      setSignedUrl("");
+      return;
+    }
+    getSignedStorageUrl(url, MESSAGE_ATTACHMENT_BUCKET).then((resolved) => {
+      if (!cancelled) setSignedUrl(resolved);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  return signedUrl;
+};
+
 
 interface AttachmentInputProps {
   onAttach: (attachment: Attachment) => void;
