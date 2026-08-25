@@ -178,7 +178,9 @@ const ArtworkDiscoveryCard = ({
             />
           ) : (
             <img
-              src={getOptimizedImageUrl(imageUrl, ImagePresets.THUMBNAIL)}
+              src={getOptimizedImageUrl(imageUrl, ImagePresets.DISCOVERY_CARD)}
+              srcSet={`${getOptimizedImageUrl(imageUrl, { width: 480, quality: 80 })} 480w, ${getOptimizedImageUrl(imageUrl, ImagePresets.DISCOVERY_CARD)} 800w`}
+              sizes="(min-width: 1280px) 25vw, (min-width: 640px) 33vw, 50vw"
               alt={title}
               loading="lazy"
               decoding="async"

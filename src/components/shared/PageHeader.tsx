@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
  * Canonical page / section header.
  *
  * Pattern derived from dashboards and content pages (Explore, Categories,
- * DashboardHeader). Uses `font-black` and `tracking-tight` per brand spec.
+ * DashboardHeader). It keeps hierarchy clear without oversized display type.
  *
  * NOT a replacement for marketing hero sections — those keep bespoke layouts.
  */
@@ -20,9 +20,9 @@ export interface PageHeaderProps {
 }
 
 const sizeMap = {
-  sm: "text-xl sm:text-2xl",
-  md: "text-2xl sm:text-3xl",
-  lg: "text-3xl sm:text-4xl",
+  sm: "text-lg sm:text-xl",
+  md: "text-xl sm:text-2xl",
+  lg: "text-2xl sm:text-3xl",
 } as const;
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
@@ -52,7 +52,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           {title}
         </h1>
         {description ? (
-          <p className="text-sm sm:text-base text-muted-foreground font-medium max-w-2xl">
+          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
             {description}
           </p>
         ) : null}

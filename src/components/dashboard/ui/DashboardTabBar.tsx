@@ -34,7 +34,7 @@ export const DashboardTabBar: React.FC<DashboardTabBarProps> = ({ tabs, badges, 
             key={tab.value}
             value={tab.value}
             className={cn(
-              "relative flex shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-2.5 sm:px-3 text-[12px] sm:text-[13px] font-medium whitespace-nowrap",
+              "relative flex min-w-max shrink-0 min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl px-2.5 sm:px-3 text-[12px] sm:text-[13px] font-medium whitespace-nowrap",
               "text-muted-foreground transition-all duration-200 ease-apple",
               "hover:bg-muted/70 hover:text-foreground",
               "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-token-sm",

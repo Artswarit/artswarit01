@@ -68,6 +68,7 @@ export const getOptimizedImageUrl = (
  */
 export const ImagePresets = {
   THUMBNAIL: { width: 640, quality: 82 } as ImageOptimizationOptions,          // Grid cards
+  DISCOVERY_CARD: { width: 800, quality: 85 } as ImageOptimizationOptions,     // Explore and related artwork
   AVATAR: { width: 128, height: 128, quality: 82 } as ImageOptimizationOptions, // Round avatars
   PROFILE_COVER: { width: 1440, quality: 82 } as ImageOptimizationOptions,     // Header banners
   ARTWORK_DETAIL: { width: 1600, quality: 85 } as ImageOptimizationOptions,    // Detail view
