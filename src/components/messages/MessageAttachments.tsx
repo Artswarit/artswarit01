@@ -67,16 +67,21 @@ export const AttachmentInput = ({ onAttach, disabled }: AttachmentInputProps) =>
     abortControllerRef.current = new AbortController();
 
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+      if (!userId) throw new Error("You must be signed in to attach files.");
+
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `message-attachments/${fileName}`;
+      // Owner-scoped folder: storage policies key access off the first segment.
+      const filePath = `${userId}/${fileName}`;
 
       const uploadOptions: any = {
         signal: abortControllerRef.current?.signal
       };
 
       const { error: uploadError } = await supabase.storage
-        .from("media")
+        .from(MESSAGE_ATTACHMENT_BUCKET)
         .upload(filePath, file, uploadOptions);
       if (uploadError) {
         if (uploadError.name === 'AbortError') return;
@@ -84,7 +89,7 @@ export const AttachmentInput = ({ onAttach, disabled }: AttachmentInputProps) =>
       }
 
       const { data: urlData } = supabase.storage
-        .from("media")
+        .from(MESSAGE_ATTACHMENT_BUCKET)
         .getPublicUrl(filePath);
 
       const attachment: Attachment = {
@@ -93,6 +98,7 @@ export const AttachmentInput = ({ onAttach, disabled }: AttachmentInputProps) =>
         type: file.type,
         size: file.size,
       };
+
 
       onAttach(attachment);
       toast({
