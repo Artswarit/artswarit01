@@ -1,8 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X, Image, FileText, Loader2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getSignedStorageUrl } from "@/lib/storage/signedUrl";
+
+// Attachments live in the private "message-attachments" bucket; the stored URL
+// is only a path carrier and is resolved to a signed URL before use.
+export const MESSAGE_ATTACHMENT_BUCKET = "message-attachments";
 
 export interface Attachment {
   name: string;
@@ -10,6 +15,28 @@ export interface Attachment {
   type: string;
   size: number;
 }
+
+/** Resolves a stored attachment URL into a short-lived signed URL. */
+const useSignedAttachmentUrl = (url?: string) => {
+  const [signedUrl, setSignedUrl] = useState<string>("");
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!url) {
+      setSignedUrl("");
+      return;
+    }
+    getSignedStorageUrl(url, MESSAGE_ATTACHMENT_BUCKET).then((resolved) => {
+      if (!cancelled) setSignedUrl(resolved);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  return signedUrl;
+};
+
 
 interface AttachmentInputProps {
   onAttach: (attachment: Attachment) => void;
@@ -40,16 +67,21 @@ export const AttachmentInput = ({ onAttach, disabled }: AttachmentInputProps) =>
     abortControllerRef.current = new AbortController();
 
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+      if (!userId) throw new Error("You must be signed in to attach files.");
+
       const fileExt = file.name.split(".").pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `message-attachments/${fileName}`;
+      // Owner-scoped folder: storage policies key access off the first segment.
+      const filePath = `${userId}/${fileName}`;
 
       const uploadOptions: any = {
         signal: abortControllerRef.current?.signal
       };
 
       const { error: uploadError } = await supabase.storage
-        .from("media")
+        .from(MESSAGE_ATTACHMENT_BUCKET)
         .upload(filePath, file, uploadOptions);
       if (uploadError) {
         if (uploadError.name === 'AbortError') return;
@@ -57,7 +89,7 @@ export const AttachmentInput = ({ onAttach, disabled }: AttachmentInputProps) =>
       }
 
       const { data: urlData } = supabase.storage
-        .from("media")
+        .from(MESSAGE_ATTACHMENT_BUCKET)
         .getPublicUrl(filePath);
 
       const attachment: Attachment = {
@@ -66,6 +98,7 @@ export const AttachmentInput = ({ onAttach, disabled }: AttachmentInputProps) =>
         type: file.type,
         size: file.size,
       };
+
 
       onAttach(attachment);
       toast({
