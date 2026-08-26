@@ -600,7 +600,7 @@ const ProjectDetailModal = ({
                   </div>
                   
                     <div className="space-y-1 sm:space-y-2">
-                      <DialogTitle className="text-2xl sm:text-4xl font-black tracking-tight leading-tight sm:leading-[1.1] pb-1 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/60">
+                      <DialogTitle className="text-xl sm:text-3xl font-bold tracking-tight leading-tight sm:leading-[1.1] pb-1 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/60">
                         {project.title}
                       </DialogTitle>
                     <div className="flex items-center gap-4 flex-wrap">
@@ -648,86 +648,78 @@ const ProjectDetailModal = ({
                       </Avatar>
                     </Link>
                   </div>
-                  <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 bg-muted/20 px-3 py-1 rounded-full">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/60 bg-muted/20 px-3 py-1 rounded-full">
                     Collaborative Workspace
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="px-4 sm:px-10 py-4 sm:py-6 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5">
-              <div className="group relative p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
-                <div className="relative z-10 flex flex-col gap-4">
-                  <div className="p-2.5 rounded-2xl bg-primary/10 text-primary w-fit group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                    <Clock className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Total Budget</p>
-                    <h3 className="text-2xl sm:text-3xl font-black tracking-tighter text-foreground">
-                      {project.amount_usd || project.budget ? 
-                        formatCurrency(project.amount_usd || project.budget || 0, project.amount_usd ? 'USD' : (project.currency || 'USD'), project.exchange_rate) : 
-                        'Not set'
-                      }
-                    </h3>
-                  </div>
+            <div className="px-4 sm:px-10 py-4 sm:py-6 grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              <div className="group relative p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 overflow-hidden">
+                <div className="relative z-10 flex flex-col gap-2 sm:gap-4">
                   <div className="flex items-center gap-2">
+                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-primary/10 text-primary">
+                      <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </div>
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60">Budget</p>
+                  </div>
+                  <h3 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
+                    {project.amount_usd || project.budget ?
+                      formatCurrency(project.amount_usd || project.budget || 0, project.amount_usd ? 'USD' : (project.currency || 'USD'), project.exchange_rate) :
+                      'Not set'
+                    }
+                  </h3>
+                  <div className="flex items-center gap-1.5">
                     <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Escrow Protected</span>
+                    <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Escrow Protected</span>
                   </div>
                 </div>
               </div>
 
-              <div className="group relative p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-amber-500/30 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-500 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-amber-500/10 transition-colors" />
-                <div className="relative z-10 flex flex-col gap-4">
-                  <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-600 w-fit group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
-                    <Calendar className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Target Deadline</p>
-                    <h3 className="text-2xl sm:text-3xl font-black tracking-tighter text-foreground">
-                      {project.deadline ? formatDate(new Date(project.deadline), 'MMM dd, yyyy') : 'Flex Timeline'}
-                    </h3>
-                  </div>
+              <div className="group relative p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-amber-500/30 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-500 overflow-hidden">
+                <div className="relative z-10 flex flex-col gap-2 sm:gap-4">
                   <div className="flex items-center gap-2">
+                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-amber-500/10 text-amber-600">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </div>
+                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60">Deadline</p>
+                  </div>
+                  <h3 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
+                    {project.deadline ? formatDate(new Date(project.deadline), 'MMM dd') : 'Flexible'}
+                  </h3>
+                  <div className="flex items-center gap-1.5">
                     <Clock className="h-3 w-3 text-amber-500" aria-hidden="true" />
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
                       {project.deadline ? (() => {
                         const daysLeft = Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                        // A past deadline previously rendered as e.g. "-222 Days
-                        // Remaining", which reads as a countdown glitch rather
-                        // than what it actually means: the deadline has passed.
-                        if (daysLeft < 0) return `${Math.abs(daysLeft)} Days Overdue`;
+                        if (daysLeft < 0) return `${Math.abs(daysLeft)}d Overdue`;
                         if (daysLeft === 0) return 'Due Today';
-                        return `${daysLeft} Days Remaining`;
-                      })() : 'No set deadline'}
+                        return `${daysLeft}d Left`;
+                      })() : 'No deadline'}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="group relative p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-500 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/10 transition-colors" />
-                <div className="relative z-10 flex flex-col gap-4">
-                  <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600 w-fit group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500">
-                    <CheckCircle className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-end">
-                      <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60">Project Progress</p>
-                      <span className="text-lg font-black text-emerald-600">{progress}%</span>
+              <div className="col-span-2 md:col-span-1 group relative p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-500 overflow-hidden">
+                <div className="relative z-10 flex flex-col gap-2 sm:gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 sm:p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600">
+                        <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                      </div>
+                      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60">Progress</p>
                     </div>
-                    <div className="h-3 bg-emerald-500/10 rounded-full overflow-hidden mt-2">
-                      <div 
-                        className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_-3px_rgba(16,185,129,0.5)]" 
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
+                    <span className="text-lg sm:text-xl font-bold text-emerald-600">{progress}%</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{completedMilestones} of {milestones.length} Milestones Done</span>
+                  <div className="h-2.5 sm:h-3 bg-emerald-500/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_-3px_rgba(16,185,129,0.5)]"
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
+                  <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">{completedMilestones} of {milestones.length} Milestones Done</span>
                 </div>
               </div>
             </div>
@@ -737,7 +729,7 @@ const ProjectDetailModal = ({
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-1 bg-primary/20 rounded-full" />
-                  <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Project Overview</h4>
+                  <h4 className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground/60">Project Overview</h4>
                 </div>
                 <div className="group relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[3rem] bg-muted/10 border border-border/30 hover:bg-muted/20 transition-all duration-500">
                   <div className="absolute top-8 left-0 w-1.5 h-12 bg-primary/40 rounded-r-full group-hover:h-24 transition-all duration-500" />
@@ -763,7 +755,7 @@ const ProjectDetailModal = ({
                       className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
                     >
                       <GitBranch className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
-                      <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px]">Workflow</span>
+                      <span className="font-bold tracking-tight uppercase text-[9px] sm:text-[11px]">Workflow</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="milestones" 
@@ -771,7 +763,7 @@ const ProjectDetailModal = ({
                       className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
                     >
                       <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
-                      <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px]">Timeline</span>
+                      <span className="font-bold tracking-tight uppercase text-[9px] sm:text-[11px]">Timeline</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="files" 
@@ -779,8 +771,8 @@ const ProjectDetailModal = ({
                       className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
                     >
                       <FileText className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
-                      <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px]">Vault</span>
-                      <Badge variant="secondary" className="px-1 sm:px-2 py-0 h-3.5 sm:h-5 min-w-[14px] sm:min-w-[20px] text-[7px] sm:text-[10px] rounded-full bg-primary/10 text-primary border-none font-black">
+                      <span className="font-bold tracking-tight uppercase text-[9px] sm:text-[11px]">Vault</span>
+                      <Badge variant="secondary" className="px-1 sm:px-2 py-0 h-3.5 sm:h-5 min-w-[14px] sm:min-w-[20px] text-[7px] sm:text-[10px] rounded-full bg-primary/10 text-primary border-none font-bold">
                         {files.length}
                       </Badge>
                     </TabsTrigger>
@@ -790,7 +782,7 @@ const ProjectDetailModal = ({
                       className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
                     >
                       <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
-                      <span className="font-black tracking-tight uppercase text-[9px] sm:text-[11px] whitespace-nowrap">Chat</span>
+                      <span className="font-bold tracking-tight uppercase text-[9px] sm:text-[11px] whitespace-nowrap">Chat</span>
                       {rtMessages.length > 0 && (
                         <div className="h-1 w-1 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
                       )}
@@ -846,13 +838,13 @@ const ProjectDetailModal = ({
                             key={milestone.id} 
                             className="group p-6 rounded-[2rem] border transition-all duration-500 relative overflow-hidden bg-white dark:bg-card/40 border-border/50 hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5"
                           >
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
-                              <div className="flex gap-5">
-                                <div className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg shadow-inner transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 bg-primary/5 text-primary border border-primary/10">
-                                  {String(idx + 1).padStart(2, '0')}
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6">
+                              <div className="flex gap-3 sm:gap-5">
+                                <div className="flex-shrink-0 w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center font-bold text-sm sm:text-lg shadow-inner bg-primary/5 text-primary border border-primary/10">
+                                  {idx + 1}
                                 </div>
-                                <div className="space-y-2 pt-1">
-                                  <h5 className="font-bold text-xl leading-tight tracking-tight group-hover:text-primary transition-colors">{milestone.title}</h5>
+                                <div className="space-y-1.5 sm:space-y-2 pt-0.5">
+                                  <h5 className="font-bold text-base sm:text-xl leading-tight tracking-tight group-hover:text-primary transition-colors">{milestone.title}</h5>
                                   {milestone.description && (
                                     <p className="text-sm text-muted-foreground/90 leading-relaxed max-w-2xl">{milestone.description}</p>
                                   )}
@@ -903,7 +895,7 @@ const ProjectDetailModal = ({
                                   <Button
                                     variant="link"
                                     onClick={() => setActiveTab('workflow')}
-                                    className="h-auto p-0 text-[10px] font-black uppercase text-primary hover:underline px-4"
+                                    className="h-auto p-0 text-[10px] font-bold uppercase text-primary hover:underline px-4"
                                   >
                                     Pay in Workflow
                                   </Button>
@@ -916,7 +908,7 @@ const ProjectDetailModal = ({
                                   <Button
                                     variant="link"
                                     onClick={() => setActiveTab('workflow')}
-                                    className="h-auto p-0 text-[10px] font-black uppercase text-primary hover:underline px-4"
+                                    className="h-auto p-0 text-[10px] font-bold uppercase text-primary hover:underline px-4"
                                   >
                                     {milestone.status === 'REVIEW_PENDING' && isClient ? 'Review in Workflow' : 'View in Workflow'}
                                   </Button>
@@ -1042,7 +1034,7 @@ const ProjectDetailModal = ({
                             </div>
                             <div className="flex-1 min-w-0 pt-1">
                               <p className="font-bold text-sm truncate mb-1">{file.original_name}</p>
-                              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground/60">
                                 {file.size_bytes ? `${(file.size_bytes / 1024).toFixed(1)} KB` : '?? KB'} • {formatDate(new Date(file.created_at), 'MMM d')}
                               </p>
                               <div className="flex gap-2 mt-4">
