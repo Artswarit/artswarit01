@@ -2704,30 +2704,6 @@ export type Database = {
         Returns: Json
       }
       get_artist_stats: { Args: { artist_uuid: string }; Returns: Json }
-      get_public_artworks: {
-        Args: {
-          p_category?: string | null
-          p_exclude_id?: string | null
-          p_limit?: number
-          p_offset?: number
-        }
-        Returns: {
-          approval_status: Database["public"]["Enums"]["approval_status"] | null
-          artist_id: string
-          category: string | null
-          created_at: string | null
-          description: string | null
-          id: string
-          media_type: Database["public"]["Enums"]["media_type_enum"] | null
-          media_url: string | null
-          metadata: Json | null
-          price: number | null
-          status: Database["public"]["Enums"]["artwork_status"] | null
-          tags: string[] | null
-          title: string
-          updated_at: string | null
-        }[]
-      }
       get_public_user_info: {
         Args: { target_user_id: string }
         Returns: {
