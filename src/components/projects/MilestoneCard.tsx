@@ -75,6 +75,7 @@ export function MilestoneCard({
   const isLockedStatus = normalizedStatus === 'LOCKED' || normalizedStatus === 'PENDING';
   const isWaitingFunds = normalizedStatus === 'WAITING_FUNDS' || normalizedStatus === 'PENDING';
   const isActive = normalizedStatus === 'ACTIVE' || normalizedStatus === 'IN_PROGRESS';
+  const isInProgress = normalizedStatus === 'IN_PROGRESS';
   const isReviewPending = normalizedStatus === 'REVIEW_PENDING' || normalizedStatus === 'SUBMITTED';
   const isRevisionRequested = normalizedStatus === 'REVISION_REQUESTED';
   const isCompleted = normalizedStatus === 'COMPLETED' || normalizedStatus === 'PAID' || normalizedStatus === 'APPROVED';
@@ -232,7 +233,7 @@ export function MilestoneCard({
                   Start Milestone
                 </Button>
               )}
-              {(isActive || isRevisionRequested) && (
+              {(isInProgress || isRevisionRequested) && (
                 <Button size="sm" onClick={onSubmit} className="bg-primary hover:bg-primary/90">
                   <Upload className="h-4 w-4 mr-1" />
                   Submit for Review
