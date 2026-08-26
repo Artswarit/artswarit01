@@ -231,7 +231,9 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
       WAITING_FUNDS: { color: 'bg-amber-50 text-amber-600 border-amber-100', icon: <Clock className="h-3 w-3" />, label: 'Waiting Funds' },
       ACTIVE: { color: 'bg-blue-50 text-blue-600 border-blue-100', icon: <FileText className="h-3 w-3" />, label: 'Active' },
       REVIEW_PENDING: { color: 'bg-indigo-50 text-indigo-600 border-indigo-100', icon: <Upload className="h-3 w-3" />, label: 'Review Pending' },
-      COMPLETED: { color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: <CheckCircle className="h-3 w-3" />, label: 'Completed' }
+      COMPLETED: { color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: <CheckCircle className="h-3 w-3" />, label: 'Completed' },
+      PROCESSING_PAYOUT: { color: 'bg-cyan-50 text-cyan-600 border-cyan-100', icon: <Clock className="h-3 w-3" />, label: 'Processing Payout' },
+      FUNDED: { color: 'bg-green-50 text-green-600 border-green-100', icon: <CheckCircle className="h-3 w-3" />, label: 'Funded' }
     };
 
     const config = statusConfig[s] || statusConfig.LOCKED;

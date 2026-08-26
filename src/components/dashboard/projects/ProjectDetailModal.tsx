@@ -126,6 +126,11 @@ const ProjectDetailModal = ({
   const [addingMilestone, setAddingMilestone] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("workflow");
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) setActiveTab('workflow');
+    onOpenChange(open);
+  };
   const [confirmAction, setConfirmAction] = useState<{
     type: 'delete_milestone';
     milestone: Milestone;
@@ -517,7 +522,7 @@ const ProjectDetailModal = ({
 
   if (loading) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-none w-screen h-[100dvh] max-h-none bg-background/95 backdrop-blur-xl border-none shadow-none flex flex-col items-center justify-center p-0 pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)]">
           <DialogHeader className="sr-only">
             <DialogTitle>Loading Project Details</DialogTitle>
@@ -541,7 +546,7 @@ const ProjectDetailModal = ({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {!project ? (
         <DialogContent className="pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)]">
           <DialogHeader className="sr-only">
@@ -1054,7 +1059,7 @@ const ProjectDetailModal = ({
                 </TabsContent>
 
                 <TabsContent id="project-tab-content-communication" value="communication" className="mt-0 outline-none focus-visible:ring-0">
-                  <div className="fixed inset-0 h-[100dvh] z-[170] bg-background flex flex-col pt-[var(--safe-top)] pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] animate-in fade-in slide-in-from-bottom-2 duration-300 ease-apple overscroll-contain">
+                  <div className="absolute inset-0 h-full z-[10] bg-background flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300 ease-apple overscroll-contain">
                     <div className="px-3 sm:px-6 py-2.5 border-b border-border/40 bg-white/90 dark:bg-card/80 backdrop-blur-xl flex items-center gap-3 shrink-0">
                       <Button
                         variant="ghost"
@@ -1080,7 +1085,7 @@ const ProjectDetailModal = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => handleOpenChange(false)}
                         className="h-9 w-9 rounded-full shrink-0"
                         aria-label="Close"
                       >

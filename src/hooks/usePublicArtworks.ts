@@ -70,15 +70,13 @@ export const usePublicArtworks = () => {
           .from('artworks')
           .select('*')
           .eq('status', 'public')
+          .or('metadata->>access_type.is.null,metadata->>access_type.eq.free')
           .order('created_at', { ascending: false })
           .range(from, from + PAGE_SIZE - 1);
 
         if (fallbackError) throw fallbackError;
 
-        artworksData = (fallbackData || []).filter((a: any) => {
-          const accessType = (a.metadata as any)?.access_type;
-          return !accessType || accessType === 'free';
-        });
+        artworksData = fallbackData || [];
       } else {
         artworksData = rpcData;
       }

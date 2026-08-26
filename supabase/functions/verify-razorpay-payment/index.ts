@@ -220,8 +220,8 @@ serve(async (req) => {
     const { error: notifError } = await supabaseAdmin.from('notifications').insert({
       user_id: payment.artist_id,
       type: 'payment',
-      title: 'Payment Received!',
-      message: `You received $${payment.artist_payout} for milestone "${payment.milestone?.title}"`,
+      title: 'Milestone Funded',
+      message: `Client funded ₹${payment.artist_payout} for milestone "${payment.milestone?.title}". Funds are held in escrow until you deliver and the client approves.`,
       metadata: {
         milestone_id: milestoneId,
         project_id: payment.project_id,
