@@ -306,7 +306,7 @@ const ArtworkManagement = () => {
       {/* Header */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between bg-muted/20 sm:bg-transparent p-5 sm:p-0 rounded-[2rem] sm:rounded-none border border-border/40 sm:border-none shadow-sm sm:shadow-none animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="space-y-2">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight leading-[1.1]">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-medium text-foreground tracking-tight leading-[1.1]">
             My <span className="text-primary">Works</span>
           </h2>
           <p className="text-[11px] sm:text-sm lg:text-base text-muted-foreground font-medium opacity-80 leading-relaxed">
@@ -334,7 +334,7 @@ const ArtworkManagement = () => {
           <Button 
             onClick={handleUploadClick} 
             size="sm" 
-            className="flex-1 sm:flex-none gap-2 h-10 sm:h-12 px-4 sm:px-6 rounded-2xl font-black shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
+            className="flex-1 sm:flex-none gap-2 h-10 sm:h-12 px-4 sm:px-6 rounded-2xl font-medium shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
           >
             <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
             <span className="text-xs sm:text-sm">Upload New</span>
@@ -375,17 +375,17 @@ const ArtworkManagement = () => {
                 id="select-all"
                 className="h-5 w-5 rounded-lg border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
               />
-              <label htmlFor="select-all" className="text-xs sm:text-sm font-black text-foreground/70 cursor-pointer select-none group-hover:text-primary transition-colors uppercase tracking-widest">
+              <label htmlFor="select-all" className="text-xs sm:text-sm font-medium text-foreground/70 cursor-pointer select-none group-hover:text-primary transition-colors uppercase tracking-[0.07em]">
                 Select All
               </label>
             </div>
           )}
           <div className="flex items-center gap-2.5">
             <div className="h-4 w-[1px] bg-border/20 hidden sm:block mx-1" />
-            <span className="text-[10px] sm:text-xs font-black text-muted-foreground/50 whitespace-nowrap bg-muted/50 px-3 py-1 rounded-lg uppercase tracking-widest">
+            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground/50 whitespace-nowrap bg-muted/50 px-3 py-1 rounded-lg uppercase tracking-[0.07em]">
               {filteredArtworks.length} items
             </span>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary/10 text-primary text-[10px] sm:text-xs font-black border border-primary/20 shadow-sm whitespace-nowrap uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary/10 text-primary text-[10px] sm:text-xs font-medium border border-primary/20 shadow-sm whitespace-nowrap uppercase tracking-[0.07em]">
               <Pin className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               <span>{pinnedCount}/5 pinned</span>
             </div>
@@ -393,14 +393,14 @@ const ArtworkManagement = () => {
         </div>
         
         <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-4 sm:pt-0 border-t border-border/10 sm:border-none">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 sm:hidden">Layout View</span>
+          <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/40 sm:hidden">Layout View</span>
           <div className="flex items-center gap-2 rounded-2xl border border-border/40 bg-background/60 p-1.5 shadow-inner">
             <Button
               variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('grid')}
               className={cn(
-                "h-11 px-4 sm:px-5 rounded-xl transition-all font-black uppercase tracking-tighter text-[10px] sm:text-xs",
+                "h-11 px-4 sm:px-5 rounded-xl transition-all font-medium uppercase tracking-tighter text-[10px] sm:text-xs",
                 viewMode === 'grid' ? "shadow-lg bg-background text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -412,7 +412,7 @@ const ArtworkManagement = () => {
               size="sm"
               onClick={() => setViewMode('list')}
               className={cn(
-                "h-11 px-4 sm:px-5 rounded-xl transition-all font-black uppercase tracking-tighter text-[10px] sm:text-xs",
+                "h-11 px-4 sm:px-5 rounded-xl transition-all font-medium uppercase tracking-tighter text-[10px] sm:text-xs",
                 viewMode === 'list' ? "shadow-lg bg-background text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -453,14 +453,14 @@ const ArtworkManagement = () => {
             <div className="rounded-[2rem] bg-muted/50 p-6 mb-6 shadow-inner">
               <FolderOpen className="h-10 w-10 text-muted-foreground/40" />
             </div>
-            <h3 className="text-xl font-black text-foreground mb-2 tracking-tight">Your Gallery is Empty</h3>
+            <h3 className="text-xl font-medium text-foreground mb-2 tracking-tight">Your Gallery is Empty</h3>
             <p className="text-sm sm:text-base text-muted-foreground text-center max-w-md mb-8 font-medium leading-relaxed opacity-70">
               {artworks.length === 0
                 ? "The first work is always the hardest. Upload your best artwork now or import from Instagram to start attracting clients and building your brand."
                 : "No artworks match your current filters. Try refining your search or clearing filters."}
             </p>
             {artworks.length === 0 && (
-              <Button onClick={handleUploadClick} className="gap-3 h-12 px-8 rounded-2xl font-black shadow-lg shadow-primary/20 hover:shadow-xl transition-all hover:-translate-y-0.5">
+              <Button onClick={handleUploadClick} className="gap-3 h-12 px-8 rounded-2xl font-medium shadow-lg shadow-primary/20 hover:shadow-xl transition-all hover:-translate-y-0.5">
                 <Plus className="h-5 w-5" />
                 Upload First Artwork
               </Button>
@@ -474,7 +474,7 @@ const ArtworkManagement = () => {
         <DialogContent className="w-screen h-[100dvh] max-w-none max-h-none sm:max-w-2xl sm:w-[95vw] sm:h-auto sm:max-h-[90vh] overflow-hidden rounded-none sm:rounded-[2.5rem] p-0 border-none bg-background shadow-2xl flex flex-col">
           <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/10 px-6 py-5 sm:px-8 sm:py-6">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-3 text-xl sm:text-2xl font-black tracking-tight">
+              <DialogTitle className="flex items-center gap-3 text-xl sm:text-2xl font-medium tracking-tight">
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                   <ImagePlus className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
@@ -510,10 +510,10 @@ const ArtworkManagement = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="h-5 w-5 text-yellow-500" />
-              Unlock Advanced Analytics
+              Upgrade to Upload More
             </DialogTitle>
             <DialogDescription>
-              Advanced analytics are available exclusively for Pro Artists. Upgrade to see detailed performance metrics, revenue trends, and engagement insights.
+              You've reached the portfolio upload limit for Starter artists. Upgrade to Pro to upload unlimited artworks and unlock premium features.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

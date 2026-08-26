@@ -333,7 +333,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
           <div className="p-3 rounded-2xl bg-primary/10 text-primary">
             <Plus className="h-6 w-6" />
           </div>
-          <CardTitle className="text-3xl font-black tracking-tight">Create New Project</CardTitle>
+          <CardTitle className="text-3xl font-semibold tracking-tight">Create New Project</CardTitle>
         </div>
         <CardDescription className="text-base font-medium text-muted-foreground/80 pl-1">
           Define your project details and break it down into milestones
@@ -344,7 +344,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         <div className="space-y-6">
           <div className="flex items-center gap-3">
             <div className="w-8 h-1 bg-primary/20 rounded-full" />
-            <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Project Overview</h3>
+            <h3 className="text-[11px] font-black uppercase tracking-[0.08em] text-muted-foreground/60">Project Overview</h3>
           </div>
           
           <div className="grid gap-6 md:grid-cols-2">
@@ -374,7 +374,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                 />
               </div>
               {userCurrency === 'INR' && budget > 0 && (
-                <div className="flex items-center gap-2 mt-1.5 ml-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-primary/5 w-fit px-2 py-1 rounded-lg">
+                <div className="flex items-center gap-2 mt-1.5 ml-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wide bg-primary/5 w-fit px-2 py-1 rounded-lg">
                   <TrendingUp className="h-3 w-3" />
                   <span>Est. ${(budget / (exchangeRates['INR'] || 83.5)).toFixed(2)} USD</span>
                 </div>
@@ -477,7 +477,7 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-1 bg-amber-500/20 rounded-full" />
-              <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Milestones</h3>
+              <h3 className="text-[11px] font-black uppercase tracking-[0.08em] text-muted-foreground/60">Milestones</h3>
             </div>
             <Button 
               variant="outline" 
@@ -539,10 +539,10 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
                             <div className="flex-1 space-y-6 w-full">
                               <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
-                                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-black text-xs">
+                                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold text-xs">
                                     {index + 1}
                                   </span>
-                                  <span className="text-sm font-black uppercase tracking-widest text-muted-foreground">
+                                  <span className="text-sm font-medium uppercase tracking-[0.07em] text-muted-foreground">
                                     Milestone Phase
                                   </span>
                                 </div>
@@ -641,14 +641,14 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
           {onCancel && (
             <Button 
               variant="outline" 
-              onClick={onCancel}
-              className="h-14 sm:h-12 px-8 rounded-2xl font-bold uppercase tracking-widest text-xs border-border/60 hover:bg-muted transition-all"
+              onClick={() => { localStorage.removeItem('create_project_draft'); onCancel?.(); }}
+              className="h-14 sm:h-12 px-8 rounded-2xl font-bold uppercase tracking-wide text-xs border-border/60 hover:bg-muted transition-all"
             >
               Cancel
             </Button>
           )}
           <Button
-            className="flex-1 h-14 sm:h-12 px-4 sm:px-8 rounded-2xl font-black uppercase tracking-wider text-[10px] sm:text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 active:scale-[0.98]"
+            className="flex-1 h-14 sm:h-12 px-4 sm:px-8 rounded-2xl font-semibold uppercase tracking-wide text-[10px] sm:text-xs shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 active:scale-[0.98]"
             onClick={handleSubmit}
             disabled={!budgetMatches || !title.trim() || budget <= 0}
             loading={submitting}

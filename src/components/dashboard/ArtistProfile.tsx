@@ -189,7 +189,10 @@ const ArtistProfile = ({
       country: editForm.country || null,
       city: editForm.city || null,
       currency: currency,
-      social_links: editForm.socialLinks
+      social_links: {
+        ...((profile?.social_links as any) || {}),
+        ...editForm.socialLinks,
+      }
     });
     setIsSaving(false);
     setIsEditing(false);
@@ -235,7 +238,7 @@ const ArtistProfile = ({
   }
   return <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
-        <h2 className="text-xl sm:text-2xl font-black tracking-tight uppercase">Artist Profile</h2>
+        <h2 className="text-xl sm:text-2xl font-medium tracking-tight uppercase">Artist Profile</h2>
         {isEditing ? <Button onClick={saveProfile} loading={isSaving} className="w-full sm:w-auto flex items-center justify-center gap-2 h-12 rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 min-h-[48px]">
             {!isSaving && <Save className="h-5 w-5" />}
             Save All Changes
@@ -250,7 +253,7 @@ const ArtistProfile = ({
         <div className="lg:col-span-1">
           <Card className="border-border/50 shadow-sm overflow-hidden rounded-3xl">
             <CardHeader className="bg-muted/30">
-              <CardTitle className="text-lg font-black uppercase tracking-tight">Profile Image</CardTitle>
+              <CardTitle className="text-lg font-medium uppercase tracking-tight">Profile Image</CardTitle>
               <CardDescription className="text-xs font-medium">Your public profile photo</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 pt-6">
@@ -263,11 +266,11 @@ const ArtistProfile = ({
               </div>
               
               <div className="text-center space-y-1">
-                <h3 className="font-black text-xl flex items-center justify-center gap-2">
+                <h3 className="font-medium text-xl flex items-center justify-center gap-2">
                   {displayName}
                   {isPremium && <Crown className="h-5 w-5 text-yellow-500 fill-yellow-500 drop-shadow-sm" />}
                 </h3>
-                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">@{tagName}</p>
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-[0.07em]">@{tagName}</p>
                 <div className="flex flex-wrap justify-center gap-2 mt-3">
                   {isPremium && <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600 font-bold px-3 py-1 rounded-full border-none shadow-sm">Premium</Badge>}
                 </div>
@@ -280,7 +283,7 @@ const ArtistProfile = ({
         <div className="lg:col-span-2">
           <Card className="border-border/50 shadow-sm overflow-hidden rounded-3xl h-full">
             <CardHeader className="bg-muted/30">
-              <CardTitle className="text-lg font-black uppercase tracking-tight">Cover Image</CardTitle>
+              <CardTitle className="text-lg font-medium uppercase tracking-tight">Cover Image</CardTitle>
               <CardDescription className="text-xs font-medium">Displayed at the top of your profile page</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
@@ -289,7 +292,7 @@ const ArtistProfile = ({
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
                   {isUploadingCover ? <Loader2 className="h-10 w-10 animate-spin text-white" /> : <div className="flex flex-col items-center gap-2 text-white">
                       <Upload className="h-10 w-10 drop-shadow-lg" />
-                      <span className="font-black uppercase tracking-widest text-xs">Change Cover</span>
+                      <span className="font-medium uppercase tracking-[0.07em] text-xs">Change Cover</span>
                     </div>}
                 </div>
                 <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} disabled={isUploadingCover} />
@@ -302,7 +305,7 @@ const ArtistProfile = ({
       {/* Basic Info Card */}
       <Card className="border-border/50 shadow-sm overflow-hidden rounded-3xl">
         <CardHeader className="bg-muted/30">
-          <CardTitle className="text-lg font-black uppercase tracking-tight">Basic Information</CardTitle>
+          <CardTitle className="text-lg font-medium uppercase tracking-tight">Basic Information</CardTitle>
           <CardDescription className="text-xs font-medium">Your display name, bio, and basic details</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
@@ -368,29 +371,29 @@ const ArtistProfile = ({
               </div>
             </div> : <div className="space-y-6">
               <div>
-                <h3 className="font-black text-2xl tracking-tight">{displayName}</h3>
-                <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">@{tagName}</p>
+                <h3 className="font-medium text-2xl tracking-tight">{displayName}</h3>
+                <p className="text-sm font-bold text-muted-foreground uppercase tracking-[0.07em]">@{tagName}</p>
               </div>
               <p className="text-sm font-medium leading-relaxed max-w-2xl text-foreground/80">{bio}</p>
               <div className="flex flex-wrap gap-4 sm:gap-6 pt-2">
-                {profile?.country && <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 rounded-full text-xs font-bold uppercase tracking-widest">
+                {profile?.country && <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 rounded-full text-xs font-bold uppercase tracking-[0.07em]">
                     <Flag className="h-4 w-4 text-primary" />
                     {countries.find(c => c.country_code === profile.country)?.country_name || profile.country}
                     {profile?.city && `, ${profile.city}`}
                   </div>}
-                {profile?.location && <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 rounded-full text-xs font-bold uppercase tracking-widest">
+                {profile?.location && <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 rounded-full text-xs font-bold uppercase tracking-[0.07em]">
                     <MapPin className="h-4 w-4 text-primary" />
                     {profile.location}
                   </div>}
-                {profile?.website && <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-xs font-bold uppercase tracking-widest text-primary hover:bg-primary/20 transition-colors">
+                {profile?.website && <a href={profile.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-xs font-bold uppercase tracking-[0.07em] text-primary hover:bg-primary/20 transition-colors">
                     <Globe className="h-4 w-4" />
                     Website
                   </a>}
-                {profile?.experience_years && <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 rounded-full text-xs font-bold uppercase tracking-widest">
+                {profile?.experience_years && <div className="flex items-center gap-2 px-4 py-2 bg-muted/30 rounded-full text-xs font-bold uppercase tracking-[0.07em]">
                     <Briefcase className="h-4 w-4 text-primary" />
                     {profile.experience_years} years exp
                   </div>}
-                {profile?.hourly_rate && <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 border border-primary/10 rounded-full text-xs font-black uppercase tracking-widest text-primary">
+                {profile?.hourly_rate && <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 border border-primary/10 rounded-full text-xs font-medium uppercase tracking-[0.07em] text-primary">
                     <DollarSign className="h-4 w-4" />
                     {formatPrice(profile.hourly_rate)}/hr
                   </div>}
@@ -402,12 +405,12 @@ const ArtistProfile = ({
       {/* Categories/Tags Card */}
       <Card className="border-border/50 shadow-sm overflow-hidden rounded-3xl">
         <CardHeader className="bg-muted/30">
-          <CardTitle className="text-lg font-black uppercase tracking-tight">Categories & Skills *</CardTitle>
+          <CardTitle className="text-lg font-medium uppercase tracking-tight">Categories & Skills *</CardTitle>
           <CardDescription className="text-xs font-medium">Add categories and skills that describe your work. This helps clients find you.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="flex flex-wrap gap-2.5 mb-6">
-            {(isEditing ? editForm.tags : profile?.tags || []).map(tag => <Badge key={tag} variant="secondary" className="px-4 py-1.5 text-xs font-black uppercase tracking-widest flex items-center gap-2 bg-primary/10 text-primary border-none rounded-full">
+            {(isEditing ? editForm.tags : profile?.tags || []).map(tag => <Badge key={tag} variant="secondary" className="px-4 py-1.5 text-xs font-medium uppercase tracking-[0.07em] flex items-center gap-2 bg-primary/10 text-primary border-none rounded-full">
                 {tag}
                 {isEditing && <button onClick={() => handleRemoveTag(tag)} className="ml-1 hover:text-destructive transition-colors" type="button">
                     <X className="h-3.5 w-3.5" />
@@ -429,9 +432,9 @@ const ArtistProfile = ({
                 </Button>
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 ml-1">Popular categories (click to add):</p>
+                <p className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground mb-3 ml-1">Popular categories (click to add):</p>
                 <div className="flex flex-wrap gap-2">
-                  {AVAILABLE_CATEGORIES.filter(cat => !editForm.tags.includes(cat)).slice(0, 12).map(category => <Button key={category} type="button" variant="outline" size="sm" onClick={() => handleAddTag(category)} className="text-[10px] font-black uppercase tracking-widest rounded-full border-muted-foreground/20 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all h-9">
+                  {AVAILABLE_CATEGORIES.filter(cat => !editForm.tags.includes(cat)).slice(0, 12).map(category => <Button key={category} type="button" variant="outline" size="sm" onClick={() => handleAddTag(category)} className="text-[10px] font-medium uppercase tracking-[0.07em] rounded-full border-muted-foreground/20 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-all h-9">
                       + {category}
                     </Button>)}
                 </div>
@@ -443,7 +446,7 @@ const ArtistProfile = ({
       {/* Social Links Card */}
       <Card className="border-border/50 shadow-sm overflow-hidden rounded-3xl">
         <CardHeader className="bg-muted/30">
-          <CardTitle className="text-lg font-black uppercase tracking-tight">Social Links</CardTitle>
+          <CardTitle className="text-lg font-medium uppercase tracking-tight">Social Links</CardTitle>
           <CardDescription className="text-xs font-medium">Connect your social media profiles</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -475,19 +478,19 @@ const ArtistProfile = ({
             </div> : <div className="flex flex-wrap gap-4">
               {profile?.social_links?.instagram && <a href={profile.social_links.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#E1306C]/10 rounded-full text-[#E1306C] hover:bg-[#E1306C]/20 transition-colors">
                   <Instagram className="h-5 w-5" />
-                  <span className="text-xs font-black uppercase tracking-widest">Instagram</span>
+                  <span className="text-xs font-medium uppercase tracking-[0.07em]">Instagram</span>
                 </a>}
               {profile?.social_links?.twitter && <a href={profile.social_links.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-black/10 rounded-full text-black hover:bg-black/20 transition-colors">
                   <Twitter className="h-5 w-5" />
-                  <span className="text-xs font-black uppercase tracking-widest">Twitter</span>
+                  <span className="text-xs font-medium uppercase tracking-[0.07em]">Twitter</span>
                 </a>}
               {profile?.social_links?.linkedin && <a href={profile.social_links.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#0077B5]/10 rounded-full text-[#0077B5] hover:bg-[#0077B5]/20 transition-colors">
                   <Linkedin className="h-5 w-5" />
-                  <span className="text-xs font-black uppercase tracking-widest">LinkedIn</span>
+                  <span className="text-xs font-medium uppercase tracking-[0.07em]">LinkedIn</span>
                 </a>}
               {profile?.social_links?.youtube && <a href={profile.social_links.youtube} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-[#FF0000]/10 rounded-full text-[#FF0000] hover:bg-[#FF0000]/20 transition-colors">
                   <Youtube className="h-5 w-5" />
-                  <span className="text-xs font-black uppercase tracking-widest">YouTube</span>
+                  <span className="text-xs font-medium uppercase tracking-[0.07em]">YouTube</span>
                 </a>}
               {!profile?.social_links?.instagram && !profile?.social_links?.twitter && !profile?.social_links?.linkedin && !profile?.social_links?.youtube && <p className="text-sm font-medium text-muted-foreground italic">No social links added yet</p>}
             </div>}

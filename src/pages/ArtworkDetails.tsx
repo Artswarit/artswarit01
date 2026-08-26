@@ -570,7 +570,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
 
               {/* Title + description — directly below the artwork */}
               <div className="mt-4 space-y-3">
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground leading-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
                   {artwork.title}
                 </h1>
 
@@ -655,8 +655,8 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
               {artwork.price > 0 && (artwork.accessType === "premium" || artwork.accessType === "exclusive") && (
                 <div className="pt-2">
                   <div className="flex items-baseline justify-between mb-3">
-                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Price</span>
-                    <span className="text-2xl font-black text-foreground">{format(artwork.price, artwork.currency)}</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground">Price</span>
+                    <span className="text-2xl font-semibold text-foreground">{format(artwork.price, artwork.currency)}</span>
                   </div>
                   <PayArtworkButton
                     artworkId={id!}

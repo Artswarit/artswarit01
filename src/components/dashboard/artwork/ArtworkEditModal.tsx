@@ -89,7 +89,12 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
       e.stopPropagation();
     }
     if (!artwork?.id) return;
-    
+
+    if (!formData.title.trim()) {
+      toast.error('Title is required');
+      return;
+    }
+
     setSaving(true);
     try {
       // For Free access type, price should be null/0
@@ -170,7 +175,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
               <Eye className="h-6 w-6" />
             </div>
             <div>
-              <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight">
+              <DialogTitle className="text-xl sm:text-2xl font-medium tracking-tight">
                 Edit Artwork
               </DialogTitle>
               <DialogDescription className="text-sm font-medium text-muted-foreground/80 mt-1">
@@ -192,7 +197,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
               <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/10 group-hover:ring-primary/20 transition-all" />
             </div>
             <div className="flex flex-col justify-center min-w-0">
-              <h3 className="text-lg font-black truncate text-foreground/90">{artwork?.title}</h3>
+              <h3 className="text-lg font-medium truncate text-foreground/90">{artwork?.title}</h3>
               <div className="flex items-center gap-2 mt-2">
                 <Badge variant="outline" className="px-3 py-1 rounded-full border-primary/20 bg-primary/5 text-[10px] font-medium uppercase tracking-[0.07em] text-primary">
                   {artwork?.status || artwork?.approval_status || 'Active'}
@@ -204,7 +209,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2.5">
-              <Label htmlFor="title" className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Title</Label>
+              <Label htmlFor="title" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">Title</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -215,7 +220,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
             </div>
 
             <div className="space-y-2.5">
-              <Label htmlFor="category" className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Category</Label>
+              <Label htmlFor="category" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">Category</Label>
               <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
                 <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-primary/10 focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all font-medium">
                   <SelectValue placeholder="Select category" />
@@ -233,7 +238,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
 
           {/* Description */}
           <div className="space-y-2.5">
-            <Label htmlFor="description" className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Description</Label>
+            <Label htmlFor="description" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -253,7 +258,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
 
             {/* Visibility */}
             <div className="space-y-2.5">
-              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 ml-1">Visibility</Label>
+              <Label className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/70 ml-1">Visibility</Label>
               <Select value={formData.visibility} onValueChange={(value) => handleInputChange('visibility', value)}>
                 <SelectTrigger className="h-14 rounded-2xl bg-background border-primary/10 focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all font-medium">
                   <SelectValue placeholder="Select visibility" />
@@ -268,7 +273,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
 
             {/* Access Type */}
             <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/70 ml-1">Access Type</Label>
+              <Label className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/70 ml-1">Access Type</Label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <button 
                   type="button"
@@ -277,7 +282,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
                   }`}
                   onClick={() => handleInputChange('accessType', 'free')}
                 >
-                  <p className="font-black text-sm uppercase tracking-tight">Free</p>
+                  <p className="font-medium text-sm uppercase tracking-tight">Free</p>
                   <p className="text-[10px] font-medium text-muted-foreground mt-2 leading-relaxed">Available to everyone at no cost</p>
                   {formData.accessType === "free" && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />}
                 </button>
@@ -289,7 +294,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
                   }`}
                   onClick={() => handleInputChange('accessType', 'premium')}
                 >
-                  <p className="font-black text-sm uppercase tracking-tight">Premium</p>
+                  <p className="font-medium text-sm uppercase tracking-tight">Premium</p>
                   <p className="text-[10px] font-medium text-muted-foreground mt-2 leading-relaxed">Paid access to this content only</p>
                   {formData.accessType === "premium" && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />}
                 </button>
@@ -301,23 +306,23 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
                   }`}
                   onClick={() => handleInputChange('accessType', 'exclusive')}
                 >
-                  <p className="font-black text-sm uppercase tracking-tight">Exclusive</p>
+                  <p className="font-medium text-sm uppercase tracking-tight">Exclusive</p>
                   <p className="text-[10px] font-medium text-muted-foreground mt-2 leading-relaxed">Special collectors-only content</p>
                   {formData.accessType === "exclusive" && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary animate-pulse" />}
                 </button>
               </div>
             </div>
 
-            {/* Price field - only show for premium */}
-            {formData.accessType === "premium" && (
+            {/* Price field - show for premium and exclusive */}
+            {(formData.accessType === "premium" || formData.accessType === "exclusive") && (
               <div className="space-y-2.5 animate-in fade-in slide-in-from-top-4 duration-500">
-                <Label htmlFor="price" className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Price ({userCurrency === 'INR' ? 'INR' : 'USD'})*</Label>
+                <Label htmlFor="price" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">Price ({userCurrency === 'INR' ? 'INR' : 'USD'})*</Label>
                 <div className="relative group">
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-primary font-black text-lg group-focus-within:scale-110 transition-transform">{userCurrencySymbol}</span>
+                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-primary font-medium text-lg group-focus-within:scale-110 transition-transform">{userCurrencySymbol}</span>
                   <Input
                     id="price"
                     type="number"
-                    className="pl-12 h-14 rounded-2xl bg-background border-primary/10 focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all font-black text-lg"
+                    className="pl-12 h-14 rounded-2xl bg-background border-primary/10 focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all font-medium text-lg"
                     value={formData.price}
                     onChange={(e) => handleInputChange('price', e.target.value)}
                     placeholder="0.00"
@@ -331,7 +336,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
             {/* Schedule for future release */}
             <div className="flex items-center justify-between p-4 bg-background/50 rounded-2xl border border-primary/5 shadow-inner">
               <div className="space-y-0.5">
-                <Label htmlFor="schedule" className="text-sm font-black uppercase tracking-tight cursor-pointer">Schedule for future release</Label>
+                <Label htmlFor="schedule" className="text-sm font-medium uppercase tracking-tight cursor-pointer">Schedule for future release</Label>
                 <p className="text-[10px] font-medium text-muted-foreground">Automatically publish at a later date</p>
               </div>
               <Switch
@@ -347,7 +352,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
           <div className="flex items-center justify-between p-6 bg-primary/5 rounded-[2rem] border border-primary/10 shadow-sm">
             <div className="space-y-1">
               <Label htmlFor="is_pinned" className="text-sm font-medium uppercase tracking-[0.07em] cursor-pointer">Pin to Profile</Label>
-              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Feature on your profile</p>
+              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.07em]">Feature on your profile</p>
             </div>
             <Switch
               id="is_pinned"
@@ -359,11 +364,11 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
 
           {/* Tags */}
           <div className="space-y-4">
-            <Label className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Tags</Label>
+            <Label className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground ml-1">Tags</Label>
             <div className="flex flex-wrap gap-3">
               {formData.tags.map((tag) => (
                 <Badge key={tag} variant="secondary" className="pl-4 pr-1.5 py-1.5 flex items-center gap-2 rounded-2xl bg-background border border-primary/10 text-primary shadow-sm hover:border-primary/30 transition-all group">
-                  <span className="text-xs font-black uppercase tracking-wider">{tag}</span>
+                  <span className="text-xs font-medium uppercase tracking-wider">{tag}</span>
                   <button
                     onClick={() => removeTag(tag)}
                     className="hover:bg-destructive/10 hover:text-destructive p-1.5 rounded-xl transition-all flex items-center justify-center min-w-[44px] min-h-[44px] active:scale-90"

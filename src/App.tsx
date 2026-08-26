@@ -96,7 +96,7 @@ class ErrorBoundary extends React.Component<
           <div className="max-w-md w-full text-center space-y-6">
             <div className="flex justify-center text-yellow-500"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-16 h-16"><path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd"/></svg></div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-black tracking-tight">Something went wrong</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Something went wrong</h1>
               <p className="text-sm text-muted-foreground">
                 {this.state.errorMessage || 'An unexpected error occurred in this part of the application.'}
               </p>

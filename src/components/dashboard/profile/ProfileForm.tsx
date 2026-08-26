@@ -24,20 +24,20 @@ const ProfileForm = memo(({ profile, isEditing, onToggleEdit, onSave, onChange }
   }, [onChange]);
 
   return (
-    <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-md overflow-hidden">
+    <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-card/80 backdrop-blur-md overflow-hidden">
       <CardHeader className="p-6 sm:p-10 border-b border-border/10">
         <div className="flex justify-between items-center gap-4">
           <div className="space-y-1">
-            <CardTitle className="text-xl sm:text-2xl font-black tracking-tight">Artist Bio</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight">Artist Bio</CardTitle>
             <CardDescription className="text-sm font-medium">Tell others about yourself and your art</CardDescription>
           </div>
           {isEditing ? (
-            <Button onClick={onSave} className="flex items-center gap-2 h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            <Button onClick={onSave} className="flex items-center gap-2 h-12 px-6 rounded-xl font-semibold text-[10px] uppercase tracking-wide bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
               <Save className="h-5 w-5" />
               Save
             </Button>
           ) : (
-            <Button onClick={onToggleEdit} className="flex items-center gap-2 h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            <Button onClick={onToggleEdit} className="flex items-center gap-2 h-12 px-6 rounded-xl font-semibold text-[10px] uppercase tracking-wide bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
               <Edit className="h-5 w-5" />
               Edit
             </Button>
@@ -60,7 +60,7 @@ const ProfileForm = memo(({ profile, isEditing, onToggleEdit, onSave, onChange }
             <div className="space-y-3">
               <Label htmlFor="tagName" className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/70">Tag Name</Label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-black">@</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">@</span>
                 <Input
                   id="tagName"
                   value={profile.tagName}
@@ -84,8 +84,8 @@ const ProfileForm = memo(({ profile, isEditing, onToggleEdit, onSave, onChange }
         ) : (
           <div className="space-y-6">
             <div className="space-y-1">
-              <h3 className="font-black text-3xl tracking-tighter">{profile.displayName}</h3>
-              <p className="text-primary font-black text-sm tracking-widest uppercase">@{profile.tagName}</p>
+              <h3 className="font-bold text-3xl tracking-tighter">{profile.displayName}</h3>
+              <p className="text-primary font-semibold text-sm tracking-wide uppercase">@{profile.tagName}</p>
             </div>
             <p className="text-base font-medium leading-relaxed text-muted-foreground whitespace-pre-wrap">{profile.bio || "No bio yet. Tell the world about your artistic journey!"}</p>
           </div>

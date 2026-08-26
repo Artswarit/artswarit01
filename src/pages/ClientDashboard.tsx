@@ -1073,7 +1073,7 @@ const ClientDashboard = () => {
                       <div className="rounded-2xl bg-muted/40 p-4 mb-4">
                         <CheckCircle className="h-6 w-6 text-muted-foreground/40" />
                       </div>
-                      <p className="text-sm font-black text-foreground mb-1">{projectSearch ? 'No matches' : 'No completed projects'}</p>
+                      <p className="text-sm font-semibold text-foreground mb-1">{projectSearch ? 'No matches' : 'No completed projects'}</p>
                       <p className="text-xs text-muted-foreground text-center">{projectSearch ? 'Try a different search term.' : 'Completed projects will appear here.'}</p>
                     </div>
                   ) : (
@@ -1178,9 +1178,10 @@ const ClientDashboard = () => {
                 <TabErrorBoundary tabLabel="Account">
                 <Tabs defaultValue="profile" className="w-full">
                   <div className="flex overflow-x-auto pb-2 mb-6 -mx-1 px-1 scrollbar-hide">
-                    <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-3 h-auto overflow-x-auto">
+                    <TabsList className="bg-muted/30 p-1 rounded-xl flex sm:grid sm:grid-cols-4 h-auto overflow-x-auto">
                       <TabsTrigger value="profile" className="rounded-lg text-xs px-4 py-2 shrink-0">Profile</TabsTrigger>
                       <TabsTrigger value="payments" className="rounded-lg text-xs px-4 py-2 shrink-0">Payments</TabsTrigger>
+                      <TabsTrigger value="ratings" className="rounded-lg text-xs px-4 py-2 shrink-0">Ratings</TabsTrigger>
                       <TabsTrigger value="settings" className="rounded-lg text-xs px-4 py-2 shrink-0">Settings</TabsTrigger>
                     </TabsList>
                   </div>

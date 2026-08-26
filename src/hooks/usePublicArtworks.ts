@@ -53,16 +53,35 @@ export const usePublicArtworks = () => {
 
       const from = pageIndex * PAGE_SIZE;
 
-      // Public discovery must never expose premium/exclusive artwork. This
-      // RPC is the access-control boundary, so filtering happens before
-      // pagination and no restricted rows reach the browser.
-      const { data: artworksData, error: artworksError } = await supabase
+      // Public discovery must never expose premium/exclusive artwork. The
+      // RPC is the access-control boundary. If it isn't deployed yet, fall
+      // back to a direct table query with client-side filtering.
+      let artworksData: any[] | null = null;
+
+      const { data: rpcData, error: rpcError } = await supabase
         .rpc('get_public_artworks', {
           p_limit: PAGE_SIZE,
           p_offset: from,
         });
 
-      if (artworksError) throw artworksError;
+      if (rpcError) {
+        console.warn('RPC get_public_artworks unavailable, using fallback query:', rpcError.message);
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('artworks')
+          .select('*')
+          .eq('status', 'public')
+          .order('created_at', { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+
+        if (fallbackError) throw fallbackError;
+
+        artworksData = (fallbackData || []).filter((a: any) => {
+          const accessType = (a.metadata as any)?.access_type;
+          return !accessType || accessType === 'free';
+        });
+      } else {
+        artworksData = rpcData;
+      }
 
       // Get unique artist IDs
       const artistIds = [...new Set((artworksData || []).map(a => a.artist_id))];

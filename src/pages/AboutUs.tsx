@@ -19,7 +19,7 @@ const AboutUs = () => {
               <Shield className="h-4 w-4" />
               RBI 2026 Compliant Marketplace
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight bg-gradient-to-r from-primary via-purple-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary via-purple-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
               About Artswarit
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
@@ -35,7 +35,7 @@ const AboutUs = () => {
                   <Heart className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black tracking-tight mb-3">Our Mission</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-3">Our Mission</h2>
                   <p className="text-muted-foreground leading-relaxed">
                     Artswarit is an initiative by <strong>Ashwareet Basu</strong> (Sole Proprietor) to bridge the gap between global artists and clients across the world. We believe that every artist, regardless of geography, language, or background, deserves a secure, transparent, and fair platform to monetise their creative talent.
                   </p>
@@ -55,7 +55,7 @@ const AboutUs = () => {
                   <Landmark className="h-6 w-6 text-emerald-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black tracking-tight mb-1">The Escrow-First Model</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-1">The Escrow-First Model</h2>
                   <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">Your Money, Safely Held</p>
                 </div>
               </div>
@@ -92,7 +92,7 @@ const AboutUs = () => {
                   <Scale className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-black tracking-tight mb-1">Digital Intermediary, Not a Seller</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-1">Digital Intermediary, Not a Seller</h2>
                   <p className="text-xs font-bold text-blue-600 uppercase tracking-widest">IT Act 2000 · IT Rules 2021 (Amended 2026)</p>
                 </div>
               </div>
@@ -120,7 +120,7 @@ const AboutUs = () => {
                 <div className="p-2.5 rounded-xl bg-purple-100 dark:bg-purple-900/30 w-fit">
                   <BadgeCheck className="h-5 w-5 text-purple-600" />
                 </div>
-                <h3 className="font-black text-lg">Trust & Verification</h3>
+                <h3 className="font-bold text-lg">Trust & Verification</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Every artist on Artswarit goes through a profile verification process. Our AI-assisted content moderation ensures that only original, legitimate work is showcased on the platform.
                 </p>
@@ -131,7 +131,7 @@ const AboutUs = () => {
                 <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/30 w-fit">
                   <Shield className="h-5 w-5 text-amber-600" />
                 </div>
-                <h3 className="font-black text-lg">Data Protection</h3>
+                <h3 className="font-bold text-lg">Data Protection</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Your personal data is processed in accordance with the Digital Personal Data Protection Act, 2023 and our comprehensive <Link to="/privacy-policy" className="text-primary underline underline-offset-2 font-semibold">Privacy Policy</Link>. We collect only what is necessary and never sell your data.
                 </p>
@@ -142,7 +142,7 @@ const AboutUs = () => {
                 <div className="p-2.5 rounded-xl bg-green-100 dark:bg-green-900/30 w-fit">
                   <Globe className="h-5 w-5 text-green-600" />
                 </div>
-                <h3 className="font-black text-lg">Global Access, Indian Roots</h3>
+                <h3 className="font-bold text-lg">Global Access, Indian Roots</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   While Artswarit is headquartered in India and fully compliant with Indian regulations, our platform is open to artists and clients from around the world. Payments are processed in INR with transparent conversion rates.
                 </p>
@@ -153,7 +153,7 @@ const AboutUs = () => {
                 <div className="p-2.5 rounded-xl bg-rose-100 dark:bg-rose-900/30 w-fit">
                   <Users className="h-5 w-5 text-rose-600" />
                 </div>
-                <h3 className="font-black text-lg">Fair Pricing</h3>
+                <h3 className="font-bold text-lg">Fair Pricing</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Artists set their own prices. Our flat 15% platform fee (0% for Pro subscribers) is disclosed upfront. No hidden charges, no surprises. See our full <Link to="/terms-of-service" className="text-primary underline underline-offset-2 font-semibold">Terms of Service</Link> for details.
                 </p>
@@ -168,7 +168,7 @@ const AboutUs = () => {
                 <div className="p-3 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 shrink-0">
                   <Building2 className="h-6 w-6 text-indigo-600" />
                 </div>
-                <h2 className="text-xl sm:text-2xl font-black tracking-tight">Entity & Office Information</h2>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Entity & Office Information</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="p-5 rounded-2xl bg-muted/40 border border-border/50 space-y-2">

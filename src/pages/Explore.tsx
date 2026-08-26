@@ -374,7 +374,7 @@ const Explore = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
 
         <div className="container-responsive relative mx-auto text-center">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black mb-3 sm:mb-4 tracking-tighter leading-[1.05] animate-in fade-in slide-in-from-bottom-6 duration-1000">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-3 sm:mb-4 tracking-tighter leading-[1.05] animate-in fade-in slide-in-from-bottom-6 duration-1000">
             Explore the <span className="text-brand-gradient">Collection</span>
           </h1>
 

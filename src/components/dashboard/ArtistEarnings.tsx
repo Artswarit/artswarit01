@@ -37,6 +37,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState("year");
+  const [showAll, setShowAll] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
   const [exportingCsv, setExportingCsv] = useState(false);
@@ -218,24 +219,23 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
     });
     
     return monthlyTotals;
-  }, [transactions]);
+  }, [transactions, convertPrice]);
 
-  // Memoize expensive calculations
   const { totalEarnings, pendingEarnings, avgPerSale, completedCount } = useMemo(() => {
     const completed = transactions.filter(t => t.status === 'completed');
     const pending = transactions.filter(t => t.status === 'pending');
-    
+
     const total = completed.reduce((sum, t) => sum + convertPrice(Number(t.amount), t.currency || 'USD'), 0);
     const pendingTotal = pending.reduce((sum, t) => sum + convertPrice(Number(t.amount), t.currency || 'USD'), 0);
     const avg = completed.length > 0 ? Math.round(total / completed.length) : 0;
-    
+
     return {
       totalEarnings: total,
       pendingEarnings: pendingTotal,
       avgPerSale: avg,
       completedCount: completed.length
     };
-  }, [transactions]);
+  }, [transactions, convertPrice]);
 
   if (isLoading || loading) {
     return (
@@ -259,7 +259,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
       
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div className="space-y-1">
-          <h2 className="font-black text-xl sm:text-2xl lg:text-3xl flex items-center gap-2 sm:gap-3 tracking-tight">
+          <h2 className="font-medium text-xl sm:text-2xl lg:text-3xl flex items-center gap-2 sm:gap-3 tracking-tight">
             Earnings & Analytics
             {isProArtist && <Crown className="h-4 w-4 sm:h-6 sm:w-6 text-yellow-500 fill-yellow-500 animate-pulse" />}
           </h2>
@@ -295,12 +295,12 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-3xl sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
           <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
-            <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+            <CardTitle className="text-[9px] sm:text-xs font-medium text-muted-foreground uppercase tracking-[0.07em] opacity-60">
               Total Earnings
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 sm:px-8 pb-4 sm:pb-8">
-            <div className="text-2xl sm:text-4xl font-black text-foreground tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
+            <div className="text-2xl sm:text-4xl font-medium text-foreground tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
               {formatPrice(totalEarnings)}
             </div>
             <p className="text-[10px] sm:text-sm text-muted-foreground mt-1 sm:mt-2 font-medium">Lifetime revenue</p>
@@ -309,12 +309,12 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
         
         <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-3xl sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group">
           <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
-            <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+            <CardTitle className="text-[9px] sm:text-xs font-medium text-muted-foreground uppercase tracking-[0.07em] opacity-60">
               Pending Payments
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 sm:px-8 pb-4 sm:pb-8">
-            <div className="text-2xl sm:text-4xl font-black text-amber-600 tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
+            <div className="text-2xl sm:text-4xl font-medium text-amber-600 tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
               {formatPrice(pendingEarnings)}
             </div>
             <p className="text-[10px] sm:text-sm text-muted-foreground mt-1 sm:mt-2 font-medium">Processing cycle</p>
@@ -323,12 +323,12 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
         
         <Card className="border-primary/10 shadow-xl shadow-primary/5 hover:border-primary/30 transition-all rounded-3xl sm:rounded-[2rem] bg-background/50 backdrop-blur-md overflow-hidden group sm:col-span-2 lg:col-span-1">
           <CardHeader className="pb-1 sm:pb-2 pt-4 sm:pt-8 px-4 sm:px-8">
-            <CardTitle className="text-[9px] sm:text-xs font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">
+            <CardTitle className="text-[9px] sm:text-xs font-medium text-muted-foreground uppercase tracking-[0.07em] opacity-60">
               Avg Per Sale
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 sm:px-8 pb-4 sm:pb-8">
-            <div className="text-2xl sm:text-4xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
+            <div className="text-2xl sm:text-4xl font-medium text-primary tracking-tighter group-hover:scale-105 transition-transform origin-left duration-500">
               {formatPrice(avgPerSale)}
             </div>
             <p className="text-[10px] sm:text-sm text-muted-foreground mt-1 sm:mt-2 font-medium">From {completedCount} sales</p>
@@ -344,12 +344,14 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
         <CardHeader className="p-6 sm:p-10 border-b border-primary/10 bg-primary/5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <CardTitle className="text-xl sm:text-2xl font-black tracking-tight">Recent Transactions</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl font-medium tracking-tight">Recent Transactions</CardTitle>
               <CardDescription className="text-sm font-medium">Your latest earnings from artwork sales</CardDescription>
             </div>
-            <Button variant="ghost" size="sm" className="w-fit font-bold text-primary hover:bg-primary/5 rounded-xl px-4 min-h-[48px] active:scale-95 transition-all">
-              View Analytics
-            </Button>
+            {transactions.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={() => setShowAll(!showAll)} className="w-fit font-bold text-primary hover:bg-primary/5 rounded-xl px-4 min-h-[48px] active:scale-95 transition-all">
+                {showAll ? 'Show Less' : `View All (${transactions.length})`}
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -357,11 +359,11 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-muted/30">
-                  <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Date</th>
-                  <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Type</th>
-                  <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Item</th>
-                  <th className="text-left px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Amount</th>
-                  <th className="text-right px-8 py-5 font-black text-[10px] uppercase tracking-widest text-muted-foreground/70">Status</th>
+                  <th className="text-left px-8 py-5 font-medium text-[10px] uppercase tracking-[0.07em] text-muted-foreground/70">Date</th>
+                  <th className="text-left px-8 py-5 font-medium text-[10px] uppercase tracking-[0.07em] text-muted-foreground/70">Type</th>
+                  <th className="text-left px-8 py-5 font-medium text-[10px] uppercase tracking-[0.07em] text-muted-foreground/70">Item</th>
+                  <th className="text-left px-8 py-5 font-medium text-[10px] uppercase tracking-[0.07em] text-muted-foreground/70">Amount</th>
+                  <th className="text-right px-8 py-5 font-medium text-[10px] uppercase tracking-[0.07em] text-muted-foreground/70">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/10">
@@ -372,12 +374,12 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
                     </td>
                   </tr>
                 ) : (
-                  transactions.slice(0, 10).map(transaction => (
+                  (showAll ? transactions : transactions.slice(0, 10)).map(transaction => (
                     <tr key={transaction.id} className="hover:bg-primary/[0.02] transition-colors group">
                       <td className="px-8 py-6 text-sm font-bold text-foreground/80">{new Date(transaction.created_at).toLocaleDateString()}</td>
                       <td className="px-8 py-6">
                         <span className={cn(
-                          "inline-flex items-center rounded-lg px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider",
+                          "inline-flex items-center rounded-lg px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider",
                           transaction.type === "artwork" 
                             ? "bg-blue-500/10 text-blue-600" 
                             : "bg-purple-500/10 text-purple-600"
@@ -386,10 +388,10 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
                         </span>
                       </td>
                       <td className="px-8 py-6 text-sm font-medium text-foreground truncate max-w-[200px]">{transaction.title}</td>
-                      <td className="px-8 py-6 font-black text-foreground">{formatPrice(Number(transaction.amount), transaction.currency || 'USD')}</td>
+                      <td className="px-8 py-6 font-medium text-foreground">{formatPrice(Number(transaction.amount), transaction.currency || 'USD')}</td>
                       <td className="px-8 py-6 text-right">
                         <span className={cn(
-                          "inline-flex items-center rounded-xl px-4 py-1.5 text-xs font-black uppercase tracking-wider",
+                          "inline-flex items-center rounded-xl px-4 py-1.5 text-xs font-medium uppercase tracking-wider",
                           transaction.status === "completed" 
                             ? "bg-green-500/10 text-green-600 dark:bg-green-500/20" 
                             : "bg-amber-500/10 text-amber-600 dark:bg-amber-500/20"
@@ -411,20 +413,20 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
                 No transactions yet
               </div>
             ) : (
-              transactions.slice(0, 8).map(transaction => (
+              (showAll ? transactions : transactions.slice(0, 8)).map(transaction => (
                 <div key={transaction.id} className="p-6 space-y-4 hover:bg-muted/30 transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <span className={cn(
-                          "inline-flex items-center rounded-lg px-2 py-0.5 text-[8px] font-black uppercase tracking-wider",
+                          "inline-flex items-center rounded-lg px-2 py-0.5 text-[8px] font-medium uppercase tracking-wider",
                           transaction.type === "artwork" 
                             ? "bg-blue-500/10 text-blue-600" 
                             : "bg-purple-500/10 text-purple-600"
                         )}>
                           {transaction.type}
                         </span>
-                        <div className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
+                        <div className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.07em]">
                           {new Date(transaction.created_at).toLocaleDateString()}
                         </div>
                       </div>
@@ -433,7 +435,7 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
                       </div>
                     </div>
                     <span className={cn(
-                      "inline-flex items-center rounded-lg px-3 py-1 text-[10px] font-black uppercase tracking-wider",
+                      "inline-flex items-center rounded-lg px-3 py-1 text-[10px] font-medium uppercase tracking-wider",
                       transaction.status === "completed" 
                         ? "bg-green-500/10 text-green-600" 
                         : "bg-amber-500/10 text-amber-600"
@@ -442,8 +444,8 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Amount</span>
-                    <span className="text-lg font-black text-foreground">
+                    <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-[0.07em]">Amount</span>
+                    <span className="text-lg font-medium text-foreground">
                       {formatPrice(Number(transaction.amount), transaction.currency || 'USD')}
                     </span>
                   </div>
@@ -452,9 +454,9 @@ const ArtistEarnings = ({ isLoading }: ArtistEarningsProps) => {
             )}
           </div>
         </CardContent>
-        {transactions.length > 8 && (
+        {transactions.length > 8 && !showAll && (
           <CardFooter className="border-t border-border/10 p-6 sm:p-8 flex justify-center bg-muted/5">
-            <Button variant="outline" className="w-full sm:w-auto font-black text-xs uppercase tracking-widest h-12 rounded-2xl border-primary/20 hover:bg-primary/5">
+            <Button variant="outline" onClick={() => setShowAll(true)} className="w-full sm:w-auto font-medium text-xs uppercase tracking-[0.07em] h-12 rounded-2xl border-primary/20 hover:bg-primary/5">
               View All Transactions
             </Button>
           </CardFooter>

@@ -257,7 +257,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
                   <Lock className="h-6 w-6" />
                 </div>
                 <div className="flex-1 space-y-1">
-                  <p className="font-black text-orange-800 dark:text-orange-400 uppercase tracking-tight">Portfolio limit reached</p>
+                  <p className="font-medium text-orange-800 dark:text-orange-400 uppercase tracking-tight">Portfolio limit reached</p>
                   <p className="text-xs sm:text-sm text-orange-600/80 font-medium leading-relaxed">
                     You've uploaded {portfolioCount}/{portfolioLimit} items. Upgrade to Pro for unlimited creative freedom!
                   </p>
@@ -265,7 +265,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
                 <Button
                   type="button"
                   onClick={handleUpgrade}
-                  className="w-full sm:w-auto h-11 px-6 rounded-xl bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 text-white font-black shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-0.5"
+                  className="w-full sm:w-auto h-11 px-6 rounded-xl bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 text-white font-medium shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-0.5"
                 >
                   <Crown className="h-4 w-4 mr-2" />
                   Upgrade Now
@@ -277,7 +277,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
 
         <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 overflow-hidden">
           <CardHeader className="bg-muted/30 px-5 py-4 sm:px-8 sm:py-6">
-            <CardTitle className="flex items-center justify-between text-lg sm:text-xl font-black tracking-tight">
+            <CardTitle className="flex items-center justify-between text-lg sm:text-xl font-medium tracking-tight">
               <span className="flex items-center gap-2.5">
                 <div className="h-2 w-2 rounded-full bg-primary" />
                 Content Type
@@ -328,7 +328,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
 
         <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5">
           <CardHeader className="bg-muted/30 px-5 py-4 sm:px-8 sm:py-6">
-            <CardTitle className="flex items-center gap-2.5 text-lg sm:text-xl font-black tracking-tight">
+            <CardTitle className="flex items-center gap-2.5 text-lg sm:text-xl font-medium tracking-tight">
               <div className="h-2 w-2 rounded-full bg-primary" />
               Artwork Details
             </CardTitle>
@@ -404,12 +404,12 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
                   </div>
                   {selectedFiles.length === 0 ? (
                     <div className="space-y-1.5 sm:space-y-2">
-                      <p className="text-base sm:text-xl font-black tracking-tight text-foreground">Click to upload <span className="text-primary">or drag & drop</span></p>
+                      <p className="text-base sm:text-xl font-medium tracking-tight text-foreground">Click to upload <span className="text-primary">or drag & drop</span></p>
                       <p className="text-[10px] sm:text-sm text-muted-foreground font-medium opacity-60">High resolution files supported</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-primary text-primary-foreground font-black text-[10px] sm:text-xs uppercase tracking-widest shadow-lg shadow-primary/20">
+                      <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-primary text-primary-foreground font-medium text-[10px] sm:text-xs uppercase tracking-[0.07em] shadow-lg shadow-primary/20">
                         {selectedFiles.length} {selectedFiles.length === 1 ? 'file' : 'files'} selected
                       </div>
                       <p className="text-[9px] sm:text-xs text-muted-foreground font-medium max-w-md mx-auto truncate px-4 italic opacity-80">
@@ -427,7 +427,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
 
         <Card className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5">
           <CardHeader className="bg-muted/30 px-5 py-4 sm:px-8 sm:py-6">
-            <CardTitle className="flex items-center gap-2.5 text-lg sm:text-xl font-black tracking-tight">
+            <CardTitle className="flex items-center gap-2.5 text-lg sm:text-xl font-medium tracking-tight">
               <div className="h-2 w-2 rounded-full bg-primary" />
               Visibility & Monetization
             </CardTitle>
@@ -467,7 +467,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
                     onClick={() => setVisibilityType(tier.id)}
                   >
                     <p className={cn(
-                      "text-sm sm:text-base font-black uppercase tracking-tight mb-0.5 sm:mb-1 transition-colors",
+                      "text-sm sm:text-base font-medium uppercase tracking-tight mb-0.5 sm:mb-1 transition-colors",
                       visibilityType === tier.id ? "text-primary" : "text-foreground"
                     )}>{tier.label}</p>
                     <p className="text-[10px] sm:text-[11px] text-muted-foreground font-medium opacity-70 leading-tight">{tier.desc}</p>
@@ -483,7 +483,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
               <div className="space-y-3 sm:space-y-4 p-5 sm:p-6 rounded-[2rem] bg-primary/5 border border-primary/10 animate-in zoom-in-95 duration-500">
                 <Label htmlFor="price" className="text-[10px] font-medium uppercase tracking-[0.07em] text-primary/80 ml-1">Set Your Price ({userCurrency})*</Label>
                 <div className="relative group">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-black text-base sm:text-lg">{userCurrencySymbol}</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary font-medium text-base sm:text-lg">{userCurrencySymbol}</span>
                   <Input 
                     id="price" 
                     value={price} 
@@ -492,7 +492,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
                     type="number"
                     min="0"
                     step="0.01"
-                    className="h-12 sm:h-14 pl-10 sm:pl-12 rounded-xl bg-background border-primary/20 focus:ring-primary/20 focus:border-primary transition-all font-black text-base sm:text-lg"
+                    className="h-12 sm:h-14 pl-10 sm:pl-12 rounded-xl bg-background border-primary/20 focus:ring-primary/20 focus:border-primary transition-all font-medium text-base sm:text-lg"
                   />
                 </div>
                 <div className="flex items-start gap-2 text-[10px] sm:text-xs text-muted-foreground/60 font-medium leading-relaxed italic">
@@ -508,7 +508,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
 
             <div className="flex items-center justify-between p-4 sm:p-6 rounded-2xl border border-border/40 bg-muted/10 group hover:border-primary/20 transition-all duration-300">
               <div className="space-y-0.5 sm:space-y-1">
-                <Label htmlFor="schedule" className="font-black text-xs sm:text-sm uppercase tracking-tight group-hover:text-primary transition-colors cursor-pointer">Schedule Release</Label>
+                <Label htmlFor="schedule" className="font-medium text-xs sm:text-sm uppercase tracking-tight group-hover:text-primary transition-colors cursor-pointer">Schedule Release</Label>
                 <p className="text-[10px] sm:text-xs text-muted-foreground font-medium opacity-60">Set a future date for this content to go live</p>
               </div>
               <Switch id="schedule" checked={scheduleRelease} onCheckedChange={setScheduleRelease} className="data-[state=checked]:bg-primary" />
@@ -544,7 +544,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
           <Button 
             type="submit" 
             disabled={isUploading}
-            className="w-full sm:flex-1 h-12 sm:h-14 rounded-2xl font-black text-sm sm:text-base uppercase tracking-widest shadow-xl shadow-primary/20 transition-all hover:shadow-2xl hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0"
+            className="w-full sm:flex-1 h-12 sm:h-14 rounded-2xl font-medium text-sm sm:text-base uppercase tracking-[0.07em] shadow-xl shadow-primary/20 transition-all hover:shadow-2xl hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {isUploading ? (
               <div className="flex items-center gap-3">
@@ -568,7 +568,7 @@ const ArtworkUploadForm = ({ onCancel, onSuccess }: ArtworkUploadFormProps) => {
             variant="ghost" 
             onClick={onCancel}
             disabled={isUploading}
-            className="w-full sm:w-auto h-12 sm:h-14 px-10 rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+            className="w-full sm:w-auto h-12 sm:h-14 px-10 rounded-2xl font-medium text-[10px] sm:text-xs uppercase tracking-[0.07em] text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
           >
             Cancel
           </Button>

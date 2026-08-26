@@ -294,9 +294,9 @@ const ServicesManagement: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-1.5">
             <div className="flex items-center gap-3">
-              <CardTitle className="text-2xl sm:text-3xl font-black tracking-tight text-foreground/90">Your Services</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl font-medium tracking-tight text-foreground/90">Your Services</CardTitle>
               {!isProArtist && (
-                <Badge variant="outline" className="shrink-0 bg-primary/5 text-primary border-primary/20 px-3 py-1 rounded-full font-black text-[10px] uppercase tracking-wider">
+                <Badge variant="outline" className="shrink-0 bg-primary/5 text-primary border-primary/20 px-3 py-1 rounded-full font-medium text-[10px] uppercase tracking-wider">
                   {serviceCount}/{serviceLimit}
                 </Badge>
               )}
@@ -305,7 +305,7 @@ const ServicesManagement: React.FC = () => {
           </div>
           <Button 
             onClick={handleAddClick} 
-            className="h-14 w-full sm:w-auto gap-3 px-8 font-black text-[10px] uppercase tracking-widest bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all rounded-2xl shrink-0"
+            className="h-14 w-full sm:w-auto gap-3 px-8 font-medium text-[10px] uppercase tracking-[0.07em] bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all rounded-2xl shrink-0"
             disabled={!canAddService}
           >
             {canAddService ? (
@@ -332,7 +332,7 @@ const ServicesManagement: React.FC = () => {
               <Loader2 className="h-12 w-12 animate-spin text-primary/40" />
               <div className="absolute inset-0 blur-xl bg-primary/10 rounded-full animate-pulse" />
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60 animate-pulse">Loading Services</p>
+            <p className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/60 animate-pulse">Loading Services</p>
           </div>
         ) : services.length === 0 ? (
           <div className="text-center py-24 px-6 space-y-6 bg-muted/10 rounded-[2.5rem] border-2 border-dashed border-border/20">
@@ -340,7 +340,7 @@ const ServicesManagement: React.FC = () => {
               <Plus className="h-10 w-10 text-muted-foreground/30" />
             </div>
             <div className="space-y-3">
-              <h4 className="text-lg font-black text-foreground/90">No services yet</h4>
+              <h4 className="text-lg font-medium text-foreground/90">No services yet</h4>
               <p className="text-sm font-medium text-muted-foreground/60 max-w-[320px] mx-auto leading-relaxed">
                 Create your first service to showcase your talent and start receiving inquiries.
               </p>
@@ -357,7 +357,7 @@ const ServicesManagement: React.FC = () => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
                 
                 <div className="flex justify-between items-start gap-4 relative z-10">
-                  <h3 className="font-black text-xl text-foreground/90 leading-tight group-hover:text-primary transition-colors truncate">{s.title}</h3>
+                  <h3 className="font-medium text-xl text-foreground/90 leading-tight group-hover:text-primary transition-colors truncate">{s.title}</h3>
                   <div className="flex gap-2 shrink-0">
                     <Button
                       variant="ghost"
@@ -384,8 +384,8 @@ const ServicesManagement: React.FC = () => {
                 )}
                 {s.starting_price !== null && (
                   <div className="mt-auto pt-6 flex items-center justify-between border-t border-border/10 relative z-10">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Starting At</span>
-                    <p className="text-xl font-black text-primary tracking-tight">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/40">Starting At</span>
+                    <p className="text-xl font-medium text-primary tracking-tight">
                       {formatPlus(s.starting_price)}
                     </p>
                   </div>
@@ -398,7 +398,7 @@ const ServicesManagement: React.FC = () => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-md w-[92vw] sm:w-full p-5 sm:p-8 rounded-[2rem] border-none shadow-2xl bg-background/95 backdrop-blur-xl">
             <DialogHeader className="mb-6 space-y-2">
-              <DialogTitle className="text-2xl font-black tracking-tight">
+              <DialogTitle className="text-2xl font-medium tracking-tight">
                 {editingService ? "Edit Service" : "Add New Service"}
               </DialogTitle>
               <DialogDescription className="text-sm sm:text-base font-medium text-muted-foreground/80">
@@ -455,11 +455,11 @@ const ServicesManagement: React.FC = () => {
                 variant="outline"
                 onClick={() => setIsDialogOpen(false)}
                 disabled={saving}
-                className="h-14 flex-1 font-black text-[10px] uppercase tracking-widest rounded-2xl border-border/60 hover:bg-muted/50 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="h-14 flex-1 font-medium text-[10px] uppercase tracking-[0.07em] rounded-2xl border-border/60 hover:bg-muted/50 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
                 Cancel
               </Button>
-              <Button onClick={handleSave} loading={saving} className="h-14 flex-1 font-black text-[10px] uppercase tracking-widest rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <Button onClick={handleSave} loading={saving} className="h-14 flex-1 font-medium text-[10px] uppercase tracking-[0.07em] rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
                 {saving ? null : editingService ? (
                   <Pencil className="h-4 w-4 mr-2" />
                 ) : (
@@ -474,14 +474,14 @@ const ServicesManagement: React.FC = () => {
         <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
           <AlertDialogContent className="w-[92vw] max-w-md p-6 sm:p-8 rounded-[2rem] border-none shadow-2xl bg-background/95 backdrop-blur-xl">
             <AlertDialogHeader className="mb-6 space-y-2">
-              <AlertDialogTitle className="text-2xl font-black tracking-tight">Delete Service?</AlertDialogTitle>
+              <AlertDialogTitle className="text-2xl font-medium tracking-tight">Delete Service?</AlertDialogTitle>
               <AlertDialogDescription className="text-sm sm:text-base font-medium text-muted-foreground/80 leading-relaxed">
                 This will permanently remove the service from your profile. Are you sure you want to proceed?
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-col sm:flex-row gap-3">
               <AlertDialogCancel onClick={() => setServiceToDelete(null)} className="h-12 flex-1 font-bold rounded-2xl border-border/60 hover:bg-muted/50">Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="h-12 flex-1 font-black rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/20">
+              <AlertDialogAction onClick={handleDelete} className="h-12 flex-1 font-medium rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg shadow-destructive/20">
                 Delete Service
               </AlertDialogAction>
             </AlertDialogFooter>

@@ -41,7 +41,7 @@ const FeaturedArtistCard = ({
              <div className="absolute top-4 right-4 z-10">
                <div className="px-3 py-1.5 bg-primary/90 backdrop-blur-md rounded-full flex items-center gap-1.5 shadow-lg border border-primary/40">
                 <BadgeCheck className="w-3.5 h-3.5 text-white" />
-                <span className="text-[10px] font-black uppercase tracking-tighter text-white">Verified</span>
+                <span className="text-[10px] font-bold uppercase tracking-tighter text-white">Verified</span>
               </div>
              </div>
           )}
@@ -57,10 +57,10 @@ const FeaturedArtistCard = ({
 
         <CardContent className="p-4 sm:p-6 bg-white dark:bg-card">
           <div className="space-y-1">
-            <h3 className="font-black text-lg sm:text-xl text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
+            <h3 className="font-semibold text-lg sm:text-xl text-foreground tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
               {name}
             </h3>
-            <p className="text-xs sm:text-sm font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-primary/40" />
               {category}
             </p>

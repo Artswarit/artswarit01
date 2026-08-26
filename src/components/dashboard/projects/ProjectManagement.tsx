@@ -448,7 +448,7 @@ const ProjectManagement = () => {
           <Loader2 className="h-12 w-12 animate-spin text-primary/40" />
           <div className="absolute inset-0 blur-xl bg-primary/10 rounded-full animate-pulse" />
         </div>
-        <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground/60 animate-pulse">Loading Projects</p>
+        <p className="text-xs font-medium uppercase tracking-[0.07em] text-muted-foreground/60 animate-pulse">Loading Projects</p>
       </div>
     );
   }
@@ -462,15 +462,15 @@ const ProjectManagement = () => {
       <Tabs defaultValue="active" className="w-full">
         <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
           <TabsList className="mb-6 w-full h-auto p-1 sm:p-1.5 bg-muted/30 backdrop-blur-md rounded-2xl border border-border/10 flex items-stretch gap-1 sm:gap-1.5">
-            <TabsTrigger value="active" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-widest min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
+            <TabsTrigger value="active" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-medium text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-[0.07em] min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
               <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
               <span className="truncate">Active ({activeProjects.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="pending" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-widest min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
+            <TabsTrigger value="pending" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-medium text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-[0.07em] min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
               <Inbox className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
               <span className="truncate">Pending ({pendingProjects.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="completed" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-black text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-widest min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
+            <TabsTrigger value="completed" className="flex-1 min-w-[80px] sm:min-w-[100px] py-2 sm:py-3 rounded-xl data-[state=active]:bg-background data-[state=active]:shadow-lg data-[state=active]:text-primary transition-all font-medium text-[8px] sm:text-[10px] uppercase tracking-tight sm:tracking-[0.07em] min-h-[40px] sm:min-h-[48px] px-1 sm:px-4 flex items-center justify-center">
               <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
               <span className="truncate">Done ({completedProjects.length})</span>
             </TabsTrigger>
@@ -482,7 +482,7 @@ const ProjectManagement = () => {
               {activeProjects.map(project => <Card key={project.id} className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-background/50 backdrop-blur-md overflow-hidden group hover:border-primary/20 transition-all duration-300">
                   <CardHeader className="pb-4">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{project.title}</CardTitle>
+                      <CardTitle className="text-xl font-medium tracking-tight group-hover:text-primary transition-colors">{project.title}</CardTitle>
                       <Badge className="bg-blue-500/10 text-blue-500 border-blue-500/20 rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-wider">Active</Badge>
                     </div>
                     <CardDescription className="pt-1">
@@ -503,7 +503,7 @@ const ProjectManagement = () => {
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
-                      <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2.5">
+                      <div className="flex justify-between text-[10px] font-medium uppercase tracking-[0.07em] mb-2.5">
                         <span className="text-muted-foreground/60">Current Progress</span>
                         <span className="text-primary">{project.progress}%</span>
                       </div>
@@ -514,18 +514,18 @@ const ProjectManagement = () => {
                         <Calendar size={14} className="text-primary/60" />
                         {new Date(project.deadline).toLocaleDateString()}
                       </div>}
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/10 text-xs font-black text-primary">
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/10 text-xs font-medium text-primary">
                         {project.payment}
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-wrap gap-3 p-5 sm:p-6 bg-muted/5 border-t border-border/10">
-                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(project.id)} className="flex-1 sm:flex-none h-12 rounded-xl font-black text-[10px] uppercase tracking-widest border-border/60 hover:bg-background hover:scale-[1.02] transition-all">
+                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(project.id)} className="flex-1 sm:flex-none h-12 rounded-xl font-medium text-[10px] uppercase tracking-[0.07em] border-border/60 hover:bg-background hover:scale-[1.02] transition-all">
                       <Eye className="h-4 w-4 mr-2" />
                       Details
                     </Button>
                     <Select value={project.progress.toString()} onValueChange={value => handleUpdateProgress(project, parseInt(value))} disabled={actionLoading === project.id}>
-                      <SelectTrigger className="flex-1 sm:flex-none w-full sm:w-[150px] h-12 rounded-xl font-black text-[10px] uppercase tracking-widest bg-background border-border/60 focus:ring-primary/20">
+                      <SelectTrigger className="flex-1 sm:flex-none w-full sm:w-[150px] h-12 rounded-xl font-medium text-[10px] uppercase tracking-[0.07em] bg-background border-border/60 focus:ring-primary/20">
                         <SelectValue placeholder="Progress" />
                       </SelectTrigger>
                       <SelectContent className="rounded-2xl border-border/40 shadow-2xl">
@@ -533,7 +533,7 @@ const ProjectManagement = () => {
                       </SelectContent>
                     </Select>
                     {readyMap[project.id] && project.status !== 'completed' && (
-                      <Button size="sm" className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={() => handleCompleteProject(project)} disabled={actionLoading === project.id || autoCompletingRef.current[project.id]}>
+                      <Button size="sm" className="flex-1 sm:flex-none bg-primary text-primary-foreground hover:bg-primary/90 h-12 rounded-xl font-medium text-[10px] uppercase tracking-[0.07em] shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={() => handleCompleteProject(project)} disabled={actionLoading === project.id || autoCompletingRef.current[project.id]}>
                         {actionLoading === project.id || autoCompletingRef.current[project.id] ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Trophy className="h-4 w-4 mr-2" />}
                         Completed
                       </Button>
@@ -553,7 +553,7 @@ const ProjectManagement = () => {
               {pendingProjects.map(project => <Card key={project.id} className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-background/50 backdrop-blur-md overflow-hidden group hover:border-primary/20 transition-all duration-300">
                   <CardHeader className="pb-4">
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{project.title}</CardTitle>
+                      <CardTitle className="text-xl font-medium tracking-tight group-hover:text-primary transition-colors">{project.title}</CardTitle>
                       <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-wider">Pending</Badge>
                     </div>
                     <CardDescription className="pt-1">
@@ -579,21 +579,21 @@ const ProjectManagement = () => {
                         <Calendar size={14} className="text-primary/60" />
                         {new Date(project.deadline).toLocaleDateString()}
                       </div>}
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/10 text-xs font-black text-primary">
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/10 text-xs font-medium text-primary">
                         {project.payment}
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter className="flex flex-wrap gap-3 p-5 sm:p-6 bg-muted/5 border-t border-border/10">
-                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(project.id)} className="flex-1 sm:flex-none h-12 rounded-xl font-black text-[10px] uppercase tracking-widest border-border/60 hover:bg-background hover:scale-[1.02] transition-all">
+                    <Button size="sm" variant="outline" onClick={() => handleViewDetails(project.id)} className="flex-1 sm:flex-none h-12 rounded-xl font-medium text-[10px] uppercase tracking-[0.07em] border-border/60 hover:bg-background hover:scale-[1.02] transition-all">
                       <Eye className="h-4 w-4 mr-2" />
                       Details
                     </Button>
-                    <Button size="sm" onClick={() => handleAcceptProject(project)} disabled={actionLoading === project.id} className="flex-1 sm:flex-none h-12 rounded-xl font-black text-[10px] uppercase tracking-widest bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <Button size="sm" onClick={() => handleAcceptProject(project)} disabled={actionLoading === project.id} className="flex-1 sm:flex-none h-12 rounded-xl font-medium text-[10px] uppercase tracking-[0.07em] bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
                       {actionLoading === project.id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
                       Accept
                     </Button>
-                    <Button size="sm" variant="outline" className="flex-1 sm:flex-none text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground h-12 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={() => handleRejectProject(project)} disabled={actionLoading === project.id}>
+                    <Button size="sm" variant="outline" className="flex-1 sm:flex-none text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground h-12 rounded-xl font-medium text-[10px] uppercase tracking-[0.07em] hover:scale-[1.02] active:scale-[0.98] transition-all" onClick={() => handleRejectProject(project)} disabled={actionLoading === project.id}>
                       {actionLoading === project.id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <X className="h-4 w-4 mr-2" />}
                       Decline
                     </Button>
@@ -614,7 +614,7 @@ const ProjectManagement = () => {
             return <Card key={project.id} className="rounded-[2rem] border-border/40 shadow-xl shadow-black/5 bg-background/50 backdrop-blur-md overflow-hidden group hover:border-primary/20 transition-all duration-300">
                     <CardHeader className="pb-4">
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-xl font-black tracking-tight group-hover:text-primary transition-colors">{project.title}</CardTitle>
+                        <CardTitle className="text-xl font-medium tracking-tight group-hover:text-primary transition-colors">{project.title}</CardTitle>
                         <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 rounded-full px-3 py-1 font-bold text-[10px] uppercase tracking-wider">Completed</Badge>
                       </div>
                       <CardDescription className="pt-1">
@@ -635,18 +635,18 @@ const ProjectManagement = () => {
                     </CardHeader>
                     <CardContent className="space-y-6">
                       <div>
-                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2.5">
+                        <div className="flex justify-between text-[10px] font-medium uppercase tracking-[0.07em] mb-2.5">
                           <span className="text-muted-foreground/60">Project Progress</span>
                           <span className="text-emerald-500">100%</span>
                         </div>
                         <Progress value={100} className="h-2 rounded-full bg-emerald-500/10" />
                       </div>
                       <div className="flex items-center justify-between pt-2">
-                        <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/10 text-xs font-black text-emerald-600">
+                        <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/10 text-xs font-medium text-emerald-600">
                           {project.payment}
                         </div>
                         {review && <div className="flex flex-col items-end gap-1.5">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Your Client Rating</span>
+                            <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/40">Your Client Rating</span>
                             <div className="flex items-center gap-0.5">
                               {[1, 2, 3, 4, 5].map(star => <Star key={star} className={`w-3.5 h-3.5 ${star <= review.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/20"}`} />)}
                             </div>
@@ -654,11 +654,11 @@ const ProjectManagement = () => {
                       </div>
                     </CardContent>
                     <CardFooter className="flex flex-wrap gap-3 p-5 sm:p-6 bg-muted/5 border-t border-border/10">
-                      <Button size="sm" variant="outline" onClick={() => handleViewDetails(project.id)} className="flex-1 sm:flex-none h-12 rounded-xl font-black text-[10px] uppercase tracking-widest border-border/60 hover:bg-background hover:scale-[1.02] transition-all">
+                      <Button size="sm" variant="outline" onClick={() => handleViewDetails(project.id)} className="flex-1 sm:flex-none h-12 rounded-xl font-medium text-[10px] uppercase tracking-[0.07em] border-border/60 hover:bg-background hover:scale-[1.02] transition-all">
                         <Eye className="h-4 w-4 mr-2" />
                         Details
                       </Button>
-                      <Button size="sm" variant={review ? "outline" : "default"} onClick={() => handleOpenReviewDialog(project)} className={`flex-1 sm:flex-none h-12 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] ${review ? "border-border/60 hover:bg-background" : "bg-amber-500 text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600"}`}>
+                      <Button size="sm" variant={review ? "outline" : "default"} onClick={() => handleOpenReviewDialog(project)} className={`flex-1 sm:flex-none h-12 rounded-xl font-medium text-[10px] uppercase tracking-[0.07em] transition-all hover:scale-[1.02] active:scale-[0.98] ${review ? "border-border/60 hover:bg-background" : "bg-amber-500 text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600"}`}>
                         {review ? <>
                             <Edit className="h-4 w-4 mr-2" />
                             Edit Review
