@@ -279,8 +279,8 @@ export function MilestoneSubmissionDialog({
               <AlertTriangle className="h-5 w-5" />
               <AlertTitle className="text-destructive">Important Reminder</AlertTitle>
               <AlertDescription className="text-destructive/90 space-y-2">
-                <p>This milestone is <strong>not paid yet</strong>.</p>
-                <p>Do <strong>NOT</strong> upload full-quality or final files.</p>
+                <p>Funds are <strong>held in escrow</strong> — payout happens after client approval.</p>
+                <p>Do <strong>NOT</strong> upload full-quality or final files yet.</p>
                 <p>Upload only:</p>
                 <ul className="list-disc list-inside ml-2 mt-1">
                   <li>Watermarked versions</li>

@@ -260,8 +260,8 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
   };
 
   const getPaidAmount = () => {
-    return milestones.filter(m => 
-      ['PAID', 'COMPLETED', 'APPROVED'].includes((m.status || '').toUpperCase())
+    return milestones.filter(m =>
+      ['ACTIVE', 'IN_PROGRESS', 'SUBMITTED', 'REVIEW_PENDING', 'REVISION_REQUESTED', 'PROCESSING_PAYOUT', 'PAID', 'COMPLETED', 'APPROVED'].includes((m.status || '').toUpperCase())
     ).reduce((sum, m) => sum + (m.amount || 0), 0);
   };
 
@@ -296,11 +296,10 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
 
   const handleStartMilestone = async (milestoneId: string) => {
     try {
-      // 'ACTIVE' is the escrow-model value for "funded, artist is working".
-      // The Start action is only reachable from ACTIVE (no-op resume) or
-      // REVISION_REQUESTED (resuming after client feedback), so scoping the
-      // update to those two statuses keeps an unfunded milestone from being
-      // moved into a funded state.
+      // ACTIVE is the working state in the DB state machine.
+      // For REVISION_REQUESTED, move back to ACTIVE (artist resumes).
+      // For already-ACTIVE milestones, this is a no-op status update but
+      // we still log the activity and show a toast.
       const { error } = await supabase
         .from('project_milestones')
         .update({ status: 'ACTIVE' })
@@ -422,7 +421,7 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
               </div>
               <Progress value={calculateProgress()} className="h-2" />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{formatCurrency(getPaidAmount(), 'USD', project.exchange_rate || undefined)} paid</span>
+                <span>{formatCurrency(getPaidAmount(), 'USD', project.exchange_rate || undefined)} funded</span>
                 <span>{formatCurrency(getTotalBudget() - getPaidAmount(), 'USD', project.exchange_rate || undefined)} remaining</span>
               </div>
             </div>

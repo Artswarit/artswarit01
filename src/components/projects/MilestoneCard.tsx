@@ -75,7 +75,6 @@ export function MilestoneCard({
   const isLockedStatus = normalizedStatus === 'LOCKED' || normalizedStatus === 'PENDING';
   const isWaitingFunds = normalizedStatus === 'WAITING_FUNDS' || normalizedStatus === 'PENDING';
   const isActive = normalizedStatus === 'ACTIVE' || normalizedStatus === 'IN_PROGRESS';
-  const isInProgress = normalizedStatus === 'IN_PROGRESS';
   const isReviewPending = normalizedStatus === 'REVIEW_PENDING' || normalizedStatus === 'SUBMITTED';
   const isRevisionRequested = normalizedStatus === 'REVISION_REQUESTED';
   const isCompleted = normalizedStatus === 'COMPLETED' || normalizedStatus === 'PAID' || normalizedStatus === 'APPROVED';
@@ -199,7 +198,7 @@ export function MilestoneCard({
           <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
             <Play className="h-4 w-4 text-blue-600" />
             <p className="text-sm text-blue-600">
-              This milestone is funded and active. Submit your work when ready.
+              Milestone funded and active. Submit your work for review when ready.
             </p>
           </div>
         )}
@@ -227,13 +226,7 @@ export function MilestoneCard({
           {/* Artist Actions */}
           {isArtist && (
             <>
-              {canStart && !startBlockedReason && (isActive || isRevisionRequested) && (
-                <Button size="sm" onClick={onStart} className="bg-primary hover:bg-primary/90">
-                  <Play className="h-4 w-4 mr-1" />
-                  Start Milestone
-                </Button>
-              )}
-              {(isInProgress || isRevisionRequested) && (
+              {(isActive || isRevisionRequested) && (
                 <Button size="sm" onClick={onSubmit} className="bg-primary hover:bg-primary/90">
                   <Upload className="h-4 w-4 mr-1" />
                   Submit for Review
