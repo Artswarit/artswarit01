@@ -382,17 +382,17 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
       {/* Project Overview */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="min-w-0 flex-1">
               <CardTitle className="flex items-center gap-2">
                 {project.title}
                 {project.is_locked && <Lock className="h-4 w-4 text-muted-foreground" />}
               </CardTitle>
-              <CardDescription>{project.description}</CardDescription>
+              <CardDescription className="line-clamp-2">{project.description}</CardDescription>
             </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold">{formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}</p>
-              <p className="text-sm text-muted-foreground">Total Budget</p>
+            <div className="text-right shrink-0">
+              <p className="text-lg sm:text-2xl font-bold">{formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Total Budget</p>
             </div>
           </div>
         </CardHeader>
@@ -405,8 +405,8 @@ export function MilestoneWorkflow({ projectId }: MilestoneWorkflowProps) {
                 they can no longer touch was pure dead-end friction on a
                 finished project. */}
             {!budgetMatch && project.status !== 'completed' && project.status !== 'cancelled' && (
-              <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                 <p className="text-sm text-destructive">
                   Milestone total ({formatCurrency(getTotalBudget(), 'USD', project.exchange_rate || undefined)}) doesn't match project budget ({formatCurrency(project.amount_usd || project.budget || 0, 'USD', project.exchange_rate || undefined)}).
                   Please adjust milestones before proceeding.

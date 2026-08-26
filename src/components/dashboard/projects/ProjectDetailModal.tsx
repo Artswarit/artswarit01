@@ -822,9 +822,9 @@ const ProjectDetailModal = ({
                     </div>
 
                     {milestones.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 rounded-[2.5rem] border-2 border-dashed border-border/40 bg-muted/5 transition-all hover:bg-muted/10">
-                        <div className="p-6 rounded-full bg-muted/20 animate-pulse">
-                          <CheckCircle className="h-12 w-12 text-muted-foreground/30" />
+                      <div className="flex flex-col items-center justify-center py-10 sm:py-20 text-center space-y-4 sm:space-y-6 rounded-2xl sm:rounded-[2.5rem] border-2 border-dashed border-border/40 bg-muted/5 transition-all hover:bg-muted/10">
+                        <div className="p-4 sm:p-6 rounded-full bg-muted/20 animate-pulse">
+                          <CheckCircle className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/30" />
                         </div>
                         <div className="space-y-2 max-w-xs">
                           <p className="text-xl font-bold tracking-tight">Ready to start?</p>
@@ -930,7 +930,7 @@ const ProjectDetailModal = ({
                       </div>
                     )}
 
-                    <div className="p-8 rounded-[2.5rem] bg-muted/5 border-2 border-dashed border-border/30 mt-8">
+                    <div className="p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] bg-muted/5 border-2 border-dashed border-border/30 mt-6 sm:mt-8">
                       <div className="flex flex-col gap-6">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
