@@ -164,6 +164,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
   attachment,
   onRemove,
 }) => {
+  const signedUrl = useSignedAttachmentUrl(attachment?.url);
   if (!attachment) return null;
   const isImage = attachment.type?.startsWith("image/");
   const formatFileSize = (bytes: number) => {
@@ -173,11 +174,13 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+
+
   return (
     <div className="relative inline-flex items-center gap-2 p-2 bg-muted rounded-lg max-w-[200px]">
       {isImage ? (
         <img
-          src={attachment.url || ""}
+          src={signedUrl || ""}
           alt={attachment.name || "Attachment"}
           className="h-10 w-10 object-cover rounded"
         />
@@ -186,6 +189,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
           <FileText className="h-5 w-5 text-muted-foreground" />
         </div>
       )}
+
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium truncate">{attachment.name || "Unnamed file"}</p>
         <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size || 0)}</p>
