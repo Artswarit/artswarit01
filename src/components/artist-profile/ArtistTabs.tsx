@@ -105,36 +105,44 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
   const [services, setServices] = useState<any[]>(initialServices);
   const [servicesLoading, setServicesLoading] = useState(true);
 
-  // Fetch reviews for the current artist
-  useEffect(() => {
-    async function fetchReviews() {
-      if (!artistId) return;
-      const {
-        data,
-        error
-      } = await supabase.from("project_reviews").select("*").eq("artist_id", artistId).order("created_at", {
-        ascending: false
-      });
-      if (!error && data) {
-        const formattedReviews = await Promise.all(data.map(async (r: any) => {
-          const {
-            data: p
-          } = await supabase.from("public_profiles").select("full_name, avatar_url").eq("id", r.client_id).single();
-          return {
-            id: r.id,
-            rating: r.rating,
-            comment: r.review_text || '',
-            date: new Date(r.created_at).toLocaleDateString(),
-            clientName: p?.full_name || "Art Collector",
-            clientAvatar: p?.avatar_url
-          };
-        }));
-        setReviews(formattedReviews);
-      }
-      setReviewLoading(false);
+  // Fetch reviews for the current artist. Keep the raw DB columns on each row —
+  // ReviewCard reads review_text / client_id / created_at / artist_response, so
+  // flattening them away silently rendered empty, un-editable reviews.
+  const fetchReviews = useCallback(async () => {
+    if (!artistId) return;
+    const { data, error } = await supabase
+      .from("project_reviews")
+      .select("*")
+      .eq("artist_id", artistId)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      const clientIds = [...new Set(data.map((r: any) => r.client_id))];
+      const { data: profiles } = clientIds.length
+        ? await supabase.from("public_profiles").select("id, full_name, avatar_url").in("id", clientIds)
+        : { data: [] as any[] };
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+
+      setReviews(
+        data.map((r: any) => ({
+          ...r,
+          clientName: profileMap.get(r.client_id)?.full_name || "Art Collector",
+          clientAvatar: profileMap.get(r.client_id)?.avatar_url ?? null,
+        }))
+      );
     }
-    fetchReviews();
+    setReviewLoading(false);
   }, [artistId]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  const refreshReviews = useCallback(() => {
+    fetchReviews();
+    onRefreshReviews?.();
+  }, [fetchReviews, onRefreshReviews]);
+
 
   // Fetch services for the current artist
   useEffect(() => {
