@@ -33,9 +33,14 @@ interface ReferenceFile {
 
 interface CreateProjectFormProps {
   artistId?: string;
+  /** Pre-fills the title when the request starts from a specific artist service. */
+  initialTitle?: string;
+  /** Pre-fills the budget (in the viewer's currency) from a service's starting price. */
+  initialBudget?: number;
   onSuccess?: (projectId: string) => void;
   onCancel?: () => void;
 }
+
 
 type ProjectMilestoneStatus = 'WAITING_FUNDS' | 'LOCKED';
 
@@ -54,16 +59,20 @@ interface ProjectMilestoneInsert {
   created_by: string;
 }
 
-export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProjectFormProps) {
+export function CreateProjectForm({ artistId, initialTitle, initialBudget, onSuccess, onCancel }: CreateProjectFormProps) {
   const { user } = useAuth();
   const { userCurrency, userCurrencySymbol, exchangeRates } = useCurrency();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // A request that starts from a specific artist service arrives pre-filled, so the
+  // generic "create project" draft must not overwrite it.
+  const isPrefilled = Boolean(initialTitle || initialBudget);
+
   // Project fields
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialTitle ?? '');
   const [description, setDescription] = useState('');
-  const [budget, setBudget] = useState<number>(0);
+  const [budget, setBudget] = useState<number>(initialBudget ?? 0);
   const [deadline, setDeadline] = useState('');
   const [referenceFiles, setReferenceFiles] = useState<ReferenceFile[]>([]);
   // Per-file byte-level upload progress (key = file index, value = 0–100).
@@ -71,11 +80,19 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
 
   // Milestones
   const [milestones, setMilestones] = useState<MilestoneInput[]>([
-    { id: crypto.randomUUID(), title: '', description: '', deliverables: '', amount: 0, due_date: '' }
+    {
+      id: crypto.randomUUID(),
+      title: initialTitle ?? '',
+      description: '',
+      deliverables: '',
+      amount: initialBudget ?? 0,
+      due_date: '',
+    }
   ]);
 
   // Load draft from localStorage on mount
   useEffect(() => {
+    if (isPrefilled) return;
     try {
       const draft = localStorage.getItem('create_project_draft');
       if (draft) {
@@ -91,10 +108,13 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
     } catch (e) {
       console.error('Failed to load project draft', e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   // Save draft to localStorage on change
   useEffect(() => {
+    if (isPrefilled) return;
     const draft = {
       title,
       description,
@@ -103,7 +123,8 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
       milestones
     };
     localStorage.setItem('create_project_draft', JSON.stringify(draft));
-  }, [title, description, budget, deadline, milestones]);
+  }, [isPrefilled, title, description, budget, deadline, milestones]);
+
 
   const totalMilestoneAmount = milestones.reduce((sum, m) => sum + (m.amount || 0), 0);
   const budgetMatches = Math.abs(totalMilestoneAmount - budget) < 0.01;
@@ -311,11 +332,25 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
         milestone_count: milestones.length,
       });
 
-      // Do NOT notify artist yet; wait for explicit client confirmation
-      toast.success('Project created. Assign an artist and click Confirm to send.');
-      
+      if (artistId) {
+        // The request was addressed to a specific artist, so notify them right away.
+        const { error: notifError } = await supabase.from('notifications').insert({
+          user_id: artistId,
+          type: 'project_request',
+          title: 'New Project Request',
+          message: `You received a new project request: "${title.trim()}"`,
+          metadata: { project_id: project.id, client_id: user!.id },
+        });
+        if (notifError) console.error('Failed to notify artist', notifError);
+        toast.success('Request sent! The artist will review it shortly.');
+      } else {
+        // Do NOT notify artist yet; wait for explicit client confirmation
+        toast.success('Project created. Assign an artist and click Confirm to send.');
+      }
+
       // Clear draft
       localStorage.removeItem('create_project_draft');
+
       
       onSuccess?.(project.id);
     } catch (error: any) {
