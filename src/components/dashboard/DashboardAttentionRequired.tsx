@@ -100,11 +100,14 @@ const DashboardAttentionRequired = ({ role, profile, onAction }: DashboardAttent
           const daysLeft = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
           
           if (daysLeft <= 3) {
+            const isOverdue = daysLeft < 0;
             attentionItems.push({
               id: 'deadline-approaching',
               type: 'project',
-              title: 'Project Deadline Approaching',
-              description: `"${nearingDeadlines[0].title}" is due in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}.`,
+              title: isOverdue ? 'Project Deadline Passed' : 'Project Deadline Approaching',
+              description: isOverdue
+                ? `"${nearingDeadlines[0].title}" was due ${Math.abs(daysLeft)} day${Math.abs(daysLeft) !== 1 ? 's' : ''} ago.`
+                : `"${nearingDeadlines[0].title}" is due in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}.`,
               actionLabel: 'Manage Project',
               actionTab: 'projects',
               severity: daysLeft <= 1 ? 'high' : 'medium'

@@ -293,14 +293,9 @@ const ServicesManagement: React.FC = () => {
       <CardHeader className="flex flex-col gap-6 p-6 sm:p-10 bg-muted/20 border-b border-border/10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-3">
-              <CardTitle className="text-2xl sm:text-3xl font-medium tracking-tight text-foreground/90">Your Services</CardTitle>
-              {!isProArtist && (
-                <Badge variant="outline" className="shrink-0 bg-primary/5 text-primary border-primary/20 px-3 py-1 rounded-full font-medium text-[10px] uppercase tracking-wider">
-                  {serviceCount}/{serviceLimit}
-                </Badge>
-              )}
-            </div>
+            {/* Plan capacity is shown by the WorksTab meter above, so it is not
+                repeated in this header. */}
+            <CardTitle className="text-2xl sm:text-3xl font-medium tracking-tight text-foreground/90">Your Services</CardTitle>
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">Showcase your expertise and manage your offerings</p>
           </div>
           <Button 

@@ -8,6 +8,7 @@ import { useCurrencyFormat } from '@/hooks/useCurrencyFormat';
 import { PayMilestoneButton } from '@/components/payments/PayMilestoneButton';
 import { ArtistEarningsBanner } from '@/components/payments/ArtistEarningsBanner';
 import { supabase } from '@/integrations/supabase/client';
+import { openSignedStorageUrl } from '@/lib/storage/signedUrl';
 import { toast } from 'sonner';
 
 interface Milestone {
@@ -280,9 +281,20 @@ export function MilestoneCard({
                       toast.info('No files found in this submission.');
                       return;
                     }
-                    // Open each file in a new tab for download
+                    // `file_url` is a stored canonical reference, not a
+                    // fetchable link — the bucket is private, so each one must
+                    // be exchanged for a short-lived signed URL before opening.
+                    let failed = 0;
                     for (const file of files) {
-                      window.open(file.file_url, '_blank');
+                      const ok = await openSignedStorageUrl(file.file_url, 'milestone-submissions');
+                      if (!ok) failed += 1;
+                    }
+                    if (failed > 0) {
+                      toast.error(
+                        failed === files.length
+                          ? 'Could not open the files. Please try again.'
+                          : `${failed} of ${files.length} files could not be opened.`
+                      );
                     }
                   } catch (err) {
                     toast.error('Failed to fetch files');

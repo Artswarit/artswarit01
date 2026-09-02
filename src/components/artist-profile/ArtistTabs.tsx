@@ -5,12 +5,10 @@ import ArtworkCardModern from "@/components/artist-profile/ArtworkCardModern";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Star, MapPin, Mail, Lock, Crown, Image, Layers, User, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useForm } from "react-hook-form";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CreateProjectForm } from "@/components/projects/CreateProjectForm";
 import ReviewCard from "@/components/reviews/ReviewCard";
 import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { useArtworkPayment } from "@/hooks/useArtworkPayment";
@@ -87,13 +85,14 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
 }) => {
   const [tab, setTab] = useState("all");
   const [page, setPage] = useState(1);
-  // null = dialog closed. string (possibly "") = open, prefilled with service title.
-  const [requestServiceTitle, setRequestServiceTitle] = useState<string | null>(null);
+  // null = dialog closed. Otherwise the service being requested, carrying the
+  // title and its price already converted to the viewer's display currency.
+  const [requestService, setRequestService] = useState<{ title: string; price: number } | null>(null);
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { initiatePayment, loading: paymentLoading } = useArtworkPayment();
   const { toast } = useToast();
-  const { formatPlus, userCurrencySymbol } = useCurrencyFormat();
+  const { formatPlus, userCurrencySymbol, convert } = useCurrencyFormat();
   
   // Track unlocked artworks
   const [unlockedArtworkIds, setUnlockedArtworkIds] = useState<Set<string>>(new Set());
@@ -428,72 +427,6 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
   const paged = isArtTab && displayed[tab] ? displayed[tab].slice(0, PAGE_SIZE * page) : [];
   const hasMore = isArtTab && displayed[tab] && displayed[tab].length > PAGE_SIZE * page;
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { isSubmitting }
-  } = useForm({
-    defaultValues: {
-      title: "",
-      description: "",
-      budget: ""
-    }
-  });
-
-  // Prefill the project title with the chosen service when the dialog opens.
-  useEffect(() => {
-    if (requestServiceTitle !== null) {
-      reset({ title: requestServiceTitle, description: "", budget: "" });
-    }
-  }, [requestServiceTitle]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const submitRequest = async (values: { title: string; description: string; budget: string }) => {
-    if (!user) {
-      toast({
-        title: "Login required",
-        description: "Please log in to send a project request.",
-        variant: "destructive",
-      });
-      return;
-    }
-    try {
-      const clientName =
-        (user as any)?.user_metadata?.full_name ||
-        (user as any)?.user_metadata?.name ||
-        user.email?.split("@")[0] ||
-        "A client";
-      const budgetText = values.budget ? ` (Budget: ${userCurrencySymbol}${values.budget})` : "";
-      await supabase.from("notifications").insert({
-        user_id: artistId,
-        title: `New project request: ${values.title}`,
-        message: `${clientName} sent a project request${budgetText}. ${values.description}`.slice(0, 500),
-        type: "info",
-        metadata: {
-          kind: "project_request",
-          client_id: user.id,
-          title: values.title,
-          description: values.description,
-          budget: values.budget || null,
-          currency: userCurrencySymbol,
-        },
-      });
-      toast({
-        title: "Project request sent!",
-        description: "The artist will be notified of your interest.",
-      });
-      reset({ title: "", description: "", budget: "" });
-      setRequestServiceTitle(null);
-    } catch (err: any) {
-      console.error("Project request failed", err);
-      toast({
-        title: "Could not send request",
-        description: err?.message || "Please try again in a moment.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return <div>
       <Tabs value={tab} onValueChange={v => {
       setTab(v);
@@ -622,7 +555,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
                   This artist hasn't listed fixed services yet.
                   <div className="mt-4">
                     <Button
-                      onClick={() => setRequestServiceTitle("")}
+                      onClick={() => setRequestService({ title: "", price: 0 })}
                       className="bg-violet-600 text-white hover:bg-violet-700 gap-2"
                     >
                       <Mail size={16} /> Send a Project Request
@@ -653,7 +586,12 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
                       </div>
                       <div className="shrink-0 sm:ml-auto">
                         <Button
-                          onClick={() => setRequestServiceTitle(service.title)}
+                          onClick={() => setRequestService({
+                            title: service.title,
+                            // starting_price is stored in USD; the form's budget
+                            // field is in the viewer's display currency.
+                            price: convert(service.starting_price),
+                          })}
                           className="w-full sm:w-auto bg-violet-600 text-white hover:bg-violet-700 gap-2 h-11"
                         >
                           <Mail size={16} /> Request
@@ -780,13 +718,15 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
         </TabsContent>
       </Tabs>
 
-      {/* Project Request — full-view dialog */}
+      {/* Project Request — full-view dialog wrapping the real project form, so
+          a service request creates an actual project with milestones and
+          escrow rather than a plain notification the artist can't act on. */}
       <Dialog
-        open={requestServiceTitle !== null}
-        onOpenChange={(open) => !open && setRequestServiceTitle(null)}
+        open={requestService !== null}
+        onOpenChange={(open) => !open && setRequestService(null)}
       >
         <DialogContent
-          className="p-0 gap-0 border-0 sm:border bg-background w-screen h-[100dvh] max-w-none rounded-none sm:w-full sm:max-w-xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col"
+          className="p-0 gap-0 border-0 sm:border bg-background w-screen h-[100dvh] max-w-none rounded-none sm:w-full sm:max-w-3xl sm:h-auto sm:max-h-[90vh] sm:rounded-2xl overflow-hidden flex flex-col"
         >
           <DialogHeader className="px-5 sm:px-6 py-4 border-b border-border/60 bg-background/95 backdrop-blur sticky top-0 z-10">
             <div className="flex items-center justify-between gap-3">
@@ -795,7 +735,7 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
                 Send Project Request
               </DialogTitle>
               <button
-                onClick={() => setRequestServiceTitle(null)}
+                onClick={() => setRequestService(null)}
                 aria-label="Close"
                 className="h-9 w-9 inline-flex items-center justify-center rounded-full hover:bg-muted transition-colors"
               >
@@ -804,49 +744,18 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
             </div>
           </DialogHeader>
 
-          <form
-            onSubmit={handleSubmit(submitRequest)}
-            className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-5"
-          >
-            <div>
-              <label className="font-medium text-foreground block mb-1.5 text-sm">Project Title</label>
-              <Input placeholder="E.g. 'Custom Portrait'" required {...register("title")} />
-            </div>
-            <div>
-              <label className="font-medium text-foreground block mb-1.5 text-sm">Project Description</label>
-              <Textarea
-                placeholder="Describe what you want, deadlines, references…"
-                rows={6}
-                required
-                {...register("description")}
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+            {requestService && (
+              <CreateProjectForm
+                // Remount per service so the form re-seeds its initial state.
+                key={requestService.title}
+                artistId={artistId}
+                initialTitle={requestService.title}
+                initialBudget={requestService.price}
+                onSuccess={() => setRequestService(null)}
+                onCancel={() => setRequestService(null)}
               />
-            </div>
-            <div>
-              <label className="font-medium text-foreground block mb-1.5 text-sm">
-                Budget <span className="text-muted-foreground font-normal">(optional, in {userCurrencySymbol})</span>
-              </label>
-              <Input type="number" min={0} placeholder={`Amount in ${userCurrencySymbol}`} {...register("budget")} />
-            </div>
-          </form>
-
-          <div className="px-5 sm:px-6 py-4 border-t border-border/60 bg-background/95 backdrop-blur flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:pb-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setRequestServiceTitle(null)}
-              className="w-full sm:w-auto h-11"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              onClick={handleSubmit(submitRequest)}
-              className="w-full sm:w-auto h-11 bg-violet-600 text-white hover:bg-violet-700 gap-2"
-            >
-              <Mail size={16} />
-              {isSubmitting ? "Sending…" : "Send Request"}
-            </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>

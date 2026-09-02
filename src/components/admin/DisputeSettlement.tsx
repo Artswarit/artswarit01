@@ -19,6 +19,7 @@ import {
 import { format } from 'date-fns';
 import { writeAuditLog } from './auditHelpers';
 import { toast } from 'sonner';
+import { openSignedStorageUrl } from '@/lib/storage/signedUrl';
 import { cn } from '@/lib/utils';
 import LogoLoader from '@/components/ui/LogoLoader';
 import { useCurrency } from '@/contexts/CurrencyContext';
@@ -425,7 +426,23 @@ export default function DisputeSettlement() {
                             <div className="p-1.5 bg-primary/10 rounded-lg text-primary"><FileText className="h-4 w-4" /></div>
                             <div className="min-w-0"><p className="text-sm font-semibold truncate">{e.file_name || 'Evidence Item'}</p><p className="text-[10px] text-muted-foreground">{format(new Date(e.created_at), 'MMM d, yyyy')}</p></div>
                           </div>
-                          {e.file_url && <Button variant="secondary" size="icon" className="h-8 w-8 shrink-0 rounded-lg" asChild aria-label="Open evidence file in new tab"><a href={e.file_url} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-3.5 w-3.5" /></a></Button>}
+                          {/* file_url is a canonical reference into a private
+                              bucket, so it is exchanged for a signed URL on
+                              click rather than used as a plain href. */}
+                          {e.file_url && (
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="h-8 w-8 shrink-0 rounded-lg"
+                              aria-label="Open evidence file in new tab"
+                              onClick={async () => {
+                                const ok = await openSignedStorageUrl(e.file_url, 'milestone-submissions');
+                                if (!ok) toast.error('Could not open evidence file');
+                              }}
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
                         </div>
                       ))
                     )}

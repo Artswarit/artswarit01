@@ -8,9 +8,10 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import ArtworkManagement from '@/components/dashboard/ArtworkManagement';
 import ArtistProfile from '@/components/dashboard/ArtistProfile';
 import ArtistEarnings from '@/components/dashboard/ArtistEarnings';
+import ArtistHomeSummary from '@/components/dashboard/ArtistHomeSummary';
+import WorksTab from '@/components/dashboard/WorksTab';
 import MessagingModule from '@/components/dashboard/messages/MessagingModule';
 import ArtistSettings from '@/components/dashboard/ArtistSettings';
 import PremiumMembership from '@/components/premium/PremiumMembership';
@@ -21,7 +22,6 @@ import { artistDashboardTabs } from '@/components/dashboard/dashboardTabs';
 import { Separator } from '@/components/ui/separator';
 import ProjectManagement from '@/components/dashboard/projects/ProjectManagement';
 import ArtistNotifications from '@/components/dashboard/ArtistNotifications';
-import ServicesManagement from '@/components/dashboard/services/ServicesManagement';
 import ExclusiveMembers from '@/components/dashboard/ExclusiveMembers';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -156,16 +156,18 @@ const ArtistDashboard = () => {
                 <div className={cn(activeTab !== 'overview' && "hidden")}>
                   {visitedTabs.has('overview') && (
                     <TabErrorBoundary tabLabel="Overview">
-                      <div className="space-y-12">
-                        {/* 1. Critical alerts that need action */}
-                        <DashboardAttentionRequired 
-                          role="artist" 
-                          profile={profile} 
-                          onAction={handleTabChange} 
+                      <div className="space-y-10 sm:space-y-12">
+                        {/* 1. Critical alerts that need action right now */}
+                        <DashboardAttentionRequired
+                          role="artist"
+                          profile={profile}
+                          onAction={handleTabChange}
                         />
-                        {/* 2. Primary KPIs: earnings + active work */}
-                        <ArtistEarnings isLoading={profileLoading} />
-                        {/* 3. Engagement & activity feed */}
+                        {/* 2. At-a-glance business snapshot: earnings, active work, unread
+                            messages. Deliberately a summary — the full breakdown lives in
+                            Account > Earnings and Projects so this doesn't duplicate them. */}
+                        <ArtistHomeSummary isLoading={profileLoading} onNavigate={handleTabChange} />
+                        {/* 3. Recent activity feed */}
                         <ArtistNotifications isLoading={profileLoading} onNotificationClick={handleNotificationClick} />
                       </div>
                     </TabErrorBoundary>
@@ -197,14 +199,7 @@ const ArtistDashboard = () => {
                 <div className={cn(activeTab !== 'portfolio' && "hidden")}>
                   {visitedTabs.has('portfolio') && (
                     <TabErrorBoundary tabLabel="Portfolio">
-                      <Tabs defaultValue="artworks" className="w-full">
-                        <TabsList className="mb-6 p-1 bg-muted/40 rounded-xl overflow-x-auto w-full flex sm:grid sm:grid-cols-2 h-auto">
-                          <TabsTrigger value="artworks" className="rounded-lg shrink-0">Artworks</TabsTrigger>
-                          <TabsTrigger value="services" className="rounded-lg shrink-0">Services</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="artworks"><ArtworkManagement /></TabsContent>
-                        <TabsContent value="services"><ServicesManagement /></TabsContent>
-                      </Tabs>
+                      <WorksTab onNavigate={handleTabChange} />
                     </TabErrorBoundary>
                   )}
                 </div>

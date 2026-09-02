@@ -69,8 +69,22 @@ export default function UserGovernance() {
     setLoading(true);
     setLoadError(null);
     try {
+      // Emails come from the admin-gated RPC once it exists. Falling back to a
+      // direct select keeps this page working either side of the migration
+      // that revokes the `email` column from `authenticated`
+      // (20260902090000_close_email_and_media_exposure.sql), so the frontend
+      // and the migration can ship independently.
+      const fetchProfiles = async () => {
+        const rpc = await (supabase as any).rpc('admin_list_users');
+        if (!rpc.error && Array.isArray(rpc.data)) return { data: rpc.data, error: null };
+        return supabase
+          .from('profiles')
+          .select('id, full_name, email, role, account_status, avatar_url, created_at')
+          .order('created_at', { ascending: false });
+      };
+
       const [profilesRes, adminRolesRes, warningsRes, payoutRes] = await Promise.all([
-        supabase.from('profiles').select('id, full_name, email, role, account_status, avatar_url, created_at').order('created_at', { ascending: false }),
+        fetchProfiles(),
         supabase.from('user_roles').select('user_id').eq('role', 'admin'),
         supabase.from('user_warnings').select('user_id, type, reason, expires_at, is_active').eq('is_active', true),
         supabase.from('razorpay_accounts').select('user_id, kyc_status, payouts_enabled')

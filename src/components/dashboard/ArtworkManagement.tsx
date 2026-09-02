@@ -303,16 +303,9 @@ const ArtworkManagement = () => {
 
   return (
     <div className="space-y-6 sm:space-y-10 py-2 sm:py-6">
-      {/* Header */}
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between bg-muted/20 sm:bg-transparent p-5 sm:p-0 rounded-[2rem] sm:rounded-none border border-border/40 sm:border-none shadow-sm sm:shadow-none animate-in fade-in slide-in-from-top-4 duration-500">
-        <div className="space-y-2">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-medium text-foreground tracking-tight leading-[1.1]">
-            My <span className="text-primary">Works</span>
-          </h2>
-          <p className="text-[11px] sm:text-sm lg:text-base text-muted-foreground font-medium opacity-80 leading-relaxed">
-            Curate and optimize your digital portfolio to showcase your best creative assets
-          </p>
-        </div>
+      {/* Action row. The "My Works" title and description live on the parent
+          WorksTab so the two don't render the same heading twice. */}
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-end animate-in fade-in slide-in-from-top-4 duration-500">
         <div className="flex items-center gap-3 sm:gap-4">
           <Button
             variant={showAnalytics ? 'secondary' : 'outline'}
@@ -365,61 +358,68 @@ const ArtworkManagement = () => {
       />
 
       {/* View Controls */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-card/40 backdrop-blur-xl p-5 sm:p-6 rounded-[2rem] border border-border/40 shadow-xl shadow-black/5 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-        <div className="flex items-center justify-between sm:justify-start gap-4 w-full sm:w-auto">
-          {filteredArtworks.length > 0 && (
-            <div className="flex items-center gap-3.5 group cursor-pointer">
-              <Checkbox
-                checked={selectedArtworks.length === filteredArtworks.length && filteredArtworks.length > 0}
-                onCheckedChange={handleSelectAll}
-                id="select-all"
-                className="h-5 w-5 rounded-lg border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
-              />
-              <label htmlFor="select-all" className="text-xs sm:text-sm font-medium text-foreground/70 cursor-pointer select-none group-hover:text-primary transition-colors uppercase tracking-[0.07em]">
-                Select All
-              </label>
-            </div>
-          )}
-          <div className="flex items-center gap-2.5">
-            <div className="h-4 w-[1px] bg-border/20 hidden sm:block mx-1" />
-            <span className="text-[10px] sm:text-xs font-medium text-muted-foreground/50 whitespace-nowrap bg-muted/50 px-3 py-1 rounded-lg uppercase tracking-[0.07em]">
-              {filteredArtworks.length} items
-            </span>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary/10 text-primary text-[10px] sm:text-xs font-medium border border-primary/20 shadow-sm whitespace-nowrap uppercase tracking-[0.07em]">
-              <Pin className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span>{pinnedCount}/5 pinned</span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-4 sm:pt-0 border-t border-border/10 sm:border-none">
-          <span className="text-[10px] font-medium uppercase tracking-[0.07em] text-muted-foreground/40 sm:hidden">Layout View</span>
-          <div className="flex items-center gap-2 rounded-2xl border border-border/40 bg-background/60 p-1.5 shadow-inner">
-            <Button
-              variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className={cn(
-                "h-11 px-4 sm:px-5 rounded-xl transition-all font-medium uppercase tracking-tighter text-[10px] sm:text-xs",
-                viewMode === 'grid' ? "shadow-lg bg-background text-primary" : "text-muted-foreground hover:text-foreground"
-              )}
+      {/* Padding steps up at md, not sm: index.css enforces a 44px button
+          min-height below 640px for touch targets, while this project's `sm`
+          breakpoint is 480px. Using `sm:` here would stack roomier padding on
+          top of already-enlarged targets between 480-640px and bloat the row. */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-border/60 bg-card px-3 py-1.5 shadow-token-xs md:py-2.5">
+        {filteredArtworks.length > 0 && (
+          <div className="flex shrink-0 items-center gap-2">
+            <Checkbox
+              checked={selectedArtworks.length === filteredArtworks.length && filteredArtworks.length > 0}
+              onCheckedChange={handleSelectAll}
+              id="select-all"
+              className="h-4 w-4 rounded border-border/60 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+            />
+            <label
+              htmlFor="select-all"
+              className="cursor-pointer select-none text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              <Grid3X3 className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Grid</span>
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className={cn(
-                "h-11 px-4 sm:px-5 rounded-xl transition-all font-medium uppercase tracking-tighter text-[10px] sm:text-xs",
-                viewMode === 'list' ? "shadow-lg bg-background text-primary" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <List className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">List</span>
-            </Button>
+              Select all
+            </label>
           </div>
+        )}
+
+        <span className="shrink-0 text-xs text-muted-foreground/70 tabular-nums">
+          {filteredArtworks.length} item{filteredArtworks.length !== 1 ? 's' : ''}
+        </span>
+
+        <span className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary tabular-nums">
+          <Pin className="h-3 w-3" />
+          {pinnedCount}/5
+        </span>
+
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 rounded-lg border border-border/60 bg-muted/40 p-0.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setViewMode('grid')}
+            aria-label="Grid view"
+            aria-pressed={viewMode === 'grid'}
+            className={cn(
+              'h-7 w-7 rounded-md transition-colors',
+              viewMode === 'grid'
+                ? 'bg-background text-primary shadow-token-xs'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <Grid3X3 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setViewMode('list')}
+            aria-label="List view"
+            aria-pressed={viewMode === 'list'}
+            className={cn(
+              'h-7 w-7 rounded-md transition-colors',
+              viewMode === 'list'
+                ? 'bg-background text-primary shadow-token-xs'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <List className="h-3.5 w-3.5" />
+          </Button>
         </div>
       </div>
 

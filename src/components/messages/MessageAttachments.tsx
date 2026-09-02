@@ -3,11 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Paperclip, X, Image, FileText, Loader2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { getSignedStorageUrl } from "@/lib/storage/signedUrl";
+import { getSignedStorageUrl, inferStorageBucket } from "@/lib/storage/signedUrl";
 
 // Attachments live in the private "message-attachments" bucket; the stored URL
 // is only a path carrier and is resolved to a signed URL before use.
 export const MESSAGE_ATTACHMENT_BUCKET = "message-attachments";
+
+/**
+ * Buckets a message attachment can legitimately live in, current first.
+ *
+ * Attachments sent before the move to a private bucket are still stored under
+ * the public `media` bucket. Those URLs must be signed too — otherwise they
+ * only resolve while `media` stays publicly readable, which is the exposure
+ * we're closing.
+ */
+const MESSAGE_ATTACHMENT_BUCKETS = [MESSAGE_ATTACHMENT_BUCKET, "media"] as const;
 
 export interface Attachment {
   name: string;
@@ -26,7 +36,8 @@ const useSignedAttachmentUrl = (url?: string) => {
       setSignedUrl("");
       return;
     }
-    getSignedStorageUrl(url, MESSAGE_ATTACHMENT_BUCKET).then((resolved) => {
+    const bucket = inferStorageBucket(url, MESSAGE_ATTACHMENT_BUCKETS) ?? MESSAGE_ATTACHMENT_BUCKET;
+    getSignedStorageUrl(url, bucket).then((resolved) => {
       if (!cancelled) setSignedUrl(resolved);
     });
     return () => {

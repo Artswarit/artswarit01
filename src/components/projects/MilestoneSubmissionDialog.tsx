@@ -3,6 +3,7 @@ import { track } from '@/lib/analytics';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { buildStorageRef } from '@/lib/storage/signedUrl';
 import {
   Dialog,
   DialogContent,
@@ -159,15 +160,15 @@ export function MilestoneSubmissionDialog({
           },
         });
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('milestone-submissions')
-          .getPublicUrl(filePath);
+        // Canonical storage reference — the bucket is private, so readers must
+        // resolve this through getSignedStorageUrl before opening it.
+        const fileRef = buildStorageRef('milestone-submissions', filePath);
 
         // Save file record
         await supabase.from('submission_files').insert({
           submission_id: submission.id,
           file_name: file.name,
-          file_url: publicUrl,
+          file_url: fileRef,
           file_type: file.type,
           file_size: file.size,
           is_preview: !isFinalUpload

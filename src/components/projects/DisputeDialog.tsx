@@ -3,6 +3,7 @@ import { track } from '@/lib/analytics';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { buildStorageRef } from '@/lib/storage/signedUrl';
 import {
   Dialog,
   DialogContent,
@@ -122,16 +123,16 @@ export function DisputeDialog({
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('milestone-submissions')
-          .getPublicUrl(filePath);
+        // Canonical storage reference — the bucket is private, so readers must
+        // resolve this through getSignedStorageUrl before opening it.
+        const fileRef = buildStorageRef('milestone-submissions', filePath);
 
         // Save evidence record
         await supabase.from('dispute_evidence').insert({
           dispute_id: dispute.id,
           submitted_by: user?.id,
           description: 'Initial evidence',
-          file_url: publicUrl,
+          file_url: fileRef,
           file_name: evidenceFile.name
         });
 

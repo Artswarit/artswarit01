@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { toast } from 'sonner';
+import { buildStorageRef } from '@/lib/storage/signedUrl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,7 +79,9 @@ export function CreateProjectForm({ artistId, initialTitle, initialBudget, onSuc
   // Per-file byte-level upload progress (key = file index, value = 0–100).
   const [refProgress, setRefProgress] = useState<Record<number, number>>({});
 
-  // Milestones
+  // Milestones. When the form is opened against a specific service, seed the
+  // first milestone with that price so the budget/milestone totals start out
+  // reconciled — the submit button is gated on them matching.
   const [milestones, setMilestones] = useState<MilestoneInput[]>([
     {
       id: crypto.randomUUID(),
@@ -90,7 +93,9 @@ export function CreateProjectForm({ artistId, initialTitle, initialBudget, onSuc
     }
   ]);
 
-  // Load draft from localStorage on mount
+  // Load draft from localStorage on mount. Explicit initial values win over a
+  // saved draft: the caller passed them because the user just picked a
+  // specific service, so a stale draft must not overwrite that choice.
   useEffect(() => {
     if (isPrefilled) return;
     try {
@@ -259,11 +264,9 @@ export function CreateProjectForm({ artistId, initialTitle, initialBudget, onSuc
             },
           });
 
-          const { data: { publicUrl } } = supabase.storage
-            .from('project-files')
-            .getPublicUrl(filePath);
-
-          uploadedPublicUrls.push(publicUrl);
+          // Canonical storage reference — the bucket is private, so readers
+          // must resolve this through getSignedStorageUrl before opening it.
+          uploadedPublicUrls.push(buildStorageRef('project-files', filePath));
 
           fileRecords.push({
             project_id: project.id,

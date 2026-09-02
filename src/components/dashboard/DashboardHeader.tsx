@@ -6,7 +6,6 @@ import { useCurrencyFormat } from "@/hooks/useCurrencyFormat";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FollowersList } from "@/components/dashboard/FollowersList";
 import { useRealtimeSync } from "@/lib/realtime-sync";
-import { computeProfileCompletion } from "@/hooks/useProfileCompletion";
 import PageHeader from "@/components/shared/PageHeader";
 import StatTile from "@/components/dashboard/ui/StatTile";
 
@@ -35,7 +34,6 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
     followers: 0,
   });
   const [openFollowers, setOpenFollowers] = useState(false);
-  const completion = computeProfileCompletion(profile);
 
   const fetchStats = useCallback(async (signal?: AbortSignal) => {
     if (!user?.id) return;
@@ -159,23 +157,7 @@ const DashboardHeader = ({ user, profile, title, subtitle }: DashboardHeaderProp
     <div className="space-y-5 sm:space-y-6 pb-1">
       <PageHeader title={title} description={subtitle} size="lg" />
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
-        {profile && (
-          <StatTile
-            label="Profile"
-            value={completion.isComplete ? "Verified" : "Incomplete"}
-            hint={
-              completion.isComplete
-                ? "All set, you're discoverable"
-                : `${completion.completionPercentage}% complete`
-            }
-            tone={completion.isComplete ? "success" : "warning"}
-            iconSlot={
-              <span className="text-[11px] font-semibold">{completion.completionPercentage}%</span>
-            }
-          />
-        )}
-
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatTile
           label="Total views"
           value={artistStats.totalViews.toLocaleString()}

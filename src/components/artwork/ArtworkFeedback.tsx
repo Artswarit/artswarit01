@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { StarRating } from '@/components/ui/StarRating';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, X, Heart, ChevronDown, ChevronUp, Send, Smile } from 'lucide-react';
+import { Loader2, X, Heart, ChevronDown, ChevronUp, Send, Smile, Pencil, Trash2 } from 'lucide-react';
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -21,6 +21,32 @@ type Reply = {
   created_at: string;
   user_id: string;
   profiles: { full_name: string | null; avatar_url: string | null } | null;
+};
+
+/**
+ * Comment length cap. Enforced in the UI only — the column is plain TEXT with
+ * just a `char_length > 0` check, so this is a usability guard, not a security
+ * boundary.
+ */
+const MAX_COMMENT_LENGTH = 500;
+/** Start showing the countdown once the user is this close to the cap. */
+const COUNTER_VISIBLE_FROM = MAX_COMMENT_LENGTH - 100;
+
+const CharCounter = ({ value, className }: { value: string; className?: string }) => {
+  if (value.length < COUNTER_VISIBLE_FROM) return null;
+  const remaining = MAX_COMMENT_LENGTH - value.length;
+  return (
+    <span
+      aria-live="polite"
+      className={cn(
+        'text-[11px] tabular-nums',
+        remaining <= 0 ? 'text-destructive' : remaining <= 20 ? 'text-warning' : 'text-muted-foreground',
+        className,
+      )}
+    >
+      {remaining}
+    </span>
+  );
 };
 
 /* ── Mini Profile Popover ────────────────────────────────── */
@@ -106,10 +132,13 @@ const CommentItem = ({
   feedback,
   artworkId,
   onReplyToParent,
+  onChanged,
 }: {
   feedback: FeedbackType & { user_id?: string; reply_count?: number };
   artworkId: string;
   onReplyToParent?: (username: string, parentId: string) => void;
+  /** Refetch the parent list after this comment is edited or deleted. */
+  onChanged?: () => void;
 }) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -121,6 +150,18 @@ const CommentItem = ({
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const replyInputRef = useRef<HTMLInputElement>(null);
+
+  // Own-comment editing / deletion
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(feedback.content);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  // Reply editing, keyed by reply id
+  const [editingReplyId, setEditingReplyId] = useState<string | null>(null);
+  const [replyEditText, setReplyEditText] = useState('');
+  const [confirmDeleteReplyId, setConfirmDeleteReplyId] = useState<string | null>(null);
+  const [busyReplyId, setBusyReplyId] = useState<string | null>(null);
 
   // Create a map of all users in the thread for mention rendering
   const userMap = useMemo(() => {
@@ -194,6 +235,81 @@ const CommentItem = ({
     setSubmitting(false);
   };
 
+  const isOwnComment = !!user && !!userId && user.id === userId;
+
+  const handleSaveEdit = async () => {
+    const next = editText.trim();
+    if (!next || next.length > MAX_COMMENT_LENGTH) return;
+    if (next === feedback.content) { setIsEditing(false); return; }
+    setSavingEdit(true);
+    // RLS ("Users can update their own feedback") is the real guard here; the
+    // user_id filter just avoids a pointless round trip for other people's rows.
+    const { error } = await supabase
+      .from('artwork_feedback')
+      .update({ content: next })
+      .eq('id', feedback.id)
+      .eq('user_id', user!.id);
+    setSavingEdit(false);
+    if (error) {
+      toast({ title: 'Failed to save changes', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setIsEditing(false);
+    onChanged?.();
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    const { error } = await supabase
+      .from('artwork_feedback')
+      .delete()
+      .eq('id', feedback.id)
+      .eq('user_id', user!.id);
+    setDeleting(false);
+    if (error) {
+      toast({ title: 'Failed to delete', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setConfirmDelete(false);
+    toast({ title: 'Comment deleted' });
+    onChanged?.();
+  };
+
+  const handleSaveReplyEdit = async (replyId: string) => {
+    const next = replyEditText.trim();
+    if (!next || next.length > MAX_COMMENT_LENGTH) return;
+    setBusyReplyId(replyId);
+    const { error } = await supabase
+      .from('artwork_feedback')
+      .update({ content: next })
+      .eq('id', replyId)
+      .eq('user_id', user!.id);
+    setBusyReplyId(null);
+    if (error) {
+      toast({ title: 'Failed to save changes', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setEditingReplyId(null);
+    fetchReplies();
+  };
+
+  const handleDeleteReply = async (replyId: string) => {
+    setBusyReplyId(replyId);
+    const { error } = await supabase
+      .from('artwork_feedback')
+      .delete()
+      .eq('id', replyId)
+      .eq('user_id', user!.id);
+    setBusyReplyId(null);
+    if (error) {
+      toast({ title: 'Failed to delete', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setConfirmDeleteReplyId(null);
+    toast({ title: 'Reply deleted' });
+    fetchReplies();
+  };
+
   const timeAgo = formatDistanceToNow(new Date(feedback.created_at), { addSuffix: false });
 
   return (
@@ -211,24 +327,96 @@ const CommentItem = ({
 
         {/* Body */}
         <div className="flex-1 min-w-0">
-          <div className="text-sm leading-snug">
-            <UsernameLink name={userName} avatarUrl={feedback.profiles?.avatar_url ?? null} userId={userId} className="mr-1.5" />
-            <span className="text-foreground/90">{renderContentWithMentions(feedback.content, userMap)}</span>
-          </div>
-          {feedback.rating && (
+          {isEditing ? (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <input
+                  value={editText}
+                  maxLength={MAX_COMMENT_LENGTH}
+                  onChange={(e) => setEditText(e.target.value)}
+                  aria-label="Edit comment"
+                  autoFocus
+                  className="flex-1 text-sm bg-muted/50 rounded-full px-3 py-1.5 outline-none focus:ring-1 focus:ring-primary/30 border border-border/40"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveEdit();
+                    if (e.key === 'Escape') { setIsEditing(false); setEditText(feedback.content); }
+                  }}
+                  disabled={savingEdit}
+                />
+                <CharCounter value={editText} />
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleSaveEdit}
+                  disabled={!editText.trim() || savingEdit}
+                  className="text-[11px] font-semibold text-primary disabled:opacity-40"
+                >
+                  {savingEdit ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  onClick={() => { setIsEditing(false); setEditText(feedback.content); }}
+                  className="text-[11px] text-muted-foreground hover:text-foreground"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm leading-snug">
+              <UsernameLink name={userName} avatarUrl={feedback.profiles?.avatar_url ?? null} userId={userId} className="mr-1.5" />
+              <span className="text-foreground/90">{renderContentWithMentions(feedback.content, userMap)}</span>
+            </div>
+          )}
+          {feedback.rating && !isEditing && (
             <StarRating rating={feedback.rating} onRatingChange={() => {}} readOnly className="mt-1" starClassName="w-3 h-3" />
           )}
-          <div className="flex items-center gap-4 mt-1.5">
-            <span className="text-[11px] text-muted-foreground">{timeAgo}</span>
-            {user && (
-              <button
-                onClick={() => handleStartReply()}
-                className="text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Reply
-              </button>
-            )}
-          </div>
+          {!isEditing && (
+            <div className="flex items-center gap-4 mt-1.5">
+              <span className="text-[11px] text-muted-foreground">{timeAgo}</span>
+              {user && (
+                <button
+                  onClick={() => handleStartReply()}
+                  className="text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Reply
+                </button>
+              )}
+              {isOwnComment && !confirmDelete && (
+                <>
+                  <button
+                    onClick={() => { setIsEditing(true); setEditText(feedback.content); }}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Pencil className="h-3 w-3" aria-hidden="true" /> Edit
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <Trash2 className="h-3 w-3" aria-hidden="true" /> Delete
+                  </button>
+                </>
+              )}
+              {isOwnComment && confirmDelete && (
+                <>
+                  <span className="text-[11px] text-muted-foreground">Delete this comment?</span>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="text-[11px] font-semibold text-destructive disabled:opacity-40"
+                  >
+                    {deleting ? 'Deleting…' : 'Yes, delete'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="text-[11px] text-muted-foreground hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          )}
 
           {/* Inline reply input */}
           {showReplyInput && (
@@ -236,12 +424,15 @@ const CommentItem = ({
               <input
                 ref={replyInputRef}
                 value={replyText}
+                maxLength={MAX_COMMENT_LENGTH}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Reply..."
+                aria-label="Write a reply"
                 className="flex-1 text-sm bg-muted/50 rounded-full px-3 py-1.5 outline-none focus:ring-1 focus:ring-primary/30 border border-border/40"
                 onKeyDown={(e) => e.key === 'Enter' && handleReply()}
                 disabled={submitting}
               />
+              <CharCounter value={replyText} />
               <button
                 onClick={handleReply}
                 disabled={!replyText.trim() || submitting}
@@ -294,23 +485,95 @@ const CommentItem = ({
                         </Avatar>
                       </Link>
                       <div className="min-w-0 flex-1">
-                        <div className="text-[13px] leading-snug">
-                          <UsernameLink name={replyName} avatarUrl={reply.profiles?.avatar_url ?? null} userId={reply.user_id} className="mr-1 text-[13px]" />
-                          <span className="text-foreground/90">{renderContentWithMentions(reply.content, userMap)}</span>
-                        </div>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-[10px] text-muted-foreground">
-                            {formatDistanceToNow(new Date(reply.created_at), { addSuffix: false })}
-                          </span>
-                          {user && (
-                            <button
-                              onClick={() => handleStartReply(replyName)}
-                              className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              Reply
-                            </button>
-                          )}
-                        </div>
+                        {editingReplyId === reply.id ? (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <input
+                                value={replyEditText}
+                                maxLength={MAX_COMMENT_LENGTH}
+                                onChange={(e) => setReplyEditText(e.target.value)}
+                                aria-label="Edit reply"
+                                autoFocus
+                                className="flex-1 text-[13px] bg-muted/50 rounded-full px-3 py-1.5 outline-none focus:ring-1 focus:ring-primary/30 border border-border/40"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleSaveReplyEdit(reply.id);
+                                  if (e.key === 'Escape') setEditingReplyId(null);
+                                }}
+                                disabled={busyReplyId === reply.id}
+                              />
+                              <CharCounter value={replyEditText} />
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => handleSaveReplyEdit(reply.id)}
+                                disabled={!replyEditText.trim() || busyReplyId === reply.id}
+                                className="text-[10px] font-semibold text-primary disabled:opacity-40"
+                              >
+                                {busyReplyId === reply.id ? 'Saving…' : 'Save'}
+                              </button>
+                              <button
+                                onClick={() => setEditingReplyId(null)}
+                                className="text-[10px] text-muted-foreground hover:text-foreground"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="text-[13px] leading-snug">
+                              <UsernameLink name={replyName} avatarUrl={reply.profiles?.avatar_url ?? null} userId={reply.user_id} className="mr-1 text-[13px]" />
+                              <span className="text-foreground/90">{renderContentWithMentions(reply.content, userMap)}</span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3 mt-1">
+                              <span className="text-[10px] text-muted-foreground">
+                                {formatDistanceToNow(new Date(reply.created_at), { addSuffix: false })}
+                              </span>
+                              {user && (
+                                <button
+                                  onClick={() => handleStartReply(replyName)}
+                                  className="text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  Reply
+                                </button>
+                              )}
+                              {user?.id === reply.user_id && confirmDeleteReplyId !== reply.id && (
+                                <>
+                                  <button
+                                    onClick={() => { setEditingReplyId(reply.id); setReplyEditText(reply.content); }}
+                                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                                  >
+                                    <Pencil className="h-2.5 w-2.5" aria-hidden="true" /> Edit
+                                  </button>
+                                  <button
+                                    onClick={() => setConfirmDeleteReplyId(reply.id)}
+                                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-destructive transition-colors"
+                                  >
+                                    <Trash2 className="h-2.5 w-2.5" aria-hidden="true" /> Delete
+                                  </button>
+                                </>
+                              )}
+                              {user?.id === reply.user_id && confirmDeleteReplyId === reply.id && (
+                                <>
+                                  <span className="text-[10px] text-muted-foreground">Delete this reply?</span>
+                                  <button
+                                    onClick={() => handleDeleteReply(reply.id)}
+                                    disabled={busyReplyId === reply.id}
+                                    className="text-[10px] font-semibold text-destructive disabled:opacity-40"
+                                  >
+                                    {busyReplyId === reply.id ? 'Deleting…' : 'Yes, delete'}
+                                  </button>
+                                  <button
+                                    onClick={() => setConfirmDeleteReplyId(null)}
+                                    className="text-[10px] text-muted-foreground hover:text-foreground"
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
@@ -470,7 +733,7 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
           ) : feedback && feedback.length > 0 ? (
             <div className="divide-y divide-border/20">
               {feedback.map((item) => (
-                <CommentItem key={item.id} feedback={item} artworkId={artworkId} />
+                <CommentItem key={item.id} feedback={item} artworkId={artworkId} onChanged={refetch} />
               ))}
             </div>
           ) : (
@@ -514,12 +777,15 @@ const ArtworkFeedback = ({ artworkId, isOpen, onClose }: ArtworkFeedbackProps) =
                   <input
                     ref={inputRef}
                     value={newComment}
+                    maxLength={MAX_COMMENT_LENGTH}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Add a comment..."
+                    aria-label="Add a comment"
                     className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                     onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                     disabled={isAddingFeedback}
                   />
+                  <CharCounter value={newComment} className="mr-2" />
                   <button
                     onClick={() => setShowEmojiPicker(prev => !prev)}
                     className="text-muted-foreground hover:text-foreground mr-2 transition-colors"

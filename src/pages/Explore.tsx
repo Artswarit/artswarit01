@@ -84,6 +84,13 @@ const Explore = () => {
     return categoryMap[slug] || decodeURIComponent(slug || '');
   })();
 
+  // `?tag=` deep links (e.g. from an artwork's tag chips). Comma-separated so
+  // several tags can be combined in one link.
+  const initialTags = (() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('tag') || '';
+  })();
+
   const toSlug = (name: string) =>
     encodeURIComponent(
       (name || '')
@@ -399,6 +406,7 @@ const Explore = () => {
             resultsCount={filteredArtworks?.length || 0}
             initialCategory={initialCategory}
             initialSearch={initialSearch}
+            initialTags={initialTags}
           />
         </div>
 

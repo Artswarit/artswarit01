@@ -23,9 +23,11 @@ interface TopFiltersProps {
   resultsCount: number;
   initialCategory?: string;
   initialSearch?: string;
+  /** Comma-separated tags, e.g. seeded from an `?tag=` deep link. */
+  initialTags?: string;
 }
 
-const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount, initialCategory, initialSearch }: TopFiltersProps) => {
+const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount, initialCategory, initialSearch, initialTags }: TopFiltersProps) => {
   const { format, userCurrencySymbol } = useCurrencyFormat();
   
   const [filters, setFilters] = useState<FilterState>({
@@ -36,11 +38,13 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
   });
 
   const [advancedFilters, setAdvancedFilters] = useState({
-    tags: '',
+    tags: initialTags || '',
     location: ''
   });
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  // Open the advanced panel when arriving on a tag deep link, so the active
+  // tag filter is visible rather than silently applied.
+  const [showAdvanced, setShowAdvanced] = useState(!!initialTags);
 
   const categories = [
     "Digital Art", "Music", "Hip-Hop", "Abstract Art", "Landscape", 
@@ -96,17 +100,24 @@ const TopFilters = ({ onFiltersChange, onViewModeChange, viewMode, resultsCount,
       search: initialSearch || '',
       category: initialCategory || prev.category
     }));
-    onFiltersChange({ 
+    // A tag deep link replaces whatever was typed in the tags box; when no
+    // tag is in the URL, keep the user's current entry.
+    const nextTags = initialTags !== undefined ? initialTags : advancedFilters.tags;
+    if (initialTags !== undefined && initialTags !== advancedFilters.tags) {
+      setAdvancedFilters(prev => ({ ...prev, tags: initialTags }));
+      if (initialTags) setShowAdvanced(true);
+    }
+    onFiltersChange({
       search: initialSearch || '',
       category: initialCategory || 'all',
       artworkType: filters.artworkType,
       sortBy: filters.sortBy,
-      tags: advancedFilters.tags.split(',').map(t => t.trim()).filter(Boolean),
+      tags: nextTags.split(',').map(t => t.trim()).filter(Boolean),
       location: advancedFilters.location,
       priceRange: 'all'
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialSearch, initialCategory]);
+  }, [initialSearch, initialCategory, initialTags]);
 
   const resetFilters = () => {
     const resetF = {

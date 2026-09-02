@@ -46,12 +46,21 @@ export const useArtworks = () => {
         throw error;
       }
 
-      // Fetch profile separately if needed, since the relationship isn't detected by PostgREST
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('full_name, email')
-        .eq('id', userId)
-        .maybeSingle();
+      // Fetch profile separately if needed, since the relationship isn't detected by PostgREST.
+      // Own email comes from the self-scoped RPC once it exists; the direct
+      // select is the pre-migration fallback (see
+      // 20260902090000_close_email_and_media_exposure.sql), which revokes the
+      // `email` column from `authenticated`.
+      const profileData = await (async () => {
+        const rpc = await (supabase as any).rpc('get_my_profile');
+        if (!rpc.error && Array.isArray(rpc.data) && rpc.data.length > 0) return rpc.data[0];
+        const { data } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', userId)
+          .maybeSingle();
+        return data;
+      })();
 
       // Transform data to match component expectations
       const transformedArtworks = (data || []).map(artwork => ({

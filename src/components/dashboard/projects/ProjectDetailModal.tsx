@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { FileText, MessageSquare, CheckCircle, Upload, Calendar, User, Clock, Plus, Trash2, Loader2, Download, GitBranch, DollarSign, SendHorizontal, Lock, RotateCcw, AlertTriangle } from "lucide-react";
+import { FileText, MessageSquare, CheckCircle, Upload, Calendar, User, Clock, Plus, Trash2, Loader2, Download, GitBranch, DollarSign, SendHorizontal, Lock, RotateCcw, AlertTriangle, Image as ImageIcon, Film, Music, FileArchive } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -47,6 +47,9 @@ interface Milestone {
   due_date: string | null;
   status: string;
   sort_order: number;
+  amount?: number | null;
+  amount_usd?: number | null;
+  exchange_rate?: number | null;
 }
 interface ProjectFile {
   id: string;
@@ -464,6 +467,14 @@ const ProjectDetailModal = ({
       e.target.value = '';
     }
   };
+  const getFileTypeIcon = (mimeType: string | null) => {
+    if (!mimeType) return FileText;
+    if (mimeType.startsWith('image/')) return ImageIcon;
+    if (mimeType.startsWith('video/')) return Film;
+    if (mimeType.startsWith('audio/')) return Music;
+    if (mimeType.includes('zip') || mimeType.includes('compressed')) return FileArchive;
+    return FileText;
+  };
   const handleDownloadFile = async (file: ProjectFile) => {
     try {
       const {
@@ -844,11 +855,24 @@ const ProjectDetailModal = ({
                                   {idx + 1}
                                 </div>
                                 <div className="space-y-1.5 sm:space-y-2 pt-0.5">
-                                  <h5 className="font-bold text-base sm:text-xl leading-tight tracking-tight group-hover:text-primary transition-colors">{milestone.title}</h5>
+                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                    <h5 className="font-bold text-base sm:text-xl leading-tight tracking-tight group-hover:text-primary transition-colors">{milestone.title}</h5>
+                                    {(milestone.amount_usd || milestone.amount) != null && (
+                                      <Badge variant="outline" className="rounded-full border-primary/20 bg-primary/5 text-primary font-bold text-[11px] px-3 py-0.5">
+                                        {formatCurrency(milestone.amount_usd ?? milestone.amount ?? 0, milestone.amount_usd ? 'USD' : (project.currency || 'USD'), milestone.exchange_rate ?? project.exchange_rate)}
+                                      </Badge>
+                                    )}
+                                  </div>
                                   {milestone.description && (
                                     <p className="text-sm text-muted-foreground/90 leading-relaxed max-w-2xl">{milestone.description}</p>
                                   )}
-                                  
+                                  {milestone.due_date && (
+                                    <div className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground/70">
+                                      <Calendar className="h-3 w-3" />
+                                      <span>Due {formatDate(new Date(milestone.due_date), 'MMM d, yyyy')}</span>
+                                    </div>
+                                  )}
+
                                   <div className="flex items-center gap-2">
                                     {milestone.status === 'COMPLETED' ? (
                                       <div className="flex items-center gap-2 py-1.5 px-4 rounded-full bg-emerald-500/10 text-emerald-600 text-[11px] font-bold uppercase tracking-wider">
@@ -1027,24 +1051,33 @@ const ProjectDetailModal = ({
                           <p className="text-muted-foreground font-medium">No files have been shared yet.</p>
                         </div>
                       ) : (
-                        files.map(file => (
-                          <div key={file.id} className="group p-5 rounded-[2rem] border bg-white dark:bg-card/40 border-border/50 hover:border-primary/30 hover:shadow-xl transition-all duration-500 flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-                              <FileText className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
-                            </div>
-                            <div className="flex-1 min-w-0 pt-1">
-                              <p className="font-bold text-sm truncate mb-1">{file.original_name}</p>
-                              <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground/60">
-                                {file.size_bytes ? `${(file.size_bytes / 1024).toFixed(1)} KB` : '?? KB'} • {formatDate(new Date(file.created_at), 'MMM d')}
-                              </p>
-                              <div className="flex gap-2 mt-4">
-                                <Button variant="secondary" size="sm" className="h-10 rounded-xl px-4 font-bold text-[10px] uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-all" onClick={() => handleDownloadFile(file)}>
-                                  Download
-                                </Button>
+                        files.map(file => {
+                          const FileIcon = getFileTypeIcon(file.mime_type);
+                          const sizeLabel = file.size_bytes
+                            ? file.size_bytes >= 1024 * 1024
+                              ? `${(file.size_bytes / 1024 / 1024).toFixed(1)} MB`
+                              : `${(file.size_bytes / 1024).toFixed(1)} KB`
+                            : '?? KB';
+                          return (
+                            <div key={file.id} className="group p-5 rounded-[2rem] border bg-white dark:bg-card/40 border-border/50 hover:border-primary/30 hover:shadow-xl transition-all duration-500 flex items-start gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center group-hover:bg-primary/5 transition-colors shrink-0">
+                                <FileIcon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                              </div>
+                              <div className="flex-1 min-w-0 pt-1">
+                                <p className="font-bold text-sm truncate mb-1">{file.original_name}</p>
+                                <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground/60">
+                                  {sizeLabel} • {formatDate(new Date(file.created_at), 'MMM d')}
+                                </p>
+                                <div className="flex gap-2 mt-4">
+                                  <Button variant="secondary" size="sm" className="h-10 rounded-xl px-4 font-bold text-[10px] uppercase tracking-wider hover:bg-primary hover:text-primary-foreground transition-all" onClick={() => handleDownloadFile(file)}>
+                                    <Download className="h-3.5 w-3.5 mr-1.5" />
+                                    Download
+                                  </Button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </div>
                   </div>
