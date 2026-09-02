@@ -332,11 +332,25 @@ export function CreateProjectForm({ artistId, initialTitle, initialBudget, onSuc
         milestone_count: milestones.length,
       });
 
-      // Do NOT notify artist yet; wait for explicit client confirmation
-      toast.success('Project created. Assign an artist and click Confirm to send.');
-      
+      if (artistId) {
+        // The request was addressed to a specific artist, so notify them right away.
+        const { error: notifError } = await supabase.from('notifications').insert({
+          user_id: artistId,
+          type: 'project_request',
+          title: 'New Project Request',
+          message: `You received a new project request: "${title.trim()}"`,
+          metadata: { project_id: project.id, client_id: user!.id },
+        });
+        if (notifError) console.error('Failed to notify artist', notifError);
+        toast.success('Request sent! The artist will review it shortly.');
+      } else {
+        // Do NOT notify artist yet; wait for explicit client confirmation
+        toast.success('Project created. Assign an artist and click Confirm to send.');
+      }
+
       // Clear draft
       localStorage.removeItem('create_project_draft');
+
       
       onSuccess?.(project.id);
     } catch (error: any) {
