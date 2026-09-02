@@ -33,9 +33,14 @@ interface ReferenceFile {
 
 interface CreateProjectFormProps {
   artistId?: string;
+  /** Pre-fills the title when the request starts from a specific artist service. */
+  initialTitle?: string;
+  /** Pre-fills the budget (in the viewer's currency) from a service's starting price. */
+  initialBudget?: number;
   onSuccess?: (projectId: string) => void;
   onCancel?: () => void;
 }
+
 
 type ProjectMilestoneStatus = 'WAITING_FUNDS' | 'LOCKED';
 
