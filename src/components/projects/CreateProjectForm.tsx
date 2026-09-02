@@ -114,6 +114,7 @@ export function CreateProjectForm({ artistId, initialTitle, initialBudget, onSuc
 
   // Save draft to localStorage on change
   useEffect(() => {
+    if (isPrefilled) return;
     const draft = {
       title,
       description,
@@ -122,7 +123,8 @@ export function CreateProjectForm({ artistId, initialTitle, initialBudget, onSuc
       milestones
     };
     localStorage.setItem('create_project_draft', JSON.stringify(draft));
-  }, [title, description, budget, deadline, milestones]);
+  }, [isPrefilled, title, description, budget, deadline, milestones]);
+
 
   const totalMilestoneAmount = milestones.reduce((sum, m) => sum + (m.amount || 0), 0);
   const budgetMatches = Math.abs(totalMilestoneAmount - budget) < 0.01;
