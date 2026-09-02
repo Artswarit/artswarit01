@@ -59,16 +59,20 @@ interface ProjectMilestoneInsert {
   created_by: string;
 }
 
-export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProjectFormProps) {
+export function CreateProjectForm({ artistId, initialTitle, initialBudget, onSuccess, onCancel }: CreateProjectFormProps) {
   const { user } = useAuth();
   const { userCurrency, userCurrencySymbol, exchangeRates } = useCurrency();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // A request that starts from a specific artist service arrives pre-filled, so the
+  // generic "create project" draft must not overwrite it.
+  const isPrefilled = Boolean(initialTitle || initialBudget);
+
   // Project fields
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialTitle ?? '');
   const [description, setDescription] = useState('');
-  const [budget, setBudget] = useState<number>(0);
+  const [budget, setBudget] = useState<number>(initialBudget ?? 0);
   const [deadline, setDeadline] = useState('');
   const [referenceFiles, setReferenceFiles] = useState<ReferenceFile[]>([]);
   // Per-file byte-level upload progress (key = file index, value = 0–100).
@@ -76,11 +80,19 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
 
   // Milestones
   const [milestones, setMilestones] = useState<MilestoneInput[]>([
-    { id: crypto.randomUUID(), title: '', description: '', deliverables: '', amount: 0, due_date: '' }
+    {
+      id: crypto.randomUUID(),
+      title: initialTitle ?? '',
+      description: '',
+      deliverables: '',
+      amount: initialBudget ?? 0,
+      due_date: '',
+    }
   ]);
 
   // Load draft from localStorage on mount
   useEffect(() => {
+    if (isPrefilled) return;
     try {
       const draft = localStorage.getItem('create_project_draft');
       if (draft) {
@@ -96,7 +108,9 @@ export function CreateProjectForm({ artistId, onSuccess, onCancel }: CreateProje
     } catch (e) {
       console.error('Failed to load project draft', e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   // Save draft to localStorage on change
   useEffect(() => {
