@@ -719,18 +719,61 @@ const ArtistTabs: React.FC<ArtistTabsProps> = ({
                     <hr className="my-4" />
 
                     <div className="mb-5">
-                      <h4 className="font-semibold text-lg mb-3 text-purple-900">Client Reviews</h4>
-                      {reviewCount === 0 ? <div className="bg-gray-50 rounded-lg px-5 py-4 border border-gray-200 text-center text-gray-500">
+                      <h4 className="font-semibold text-lg mb-3 text-foreground">Client Reviews</h4>
+
+                      {/* Rating summary + distribution */}
+                      {reviewCount > 0 && (
+                        <div className="mb-5 flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/70 p-4 sm:flex-row sm:items-center sm:gap-6">
+                          <div className="flex shrink-0 flex-col items-center justify-center sm:w-28">
+                            <span className="text-3xl font-semibold tracking-tight text-foreground">{avgRating.toFixed(1)}</span>
+                            <div className="mt-1 flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star
+                                  key={s}
+                                  size={13}
+                                  className={cn(
+                                    s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"
+                                  )}
+                                />
+                              ))}
+                            </div>
+                            <span className="mt-1 text-[11px] text-muted-foreground">
+                              {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+                            </span>
+                          </div>
+                          <div className="flex-1 space-y-1.5">
+                            {[5, 4, 3, 2, 1].map((star) => {
+                              const count = reviews.filter((r) => Math.round(r.rating) === star).length;
+                              const pct = reviewCount ? (count / reviewCount) * 100 : 0;
+                              return (
+                                <div key={star} className="flex items-center gap-2">
+                                  <span className="w-3 text-[11px] tabular-nums text-muted-foreground">{star}</span>
+                                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                                    <div
+                                      className="h-full rounded-full bg-amber-400 transition-all duration-500"
+                                      style={{ width: `${pct}%` }}
+                                    />
+                                  </div>
+                                  <span className="w-6 text-right text-[11px] tabular-nums text-muted-foreground">{count}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {reviewCount === 0 ? <div className="rounded-xl border border-border bg-muted/30 px-5 py-4 text-center text-sm text-muted-foreground">
                           No reviews yet. Be the first to work with this artist!
                         </div> : <div className="space-y-4">
                           {reviews.map(rev => {
                     const isHighlighted = searchParams.get("review") === rev.id;
                     return <div key={rev.id} id={`review-${rev.id}`} className={isHighlighted ? "scroll-mt-24 rounded-lg ring-2 ring-primary/30" : "scroll-mt-24"}>
-                                <ReviewCard reviewId={rev.id} artistId={artistId} clientId={rev.client_id} clientName={rev.clientName} clientAvatar={rev.clientAvatar} rating={rev.rating} reviewText={rev.review_text} createdAt={rev.created_at} artistResponse={rev.artist_response} artistResponseAt={rev.artist_response_at} isArtistOwner={isArtistOwner} currentUserId={currentUserId} onResponseAdded={onRefreshReviews} onReviewUpdated={onRefreshReviews} />
+                                <ReviewCard reviewId={rev.id} artistId={artistId} clientId={rev.client_id} clientName={rev.clientName} clientAvatar={rev.clientAvatar} rating={rev.rating} reviewText={rev.review_text} createdAt={rev.created_at} artistResponse={rev.artist_response} artistResponseAt={rev.artist_response_at} isArtistOwner={isArtistOwner} currentUserId={currentUserId} onResponseAdded={refreshReviews} onReviewUpdated={refreshReviews} />
                               </div>;
                   })}
                         </div>}
                     </div>
+
                   </>;
           })()}
             </div>}
