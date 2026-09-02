@@ -580,238 +580,216 @@ const ProjectDetailModal = ({
             <DialogDescription>Project details and collaboration workspace</DialogDescription>
           </DialogHeader>
           <ScrollArea className="flex-1 min-h-0 h-full" viewportRef={modalViewportRef}>
-            <div className="flex flex-col min-h-full max-w-7xl mx-auto w-full relative border-x border-border/5">
-            {/* Ultra Modern Header Section */}
-            <div className="relative overflow-hidden pt-8 sm:pt-12 pb-7 sm:pb-9 px-4 sm:px-10 border-b bg-gradient-to-br from-primary/[0.07] via-background to-primary/[0.03]">
-              {/* Abstract Background Shapes */}
-              <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-              <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
-              
-              <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-8">
-                <div className="space-y-3 flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                      <GitBranch className="h-5 w-5" />
-                    </div>
-                    <Badge variant="outline" className="px-3 py-1 rounded-full bg-background/50 backdrop-blur-md border-primary/20 text-primary font-bold tracking-wide uppercase text-[10px]">
-                      Project ID: #{project.id.slice(0, 8)}
-                    </Badge>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Refresh project"
-                      className="h-8 w-8 rounded-full hover:bg-primary/10 text-primary/60 hover:text-primary transition-all ml-auto"
-                      onClick={() => {
-                        toast.info('Syncing latest updates...');
-                        fetchProjectData(undefined, false);
-                      }}
-                    >
-                      <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} aria-hidden="true" />
-                    </Button>
+            {/* One continuous stacked card on a page ground, per the design:
+                header → stat strip → overview → tabs. Sections share edges, so
+                each declares its own borders rather than sitting in a grid of
+                separate rounded cards. */}
+            {/* No `w-full` here: index.css carries a global
+                `.w-full { max-width: 100% !important }` that would override
+                max-w-2xl and stretch this to the viewport. A block div is
+                full-width by default anyway. */}
+            <div className="mx-auto flex min-h-full max-w-2xl flex-col px-3 py-4 sm:px-4 sm:py-8">
+            {/* Header */}
+            <div className="rounded-t-2xl sm:rounded-t-3xl border border-b-0 border-border/60 bg-gradient-to-br from-primary/[0.08] via-primary/[0.03] to-background px-5 pt-5 pb-5 sm:px-7 sm:pt-6">
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <GitBranch className="h-[15px] w-[15px]" />
                   </div>
-                  
-                    <div className="space-y-1 sm:space-y-2">
-                      <DialogTitle className="text-xl sm:text-3xl font-bold tracking-tight leading-tight sm:leading-[1.1] pb-1 bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-foreground/60">
-                        {project.title}
-                      </DialogTitle>
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <Badge 
-                        className={cn(
-                          "px-4 py-1.5 rounded-full font-bold text-[11px] uppercase tracking-wider shadow-lg shadow-primary/5 transition-all duration-500",
-                          project.status === 'accepted' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 
-                          project.status === 'pending' ? 'bg-amber-500 text-white hover:bg-amber-600' : 
-                          'bg-primary text-primary-foreground hover:bg-primary/90'
-                        )}
-                      >
-                        {project.status}
-                      </Badge>
-                      <Separator orientation="vertical" className="h-4 bg-border/40" />
-                      <Link 
-                        to={user?.id === project.artist_id ? `/profile/${project.client_id}` : `/artist/${project.artist_id}`} 
-                        className="flex items-center gap-2 group cursor-pointer"
-                      >
-                        <Avatar className="h-8 w-8 ring-2 ring-background ring-offset-2 ring-offset-primary/10 transition-transform group-hover:scale-110">
-                          <AvatarImage src={user?.id === project.artist_id ? project.client_avatar : project.artist_avatar} />
-                          <AvatarFallback className="bg-primary/5 text-primary text-xs font-bold">
-                            {(user?.id === project.artist_id ? project.client_name : project.artist_name)?.charAt(0) || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-bold text-primary group-hover:text-foreground transition-colors">
-                          {user?.id === project.artist_id ? project.client_name : project.artist_name}
-                        </span>
-                      </Link>
-                    </div>
-                  </div>
+                  <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Project ID: #{project.id.slice(0, 8)}
+                  </span>
                 </div>
-
-                <div className="flex flex-col items-start sm:items-end gap-3">
-                  <div className="flex -space-x-3">
-                    <Link to={`/artist/${project.artist_id}`}>
-                      <Avatar className="h-10 w-10 ring-4 ring-background hover:scale-105 transition-transform">
+                <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                  <div className="hidden -space-x-2 sm:flex">
+                    <Link to={`/artist/${project.artist_id}`} aria-label="View artist profile">
+                      <Avatar className="h-[30px] w-[30px] ring-2 ring-background transition-transform hover:scale-105">
                         <AvatarImage src={project.artist_avatar} />
-                        <AvatarFallback className="bg-primary/10 text-primary font-bold">A</AvatarFallback>
+                        <AvatarFallback className="bg-primary/10 text-[11px] font-semibold text-primary">A</AvatarFallback>
                       </Avatar>
                     </Link>
-                    <Link to={`/profile/${project.client_id}`}>
-                      <Avatar className="h-10 w-10 ring-4 ring-background hover:scale-105 transition-transform">
+                    <Link to={`/profile/${project.client_id}`} aria-label="View client profile">
+                      <Avatar className="h-[30px] w-[30px] ring-2 ring-background transition-transform hover:scale-105">
                         <AvatarImage src={project.client_avatar} />
-                        <AvatarFallback className="bg-amber-500/10 text-amber-600 font-bold">C</AvatarFallback>
+                        <AvatarFallback className="bg-warning-muted text-[11px] font-semibold text-warning">C</AvatarFallback>
                       </Avatar>
                     </Link>
                   </div>
-                  <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/60 bg-muted/20 px-3 py-1 rounded-full">
+                  <span className="hidden text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 lg:inline">
                     Collaborative Workspace
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Refresh project"
+                    className="h-8 w-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    onClick={() => {
+                      toast.info('Syncing latest updates...');
+                      fetchProjectData(undefined, false);
+                    }}
+                  >
+                    <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} aria-hidden="true" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <DialogTitle className="text-xl font-bold leading-tight tracking-tight text-foreground sm:text-[26px]">
+                  {project.title}
+                </DialogTitle>
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                    project.status === 'accepted' ? 'bg-success-muted text-success' :
+                    project.status === 'pending' ? 'bg-warning-muted text-warning' :
+                    'bg-primary/10 text-primary'
+                  )}
+                >
+                  {project.status}
+                </span>
+              </div>
+              <Link
+                to={user?.id === project.artist_id ? `/profile/${project.client_id}` : `/artist/${project.artist_id}`}
+                className="group inline-flex items-center gap-2"
+              >
+                <Avatar className="h-5 w-5">
+                  <AvatarImage src={user?.id === project.artist_id ? project.client_avatar : project.artist_avatar} />
+                  <AvatarFallback className="bg-primary/5 text-[9px] font-semibold text-primary">
+                    {(user?.id === project.artist_id ? project.client_name : project.artist_name)?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-[13px] font-medium text-primary group-hover:underline">
+                  {user?.id === project.artist_id ? project.client_name : project.artist_name}
+                </span>
+              </Link>
+            </div>
+
+            {/* Stat strip. Three panes sharing hairline dividers rather than
+                separate floating cards — `gap-px` over a border-coloured
+                background paints the dividers. Stacks on the narrowest
+                screens so the values never truncate. */}
+            <div className="grid grid-cols-1 gap-px border-x border-border/60 bg-border/60 md:grid-cols-3">
+              <div className="bg-card px-5 py-4 sm:px-6 sm:py-5">
+                <div className="mb-3 flex items-center gap-2">
+                  <div className="grid h-6 w-6 place-items-center rounded-lg bg-primary/10 text-primary">
+                    <DollarSign className="h-3 w-3" />
                   </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">Budget</span>
+                </div>
+                <div className="truncate text-lg font-bold tracking-tight text-foreground sm:text-[22px]">
+                  {project.amount_usd || project.budget
+                    ? formatCurrency(project.amount_usd || project.budget || 0, project.amount_usd ? 'USD' : (project.currency || 'USD'), project.exchange_rate)
+                    : 'Not set'}
+                </div>
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-success" />
+                  <span className="text-[11px] font-medium text-muted-foreground/70">Escrow Protected</span>
+                </div>
+              </div>
+
+              <div className="bg-card px-5 py-4 sm:px-6 sm:py-5">
+                <div className="mb-3 flex items-center gap-2">
+                  <div className="grid h-6 w-6 place-items-center rounded-lg bg-warning-muted text-warning">
+                    <Calendar className="h-3 w-3" />
+                  </div>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">Deadline</span>
+                </div>
+                <div className="truncate text-lg font-bold tracking-tight text-foreground sm:text-[22px]">
+                  {project.deadline ? formatDate(new Date(project.deadline), 'MMM dd') : 'Flexible'}
+                </div>
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <Clock className="h-[11px] w-[11px] shrink-0 text-warning" aria-hidden="true" />
+                  <span className="truncate text-[11px] font-medium text-muted-foreground/70">
+                    {project.deadline ? (() => {
+                      const daysLeft = Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                      if (daysLeft < 0) return `${Math.abs(daysLeft)}d overdue`;
+                      if (daysLeft === 0) return 'Due today';
+                      return `${daysLeft}d left`;
+                    })() : 'No deadline set'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-card px-5 py-4 sm:px-6 sm:py-5">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <div className="grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-success-muted text-success">
+                      <CheckCircle className="h-3 w-3" />
+                    </div>
+                    <span className="truncate text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">Progress</span>
+                  </div>
+                  <span className="shrink-0 text-[15px] font-bold text-success tabular-nums">{progress}%</span>
+                </div>
+                <div className="h-1 overflow-hidden rounded-full bg-foreground/[0.07]">
+                  <div
+                    className="h-full rounded-full bg-success transition-all duration-700 ease-apple"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <div className="mt-2 text-[11px] font-medium text-muted-foreground/70">
+                  {completedMilestones} of {milestones.length} milestones done
                 </div>
               </div>
             </div>
 
-            <div className="px-4 sm:px-10 py-4 sm:py-6 grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-              <div className="group relative p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 overflow-hidden">
-                <div className="relative z-10 flex flex-col gap-2 sm:gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-primary/10 text-primary">
-                      <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </div>
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60">Budget</p>
-                  </div>
-                  <h3 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
-                    {project.amount_usd || project.budget ?
-                      formatCurrency(project.amount_usd || project.budget || 0, project.amount_usd ? 'USD' : (project.currency || 'USD'), project.exchange_rate) :
-                      'Not set'
-                    }
-                  </h3>
-                  <div className="flex items-center gap-1.5">
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Escrow Protected</span>
-                  </div>
-                </div>
+            {/* Project overview — centred rule label, then a thin accent bar
+                beside the copy, per the design. */}
+            <div className="border-x border-t border-border/60 bg-card px-5 py-5 sm:px-7 sm:py-6">
+              <div className="mb-4 flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+                <div className="h-px flex-1 bg-border/60" />
+                Project Overview
+                <div className="h-px flex-1 bg-border/60" />
               </div>
-
-              <div className="group relative p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-amber-500/30 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-500 overflow-hidden">
-                <div className="relative z-10 flex flex-col gap-2 sm:gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 sm:p-2.5 rounded-xl bg-amber-500/10 text-amber-600">
-                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-                    </div>
-                    <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60">Deadline</p>
-                  </div>
-                  <h3 className="text-lg sm:text-2xl font-bold tracking-tight text-foreground">
-                    {project.deadline ? formatDate(new Date(project.deadline), 'MMM dd') : 'Flexible'}
-                  </h3>
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-3 w-3 text-amber-500" aria-hidden="true" />
-                    <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
-                      {project.deadline ? (() => {
-                        const daysLeft = Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-                        if (daysLeft < 0) return `${Math.abs(daysLeft)}d Overdue`;
-                        if (daysLeft === 0) return 'Due Today';
-                        return `${daysLeft}d Left`;
-                      })() : 'No deadline'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-span-2 md:col-span-1 group relative p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] bg-white dark:bg-card/40 border border-border/50 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-500 overflow-hidden">
-                <div className="relative z-10 flex flex-col gap-2 sm:gap-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 sm:p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600">
-                        <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                      </div>
-                      <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground/60">Progress</p>
-                    </div>
-                    <span className="text-lg sm:text-xl font-bold text-emerald-600">{progress}%</span>
-                  </div>
-                  <div className="h-2.5 sm:h-3 bg-emerald-500/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_-3px_rgba(16,185,129,0.5)]"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <span className="text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">{completedMilestones} of {milestones.length} Milestones Done</span>
-                </div>
+              <div className="flex gap-3">
+                <div className="w-0.5 shrink-0 self-stretch rounded-full bg-primary/45" />
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                  {project.description || 'No description provided for this project. Use the chat tab to discuss requirements with your collaborator.'}
+                </p>
               </div>
             </div>
 
-            <div className="px-4 sm:px-10 pb-6 sm:pb-8 space-y-6 sm:space-y-8">
-              {/* Description Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-1 bg-primary/20 rounded-full" />
-                  <h4 className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground/60">Project Overview</h4>
-                </div>
-                <div className="group relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[3rem] bg-muted/10 border border-border/30 hover:bg-muted/20 transition-all duration-500">
-                  <div className="absolute top-8 left-0 w-1.5 h-12 bg-primary/40 rounded-r-full group-hover:h-24 transition-all duration-500" />
-                  <p className="text-base sm:text-lg leading-relaxed text-foreground/80 whitespace-pre-wrap font-medium pl-4">
-                    {project.description || 'No description provided for this project. Use the communication tab to discuss requirements with your collaborator.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Enhanced Sticky Navigation */}
-              <Tabs value={activeTab} onValueChange={scrollToTab} className="w-full">
-                <div className="sticky top-0 z-20 -mx-4 sm:-mx-10 px-3 sm:px-10 pt-3 sm:pt-5 pb-4 sm:pb-6 bg-background border-b border-border/40 mb-5 sm:mb-7">
-                  <div className="relative group/tabs">
-                    {/* Scroll Gradient Indicators */}
-                    <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent z-10 opacity-0 group-hover/tabs:opacity-100 transition-opacity pointer-events-none" />
-                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent z-10 opacity-0 group-hover/tabs:opacity-100 transition-opacity pointer-events-none" />
-                    
-                    <TabsList className="w-full h-auto min-h-[48px] sm:min-h-0 p-1 sm:p-1.5 bg-muted/50 rounded-3xl sm:rounded-[2rem] border border-border/40 flex items-stretch gap-1 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth shadow-inner">
-                    <TabsTrigger 
-                      value="workflow" 
-                      onClick={() => scrollToTab('workflow')}
-                      className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
+            {/* Tabs — compact segmented control closing the stacked card. */}
+              <Tabs value={activeTab} onValueChange={scrollToTab} className="w-full rounded-b-2xl border border-border/60 bg-card px-4 pb-6 pt-5 shadow-token-xs sm:rounded-b-3xl sm:px-6">
+                <TabsList className="flex h-auto w-full items-stretch gap-0.5 rounded-2xl border border-border/60 bg-card p-1.5 shadow-token-xs">
+                  {([
+                    { value: 'workflow', label: 'Workflow', Icon: GitBranch },
+                    { value: 'milestones', label: 'Timeline', Icon: CheckCircle },
+                    { value: 'files', label: 'Vault', Icon: FileText },
+                    { value: 'communication', label: 'Chat', Icon: MessageSquare },
+                  ] as const).map(({ value, label, Icon }) => (
+                    <TabsTrigger
+                      key={value}
+                      value={value}
+                      onClick={() => scrollToTab(value)}
+                      aria-label={label}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-[12.5px] font-medium tracking-[0.02em] text-muted-foreground transition-colors data-[state=active]:bg-primary/10 data-[state=active]:font-semibold data-[state=active]:text-primary data-[state=active]:shadow-none"
                     >
-                      <GitBranch className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
-                      <span className="font-bold tracking-tight uppercase text-[9px] sm:text-[11px]">Workflow</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="milestones" 
-                      onClick={() => scrollToTab('milestones')}
-                      className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
-                    >
-                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
-                      <span className="font-bold tracking-tight uppercase text-[9px] sm:text-[11px]">Timeline</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="files" 
-                      onClick={() => scrollToTab('files')}
-                      className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
-                    >
-                      <FileText className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
-                      <span className="font-bold tracking-tight uppercase text-[9px] sm:text-[11px]">Vault</span>
-                      <Badge variant="secondary" className="px-1 sm:px-2 py-0 h-3.5 sm:h-5 min-w-[14px] sm:min-w-[20px] text-[7px] sm:text-[10px] rounded-full bg-primary/10 text-primary border-none font-bold">
-                        {files.length}
-                      </Badge>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="communication" 
-                      onClick={() => scrollToTab('communication')}
-                      className="flex-1 min-w-[82px] sm:min-w-[128px] py-2 sm:py-3 px-2.5 sm:px-5 rounded-[1rem] sm:rounded-[1.4rem] data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-lg data-[state=active]:shadow-primary/10 transition-all duration-500 min-h-[40px] sm:min-h-[50px] gap-1.5 sm:gap-2.5 group"
-                    >
-                      <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5 group-data-[state=active]:scale-110 sm:group-data-[state=active]:scale-125 transition-transform duration-500" />
-                      <span className="font-bold tracking-tight uppercase text-[9px] sm:text-[11px] whitespace-nowrap">Chat</span>
-                      {rtMessages.length > 0 && (
-                        <div className="h-1 w-1 sm:h-2 sm:w-2 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+                      <Icon className="h-3.5 w-3.5 shrink-0" />
+                      {/* Labels drop below sm so four tabs never truncate to
+                          single letters; the icon plus aria-label carries it. */}
+                      <span className="hidden truncate sm:inline">{label}</span>
+                      {value === 'files' && (
+                        <span className="ml-0.5 shrink-0 rounded-full bg-foreground/[0.07] px-1.5 py-px text-[10px] font-bold tabular-nums text-muted-foreground">
+                          {files.length}
+                        </span>
+                      )}
+                      {value === 'communication' && rtMessages.length > 0 && (
+                        <span className="ml-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                       )}
                     </TabsTrigger>
-                  </TabsList>
-                </div>
-              </div>
+                  ))}
+                </TabsList>
 
-              <div className="space-y-8 sm:space-y-10 pb-10">
+              <div className="mt-6 pb-2">
                 <TabsContent id="project-tab-content-workflow" value="workflow" className="mt-0 outline-none focus-visible:ring-0">
-                  <div className="rounded-[2.5rem] border border-border/40 bg-white/40 dark:bg-card/20 p-4 sm:p-8 shadow-sm transition-all duration-500 hover:shadow-md">
-                    <div className="flex items-center gap-3 mb-8">
-                      <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
-                        <GitBranch className="h-6 w-6" />
+                  <div className="space-y-5">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                        <GitBranch className="h-[17px] w-[17px]" />
                       </div>
-                      <div>
-                        <h3 className="text-xl font-bold tracking-tight">Project Workflow</h3>
-                        <p className="text-sm text-muted-foreground">Track real-time progress and phase completion.</p>
+                      <div className="min-w-0">
+                        <h3 className="text-[15px] font-semibold tracking-tight">Project Workflow</h3>
+                        <p className="text-[13px] text-muted-foreground">Track real-time progress and phase completion.</p>
                       </div>
                     </div>
                     <MilestoneWorkflow projectId={projectId!} />
