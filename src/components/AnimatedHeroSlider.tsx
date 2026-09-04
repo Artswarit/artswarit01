@@ -152,7 +152,7 @@ const AnimatedHeroSlider = () => {
             {slides.map((s, index) => (
               <img
                 key={s.id}
-                src={getOptimizedImageUrl(s.imageUrl, ImagePresets.HERO)}
+                src={getOptimizedImageUrl(s.imageUrl, ImagePresets.PROFILE_COVER)}
                 alt={`${s.title} ${s.accent}`}
                 loading={index === 0 ? "eager" : "lazy"}
                 decoding={index === 0 ? "sync" : "async"}
@@ -173,7 +173,7 @@ const AnimatedHeroSlider = () => {
           {/* Floating detail tile */}
           <div className="absolute -right-4 -top-8 z-20 hidden h-40 w-40 overflow-hidden rounded-3xl border border-border/40 shadow-token-md transition-transform duration-500 ease-apple hover:-rotate-2 sm:block sm:-rotate-6">
             <img
-              src={getOptimizedImageUrl(slide.detailUrl, ImagePresets.CARD)}
+              src={getOptimizedImageUrl(slide.detailUrl, ImagePresets.THUMBNAIL)}
               alt=""
               aria-hidden
               loading="lazy"
