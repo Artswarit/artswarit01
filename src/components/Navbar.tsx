@@ -71,8 +71,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/80 dark:bg-card/80 backdrop-blur-xl border-b border-muted/20 fixed w-full top-0 z-50 transition-all duration-300 pt-[var(--safe-top)]">
-      <div className="w-full h-16 sm:h-20 px-3 sm:px-4 lg:px-6 flex items-center justify-between">
+    <nav className="fixed top-0 z-50 w-full pt-[var(--safe-top)] transition-all duration-300 ease-apple">
+      <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between gap-3 border border-border/40 bg-card/70 px-3 shadow-token-sm backdrop-blur-2xl sm:my-3 sm:h-16 sm:w-[calc(100%-2rem)] sm:rounded-full sm:px-4 lg:px-5">
+
         {/* Left: logo + desktop menu */}
         <div className="flex items-center gap-4 lg:gap-8">
           {/* Logo */}
@@ -81,35 +82,34 @@ const Navbar = () => {
             <img loading="lazy" decoding="async" 
               src="/icons/artswarit-logo-96.png" 
               alt="Artswarit Logo" 
-              className="h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16 object-contain relative transition-transform duration-500 group-hover:scale-110 group-active:scale-95" 
+              className="relative h-10 w-10 object-contain transition-transform duration-500 ease-apple group-hover:scale-105 group-active:scale-95 sm:h-11 sm:w-11" 
             />
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+          <div className="hidden lg:flex items-center gap-1">
             {menuItems.map(item => (
               <Link 
                 key={item.name} 
                 to={item.path} 
+                aria-current={location.pathname === item.path ? "page" : undefined}
                 className={cn(
-                  "relative flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 group",
+                  "group relative flex items-center gap-2 rounded-full px-4 py-2 text-[15px] font-medium tracking-[-0.01em] transition-all duration-300 ease-apple",
                   location.pathname === item.path 
-                    ? "text-primary bg-primary/5" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    ? "bg-primary/10 text-primary" 
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                 )}
               >
                 <span className={cn(
-                  "transition-transform duration-300 group-hover:scale-110",
+                  "transition-transform duration-300 ease-apple group-hover:scale-105",
                   location.pathname === item.path ? "text-primary" : "text-muted-foreground/70 group-hover:text-primary"
                 )}>
                   {item.icon}
                 </span>
                 <span>{item.name}</span>
-                {location.pathname === item.path && (
-                  <span className="absolute bottom-1.5 left-4 right-4 h-0.5 bg-primary rounded-full animate-in fade-in zoom-in duration-300" />
-                )}
               </Link>
             ))}
+
           </div>
         </div>
 
@@ -127,7 +127,7 @@ const Navbar = () => {
                   <Button variant="ghost" aria-label="Account menu" className="relative h-10 w-10 sm:h-12 sm:w-12 p-0 rounded-2xl hover:bg-primary/5 transition-all duration-300 group">
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl border-2 border-background shadow-sm transition-transform group-hover:scale-105 group-active:scale-95">
                       <AvatarImage src={getOptimizedImageUrl(profile?.avatar_url || user?.user_metadata?.avatar_url || '', ImagePresets.AVATAR)} />
-                      <AvatarFallback className="bg-primary/5 text-primary text-xs font-black">
+                      <AvatarFallback className="bg-primary/5 text-primary text-xs font-semibold">
                         {(profile?.full_name || user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -137,32 +137,33 @@ const Navbar = () => {
                 <DropdownMenuContent className="w-56 p-2 z-50 rounded-2xl border-muted/20 bg-white/95 dark:bg-card/95 backdrop-blur-xl shadow-2xl" align="end" sideOffset={8}>
                   <div className="px-3 py-2.5 mb-2">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground/50">Account</p>
-                    <p className="text-sm font-bold truncate mt-1">{user.email}</p>
+                    <p className="text-sm font-medium truncate mt-1">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator className="bg-muted/50" />
-                  <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 focus:text-primary cursor-pointer py-2.5 font-bold">
+                  <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 focus:text-primary cursor-pointer py-2.5 font-medium">
                     <Link to={isAdmin ? "/admin-dashboard" : (profile?.role || user?.user_metadata?.role) === "artist" ? "/artist-dashboard" : "/client-dashboard"}>
                       <Home className="mr-2 h-4 w-4" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-muted/50" />
-                  <DropdownMenuItem onClick={signOut} className="rounded-xl focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10 cursor-pointer py-2.5 font-bold text-red-500">
+                  <DropdownMenuItem onClick={signOut} className="rounded-xl focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10 cursor-pointer py-2.5 font-medium text-red-500">
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           ) : (
-            <div className="hidden sm:flex items-center gap-3">
-              <Button variant="ghost" asChild className="font-bold text-sm px-6 rounded-md text-blue-600 hover:bg-blue-50 transition-all">
-                <Link to="/login">Login</Link>
+            <div className="hidden sm:flex items-center gap-2">
+              <Button variant="ghost" asChild className="h-10 rounded-full px-5 text-[15px] font-medium text-foreground transition-all duration-300 ease-apple hover:bg-muted/60">
+                <Link to="/login">Log in</Link>
               </Button>
-              <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 rounded-md shadow-sm transition-all">
-                <Link to="/signup">Sign Up</Link>
+              <Button asChild className="h-10 rounded-full bg-brand-gradient px-5 text-[15px] font-semibold text-primary-foreground border-none shadow-token-brand transition-all duration-300 ease-apple active:scale-[0.97]">
+                <Link to="/signup">Sign up</Link>
               </Button>
             </div>
           )}
+
 
           {/* Mobile Menu Toggle */}
           <Button 
@@ -204,7 +205,7 @@ const Navbar = () => {
                   to={item.path} 
                   key={item.name} 
                   className={cn(
-                    "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 font-bold",
+                    "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 font-medium",
                     location.pathname === item.path 
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
                       : "text-foreground hover:bg-primary/5 hover:text-primary"
@@ -223,10 +224,10 @@ const Navbar = () => {
               
               {!user && (
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t border-muted/20 mt-4">
-                  <Button variant="outline" asChild className="rounded-xl h-11 font-bold border-muted/30 hover:bg-primary/5 hover:text-primary transition-all" onClick={closeMenu}>
+                  <Button variant="outline" asChild className="rounded-xl h-11 font-medium border-muted/30 hover:bg-primary/5 hover:text-primary transition-all" onClick={closeMenu}>
                     <Link to="/login" state={{ backgroundLocation: location }}>Login</Link>
                   </Button>
-                  <Button asChild className="rounded-xl h-11 font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all" onClick={closeMenu}>
+                  <Button asChild className="rounded-xl h-11 font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all" onClick={closeMenu}>
                     <Link to="/signup" state={{ backgroundLocation: location }}>Sign Up</Link>
                   </Button>
                 </div>

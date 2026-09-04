@@ -76,7 +76,7 @@ const Index = () => {
       {/* Featured Artists Section */}
       <section id="featured-artists" className="container mx-auto px-4 py-12 sm:py-16 sm:px-6 lg:px-8 mt-4 sm:mt-8">
         <div className="text-center mb-8 sm:mb-12">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4 text-blue-600">
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4 text-brand-gradient">
             Featured Artists
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -123,10 +123,10 @@ const Index = () => {
       <ArtworkCarousel />
 
       {/* Categories Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-r from-indigo-50 to-purple-50">
+      <section className="py-12 sm:py-16 bg-muted/40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-brand-gradient">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4 text-brand-gradient">
               Popular Categories
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -163,7 +163,7 @@ const Index = () => {
       {/* How It Works Section */}
       <section className="container mx-auto px-4 py-12 sm:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12">
-          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-brand-gradient">
+          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4 text-brand-gradient">
             How Artswarit Works
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -171,27 +171,27 @@ const Index = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-blue-100 dark:border-border shadow-sm hover:shadow-md transition-all">
+          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
-              <span className="font-bold text-lg sm:text-xl">1</span>
+              <span className="font-semibold text-lg sm:text-xl">1</span>
             </div>
             <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2">Create Your Profile</h3>
             <p className="text-sm sm:text-base text-muted-foreground">
               Sign up as an artist and build your custom profile showcasing your skills, portfolio, and services.
             </p>
           </div>
-          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-blue-100 dark:border-border shadow-sm hover:shadow-md transition-all">
+          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
-              <span className="font-bold text-lg sm:text-xl">2</span>
+              <span className="font-semibold text-lg sm:text-xl">2</span>
             </div>
             <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2">Upload Your Content</h3>
             <p className="text-sm sm:text-base text-muted-foreground">
               Share your work with the world. Upload audio, video, or text content to showcase your talent.
             </p>
           </div>
-          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-blue-100 dark:border-border shadow-sm hover:shadow-md transition-all">
+          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
-              <span className="font-bold text-lg sm:text-xl">3</span>
+              <span className="font-semibold text-lg sm:text-xl">3</span>
             </div>
             <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2">Connect & Earn</h3>
             <p className="text-sm sm:text-base text-muted-foreground">
@@ -207,10 +207,10 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-12 sm:py-16 bg-gradient-to-r from-indigo-50 to-purple-50">
+      <section className="py-12 sm:py-16 bg-muted/40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-brand-gradient">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4 text-brand-gradient">
               Success Stories
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -224,13 +224,13 @@ const Index = () => {
               ))
             ) : (
               reviews.map((testimonial) => (
-                <div key={testimonial.id} className="bg-card/60 backdrop-blur-sm p-4 sm:p-6 rounded-xl shadow-sm border border-blue-100 dark:border-border hover:shadow-md transition-all">
+                <div key={testimonial.id} className="bg-card/60 backdrop-blur-sm p-4 sm:p-6 rounded-xl shadow-sm border border-border/60 hover:shadow-md transition-all">
                   <div className="mb-4">
                     {[...Array(testimonial.rating || 5)].map((_, i) => (
                       <span key={i} className="text-yellow-400">★</span>
                     ))}
                   </div>
-                  <p className="text-gray-700 mb-4 text-sm sm:text-base leading-relaxed">"{testimonial.content}"</p>
+                  <p className="text-foreground/80 mb-4 text-sm sm:text-base leading-relaxed">"{testimonial.content}"</p>
                   <div>
                     <p className="font-heading font-semibold text-sm sm:text-base text-foreground">{testimonial.author}</p>
                     <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</p>
@@ -246,7 +246,7 @@ const Index = () => {
       <section className="bg-brand-gradient text-white py-12 sm:py-16 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="max-w-3xl mx-auto">
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4">
               Ready to Showcase Your Talent?
             </h2>
             <p className="text-lg sm:text-xl mb-8 text-white/90">
@@ -260,7 +260,7 @@ const Index = () => {
                   <User className="w-4 h-4 transition-transform group-hover:scale-110" />
                   <span>Join as Artist</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-purple-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
+                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
                 </Link>
               </Button>
 
@@ -269,7 +269,7 @@ const Index = () => {
                   <Briefcase className="w-4 h-4 transition-transform group-hover:scale-110" />
                   <span>Join as Client</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-purple-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
+                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
                 </Link>
               </Button>
             </div>
