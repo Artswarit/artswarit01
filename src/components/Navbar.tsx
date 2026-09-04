@@ -127,7 +127,7 @@ const Navbar = () => {
                   <Button variant="ghost" aria-label="Account menu" className="relative h-10 w-10 sm:h-12 sm:w-12 p-0 rounded-2xl hover:bg-primary/5 transition-all duration-300 group">
                     <Avatar className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl border-2 border-background shadow-sm transition-transform group-hover:scale-105 group-active:scale-95">
                       <AvatarImage src={getOptimizedImageUrl(profile?.avatar_url || user?.user_metadata?.avatar_url || '', ImagePresets.AVATAR)} />
-                      <AvatarFallback className="bg-primary/5 text-primary text-xs font-black">
+                      <AvatarFallback className="bg-primary/5 text-primary text-xs font-semibold">
                         {(profile?.full_name || user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -137,17 +137,17 @@ const Navbar = () => {
                 <DropdownMenuContent className="w-56 p-2 z-50 rounded-2xl border-muted/20 bg-white/95 dark:bg-card/95 backdrop-blur-xl shadow-2xl" align="end" sideOffset={8}>
                   <div className="px-3 py-2.5 mb-2">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground/50">Account</p>
-                    <p className="text-sm font-bold truncate mt-1">{user.email}</p>
+                    <p className="text-sm font-medium truncate mt-1">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator className="bg-muted/50" />
-                  <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 focus:text-primary cursor-pointer py-2.5 font-bold">
+                  <DropdownMenuItem asChild className="rounded-xl focus:bg-primary/5 focus:text-primary cursor-pointer py-2.5 font-medium">
                     <Link to={isAdmin ? "/admin-dashboard" : (profile?.role || user?.user_metadata?.role) === "artist" ? "/artist-dashboard" : "/client-dashboard"}>
                       <Home className="mr-2 h-4 w-4" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-muted/50" />
-                  <DropdownMenuItem onClick={signOut} className="rounded-xl focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10 cursor-pointer py-2.5 font-bold text-red-500">
+                  <DropdownMenuItem onClick={signOut} className="rounded-xl focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10 cursor-pointer py-2.5 font-medium text-red-500">
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -205,7 +205,7 @@ const Navbar = () => {
                   to={item.path} 
                   key={item.name} 
                   className={cn(
-                    "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 font-bold",
+                    "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 font-medium",
                     location.pathname === item.path 
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
                       : "text-foreground hover:bg-primary/5 hover:text-primary"
@@ -224,10 +224,10 @@ const Navbar = () => {
               
               {!user && (
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t border-muted/20 mt-4">
-                  <Button variant="outline" asChild className="rounded-xl h-11 font-bold border-muted/30 hover:bg-primary/5 hover:text-primary transition-all" onClick={closeMenu}>
+                  <Button variant="outline" asChild className="rounded-xl h-11 font-medium border-muted/30 hover:bg-primary/5 hover:text-primary transition-all" onClick={closeMenu}>
                     <Link to="/login" state={{ backgroundLocation: location }}>Login</Link>
                   </Button>
-                  <Button asChild className="rounded-xl h-11 font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all" onClick={closeMenu}>
+                  <Button asChild className="rounded-xl h-11 font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 transition-all" onClick={closeMenu}>
                     <Link to="/signup" state={{ backgroundLocation: location }}>Sign Up</Link>
                   </Button>
                 </div>
