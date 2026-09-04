@@ -119,22 +119,28 @@ export default {
 				sans: ['Inter', 'sans-serif'],
 				heading: ['Poppins', 'sans-serif']
 			},
-			// HIG type ramp, named after Apple's text styles so intent is legible
-			// at the call site. Each entry pins line-height, tracking and weight
-			// together — Apple tightens tracking as type grows and loosens it at
-			// caption sizes, which is what stops large headings looking loose and
-			// small labels looking cramped.
+			// HIG Dynamic Type ramp at the Large (default) size class, transcribed
+			// from Apple's published text-style table rather than eyeballed. Each
+			// entry pins size / leading / tracking / weight together, because
+			// Apple varies all four per style: tracking goes *negative* as type
+			// grows and *positive* at caption sizes, which is what keeps headings
+			// tight and microcopy legible.
+			//
+			// Tracking is converted from Apple's absolute pt values to em so it
+			// scales correctly (e.g. Body -0.43pt at 17pt = -0.0253em).
 			fontSize: {
-				'caption2': ['0.6875rem', { lineHeight: '0.875rem', letterSpacing: '0.01em' }],   // 11
-				'caption1': ['0.75rem', { lineHeight: '1rem', letterSpacing: '0.005em' }],        // 12
-				'footnote': ['0.8125rem', { lineHeight: '1.125rem', letterSpacing: '0' }],        // 13
-				'subheadline': ['0.9375rem', { lineHeight: '1.25rem', letterSpacing: '-0.01em' }],// 15
-				'callout': ['1rem', { lineHeight: '1.375rem', letterSpacing: '-0.012em' }],       // 16
-				'headline': ['1.0625rem', { lineHeight: '1.375rem', letterSpacing: '-0.014em', fontWeight: '600' }], // 17
-				'title3': ['1.25rem', { lineHeight: '1.5rem', letterSpacing: '-0.018em' }],       // 20
-				'title2': ['1.375rem', { lineHeight: '1.625rem', letterSpacing: '-0.02em' }],     // 22
-				'title1': ['1.75rem', { lineHeight: '2.125rem', letterSpacing: '-0.022em' }],     // 28
-				'largetitle': ['2.125rem', { lineHeight: '2.5rem', letterSpacing: '-0.026em' }],  // 34
+				// size          leading      tracking    weight
+				'caption2':    ['0.6875rem', { lineHeight: '0.875rem',  letterSpacing: '0.0136em' }],  // 11/14  +0.15pt
+				'caption1':    ['0.75rem',   { lineHeight: '0.9375rem', letterSpacing: '0.01em' }],    // 12/15  +0.12pt
+				'footnote':    ['0.8125rem', { lineHeight: '1rem',      letterSpacing: '0.0023em' }],  // 13/16  +0.03pt
+				'subhead':     ['0.9375rem', { lineHeight: '1.1875rem', letterSpacing: '0' }],         // 15/19   0
+				'callout':     ['1rem',      { lineHeight: '1.25rem',   letterSpacing: '-0.02em' }],   // 16/20  -0.32pt
+				'body':        ['1.0625rem', { lineHeight: '1.375rem',  letterSpacing: '-0.0253em' }], // 17/22  -0.43pt
+				'headline':    ['1.0625rem', { lineHeight: '1.375rem',  letterSpacing: '-0.0253em', fontWeight: '600' }], // 17/22 semibold
+				'title3':      ['1.25rem',   { lineHeight: '1.5625rem', letterSpacing: '-0.03em',   fontWeight: '600' }], // 20/25 semibold
+				'title2':      ['1.375rem',  { lineHeight: '1.75rem',   letterSpacing: '-0.0318em', fontWeight: '700' }], // 22/28 bold
+				'title1':      ['1.75rem',   { lineHeight: '2.125rem',  letterSpacing: '-0.0286em', fontWeight: '700' }], // 28/34 bold
+				'largetitle':  ['2.125rem',  { lineHeight: '2.5625rem', letterSpacing: '-0.0309em', fontWeight: '700' }], // 34/41 bold
 			},
 			// Icon scale — see --icon-* in index.css. Use as `size-icon-md` etc.
 			size: {

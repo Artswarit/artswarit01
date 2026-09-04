@@ -10,7 +10,10 @@ const Progress = React.forwardRef<
   <ProgressPrimitive.Root
     ref={ref}
     className={cn(
-      "relative h-4 w-full overflow-hidden rounded-full bg-secondary",
+      // HIG: progress indicators are a thin track (~4pt), not a chunky bar.
+      // The previous 16px default read as a container rather than an
+      // indicator; call sites that pass their own h-* still win.
+      "relative h-1.5 w-full overflow-hidden rounded-full bg-secondary",
       className
     )}
     {...props}
