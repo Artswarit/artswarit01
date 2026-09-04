@@ -147,8 +147,8 @@ const AnimatedHeroSlider = () => {
         </div>
 
         {/* ── Layered art column ──────────────────────────────────── */}
-        <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-          <div className="group relative z-10 mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2.5rem] border border-border/40 shadow-token-lg transition-transform duration-700 ease-apple lg:rotate-2 lg:group-hover:rotate-0 hover:rotate-0">
+        <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-6 lg:px-8">
+          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-transform duration-700 ease-apple hover:rotate-0 lg:rotate-2">
             {slides.map((s, index) => (
               <img
                 key={s.id}
@@ -163,12 +163,13 @@ const AnimatedHeroSlider = () => {
             ))}
             <div
               aria-hidden
-              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-6 pt-16"
+              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent px-6 pb-6 pt-20"
             >
-              <p className="text-sm font-medium text-white/70">{slide.captionSub}</p>
-              <p className="font-heading text-xl font-semibold text-white">{slide.caption}</p>
+              <p className="text-xs font-medium text-white/70">{slide.captionSub}</p>
+              <p className="font-heading text-lg font-semibold leading-tight text-white">{slide.caption}</p>
             </div>
           </div>
+
 
           {/* Floating detail tile */}
           <div className="absolute -right-4 -top-8 z-20 hidden h-40 w-40 overflow-hidden rounded-3xl border border-border/40 shadow-token-md transition-transform duration-500 ease-apple hover:-rotate-2 sm:block sm:-rotate-6">
