@@ -82,35 +82,34 @@ const Navbar = () => {
             <img loading="lazy" decoding="async" 
               src="/icons/artswarit-logo-96.png" 
               alt="Artswarit Logo" 
-              className="h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16 object-contain relative transition-transform duration-500 group-hover:scale-110 group-active:scale-95" 
+              className="relative h-10 w-10 object-contain transition-transform duration-500 ease-apple group-hover:scale-105 group-active:scale-95 sm:h-11 sm:w-11" 
             />
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+          <div className="hidden lg:flex items-center gap-1">
             {menuItems.map(item => (
               <Link 
                 key={item.name} 
                 to={item.path} 
+                aria-current={location.pathname === item.path ? "page" : undefined}
                 className={cn(
-                  "relative flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 group",
+                  "group relative flex items-center gap-2 rounded-full px-4 py-2 text-[15px] font-medium tracking-[-0.01em] transition-all duration-300 ease-apple",
                   location.pathname === item.path 
-                    ? "text-primary bg-primary/5" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    ? "bg-primary/10 text-primary" 
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                 )}
               >
                 <span className={cn(
-                  "transition-transform duration-300 group-hover:scale-110",
+                  "transition-transform duration-300 ease-apple group-hover:scale-105",
                   location.pathname === item.path ? "text-primary" : "text-muted-foreground/70 group-hover:text-primary"
                 )}>
                   {item.icon}
                 </span>
                 <span>{item.name}</span>
-                {location.pathname === item.path && (
-                  <span className="absolute bottom-1.5 left-4 right-4 h-0.5 bg-primary rounded-full animate-in fade-in zoom-in duration-300" />
-                )}
               </Link>
             ))}
+
           </div>
         </div>
 
