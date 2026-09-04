@@ -115,10 +115,14 @@ export default {
 				'token-elevated': 'var(--shadow-elevated)',
 				'token-brand': 'var(--shadow-brand)'
 			},
+			// HIG typography: prefer the platform's own system face (SF on Apple
+			// devices) and fall back to Inter/Poppins everywhere else, so text
+			// renders native on iOS/macOS without changing the brand elsewhere.
 			fontFamily: {
-				sans: ['Inter', 'sans-serif'],
-				heading: ['Poppins', 'sans-serif']
+				sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Inter', 'system-ui', 'sans-serif'],
+				heading: ['SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Poppins', 'system-ui', 'sans-serif']
 			},
+
 			// HIG Dynamic Type ramp at the Large (default) size class, transcribed
 			// from Apple's published text-style table rather than eyeballed. Each
 			// entry pins size / leading / tracking / weight together, because
