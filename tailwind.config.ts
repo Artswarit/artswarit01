@@ -119,6 +119,31 @@ export default {
 				sans: ['Inter', 'sans-serif'],
 				heading: ['Poppins', 'sans-serif']
 			},
+			// HIG type ramp, named after Apple's text styles so intent is legible
+			// at the call site. Each entry pins line-height, tracking and weight
+			// together — Apple tightens tracking as type grows and loosens it at
+			// caption sizes, which is what stops large headings looking loose and
+			// small labels looking cramped.
+			fontSize: {
+				'caption2': ['0.6875rem', { lineHeight: '0.875rem', letterSpacing: '0.01em' }],   // 11
+				'caption1': ['0.75rem', { lineHeight: '1rem', letterSpacing: '0.005em' }],        // 12
+				'footnote': ['0.8125rem', { lineHeight: '1.125rem', letterSpacing: '0' }],        // 13
+				'subheadline': ['0.9375rem', { lineHeight: '1.25rem', letterSpacing: '-0.01em' }],// 15
+				'callout': ['1rem', { lineHeight: '1.375rem', letterSpacing: '-0.012em' }],       // 16
+				'headline': ['1.0625rem', { lineHeight: '1.375rem', letterSpacing: '-0.014em', fontWeight: '600' }], // 17
+				'title3': ['1.25rem', { lineHeight: '1.5rem', letterSpacing: '-0.018em' }],       // 20
+				'title2': ['1.375rem', { lineHeight: '1.625rem', letterSpacing: '-0.02em' }],     // 22
+				'title1': ['1.75rem', { lineHeight: '2.125rem', letterSpacing: '-0.022em' }],     // 28
+				'largetitle': ['2.125rem', { lineHeight: '2.5rem', letterSpacing: '-0.026em' }],  // 34
+			},
+			// Icon scale — see --icon-* in index.css. Use as `size-icon-md` etc.
+			size: {
+				'icon-xs': 'var(--icon-xs)',
+				'icon-sm': 'var(--icon-sm)',
+				'icon-md': 'var(--icon-md)',
+				'icon-lg': 'var(--icon-lg)',
+				'icon-xl': 'var(--icon-xl)',
+			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',

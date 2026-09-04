@@ -39,7 +39,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          {Icon ? <Icon className="h-[18px] w-[18px] shrink-0 text-muted-foreground" /> : null}
+          {Icon ? <Icon className="size-icon-md shrink-0 text-muted-foreground" /> : null}
           <h2
             className={cn(
               "font-semibold tracking-tight text-foreground truncate",

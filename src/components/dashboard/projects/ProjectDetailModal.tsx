@@ -594,7 +594,7 @@ const ProjectDetailModal = ({
               <div className="mb-5 flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2.5">
                   <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-                    <GitBranch className="h-[15px] w-[15px]" />
+                    <GitBranch className="size-icon-md" />
                   </div>
                   <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Project ID: #{project.id.slice(0, 8)}
@@ -698,7 +698,7 @@ const ProjectDetailModal = ({
                   {project.deadline ? formatDate(new Date(project.deadline), 'MMM dd') : 'Flexible'}
                 </div>
                 <div className="mt-1.5 flex items-center gap-1.5">
-                  <Clock className="h-[11px] w-[11px] shrink-0 text-warning" aria-hidden="true" />
+                  <Clock className="size-icon-xs shrink-0 text-warning" aria-hidden="true" />
                   <span className="truncate text-[11px] font-medium text-muted-foreground/70">
                     {project.deadline ? (() => {
                       const daysLeft = Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
@@ -785,7 +785,7 @@ const ProjectDetailModal = ({
                   <div className="space-y-5">
                     <div className="flex items-center gap-3">
                       <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-                        <GitBranch className="h-[17px] w-[17px]" />
+                        <GitBranch className="size-icon-md" />
                       </div>
                       <div className="min-w-0">
                         <h3 className="text-[15px] font-semibold tracking-tight">Project Workflow</h3>

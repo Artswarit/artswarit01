@@ -38,12 +38,28 @@ img {
   --gradient-brand-hover: linear-gradient(135deg, var(--brand-from-dark), var(--brand-to-dark));
 
   /* ── Elevation tokens ── */
+  /* Apple's HIG uses depth sparingly: elevation reads as a hairline plus a
+     barely-there shadow, never a heavy drop. The lower steps are tuned for
+     resting surfaces; the higher ones are reserved for genuinely floating
+     layers (dialogs, popovers, the bulk-actions bar). */
   --shadow-xs: 0 1px 2px hsl(220 10% 10% / 0.05);
   --shadow-sm: 0 2px 8px hsl(220 10% 10% / 0.06);
   --shadow-md: 0 8px 24px hsl(220 10% 10% / 0.08);
   --shadow-lg: 0 20px 60px -30px hsl(220 10% 10% / 0.3);
   --shadow-elevated: 0 30px 80px -40px hsl(220 10% 10% / 0.4);
   --shadow-brand: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+
+  /* ── Icon scale (HIG: icons read as one family) ───────────────────────
+     Apple's guidance is that icons share an optical weight and align to the
+     text they sit beside, rather than each call site picking a size. This
+     codebase had 20+ distinct icon dimensions; these five steps replace them.
+     Pair with --icon-stroke so weight stays consistent as size changes. */
+  --icon-xs: 0.75rem;   /* 12px — dense chips, inline metadata */
+  --icon-sm: 0.875rem;  /* 14px — buttons, tabs, list rows */
+  --icon-md: 1rem;      /* 16px — default, aligns with 15-17px text */
+  --icon-lg: 1.25rem;   /* 20px — section headers, toolbars */
+  --icon-xl: 1.5rem;    /* 24px — feature/empty-state glyphs */
+  --icon-stroke: 1.75;  /* lucide default is 2 and reads heavy beside Inter */
 }
 
 
@@ -250,6 +266,22 @@ img {
 
   * {
     @apply border-border;
+  }
+
+  /* ── HIG: icons should read as a single family ──────────────────────────
+     Apple's icon guidance is that glyphs share an optical weight so no single
+     icon shouts louder than its neighbours. lucide ships stroke-width 2, which
+     is visibly heavier than Inter's stems at UI sizes and made icon-plus-label
+     pairings look unbalanced. Normalising here reaches every icon in the app
+     at once; because this sits in @layer base, a call site can still override
+     with a `[stroke-width:N]` utility when a glyph genuinely needs it.
+
+     `vector-effect` keeps the stroke visually constant when an icon is scaled
+     by a transform, which is what stops hover-scale animations from thickening
+     the line. */
+  .lucide {
+    stroke-width: var(--icon-stroke);
+    vector-effect: non-scaling-stroke;
   }
 
   html {

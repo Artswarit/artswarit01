@@ -9,7 +9,10 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm transition-[transform,box-shadow] duration-300 ease-apple",
+      // HIG elevation: a hairline carries the edge and the shadow is barely
+      // there. Tailwind's `shadow-sm` sits on top of the border and reads as a
+      // second edge, so this uses the tuned token instead.
+      "rounded-lg border border-border/60 bg-card text-card-foreground shadow-token-xs transition-[transform,box-shadow] duration-300 ease-apple",
       className
     )}
     {...props}

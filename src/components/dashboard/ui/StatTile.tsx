@@ -58,7 +58,7 @@ export const StatTile: React.FC<StatTileProps> = ({
               interactive && "group-hover:scale-105",
             )}
           >
-            {iconSlot ?? (Icon ? <Icon className="h-[18px] w-[18px]" /> : null)}
+            {iconSlot ?? (Icon ? <Icon className="size-icon-md" /> : null)}
           </span>
         )}
         <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
