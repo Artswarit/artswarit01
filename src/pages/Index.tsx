@@ -173,7 +173,7 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
-              <span className="font-bold text-lg sm:text-xl">1</span>
+              <span className="font-semibold text-lg sm:text-xl">1</span>
             </div>
             <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2">Create Your Profile</h3>
             <p className="text-sm sm:text-base text-muted-foreground">
@@ -182,7 +182,7 @@ const Index = () => {
           </div>
           <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
-              <span className="font-bold text-lg sm:text-xl">2</span>
+              <span className="font-semibold text-lg sm:text-xl">2</span>
             </div>
             <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2">Upload Your Content</h3>
             <p className="text-sm sm:text-base text-muted-foreground">
@@ -191,7 +191,7 @@ const Index = () => {
           </div>
           <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
-              <span className="font-bold text-lg sm:text-xl">3</span>
+              <span className="font-semibold text-lg sm:text-xl">3</span>
             </div>
             <h3 className="font-heading text-lg sm:text-xl font-semibold mb-2">Connect & Earn</h3>
             <p className="text-sm sm:text-base text-muted-foreground">
@@ -260,7 +260,7 @@ const Index = () => {
                   <User className="w-4 h-4 transition-transform group-hover:scale-110" />
                   <span>Join as Artist</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-purple-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
+                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
                 </Link>
               </Button>
 
@@ -269,7 +269,7 @@ const Index = () => {
                   <Briefcase className="w-4 h-4 transition-transform group-hover:scale-110" />
                   <span>Join as Client</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-purple-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
+                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md"></div>
                 </Link>
               </Button>
             </div>
