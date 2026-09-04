@@ -172,7 +172,7 @@ const AnimatedHeroSlider = () => {
 
 
           {/* Floating detail tile */}
-          <div className="absolute -right-4 -top-8 z-20 hidden h-40 w-40 overflow-hidden rounded-3xl border border-border/40 shadow-token-md transition-transform duration-500 ease-apple hover:-rotate-2 sm:block sm:-rotate-6">
+          <div className="absolute right-0 -top-6 z-20 hidden h-32 w-32 overflow-hidden rounded-3xl border border-border/40 shadow-token-md transition-transform duration-500 ease-apple hover:-rotate-2 sm:block sm:-rotate-6">
             <img
               src={getOptimizedImageUrl(slide.detailUrl, ImagePresets.THUMBNAIL)}
               alt=""
@@ -184,7 +184,7 @@ const AnimatedHeroSlider = () => {
           </div>
 
           {/* Floating trust chip — translucent material over the art */}
-          <div className="absolute -bottom-6 left-0 z-20 rounded-2xl border border-border/50 bg-card/85 px-5 py-3 shadow-token-md backdrop-blur-xl transition-transform duration-500 ease-apple hover:rotate-0 sm:-left-8 sm:rotate-3">
+          <div className="absolute -bottom-5 left-0 z-20 max-w-[15rem] rounded-2xl border border-border/50 bg-card/85 px-5 py-3 shadow-token-md backdrop-blur-xl transition-transform duration-500 ease-apple hover:rotate-0 sm:left-1 sm:rotate-3">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-primary" aria-hidden />
               <span className="text-sm font-semibold text-foreground">Escrow protected</span>
