@@ -163,10 +163,10 @@ const AnimatedHeroSlider = () => {
             ))}
             <div
               aria-hidden
-              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent px-6 pb-6 pt-20"
+              className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 via-black/20 to-transparent px-6 pb-16 pt-6"
             >
-              <p className="text-xs font-medium text-white/70">{slide.captionSub}</p>
               <p className="font-heading text-lg font-semibold leading-tight text-white">{slide.caption}</p>
+              <p className="mt-0.5 text-xs font-medium text-white/75">{slide.captionSub}</p>
             </div>
           </div>
 
