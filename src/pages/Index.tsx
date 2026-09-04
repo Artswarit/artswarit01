@@ -246,7 +246,7 @@ const Index = () => {
       <section className="bg-brand-gradient text-white py-12 sm:py-16 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="max-w-3xl mx-auto">
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4">
               Ready to Showcase Your Talent?
             </h2>
             <p className="text-lg sm:text-xl mb-8 text-white/90">
