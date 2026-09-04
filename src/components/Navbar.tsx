@@ -71,8 +71,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/80 dark:bg-card/80 backdrop-blur-xl border-b border-muted/20 fixed w-full top-0 z-50 transition-all duration-300 pt-[var(--safe-top)]">
-      <div className="w-full h-16 sm:h-20 px-3 sm:px-4 lg:px-6 flex items-center justify-between">
+    <nav className="fixed top-0 z-50 w-full pt-[var(--safe-top)] transition-all duration-300 ease-apple">
+      <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between gap-3 border border-border/40 bg-card/70 px-3 shadow-token-sm backdrop-blur-2xl sm:my-3 sm:h-16 sm:w-[calc(100%-2rem)] sm:rounded-full sm:px-4 lg:px-5">
+
         {/* Left: logo + desktop menu */}
         <div className="flex items-center gap-4 lg:gap-8">
           {/* Logo */}
