@@ -154,15 +154,16 @@ const Navbar = () => {
               </DropdownMenu>
             </div>
           ) : (
-            <div className="hidden sm:flex items-center gap-3">
-              <Button variant="ghost" asChild className="font-bold text-sm px-6 rounded-md text-blue-600 hover:bg-blue-50 transition-all">
-                <Link to="/login">Login</Link>
+            <div className="hidden sm:flex items-center gap-2">
+              <Button variant="ghost" asChild className="h-10 rounded-full px-5 text-[15px] font-medium text-foreground transition-all duration-300 ease-apple hover:bg-muted/60">
+                <Link to="/login">Log in</Link>
               </Button>
-              <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 rounded-md shadow-sm transition-all">
-                <Link to="/signup">Sign Up</Link>
+              <Button asChild className="h-10 rounded-full bg-brand-gradient px-5 text-[15px] font-semibold text-primary-foreground border-none shadow-token-brand transition-all duration-300 ease-apple active:scale-[0.97]">
+                <Link to="/signup">Sign up</Link>
               </Button>
             </div>
           )}
+
 
           {/* Mobile Menu Toggle */}
           <Button 
