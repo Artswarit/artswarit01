@@ -91,7 +91,7 @@ const ArtworkEditModal = ({ artwork, isOpen, onClose, onSave }: ArtworkEditModal
     if (!artwork?.id) return;
 
     if (!formData.title.trim()) {
-      toast.error('Title is required');
+      toast({ title: 'Title is required', variant: 'destructive' });
       return;
     }
 

@@ -94,12 +94,13 @@ const AnimatedHeroSlider = () => {
       <div className="container relative mx-auto grid items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
         {/* ── Copy column ─────────────────────────────────────────── */}
         <div className="space-y-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+          <span className="inline-flex animate-fade-in items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {slide.eyebrow}
           </span>
 
-          <div className="space-y-5">
+          <div className="animate-fade-in space-y-5 [animation-delay:80ms] [animation-fill-mode:backwards]">
+
             <h1 className="font-heading text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
               <span className="block transition-opacity duration-700 ease-apple">{slide.title}</span>
               <span className="block text-brand-gradient transition-opacity duration-700 ease-apple">
@@ -111,7 +112,7 @@ const AnimatedHeroSlider = () => {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex animate-fade-in flex-col gap-3 [animation-delay:160ms] [animation-fill-mode:backwards] sm:flex-row sm:items-center">
             <Button
               asChild
               size="lg"
@@ -123,16 +124,17 @@ const AnimatedHeroSlider = () => {
               asChild
               size="lg"
               variant="outline"
-              className="h-12 w-full rounded-2xl border-border/60 bg-card px-8 text-base font-semibold shadow-token-xs transition-all duration-300 ease-apple hover:bg-muted/60 active:scale-[0.98] sm:w-auto"
+              className="h-12 w-full rounded-2xl border-border/60 bg-card px-8 text-base font-semibold shadow-token-xs transition-all duration-300 ease-apple hover:-translate-y-0.5 hover:bg-muted/60 active:scale-[0.98] sm:w-auto"
             >
-              <Link to="/explore-artists" className="flex items-center justify-center gap-2">
+              <Link to="/explore-artists" className="group flex items-center justify-center gap-2">
                 Meet the artists
-                <ArrowRight className="h-4 w-4" aria-hidden />
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-apple group-hover:translate-x-1" aria-hidden />
               </Link>
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-6">
+          <div className="flex animate-fade-in flex-wrap items-center gap-2 border-t border-border/60 pt-6 [animation-delay:240ms] [animation-fill-mode:backwards]">
+
             <span className="mr-1 text-sm text-muted-foreground">Browse</span>
             {quickLinks.map((link) => (
               <Link
@@ -147,8 +149,8 @@ const AnimatedHeroSlider = () => {
         </div>
 
         {/* ── Layered art column ──────────────────────────────────── */}
-        <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-6 lg:px-8">
-          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-transform duration-700 ease-apple hover:rotate-0 lg:rotate-2">
+        <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-4 lg:px-6">
+          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-all duration-700 ease-apple hover:-translate-y-1 hover:shadow-token-elevated">
             {slides.map((s, index) => (
               <img
                 key={s.id}
@@ -156,42 +158,21 @@ const AnimatedHeroSlider = () => {
                 alt={`${s.title} ${s.accent}`}
                 loading={index === 0 ? "eager" : "lazy"}
                 decoding={index === 0 ? "sync" : "async"}
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-apple ${
-                  index === current ? "opacity-100" : "opacity-0"
+                className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1200ms] ease-apple ${
+                  index === current ? "scale-100 opacity-100" : "scale-105 opacity-0"
                 }`}
               />
             ))}
             <div
               aria-hidden
-              className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 via-black/20 to-transparent px-6 pb-16 pt-6"
+              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-6 pb-6 pt-16"
             >
               <p className="font-heading text-lg font-semibold leading-tight text-white">{slide.caption}</p>
               <p className="mt-0.5 text-xs font-medium text-white/75">{slide.captionSub}</p>
             </div>
           </div>
-
-
-          {/* Floating detail tile */}
-          <div className="absolute right-0 -top-6 z-20 hidden h-32 w-32 overflow-hidden rounded-3xl border border-border/40 shadow-token-md transition-transform duration-500 ease-apple hover:-rotate-2 sm:block sm:-rotate-6">
-            <img
-              src={getOptimizedImageUrl(slide.detailUrl, ImagePresets.THUMBNAIL)}
-              alt=""
-              aria-hidden
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover"
-            />
-          </div>
-
-          {/* Floating trust chip — translucent material over the art */}
-          <div className="absolute -bottom-5 left-0 z-20 max-w-[15rem] rounded-2xl border border-border/50 bg-card/85 px-5 py-3 shadow-token-md backdrop-blur-xl transition-transform duration-500 ease-apple hover:rotate-0 sm:left-1 sm:rotate-3">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-primary" aria-hidden />
-              <span className="text-sm font-semibold text-foreground">Escrow protected</span>
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">Funds release on your approval</p>
-          </div>
         </div>
+
       </div>
 
       {/* ── Slide indicator: iOS page-control proportions ─────────── */}
