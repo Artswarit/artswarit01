@@ -229,21 +229,21 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
       // access_type check, so a raw query (or a client-side filter after
       // the fact) would return premium rows to unauthorized viewers.
       const { data: sameCategory } = artwork.category
-        ? await supabase.rpc('get_public_artworks', {
+        ? await (supabase.rpc as any)('get_public_artworks', {
             p_limit: RELATED_LIMIT,
             p_exclude_id: artwork.id,
             p_category: artwork.category,
           })
         : { data: [] as any[] };
 
-      let pool = sameCategory || [];
+      let pool: any[] = (sameCategory as any[]) || [];
       if (pool.length < RELATED_LIMIT) {
-        const { data: recent } = await supabase.rpc('get_public_artworks', {
+        const { data: recent } = await (supabase.rpc as any)('get_public_artworks', {
           p_limit: RELATED_LIMIT,
           p_exclude_id: artwork.id,
         });
-        const seen = new Set(pool.map(a => a.id));
-        pool = [...pool, ...(recent || []).filter(a => !seen.has(a.id))].slice(0, RELATED_LIMIT);
+        const seen = new Set<string>(pool.map((a: any) => a.id as string));
+        pool = [...pool, ...(((recent as any[]) || []).filter((a: any) => !seen.has(a.id)))].slice(0, RELATED_LIMIT);
       }
 
       if (pool.length === 0) {
@@ -251,8 +251,8 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
         return;
       }
 
-      const artistIds = [...new Set(pool.map(a => a.artist_id).filter(Boolean))];
-      const artworkIds = pool.map(a => a.id);
+      const artistIds = [...new Set<string>(pool.map((a: any) => a.artist_id as string).filter(Boolean))];
+      const artworkIds: string[] = pool.map((a: any) => a.id as string);
 
       const [{ data: artists }, { data: likeRows }] = await Promise.all([
         artistIds.length > 0
@@ -265,7 +265,7 @@ export default function ArtworkDetails({ isModal = false }: { isModal?: boolean 
       const likeCounts = new Map<string, number>();
       (likeRows || []).forEach(r => likeCounts.set(r.artwork_id, (likeCounts.get(r.artwork_id) || 0) + 1));
 
-      const transformed: RelatedArtwork[] = pool.map(a => {
+      const transformed: RelatedArtwork[] = pool.map((a: any) => {
         const meta = (a.metadata as any) || {};
         const artistInfo = artistMap.get(a.artist_id);
         return {

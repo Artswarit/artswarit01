@@ -58,11 +58,10 @@ export const usePublicArtworks = () => {
       // back to a direct table query with client-side filtering.
       let artworksData: any[] | null = null;
 
-      const { data: rpcData, error: rpcError } = await supabase
-        .rpc('get_public_artworks', {
+      const { data: rpcData, error: rpcError } = await (supabase.rpc as any)('get_public_artworks', {
           p_limit: PAGE_SIZE,
-          p_offset: from,
-        });
+        p_offset: from,
+      });
 
       if (rpcError) {
         console.warn('RPC get_public_artworks unavailable, using fallback query:', rpcError.message);
@@ -78,7 +77,7 @@ export const usePublicArtworks = () => {
 
         artworksData = fallbackData || [];
       } else {
-        artworksData = rpcData;
+        artworksData = (rpcData as any[]) || [];
       }
 
       // Get unique artist IDs
