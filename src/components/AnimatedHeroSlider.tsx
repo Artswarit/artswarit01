@@ -148,7 +148,7 @@ const AnimatedHeroSlider = () => {
 
         {/* ── Layered art column ──────────────────────────────────── */}
         <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-4 lg:px-6">
-          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-all duration-700 ease-apple hover:-translate-y-1 hover:shadow-token-xl">
+          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-all duration-700 ease-apple hover:-translate-y-1 hover:shadow-token-elevated">
             {slides.map((s, index) => (
               <img
                 key={s.id}
