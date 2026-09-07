@@ -147,8 +147,8 @@ const AnimatedHeroSlider = () => {
         </div>
 
         {/* ── Layered art column ──────────────────────────────────── */}
-        <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-6 lg:px-8">
-          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-transform duration-700 ease-apple hover:rotate-0 lg:rotate-2">
+        <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-4 lg:px-6">
+          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-all duration-700 ease-apple hover:-translate-y-1 hover:shadow-token-xl">
             {slides.map((s, index) => (
               <img
                 key={s.id}
@@ -156,42 +156,21 @@ const AnimatedHeroSlider = () => {
                 alt={`${s.title} ${s.accent}`}
                 loading={index === 0 ? "eager" : "lazy"}
                 decoding={index === 0 ? "sync" : "async"}
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-apple ${
-                  index === current ? "opacity-100" : "opacity-0"
+                className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1200ms] ease-apple ${
+                  index === current ? "scale-100 opacity-100" : "scale-105 opacity-0"
                 }`}
               />
             ))}
             <div
               aria-hidden
-              className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 via-black/20 to-transparent px-6 pb-16 pt-6"
+              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-6 pb-6 pt-16"
             >
               <p className="font-heading text-lg font-semibold leading-tight text-white">{slide.caption}</p>
               <p className="mt-0.5 text-xs font-medium text-white/75">{slide.captionSub}</p>
             </div>
           </div>
-
-
-          {/* Floating detail tile */}
-          <div className="absolute right-0 -top-6 z-20 hidden h-32 w-32 overflow-hidden rounded-3xl border border-border/40 shadow-token-md transition-transform duration-500 ease-apple hover:-rotate-2 sm:block sm:-rotate-6">
-            <img
-              src={getOptimizedImageUrl(slide.detailUrl, ImagePresets.THUMBNAIL)}
-              alt=""
-              aria-hidden
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover"
-            />
-          </div>
-
-          {/* Floating trust chip — translucent material over the art */}
-          <div className="absolute -bottom-5 left-0 z-20 max-w-[15rem] rounded-2xl border border-border/50 bg-card/85 px-5 py-3 shadow-token-md backdrop-blur-xl transition-transform duration-500 ease-apple hover:rotate-0 sm:left-1 sm:rotate-3">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-primary" aria-hidden />
-              <span className="text-sm font-semibold text-foreground">Escrow protected</span>
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">Funds release on your approval</p>
-          </div>
         </div>
+
       </div>
 
       {/* ── Slide indicator: iOS page-control proportions ─────────── */}
