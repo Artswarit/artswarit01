@@ -112,7 +112,7 @@ const AnimatedHeroSlider = () => {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex animate-fade-in flex-col gap-3 [animation-delay:160ms] sm:flex-row sm:items-center">
             <Button
               asChild
               size="lg"
@@ -124,16 +124,17 @@ const AnimatedHeroSlider = () => {
               asChild
               size="lg"
               variant="outline"
-              className="h-12 w-full rounded-2xl border-border/60 bg-card px-8 text-base font-semibold shadow-token-xs transition-all duration-300 ease-apple hover:bg-muted/60 active:scale-[0.98] sm:w-auto"
+              className="h-12 w-full rounded-2xl border-border/60 bg-card px-8 text-base font-semibold shadow-token-xs transition-all duration-300 ease-apple hover:-translate-y-0.5 hover:bg-muted/60 active:scale-[0.98] sm:w-auto"
             >
-              <Link to="/explore-artists" className="flex items-center justify-center gap-2">
+              <Link to="/explore-artists" className="group flex items-center justify-center gap-2">
                 Meet the artists
-                <ArrowRight className="h-4 w-4" aria-hidden />
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-apple group-hover:translate-x-1" aria-hidden />
               </Link>
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-6">
+          <div className="flex animate-fade-in flex-wrap items-center gap-2 border-t border-border/60 pt-6 [animation-delay:240ms]">
+
             <span className="mr-1 text-sm text-muted-foreground">Browse</span>
             {quickLinks.map((link) => (
               <Link
