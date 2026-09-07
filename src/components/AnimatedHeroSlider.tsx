@@ -99,7 +99,7 @@ const AnimatedHeroSlider = () => {
             {slide.eyebrow}
           </span>
 
-          <div className="animate-fade-in space-y-5 [animation-delay:80ms]">
+          <div className="animate-fade-in space-y-5 [animation-delay:80ms] [animation-fill-mode:backwards]">
 
             <h1 className="font-heading text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
               <span className="block transition-opacity duration-700 ease-apple">{slide.title}</span>
@@ -112,7 +112,7 @@ const AnimatedHeroSlider = () => {
             </p>
           </div>
 
-          <div className="flex animate-fade-in flex-col gap-3 [animation-delay:160ms] sm:flex-row sm:items-center">
+          <div className="flex animate-fade-in flex-col gap-3 [animation-delay:160ms] [animation-fill-mode:backwards] sm:flex-row sm:items-center">
             <Button
               asChild
               size="lg"
@@ -133,7 +133,7 @@ const AnimatedHeroSlider = () => {
             </Button>
           </div>
 
-          <div className="flex animate-fade-in flex-wrap items-center gap-2 border-t border-border/60 pt-6 [animation-delay:240ms]">
+          <div className="flex animate-fade-in flex-wrap items-center gap-2 border-t border-border/60 pt-6 [animation-delay:240ms] [animation-fill-mode:backwards]">
 
             <span className="mr-1 text-sm text-muted-foreground">Browse</span>
             {quickLinks.map((link) => (
