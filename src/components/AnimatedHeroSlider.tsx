@@ -94,12 +94,13 @@ const AnimatedHeroSlider = () => {
       <div className="container relative mx-auto grid items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
         {/* ── Copy column ─────────────────────────────────────────── */}
         <div className="space-y-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+          <span className="inline-flex animate-fade-in items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {slide.eyebrow}
           </span>
 
-          <div className="space-y-5">
+          <div className="animate-fade-in space-y-5 [animation-delay:80ms]">
+
             <h1 className="font-heading text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
               <span className="block transition-opacity duration-700 ease-apple">{slide.title}</span>
               <span className="block text-brand-gradient transition-opacity duration-700 ease-apple">
