@@ -41,18 +41,9 @@ const Navbar = () => {
   } = useIsAdmin();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const isMobile = useIsMobile();
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
-
-  // Header condenses into a floating pill once the page scrolls
-  React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
 
   // Auto-close mobile menu on route change
@@ -81,15 +72,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full pt-[var(--safe-top)] transition-all duration-500 ease-apple">
-      <div
-        className={cn(
-          "mx-auto flex items-center justify-between gap-3 px-3 backdrop-blur-2xl transition-all duration-500 ease-apple sm:px-4 lg:px-5",
-          scrolled
-            ? "h-14 w-full max-w-[1400px] border border-border/40 bg-card/75 shadow-token-md sm:my-3 sm:h-14 sm:w-[calc(100%-2rem)] sm:rounded-full"
-            : "h-16 w-full max-w-none border border-transparent bg-background/80 shadow-none sm:my-0 sm:h-20 sm:w-full sm:rounded-none sm:px-8 lg:px-12"
-        )}
-      >
+    <nav className="fixed top-0 z-50 w-full pt-[var(--safe-top)]">
+      <div className="mx-auto flex h-16 w-full max-w-none items-center justify-between gap-3 border border-transparent bg-background/80 px-3 shadow-none backdrop-blur-2xl sm:h-20 sm:px-8 lg:px-12">
 
 
         {/* Left: logo + desktop menu */}

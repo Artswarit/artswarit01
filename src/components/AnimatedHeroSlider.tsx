@@ -149,8 +149,8 @@ const AnimatedHeroSlider = () => {
         </div>
 
         {/* ── Layered art column ──────────────────────────────────── */}
-        <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-4 lg:px-6">
-          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-all duration-700 ease-apple hover:-translate-y-1 hover:shadow-token-elevated">
+        <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-6 lg:px-8">
+          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-transform duration-700 ease-apple hover:rotate-0 lg:rotate-2">
             {slides.map((s, index) => (
               <img
                 key={s.id}
@@ -170,6 +170,25 @@ const AnimatedHeroSlider = () => {
               <p className="font-heading text-lg font-semibold leading-tight text-white">{slide.caption}</p>
               <p className="mt-0.5 text-xs font-medium text-white/75">{slide.captionSub}</p>
             </div>
+          </div>
+
+          <div className="absolute right-0 -top-6 z-20 hidden h-32 w-32 overflow-hidden rounded-3xl border border-border/40 shadow-token-md transition-transform duration-500 ease-apple hover:-rotate-2 sm:block sm:-rotate-6">
+            <img
+              src={getOptimizedImageUrl(slide.detailUrl, ImagePresets.THUMBNAIL)}
+              alt=""
+              aria-hidden
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
+          </div>
+
+          <div className="absolute -bottom-5 left-0 z-20 max-w-[15rem] rounded-2xl border border-border/50 bg-card/85 px-5 py-3 shadow-token-md backdrop-blur-xl transition-transform duration-500 ease-apple hover:rotate-0 sm:left-1 sm:rotate-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" aria-hidden />
+              <span className="text-sm font-semibold text-foreground">Escrow protected</span>
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">Funds release on your approval</p>
           </div>
         </div>
 
