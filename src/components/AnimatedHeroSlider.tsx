@@ -1,215 +1,131 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
-import { getOptimizedImageUrl, ImagePresets } from "@/lib/image-optimization";
+import { Link } from "react-router-dom";
+import { Sparkles } from "lucide-react";
 
-/**
- * Homepage hero — "spatial layered" direction, built to Apple HIG:
- *  - one large title with negative optical tracking, body copy at a calm
- *    measure, and a single primary action plus one quiet secondary action
- *  - depth from layered translucent materials and hairlines, not heavy shadows
- *  - motion is restrained: ease-apple, 300–700ms, no parallax spectacle
- */
 const slides = [
   {
     id: 1,
-    eyebrow: "Showcase",
-    title: "Where talent",
-    accent: "finds its stage.",
-    subtitle:
-      "Publish your portfolio, get discovered by clients worldwide, and build a career around the work you love.",
+    title: "Showcase Your Creative Talent",
+    subtitle: "Join thousands of artists making an impact with their work",
     imageUrl:
-      "https://images.unsplash.com/photo-1579546929662-711aa81148cf?auto=format&fit=crop&w=1200&q=80",
-    detailUrl:
-      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=600&q=80",
-    caption: "Portfolios",
-    captionSub: "Audio, video, writing and visual work",
+      "https://images.unsplash.com/photo-1579546929662-711aa81148cf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
+    gradient: "from-indigo-600/80 via-purple-600/80 to-blue-600/80",
   },
   {
     id: 2,
-    eyebrow: "Connect",
-    title: "Where vision",
-    accent: "meets commerce.",
-    subtitle:
-      "Brands and creators brief you directly, agree milestones, and pay through escrow — no chasing invoices.",
+    title: "Connect With Global Clients",
+    subtitle: "Expand your reach and grow your creative business",
     imageUrl:
-      "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80",
-    detailUrl:
-      "https://images.unsplash.com/photo-1579546929662-711aa81148cf?auto=format&fit=crop&w=600&q=80",
-    caption: "Projects",
-    captionSub: "Milestones, reviews and clear approvals",
+      "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1469&q=80",
+    gradient: "from-blue-600/80 via-violet-600/80 to-purple-600/80",
   },
   {
     id: 3,
-    eyebrow: "Earn",
-    title: "Where craft",
-    accent: "becomes a career.",
-    subtitle:
-      "Sell artworks, take commissions and grow recurring clients with pricing that stays in your control.",
+    title: "Monetize Your Art",
+    subtitle: "Turn your passion into a sustainable career",
     imageUrl:
-      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=1200&q=80",
-    detailUrl:
-      "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80",
-    caption: "Payouts",
-    captionSub: "Escrow released on approval",
+      "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
+    gradient: "from-purple-600/80 via-indigo-600/80 to-blue-600/80",
   },
 ];
 
-const quickLinks = [
-  { label: "Musicians", to: "/categories" },
-  { label: "Illustrators", to: "/categories" },
-  { label: "Writers", to: "/categories" },
-];
-
 const AnimatedHeroSlider = () => {
-  const [current, setCurrent] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return;
     const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % slides.length);
-    }, 6000);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  const slide = slides[current];
-
   return (
-    <section
-      aria-label="Artswarit introduction"
-      className="relative overflow-hidden bg-background pt-[calc(var(--navbar-height-mobile,4rem)+var(--safe-top)+2rem)] pb-16 sm:pt-[calc(var(--navbar-height-desktop,5rem)+var(--safe-top)+3rem)] sm:pb-24"
-    >
-      {/* Ambient brand light — soft, never a hard gradient wash */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-40 -top-48 h-[36rem] w-[36rem] rounded-full bg-primary/10 blur-[120px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-accent/40 blur-[110px]"
-      />
+    <section className="relative min-h-screen md:h-[90vh] overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-black/40"></div>
 
-      <div className="container relative mx-auto grid items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
-        {/* ── Copy column ─────────────────────────────────────────── */}
-        <div className="space-y-8">
-          <span className="inline-flex animate-fade-in items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            {slide.eyebrow}
-          </span>
+      {/* Animated floating elements */}
+      <div className="absolute -top-20 -left-20 w-96 h-96 bg-violet-600/30 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute top-40 -right-20 w-72 h-72 bg-blue-600/30 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
+      <div className="absolute -bottom-20 left-1/3 w-80 h-80 bg-indigo-600/30 rounded-full blur-3xl animate-pulse animation-delay-4000"></div>
 
-          <div className="animate-fade-in space-y-5 [animation-delay:80ms] [animation-fill-mode:backwards]">
-
-            <h1 className="font-heading text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-foreground sm:text-5xl lg:text-6xl">
-              <span className="block transition-opacity duration-700 ease-apple">{slide.title}</span>
-              <span className="block text-brand-gradient transition-opacity duration-700 ease-apple">
-                {slide.accent}
-              </span>
-            </h1>
-            <p className="max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
-              {slide.subtitle}
-            </p>
-          </div>
-
-          <div className="flex animate-fade-in flex-col gap-3 [animation-delay:160ms] [animation-fill-mode:backwards] sm:flex-row sm:items-center">
-            <Button
-              asChild
-              size="lg"
-              className="h-12 w-full rounded-2xl bg-brand-gradient px-8 text-base font-semibold text-primary-foreground border-none shadow-token-brand transition-all duration-300 ease-apple hover:-translate-y-0.5 active:scale-[0.98] sm:w-auto"
-            >
-              <Link to="/explore">Explore works</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="h-12 w-full rounded-2xl border-border/60 bg-card px-8 text-base font-semibold shadow-token-xs transition-all duration-300 ease-apple hover:-translate-y-0.5 hover:bg-muted/60 active:scale-[0.98] sm:w-auto"
-            >
-              <Link to="/explore-artists" className="group flex items-center justify-center gap-2">
-                Meet the artists
-                <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-apple group-hover:translate-x-1" aria-hidden />
-              </Link>
-            </Button>
-          </div>
-
-          <div className="flex animate-fade-in flex-wrap items-center gap-2 border-t border-border/60 pt-6 [animation-delay:240ms] [animation-fill-mode:backwards]">
-
-            <span className="mr-1 text-sm text-muted-foreground">Browse</span>
-            {quickLinks.map((link) => (
-              <Link
-                key={link.label}
-                to={link.to}
-                className="rounded-full border border-border/60 bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors duration-200 ease-apple hover:border-primary/40 hover:text-primary"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Layered art column ──────────────────────────────────── */}
-        <div className="relative mx-auto w-full max-w-sm px-2 sm:max-w-md sm:px-6 lg:px-8">
-          <div className="group relative z-10 mx-auto aspect-[4/5] w-full overflow-hidden rounded-[2rem] border border-border/40 shadow-token-lg transition-transform duration-700 ease-apple hover:rotate-0 lg:rotate-2">
-            {slides.map((s, index) => (
+      {/* Slides */}
+      <div className="absolute inset-0">
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+              index === currentSlide
+                ? "opacity-100 z-10 scale-100"
+                : "opacity-0 z-0 scale-105"
+            }`}
+          >
+            <div className="relative w-full h-full">
               <img
-                key={s.id}
-                src={getOptimizedImageUrl(s.imageUrl, ImagePresets.PROFILE_COVER)}
-                alt={`${s.title} ${s.accent}`}
+                src={slide.imageUrl}
+                alt={slide.title}
+                className="absolute inset-0 w-full h-full object-cover"
                 loading={index === 0 ? "eager" : "lazy"}
                 decoding={index === 0 ? "sync" : "async"}
-                className={`absolute inset-0 h-full w-full object-cover transition-all duration-[1200ms] ease-apple ${
-                  index === current ? "scale-100 opacity-100" : "scale-105 opacity-0"
-                }`}
+                
               />
-            ))}
-            <div
-              aria-hidden
-              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent px-6 pb-6 pt-16"
-            >
-              <p className="font-heading text-lg font-semibold leading-tight text-white">{slide.caption}</p>
-              <p className="mt-0.5 text-xs font-medium text-white/75">{slide.captionSub}</p>
+              <div
+                className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`}
+              ></div>
             </div>
           </div>
+        ))}
 
-          <div className="absolute right-0 -top-6 z-20 hidden h-32 w-32 overflow-hidden rounded-3xl border border-border/40 shadow-token-md transition-transform duration-500 ease-apple hover:-rotate-2 sm:block sm:-rotate-6">
-            <img
-              src={getOptimizedImageUrl(slide.detailUrl, ImagePresets.THUMBNAIL)}
-              alt=""
-              aria-hidden
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover"
-            />
-          </div>
-
-          <div className="absolute -bottom-5 left-0 z-20 max-w-[15rem] rounded-2xl border border-border/50 bg-card/85 px-5 py-3 shadow-token-md backdrop-blur-xl transition-transform duration-500 ease-apple hover:rotate-0 sm:left-1 sm:rotate-3">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-primary" aria-hidden />
-              <span className="text-sm font-semibold text-foreground">Escrow protected</span>
+        {/* Content */}
+        <div className="absolute inset-0 z-20 flex items-center pt-[calc(var(--navbar-height-mobile)+var(--safe-top))!important] sm:pt-[calc(var(--navbar-height-desktop)+var(--safe-top))!important]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl text-white">
+              <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold mb-6 animate-slide-up">
+                {slides[currentSlide].title}
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-xl animate-slide-up animation-delay-300">
+                {slides[currentSlide].subtitle}
+              </p>
+              <div className="flex flex-wrap gap-4 animate-slide-up animation-delay-600">
+                <Button
+                  size="lg"
+                  variant="default"
+                  className="bg-white text-violet-600 hover:bg-gray-100 btn-glow"
+                >
+                  <Link to="/signup" className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Join Now
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">Funds release on your approval</p>
           </div>
         </div>
 
-      </div>
-
-      {/* ── Slide indicator: iOS page-control proportions ─────────── */}
-      <div className="container relative mx-auto mt-14 flex justify-center gap-2 px-4 sm:mt-16">
-        {slides.map((s, index) => (
-          <button
-            key={s.id}
-            onClick={() => setCurrent(index)}
-            aria-label={`Show ${s.eyebrow}`}
-            aria-current={index === current}
-            className={`h-2 rounded-full transition-all duration-300 ease-apple ${
-              index === current ? "w-8 bg-primary" : "w-2 bg-foreground/20 hover:bg-foreground/40"
-            }`}
-          />
-        ))}
+        {/* Slider controls */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentSlide
+                  ? "w-8 bg-white"
+                  : "bg-white/50 hover:bg-white/70"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            ></button>
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
 export default AnimatedHeroSlider;
+
+
+
+
+
