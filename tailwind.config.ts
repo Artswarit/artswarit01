@@ -120,7 +120,7 @@ export default {
 			// renders native on iOS/macOS without changing the brand elsewhere.
 			fontFamily: {
 				sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Inter', 'system-ui', 'sans-serif'],
-				heading: ['SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Poppins', 'system-ui', 'sans-serif']
+				heading: ['SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'system-ui', 'sans-serif']
 			},
 
 			// HIG Dynamic Type ramp at the Large (default) size class, transcribed
