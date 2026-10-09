@@ -76,7 +76,7 @@ const Index = () => {
       {/* Featured Artists Section */}
       <section id="featured-artists" className="container mx-auto px-4 py-12 sm:py-16 sm:px-6 lg:px-8 mt-4 sm:mt-8">
         <div className="text-center mb-8 sm:mb-12">
-          <h2 className="font-heading text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4 text-brand-gradient">
+          <h2 className="font-heading text-3xl md:text-4xl font-semibold tracking-normal mb-4 text-foreground">
             Featured Artists
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -113,8 +113,8 @@ const Index = () => {
                 ))
               )}
             </CarouselContent>
-            <CarouselPrevious className="left-2 bg-white/80 backdrop-blur-md border border-white/30 text-primary hover:bg-white/90 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <CarouselNext className="right-2 bg-white/80 backdrop-blur-md border border-white/30 text-primary hover:bg-white/90 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <CarouselPrevious className="left-2 bg-card/90 backdrop-blur-md border border-border/60 text-foreground hover:bg-muted shadow-token-sm opacity-100 transition-opacity duration-300" />
+            <CarouselNext className="right-2 bg-card/90 backdrop-blur-md border border-border/60 text-foreground hover:bg-muted shadow-token-sm opacity-100 transition-opacity duration-300" />
           </Carousel>
         </div>
       </section>
@@ -126,14 +126,14 @@ const Index = () => {
       <section className="py-12 sm:py-16 bg-muted/40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4 text-brand-gradient">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-normal mb-4 text-foreground">
               Popular Categories
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
               Find the perfect creative professional for your project from our diverse selection of specialized talents.
             </p>
             <p className="text-sm text-muted-foreground mt-2">
-              <span className="inline-block w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+              <span className="inline-block w-2 h-2 bg-success rounded-full mr-2"></span>
               Live counts • Updated regularly
             </p>
           </div>
@@ -163,7 +163,7 @@ const Index = () => {
       {/* How It Works Section */}
       <section className="container mx-auto px-4 py-12 sm:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12">
-          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4 text-brand-gradient">
+          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-normal mb-4 text-foreground">
             How Artswarit Works
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -171,7 +171,7 @@ const Index = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
+          <div className="text-center p-4 sm:p-6 bg-card rounded-lg border border-border/60 shadow-token-xs hover:shadow-token-sm transition-shadow duration-300 ease-apple">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
               <span className="font-semibold text-lg sm:text-xl">1</span>
             </div>
@@ -180,7 +180,7 @@ const Index = () => {
               Sign up as an artist and build your custom profile showcasing your skills, portfolio, and services.
             </p>
           </div>
-          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
+          <div className="text-center p-4 sm:p-6 bg-card rounded-lg border border-border/60 shadow-token-xs hover:shadow-token-sm transition-shadow duration-300 ease-apple">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
               <span className="font-semibold text-lg sm:text-xl">2</span>
             </div>
@@ -189,7 +189,7 @@ const Index = () => {
               Share your work with the world. Upload audio, video, or text content to showcase your talent.
             </p>
           </div>
-          <div className="text-center p-4 sm:p-6 bg-card/60 backdrop-blur-sm rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-all">
+          <div className="text-center p-4 sm:p-6 bg-card rounded-lg border border-border/60 shadow-token-xs hover:shadow-token-sm transition-shadow duration-300 ease-apple">
             <div className="bg-brand-gradient h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center text-primary-foreground mx-auto mb-4">
               <span className="font-semibold text-lg sm:text-xl">3</span>
             </div>
@@ -210,7 +210,7 @@ const Index = () => {
       <section className="py-12 sm:py-16 bg-muted/40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4 text-brand-gradient">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-normal mb-4 text-foreground">
               Success Stories
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
@@ -224,10 +224,10 @@ const Index = () => {
               ))
             ) : (
               reviews.map((testimonial) => (
-                <div key={testimonial.id} className="bg-card/60 backdrop-blur-sm p-4 sm:p-6 rounded-xl shadow-sm border border-border/60 hover:shadow-md transition-all">
+                <div key={testimonial.id} className="bg-card p-4 sm:p-6 rounded-lg shadow-token-xs border border-border/60 hover:shadow-token-sm transition-shadow duration-300 ease-apple">
                   <div className="mb-4">
                     {[...Array(testimonial.rating || 5)].map((_, i) => (
-                      <span key={i} className="text-yellow-400">★</span>
+                      <span key={i} className="text-warning">★</span>
                     ))}
                   </div>
                   <p className="text-foreground/80 mb-4 text-sm sm:text-base leading-relaxed">"{testimonial.content}"</p>
@@ -246,7 +246,7 @@ const Index = () => {
       <section className="bg-brand-gradient text-white py-12 sm:py-16 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="max-w-3xl mx-auto">
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-[-0.02em] mb-4">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold tracking-normal mb-4">
               Ready to Showcase Your Talent?
             </h2>
             <p className="text-lg sm:text-xl mb-8 text-white/90">
@@ -255,7 +255,7 @@ const Index = () => {
             
             {/* Enhanced Buttons Container */}
             <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
-              <Button asChild className="group relative overflow-hidden bg-white text-primary hover:bg-gray-50 font-medium px-6 py-3 text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg">
+              <Button asChild className="group relative overflow-hidden bg-white text-primary hover:bg-gray-50 font-medium px-6 py-3 text-sm transition-all duration-300 hover:shadow-token-sm ease-apple">
                 <Link to="/signup" className="flex items-center justify-center gap-2 relative z-10">
                   <User className="w-4 h-4 transition-transform group-hover:scale-110" />
                   <span>Join as Artist</span>
@@ -264,7 +264,7 @@ const Index = () => {
                 </Link>
               </Button>
 
-              <Button asChild className="group relative overflow-hidden bg-white text-primary hover:bg-gray-50 font-medium px-6 py-3 text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg">
+              <Button asChild className="group relative overflow-hidden bg-white text-primary hover:bg-gray-50 font-medium px-6 py-3 text-sm transition-all duration-300 hover:shadow-token-sm ease-apple">
                 <Link to="/signup?role=client" className="flex items-center justify-center gap-2 relative z-10">
                   <Briefcase className="w-4 h-4 transition-transform group-hover:scale-110" />
                   <span>Join as Client</span>

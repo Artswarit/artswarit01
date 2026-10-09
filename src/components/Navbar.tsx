@@ -73,13 +73,13 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 z-50 w-full pt-[var(--safe-top)]">
-      <div className="mx-auto flex h-16 w-full max-w-none items-center justify-between gap-3 border border-transparent bg-background/80 px-3 shadow-none backdrop-blur-2xl sm:h-20 sm:px-8 lg:px-12">
+      <div className="mx-auto flex h-16 w-full max-w-none items-center justify-between gap-3 border-b border-border/60 bg-background/90 px-3 shadow-none backdrop-blur-2xl sm:h-20 sm:px-8 lg:px-12">
 
 
         {/* Left: logo + desktop menu */}
         <div className="flex items-center gap-4 lg:gap-8">
           {/* Logo */}
-          <Link to="/" onClick={handleLogoClick} className="relative group shrink-0">
+          <Link to="/" onClick={handleLogoClick} className="relative group shrink-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <div className="absolute -inset-2 bg-primary/5 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
             <img loading="lazy" decoding="async" 
               src="/icons/artswarit-logo-96.png" 
@@ -96,7 +96,7 @@ const Navbar = () => {
                 to={item.path} 
                 aria-current={location.pathname === item.path ? "page" : undefined}
                 className={cn(
-                  "group relative flex items-center gap-2 rounded-full px-4 py-2 text-[15px] font-medium tracking-[-0.01em] transition-all duration-300 ease-apple",
+                  "group relative flex items-center gap-2 h-11 rounded-md px-4 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-[15px] font-medium tracking-normal transition-all duration-300 ease-apple",
                   location.pathname === item.path 
                     ? "bg-primary/10 text-primary" 
                     : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
@@ -133,10 +133,10 @@ const Navbar = () => {
                         {(profile?.full_name || user?.user_metadata?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-emerald-500 border-2 border-white dark:border-card rounded-full shadow-sm scale-0 group-hover:scale-100 transition-transform duration-300" />
+                    <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-success border-2 border-background dark:border-card rounded-full shadow-sm scale-0 group-hover:scale-100 transition-transform duration-300" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 p-2 z-50 rounded-2xl border-muted/20 bg-white/95 dark:bg-card/95 backdrop-blur-xl shadow-2xl" align="end" sideOffset={8}>
+                <DropdownMenuContent className="w-56 p-2 z-50 rounded-2xl border-muted/20 bg-popover/95 backdrop-blur-xl shadow-token-lg" align="end" sideOffset={8}>
                   <div className="px-3 py-2.5 mb-2">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground/50">Account</p>
                     <p className="text-sm font-medium truncate mt-1">{user.email}</p>
@@ -149,7 +149,7 @@ const Navbar = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-muted/50" />
-                  <DropdownMenuItem onClick={signOut} className="rounded-xl focus:bg-red-50 focus:text-red-600 dark:focus:bg-red-500/10 cursor-pointer py-2.5 font-medium text-red-500">
+                  <DropdownMenuItem onClick={signOut} className="rounded-xl focus:bg-destructive/10 focus:text-destructive cursor-pointer py-2.5 font-medium text-destructive">
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -173,7 +173,7 @@ const Navbar = () => {
             onClick={toggleMenu} 
             aria-expanded={isOpen}
             aria-controls="mobile-menu"
-            className="lg:hidden h-12 w-12 p-0 rounded-xl hover:bg-primary/5 text-primary transition-all active:scale-90 flex items-center justify-center min-h-[48px] min-w-[48px]"
+            className="lg:hidden h-12 w-12 p-0 rounded-xl hover:bg-primary/5 text-primary transition-all active:scale-[0.97] flex items-center justify-center min-h-[48px] min-w-[48px]"
           >
             <span className="sr-only">Toggle Menu</span>
             {isOpen ? (
@@ -200,7 +200,7 @@ const Navbar = () => {
       {/* Modern Mobile Menu */}
       {isOpen && (
         <div id="mobile-menu" className="lg:hidden absolute top-full left-0 right-0 p-4 animate-in fade-in slide-in-from-top-4 duration-300 z-50">
-          <div className="bg-white/95 dark:bg-card/95 backdrop-blur-2xl rounded-[2rem] border border-muted/20 shadow-2xl overflow-y-auto max-h-[calc(100dvh-4rem-var(--safe-top)-var(--safe-bottom)-2rem)] sm:max-h-[calc(100dvh-5rem-var(--safe-top)-var(--safe-bottom)-2rem)]">
+          <div className="bg-popover/95 backdrop-blur-2xl rounded-lg border border-border/60 shadow-token-lg overflow-y-auto max-h-[calc(100dvh-4rem-var(--safe-top)-var(--safe-bottom)-2rem)] sm:max-h-[calc(100dvh-5rem-var(--safe-top)-var(--safe-bottom)-2rem)]">
             <div className="p-4 space-y-2 pb-[var(--safe-bottom)]">
               {menuItems.map(item => (
                 <Link 
@@ -220,7 +220,7 @@ const Navbar = () => {
                   )}>
                     {item.icon}
                   </span>
-                  <span className="text-base tracking-tight">{item.name}</span>
+                  <span className="text-base tracking-normal">{item.name}</span>
                 </Link>
               ))}
               
