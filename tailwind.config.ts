@@ -134,17 +134,17 @@ export default {
 			// scales correctly (e.g. Body -0.43pt at 17pt = -0.0253em).
 			fontSize: {
 				// size          leading      tracking    weight
-				'caption2':    ['0.6875rem', { lineHeight: '0.875rem',  letterSpacing: '0.0136em' }],  // 11/14  +0.15pt
-				'caption1':    ['0.75rem',   { lineHeight: '0.9375rem', letterSpacing: '0.01em' }],    // 12/15  +0.12pt
-				'footnote':    ['0.8125rem', { lineHeight: '1rem',      letterSpacing: '0.0023em' }],  // 13/16  +0.03pt
+				'caption2':    ['0.6875rem', { lineHeight: '0.875rem',  letterSpacing: '0' }],  // 11/14  +0.15pt
+				'caption1':    ['0.75rem',   { lineHeight: '0.9375rem', letterSpacing: '0' }],    // 12/15  +0.12pt
+				'footnote':    ['0.8125rem', { lineHeight: '1rem',      letterSpacing: '0' }],  // 13/16  +0.03pt
 				'subhead':     ['0.9375rem', { lineHeight: '1.1875rem', letterSpacing: '0' }],         // 15/19   0
-				'callout':     ['1rem',      { lineHeight: '1.25rem',   letterSpacing: '-0.02em' }],   // 16/20  -0.32pt
-				'body':        ['1.0625rem', { lineHeight: '1.375rem',  letterSpacing: '-0.0253em' }], // 17/22  -0.43pt
-				'headline':    ['1.0625rem', { lineHeight: '1.375rem',  letterSpacing: '-0.0253em', fontWeight: '600' }], // 17/22 semibold
-				'title3':      ['1.25rem',   { lineHeight: '1.5625rem', letterSpacing: '-0.03em',   fontWeight: '600' }], // 20/25 semibold
-				'title2':      ['1.375rem',  { lineHeight: '1.75rem',   letterSpacing: '-0.0318em', fontWeight: '700' }], // 22/28 bold
-				'title1':      ['1.75rem',   { lineHeight: '2.125rem',  letterSpacing: '-0.0286em', fontWeight: '700' }], // 28/34 bold
-				'largetitle':  ['2.125rem',  { lineHeight: '2.5625rem', letterSpacing: '-0.0309em', fontWeight: '700' }], // 34/41 bold
+				'callout':     ['1rem',      { lineHeight: '1.25rem',   letterSpacing: '0' }],   // 16/20  -0.32pt
+				'body':        ['1.0625rem', { lineHeight: '1.375rem',  letterSpacing: '0' }], // 17/22  -0.43pt
+				'headline':    ['1.0625rem', { lineHeight: '1.375rem',  letterSpacing: '0', fontWeight: '600' }], // 17/22 semibold
+				'title3':      ['1.25rem',   { lineHeight: '1.5625rem', letterSpacing: '0',   fontWeight: '600' }], // 20/25 semibold
+				'title2':      ['1.375rem',  { lineHeight: '1.75rem',   letterSpacing: '0', fontWeight: '700' }], // 22/28 bold
+				'title1':      ['1.75rem',   { lineHeight: '2.125rem',  letterSpacing: '0', fontWeight: '700' }], // 28/34 bold
+				'largetitle':  ['2.125rem',  { lineHeight: '2.5625rem', letterSpacing: '0', fontWeight: '700' }], // 34/41 bold
 			},
 			// Icon scale — see --icon-* in index.css. Use as `size-icon-md` etc.
 			size: {
@@ -192,8 +192,8 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.5s ease-out',
-				'slide-up': 'slide-up 0.5s ease-out',
+				'fade-in': 'fade-in 0.5s var(--ease-apple)',
+				'slide-up': 'slide-up 0.5s var(--ease-apple)',
 				'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			}
 		}
